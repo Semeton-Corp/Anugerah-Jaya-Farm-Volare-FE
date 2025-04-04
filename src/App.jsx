@@ -1,7 +1,10 @@
+import Navbar from "./components/Navbar";
+import Login from "./pages/Login";
+
 function App() {
   return (
     <>
-      <h1 className="text-[24px]">Hai</h1>
+      <Login />
     </>
   );
 }
