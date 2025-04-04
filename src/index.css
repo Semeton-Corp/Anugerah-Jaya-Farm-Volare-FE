@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+@theme {
+  /* Green Color */
+  --color-green-50: rgb(234, 242, 243);
+  --color-green-100: rgb(190, 215, 219);
+  --color-green-200: rgb(159, 196, 202);
+  --color-green-300: rgb(115, 169, 177);
+  --color-green-400: rgb(88, 152, 162);
+  --color-green-500: rgb(46, 126, 139);
+  --color-green-600: rgb(42, 115, 126);
+  --color-green-700: rgb(33, 89, 99);
+  --color-green-800: rgb(25, 69, 76);
+  --color-green-900: rgb(19, 53, 58);
+
+  /* Orange Color */
+  --color-orange-50: rgb(252, 245, 230);
+  --color-orange-100: rgb(246, 223, 176);
+  --color-orange-200: rgb(242, 208, 138);
+  --color-orange-300: rgb(236, 187, 85);
+  --color-orange-400: rgb(232, 173, 52);
+  --color-orange-500: rgb(226, 153, 1);
+  --color-orange-600: rgb(206, 139, 1);
+  --color-orange-700: rgb(160, 109, 1);
+  --color-orange-800: rgb(124, 84, 1);
+  --color-orange-900: rgb(95, 64, 0);
+
+  /* Normal Color */
+  --color-lighter: rgb(178, 187, 198);
+  --color-light-hover: rgb(163, 173, 187);
+  --color-light-active: rgb(144, 157, 173);
+  --color-normal: rgb(84, 104, 129);
+  --color-normal-hover: rgb(71, 88, 110);
+  --color-normal-active: rgb(61, 76, 94);
+  --color-dark: rgb(29, 36, 45);
+  --color-dark-hover: rgb(21, 26, 32);
+  --color-dark-active: rgb(9, 11, 14);
+
+  /* Black Color */
+  --color-black-1: rgb(255, 255, 255);
+  --color-black-2: rgb(252, 252, 252);
+  --color-black-3: rgb(245, 245, 245);
+  --color-black-4: rgb(240, 240, 240);
+  --color-black-5: rgb(217, 217, 217);
+  --color-black-6: rgb(191, 191, 191);
+  --color-black-7: rgb(140, 140, 140);
+  --color-black-8: rgb(89, 89, 89);
+  --color-black-9: rgb(69, 69, 69);
+  --color-black-10: rgb(38, 38, 38);
+  --color-black-11: rgb(31, 31, 31);
+  --color-black-12: rgb(20, 20, 20);
+  --color-black-13: rgb(0, 0, 0);
+
+  
+}
