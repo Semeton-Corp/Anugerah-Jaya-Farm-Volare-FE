@@ -2,7 +2,10 @@ import logo from "../assets/logo_ajf.svg";
 import { IoIosNotificationsOutline, IoIosArrowDown } from "react-icons/io";
 import profileAvatar from "../assets/profile_avatar.svg";
 
-export default function Navbar() {
+export default function TopBar() {
+  const profileHandle = () => {
+    console.log("Profile dropdown clicked!");
+  };
   return (
     <nav className="bg-white p-4 shadow-lg ">
       <div className="px-16 flex justify-between">
@@ -39,8 +42,8 @@ export default function Navbar() {
 
           {/* arrow down */}
           <div
-            onClick=""
-            className="mx-4 rounded-full border-black-10 border-1 h-8 w-8 flex justify-center items-center"
+            onClick={profileHandle}
+            className="mx-4 rounded-full border-black-10 border-1 h-8 w-8 flex justify-center items-center hover:bg-black-6 cursor-pointer"
           >
             <IoIosArrowDown />
           </div>
