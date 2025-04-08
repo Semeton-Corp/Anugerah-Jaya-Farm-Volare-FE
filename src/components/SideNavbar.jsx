@@ -1,79 +1,20 @@
 import React, { useState } from "react";
-import { Home, Settings, Menu } from "lucide-react"; // You can use other icons too
 import {
   MdKeyboardDoubleArrowRight,
   MdKeyboardDoubleArrowLeft,
 } from "react-icons/md";
-import overview from "../assets/icon_nav/icon_nav_overview.svg";
-import penjualan from "../assets/icon_nav/icon_nav_penjualan.svg";
-import produksiTelur from "../assets/icon_nav/icon_nav_produksi_telur.svg";
-import ayam from "../assets/icon_nav/icon_nav_ayam.svg";
-import kinerja from "../assets/icon_nav/icon_nav_kinerja.svg";
-import gudang from "../assets/icon_nav/icon_nav_gudang.svg";
-import toko from "../assets/icon_nav/icon_nav_toko.svg";
-import kelolaPegawai from "../assets/icon_nav/icon_nav_kelola_pegawai.svg";
-import cashflow from "../assets/icon_nav/icon_nav_cashflow.svg";
-
-const sidebarMenus = {
-  Owner: [
-    {
-      icon: <img src={overview} alt="Overview Icon" className="h-4 w-4" />,
-      text: "Overview",
-    },
-    {
-      icon: <img src={penjualan} alt="Overview Icon" className="h-4 w-4" />,
-      text: "Penjualan",
-    },
-    {
-      icon: <img src={produksiTelur} alt="Overview Icon" className="h-4 w-4" />,
-      text: "Produksi Telur",
-    },
-    {
-      icon: <img src={ayam} alt="Overview Icon" className="h-4 w-4" />,
-      text: "Ayam",
-    },
-    {
-      icon: <img src={kinerja} alt="Overview Icon" className="h-4 w-4" />,
-      text: "Kinerja",
-    },
-    {
-      icon: <img src={gudang} alt="Overview Icon" className="h-4 w-4" />,
-      text: "Gudang",
-    },
-    {
-      icon: <img src={toko} alt="Overview Icon" className="h-4 w-4" />,
-      text: "Toko",
-    },
-    {
-      icon: <img src={kelolaPegawai} alt="Overview Icon" className="h-4 w-4" />,
-      text: "Kelola Pegawai",
-    },
-    {
-      icon: <img src={cashflow} alt="Overview Icon" className="h-4 w-4" />,
-      text: "Cashflow",
-    },
-  ],
-  "Pekerja Kandang": [
-    { icon: <Home />, text: "Kandang" },
-    // add more items
-  ],
-  "Pekerja Telur": [
-    { icon: <Home />, text: "Telur Harian" },
-    // add more items
-  ],
-  "Kepala Gudang & Admin Rekap": [
-    { icon: <Home />, text: "Gudang" },
-    { icon: <Settings />, text: "Rekap" },
-    // add more items
-  ],
-};
+import { sidebarMenus } from "../data/SidebarMenus";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const SideNavbar = ({ role }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const toggleSidebar = () => setIsExpanded(!isExpanded);
-
   const menuItems = sidebarMenus[role] || [];
+
+  const currentPath = location.pathname;
 
   return (
     <div
@@ -82,14 +23,23 @@ const SideNavbar = ({ role }) => {
       }`}
     >
       <nav className="mt-32 space-y-2">
-        {menuItems.map((item, idx) => (
-          <SidebarItem
-            key={idx}
-            icon={item.icon}
-            text={item.text}
-            isExpanded={isExpanded}
-          />
-        ))}
+        {menuItems.map((item, idx) => {
+          const rolePath = role.toLowerCase().replace(/\s+/g, "-");
+          const tabPath = item.tabName.toLowerCase().replace(/\s+/g, "-");
+          const fullPath = `/${rolePath}/${tabPath}`;
+          const isSelected = currentPath === fullPath;
+
+          return (
+            <SidebarItem
+              key={idx}
+              icon={item.icon}
+              tabName={item.tabName}
+              isExpanded={isExpanded}
+              isSelected={isSelected}
+              onClick={() => navigate(fullPath)}
+            />
+          );
+        })}
       </nav>
       <div className="flex items-center justify-center p-4">
         <button
@@ -107,15 +57,19 @@ const SideNavbar = ({ role }) => {
   );
 };
 
-const SidebarItem = ({ icon, text, isExpanded }) => {
+const SidebarItem = ({ icon, tabName, isExpanded, isSelected, onClick }) => {
   return (
     <div
-      className={`flex items-center mx-4 py-4 bg-orange-50 rounded-[6px] hover:bg-green-800 cursor-pointer transition ${
-        isExpanded ? "justify-start px-6" : "justify-center"
-      }`}
+      onClick={onClick}
+      className={`flex items-center mx-4 py-4 rounded-[6px] cursor-pointer transition
+        ${isExpanded ? "justify-start px-6" : "justify-center"}
+        ${isSelected ? "bg-orange-500" : "bg-orange-50 hover:bg-green-600"}
+      `}
     >
-      <div className="">{icon}</div>
-      {isExpanded && <span className="text-shadow-black-13 mx-4">{text}</span>}
+      <div>{icon}</div>
+      {isExpanded && (
+        <span className="text-black-13 mx-4 font-semibold">{tabName}</span>
+      )}
     </div>
   );
 };

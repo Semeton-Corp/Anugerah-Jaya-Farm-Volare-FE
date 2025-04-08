@@ -3,12 +3,12 @@ import { Outlet } from "react-router-dom";
 import TopBar from "../components/TopBar";
 import SideNavbar from "../components/SideNavBar";
 
-const MainLayout = () => {
+const MainLayout = ({ role }) => {
   return (
     <div className="relative min-h-screen bg-gray-50">
       {/* Sidebar absolute to sit behind TopBar */}
       <div className="absolute top-0 left-0 h-full z-10">
-        <SideNavbar role="Owner" />
+        <SideNavbar role={role} />
       </div>
 
       {/* Main content shifted right */}
