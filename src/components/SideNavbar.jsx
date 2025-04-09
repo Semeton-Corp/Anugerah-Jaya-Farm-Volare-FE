@@ -6,8 +6,7 @@ import {
 import { sidebarMenus } from "../data/SidebarMenus";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const SideNavbar = ({ role }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -22,7 +21,7 @@ const SideNavbar = ({ role }) => {
         isExpanded ? "w-64" : "w-20"
       }`}
     >
-      <nav className="mt-32 space-y-2">
+      <nav className="mt-[122px] space-y-[24px]">
         {menuItems.map((item, idx) => {
           const rolePath = role.toLowerCase().replace(/\s+/g, "-");
           const tabPath = item.tabName.toLowerCase().replace(/\s+/g, "-");

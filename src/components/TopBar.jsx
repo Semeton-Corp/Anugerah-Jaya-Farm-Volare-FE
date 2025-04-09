@@ -7,7 +7,7 @@ export default function TopBar() {
     console.log("Profile dropdown clicked!");
   };
   return (
-    <nav className="bg-white p-4 shadow-lg ">
+    <nav className="bg-white p-4 shadow-sm ">
       <div className="px-16 flex justify-between">
         {/* logo & company name */}
         <div className="flex">
