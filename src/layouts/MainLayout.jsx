@@ -4,6 +4,7 @@ import TopBar from "../components/TopBar";
 import SideNavbar from "../components/SideNavBar";
 import { useState } from "react";
 
+
 const MainLayout = ({ role }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -26,7 +27,11 @@ const MainLayout = ({ role }) => {
         </div>
 
         {/* Page Content */}
-        <main className="ml-28 mt-4 me-6">
+        <main
+          className={`mt-4 me-6 transition-all duration-300 ease-in-out ${
+            isExpanded ? "ml-[17rem]" : "ml-[7rem]"
+          }`}
+        >
           <Outlet />
         </main>
       </div>

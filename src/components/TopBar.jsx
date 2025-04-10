@@ -6,46 +6,54 @@ export default function TopBar() {
   const profileHandle = () => {
     console.log("Profile dropdown clicked!");
   };
+
   return (
-    <nav className="bg-white p-4 shadow-sm ">
-      <div className="px-16 flex justify-between">
+    <nav className="bg-white p-4 shadow-sm">
+      <div className="px-6 lg:px-16 flex justify-between items-center flex-wrap gap-4">
         {/* logo & company name */}
-        <div className="flex">
+        <div className="flex items-center gap-4">
           <img
             src={logo}
             alt="AJF Logo"
-            className="md:w-14 md:h-14 w-14 h-14 mr-4"
+            className="w-12 h-12 sm:w-14 sm:h-14"
           />
           <div>
-            <h1 className="md:text-lg text-base font-bold md:w-60 w-35">
+            <h1 className="text-base sm:text-lg font-bold whitespace-nowrap">
               Anugerah Jaya Farm
             </h1>
-            <p className="text-base md:text-lg">Platform Monitoring Digital</p>
+            <p className="text-sm sm:text-base text-gray-600">
+              Platform Monitoring Digital
+            </p>
           </div>
         </div>
 
         {/* profile section */}
-        <div className="flex items-center">
-          <IoIosNotificationsOutline size={36} className="mx-4" />
-          <div className="h-full w-[2px] bg-black-7 rounded-full" />
-          <div className="flex">
+        <div className="flex items-center gap-4">
+          <IoIosNotificationsOutline
+            size={28}
+            className="text-black cursor-pointer"
+          />
+          <div className="h-6 w-[1px] bg-gray-400 rounded-full" />
+
+          <div className="flex items-center gap-6">
             {/* profile picture */}
-            <div className="mx-4 h-14 w-14 rounded-full">
+            <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full overflow-hidden">
               <img src={profileAvatar} alt="Profile Avatar" />
             </div>
-            <div>
-              {/* user name */}
-              <p className="text-lg font-bold">Jaya Mandiri</p>
-              <p className="text-base">Owner</p>
-            </div>
-          </div>
 
-          {/* arrow down */}
-          <div
-            onClick={profileHandle}
-            className="mx-4 rounded-full border-black-10 border-1 h-8 w-8 flex justify-center items-center hover:bg-black-6 cursor-pointer"
-          >
-            <IoIosArrowDown />
+            {/* user name + role */}
+            <div className="">
+              <p className="text-base font-bold leading-tight">Jaya Mandiri</p>
+              <p className="text-sm text-gray-500">Owner</p>
+            </div>
+
+            {/* dropdown arrow */}
+            <div
+              onClick={profileHandle}
+              className="h-8 w-8 border border-gray-300 rounded-full flex justify-center items-center hover:bg-gray-200 cursor-pointer"
+            >
+              <IoIosArrowDown />
+            </div>
           </div>
         </div>
       </div>
