@@ -1,6 +1,16 @@
 import React from "react";
 import { PiCalendarBlank } from "react-icons/pi";
-import { MdEgg } from "react-icons/md";
+import { MdEgg, MdShoppingCart } from "react-icons/md";
+import { PiMoneyWavyFill } from "react-icons/pi";
+import {
+  FaArrowUpLong,
+  FaArrowDownLong,
+  FaTriangleExclamation,
+} from "react-icons/fa6";
+import { FiMaximize2 } from "react-icons/fi";
+import { BsCheckCircleFill } from "react-icons/bs";
+import { TfiReload } from "react-icons/tfi";
+
 import {
   LineChart,
   Line,
@@ -24,9 +34,9 @@ const data = [
 
 const OverviewOwner = () => {
   return (
-    <div className="flex flex-col p-4 gap-4">
+    <div className="flex flex-col px-4 py-3 gap-4 ">
       {/* header section */}
-      <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
+      <div className="flex justify-between items-center mb-2 flex-wrap gap-4">
         <h1 className="text-3xl font-bold">Overview</h1>
 
         <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
@@ -40,7 +50,7 @@ const OverviewOwner = () => {
       {/* produksi & penjualan section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* produksi telur */}
-        <div className="p-4 w-full rounded-md border-2 border-gray-300">
+        <div className="p-4 w-full rounded-md border-2 border-black-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold">Produksi telur</h2>
             <div className="p-2 rounded-xl bg-green-700">
@@ -68,11 +78,11 @@ const OverviewOwner = () => {
         </div>
 
         {/* penjualan telur */}
-        <div className="p-4 w-full rounded-md border-2 border-gray-300">
+        <div className="p-4 w-full rounded-md border-2 border-black-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold">Penjualan telur</h2>
             <div className="p-2 rounded-xl bg-green-700">
-              <MdEgg size={24} color="white" />
+              <MdShoppingCart size={24} color="white" />
             </div>
           </div>
 
@@ -97,11 +107,11 @@ const OverviewOwner = () => {
       </div>
 
       {/* chart, incomes, and history section */}
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row h-120 gap-6">
         {/* Chart Section (3/4 width on large screens) */}
-        <div className="w-full lg:w-5/8 bg-white rounded-lg p-4 border border-gray-300">
+        <div className="w-full lg:w-6/8 bg-white rounded-lg p-4 border border-black-6">
           <h2 className="text-xl font-semibold mb-4">Produksi & Penjualan</h2>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height="90%">
             <LineChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
@@ -129,14 +139,193 @@ const OverviewOwner = () => {
         </div>
 
         {/* Side Card Section (1/4 width on large screens) */}
-        <div className="w-full h-full lg:w-3/8 flex flex-col gap-4">
-          <div className="bg-white h-1/2 p-4 border border-gray-300 rounded-lg">
-            <h3 className="text-lg font-semibold mb-1">Total Income</h3>
-            <p className="text-2xl font-bold text-green-600">Rp 12.500.000</p>
+        <div className="w-full h-full lg:w-2/8 flex flex-col gap-4">
+          {/* Pendapatan */}
+          <div className="bg-white  p-[20px] border border-black-6 rounded-lg">
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-semibold">Pendapatan</h2>
+              <div className="p-2 rounded-xl bg-green-700">
+                <PiMoneyWavyFill size={24} color="white" />
+              </div>
+            </div>
+            <p className="text-[36px] font-semibold mb-2">Rp 12.500.000</p>
+            {/* profit dynamics notification */}
+            <div className="flex items-center">
+              <FaArrowDownLong color="#F41C1C" />
+              <p className="text-[16px] text-[#F41C1C]">
+                10% dibanding kemarin
+              </p>
+            </div>
           </div>
-          <div className="bg-white h-1/2 p-4 border border-gray-300 rounded-lg">
-            <h3 className="text-lg font-semibold mb-1">Transaksi Hari Ini</h3>
-            <p className="text-2xl font-bold text-blue-600">38</p>
+
+          {/* History */}
+          <div className="bg-white flex-1 p-4 border border-black-6 rounded-lg">
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-lg font-semibold">Riwayat aktifitas</h2>
+              <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
+                <FiMaximize2 size={24} color="" />
+              </div>
+            </div>
+
+            {/* history data */}
+            <div className="flex flex-col gap-2">
+              {/* item 1 */}
+              <div className="flex items-center justify-between">
+                <div className="flex">
+                  <BsCheckCircleFill
+                    size={24}
+                    color="#06C000"
+                    className="me-6"
+                  />
+                  <p className="text-base">Pengiriman telur selesai</p>
+                </div>
+                <div></div>
+                <p className="text-[12px] text-[#595959]">2 jam lalu</p>
+              </div>
+
+              {/* item 2 */}
+              <div className="flex items-center justify-between">
+                <div className="flex">
+                  <TfiReload size={24} color="#FFD400" className="me-6" />
+                  <p className="text-base">Stok dedak masuk</p>
+                </div>
+                <div></div>
+                <p className="text-[12px] text-[#595959]">2 jam lalu</p>
+              </div>
+
+              {/* item 3 */}
+              <div className="flex items-center justify-between">
+                <div className="flex">
+                  <FaTriangleExclamation
+                    size={24}
+                    color="#FF0000"
+                    className="me-6"
+                  />
+                  <p className="text-base">Stok dedak masuk</p>
+                </div>
+                <div></div>
+                <p className="text-[12px] text-[#595959]">2 jam lalu</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* total ayam, gudang, toko */}
+      <div className="flex gap-4 h-65">
+        {/* total ayam */}
+        <div className="bg-white flex-1 p-4 border border-black-6 rounded-lg">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-lg font-semibold">Total ayam</h2>
+            <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
+              <FiMaximize2 size={24} color="" />
+            </div>
+          </div>
+
+          {/* items */}
+          <div className="h-5/8 flex flex-col justify-between my-8">
+            {/* Ayam Hidup */}
+            <div className="flex justify-between px-4">
+              <div className="flex gap-2">
+                <p className="text-xl font-bold">5000</p>
+                <p className="text-xl">Ekor</p>
+              </div>
+              <p className="text-xl font-bold">Ayam Hidup</p>
+            </div>
+
+            {/* Ayam Sakit */}
+            <div className="flex justify-between px-4">
+              <div className="flex gap-2">
+                <p className="text-xl font-bold">100</p>
+                <p className="text-xl">Ekor</p>
+              </div>
+              <p className="text-xl font-bold">Ayam Sakit</p>
+            </div>
+
+            {/* Ayam Mati */}
+            <div className="flex  justify-between px-4">
+              <div className="flex gap-2">
+                <p className="text-xl font-bold">30</p>
+                <p className="text-xl">Ekor</p>
+              </div>
+              <p className="text-xl font-bold">Ayam Mati</p>
+            </div>
+          </div>
+        </div>
+
+        {/* stok gudang */}
+        <div className="bg-white flex-1 p-4 border border-black-6 rounded-lg">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-lg font-semibold">Stok gudang</h2>
+            <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
+              <FiMaximize2 size={24} color="" />
+            </div>
+          </div>
+
+          {/* the items */}
+          <div className="flex w-full gap-4 px-4 justify-center">
+            {/* item 1 */}
+            <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
+              <div className="flex flex-col justify-center gap-2">
+                <div className="flex flex-col items-center">
+                  <p className="text-[40px] font-bold">20</p>
+                  <p className="text-xl">Barang</p>
+                </div>
+                <div className="rounded-[4px] bg-[#87FF8B] flex items-center">
+                  <p className="w-full text-center">aman</p>
+                </div>
+              </div>
+            </div>
+            {/* item 2 */}
+            <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
+              <div className="flex flex-col justify-center gap-2">
+                <div className="flex flex-col items-center">
+                  <p className="text-[40px] font-bold">5</p>
+                  <p className="text-xl">Barang</p>
+                </div>
+                <div className="rounded-[4px] bg-[#FF5E5E] flex items-center">
+                  <p className="w-full text-center">kritis</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* stok gudang */}
+        <div className="bg-white flex-1 p-4 border border-black-6 rounded-lg">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-lg font-semibold">Stok toko</h2>
+            <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
+              <FiMaximize2 size={24} color="" />
+            </div>
+          </div>
+
+          {/* the items */}
+          <div className="flex w-full gap-4 px-4 justify-center">
+            {/* item 1 */}
+            <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
+              <div className="flex flex-col justify-center gap-2">
+                <div className="flex flex-col items-center">
+                  <p className="text-[40px] font-bold">20</p>
+                  <p className="text-xl">Barang</p>
+                </div>
+                <div className="rounded-[4px] bg-[#87FF8B] flex items-center">
+                  <p className="w-full text-center">aman</p>
+                </div>
+              </div>
+            </div>
+            {/* item 2 */}
+            <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
+              <div className="flex flex-col justify-center gap-2">
+                <div className="flex flex-col items-center">
+                  <p className="text-[40px] font-bold">5</p>
+                  <p className="text-xl">Barang</p>
+                </div>
+                <div className="rounded-[4px] bg-[#FF5E5E] flex items-center">
+                  <p className="w-full text-center">kritis</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
