@@ -17,7 +17,7 @@ const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
 
   return (
     <div
-      className={`bg-green-700 text-shadow-black-13 h-screen transition-all flex flex-col duration-100 justify-between ${
+      className={`bg-green-700 text-shadow-black-13 h-full transition-all flex flex-col duration-100 justify-between ${
         isExpanded ? "w-64" : "w-20"
       }`}
     >
