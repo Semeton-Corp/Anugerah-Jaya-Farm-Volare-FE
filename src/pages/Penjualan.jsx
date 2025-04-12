@@ -76,7 +76,7 @@ const pieData = [
   { name: "Toko", value: 70 },
 ];
 
-const COLORS = ["#0f766e", "#f59e0b"];
+const COLORS = ["#2E7E8B", "#E8AD34"];
 
 const Penjualan = () => {
   return (
@@ -141,7 +141,7 @@ const Penjualan = () => {
         <div className="w-1/4 h-full">
           {/* Pendapatan */}
           <div className="bg-white w-full h-full p-4 flex flex-col justify-center border border-black-6 rounded-lg">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center mb-3">
               <h2 className="text-lg font-semibold">Pendapatan</h2>
               <div className="p-2 rounded-xl bg-green-700">
                 <PiMoneyWavyFill size={24} color="white" />
@@ -159,11 +159,11 @@ const Penjualan = () => {
         </div>
 
         {/* keuntungan */}
-        <div className="w-1/4">
+        <div className="w-1/4 h-full">
           {/* Pendapatan */}
-          <div className="bg-white  p-[20px] border border-black-6 rounded-lg">
-            <div className="flex justify-between items-center">
-              <h2 className="text-lg font-semibold">Pendapatan</h2>
+          <div className="bg-white w-full h-full p-4 flex flex-col justify-center border border-black-6 rounded-lg">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="text-lg font-semibold">Keuntungan</h2>
               <div className="p-2 rounded-xl bg-green-700">
                 <PiMoneyWavyFill size={24} color="white" />
               </div>
@@ -183,13 +183,16 @@ const Penjualan = () => {
       {/* keuntungan & penjualan*/}
       <div className="flex flex-col lg:flex-row h-105 gap-6">
         {/* Chart Section (1/2 width on large screens) */}
-        <div className="w-full lg:w-1/2 bg-white rounded-lg p-4 border border-black-6">
+        <div className="w-full lg:w-1/2 bg-white rounded-lg p-6 border border-black-6">
           <h2 className="text-xl font-semibold mb-4">Keuntungan</h2>
           <ResponsiveContainer width="100%" height="90%">
             <LineChart data={dataUntung}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
-              <YAxis domain={[0, 50]} />
+              <YAxis
+                domain={["auto", "auto"]}
+                tickFormatter={(value) => `${value / 1000000} juta`}
+              />
               <Tooltip />
               <Legend verticalAlign="top" align="right" />
 
@@ -206,7 +209,7 @@ const Penjualan = () => {
         </div>
 
         {/* Chart Section (1/2 width on large screens) */}
-        <div className="w-full lg:w-1/2 bg-white rounded-lg p-4 border border-black-6">
+        <div className="w-full lg:w-1/2 bg-white rounded-lg p-6 border border-black-6">
           <h2 className="text-xl font-semibold mb-4">Penjualan Telur</h2>
           <ResponsiveContainer width="100%" height="90%">
             <LineChart data={dataJual}>
@@ -232,9 +235,9 @@ const Penjualan = () => {
       {/* detail penjualan, presentase penjualan*/}
       <div className="flex w-full gap-6">
         {/* Left: Tabel Penjualan */}
-        <div className="w-2/3 bg-white p-4 rounded-lg border">
+        <div className="w-2/3 bg-white px-8 py-6 rounded-lg border border-black-6">
           <div className="flex justify-between items-start mb-4">
-            <h2 className="text-xl font-bold">Detail Penjualan</h2>
+            <h2 className="text-lg font-semibold">Detail Penjualan</h2>
             <div className="p-2 hover:bg-gray-100 rounded-full cursor-pointer">
               <FiMaximize2 size={18} />
             </div>
@@ -261,8 +264,8 @@ const Penjualan = () => {
                     <span
                       className={`text-xs font-medium px-2 py-1 rounded ${
                         item.status === "Selesai"
-                          ? "bg-green-400 text-white"
-                          : "bg-red-400 text-white"
+                          ? "bg-aman-box-surface-color text-aman-text-color"
+                          : "bg-kritis-box-surface-color text-kritis-text-color"
                       }`}
                     >
                       {item.status}
@@ -275,8 +278,8 @@ const Penjualan = () => {
         </div>
 
         {/* Right: Pie Chart */}
-        <div className="w-1/3 bg-white p-4 rounded-lg border">
-          <h2 className="text-xl font-bold mb-4">Presentase Penjualan</h2>
+        <div className="w-1/3 bg-white p-4 rounded-lg border border-black-6">
+          <h2 className="text-lg font-semibold mb-4">Presentase Penjualan</h2>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
