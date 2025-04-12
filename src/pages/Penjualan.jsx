@@ -238,8 +238,8 @@ const Penjualan = () => {
         <div className="w-2/3 bg-white px-8 py-6 rounded-lg border border-black-6">
           <div className="flex justify-between items-start mb-4">
             <h2 className="text-lg font-semibold">Detail Penjualan</h2>
-            <div className="p-2 hover:bg-gray-100 rounded-full cursor-pointer">
-              <FiMaximize2 size={18} />
+            <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
+              <FiMaximize2 size={24} color="" />
             </div>
           </div>
 

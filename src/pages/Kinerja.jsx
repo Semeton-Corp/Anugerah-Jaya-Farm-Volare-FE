@@ -347,7 +347,12 @@ const Kinerja = () => {
 
       {/* detail penjualan */}
       <div className="bg-white p-4 rounded-lg border border-gray-300">
-        <h2 className="text-lg font-semibold mb-4">Detail kinerja ayam</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">Detail kinerja ayam</h2>
+          <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
+            <FiMaximize2 size={24} color="" />
+          </div>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
