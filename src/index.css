@@ -56,6 +56,14 @@
   --color-black-12: rgb(20, 20, 20);
   --color-black-13: rgb(0, 0, 0);
 
+  /* Status Color */
+  --color-aman-text-color: rgb(6, 96, 0);
+  --color-aman-box-surface-color: rgb(135, 255, 139);
+  --color-update-icon-color: rgb(255, 212, 0);
+  --color-warning-icon-color: rgb(255, 0, 0);
+  --color-kritis-text-color: rgb(100, 4, 4);
+  --color-kritis-box-surface-color: rgb(255, 94, 94);
+
   /* Text Size  2sm */
   --text-2sm: 12px;
   --text-sm: 14px;

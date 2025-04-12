@@ -22,6 +22,9 @@ import {
   Legend,
   ResponsiveContainer,
   CartesianGrid,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts";
 
 const dataUntung = [
@@ -43,6 +46,37 @@ const dataJual = [
   { date: "03 Apr", penjualan: 20 },
   { date: "04 Apr", penjualan: 32 },
 ];
+
+const salesData = [
+  {
+    tanggal: "20 Maret 2025",
+    namaBarang: "Telur OK",
+    kuantitas: "12 Ikat",
+    customer: "Pak Tono",
+    status: "Selesai",
+  },
+  {
+    tanggal: "22 Maret 2025",
+    namaBarang: "Telur retak",
+    kuantitas: "12 Karpet",
+    customer: "Pak Adi",
+    status: "Belum Terkirim",
+  },
+  {
+    tanggal: "22 Maret 2025",
+    namaBarang: "Telur pecah",
+    kuantitas: "10 Karpet",
+    customer: "Pak Yono",
+    status: "Belum Terkirim",
+  },
+];
+
+const pieData = [
+  { name: "Gudang", value: 30 },
+  { name: "Toko", value: 70 },
+];
+
+const COLORS = ["#0f766e", "#f59e0b"];
 
 const Penjualan = () => {
   return (
@@ -147,7 +181,7 @@ const Penjualan = () => {
       </div>
 
       {/* keuntungan & penjualan*/}
-      <div className="flex flex-col lg:flex-row h-120 gap-6">
+      <div className="flex flex-col lg:flex-row h-105 gap-6">
         {/* Chart Section (1/2 width on large screens) */}
         <div className="w-full lg:w-1/2 bg-white rounded-lg p-4 border border-black-6">
           <h2 className="text-xl font-semibold mb-4">Keuntungan</h2>
@@ -195,122 +229,75 @@ const Penjualan = () => {
         </div>
       </div>
 
-      {/* total ayam, gudang, toko */}
-      <div className="flex gap-4 h-65">
-        {/* total ayam */}
-        <div className="bg-white flex-1 p-4 border border-black-6 rounded-lg">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-semibold">Total ayam</h2>
-            <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
-              <FiMaximize2 size={24} color="" />
+      {/* detail penjualan, presentase penjualan*/}
+      <div className="flex w-full gap-6">
+        {/* Left: Tabel Penjualan */}
+        <div className="w-2/3 bg-white p-4 rounded-lg border">
+          <div className="flex justify-between items-start mb-4">
+            <h2 className="text-xl font-bold">Detail Penjualan</h2>
+            <div className="p-2 hover:bg-gray-100 rounded-full cursor-pointer">
+              <FiMaximize2 size={18} />
             </div>
           </div>
 
-          {/* items */}
-          <div className="h-5/8 flex flex-col justify-between my-8">
-            {/* Ayam Hidup */}
-            <div className="flex justify-between px-4">
-              <div className="flex gap-2">
-                <p className="text-xl font-bold">5000</p>
-                <p className="text-xl">Ekor</p>
-              </div>
-              <p className="text-xl font-bold">Ayam Hidup</p>
-            </div>
-
-            {/* Ayam Sakit */}
-            <div className="flex justify-between px-4">
-              <div className="flex gap-2">
-                <p className="text-xl font-bold">100</p>
-                <p className="text-xl">Ekor</p>
-              </div>
-              <p className="text-xl font-bold">Ayam Sakit</p>
-            </div>
-
-            {/* Ayam Mati */}
-            <div className="flex  justify-between px-4">
-              <div className="flex gap-2">
-                <p className="text-xl font-bold">30</p>
-                <p className="text-xl">Ekor</p>
-              </div>
-              <p className="text-xl font-bold">Ayam Mati</p>
-            </div>
-          </div>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-green-700 text-white text-left">
+                <th className="py-2 px-4">Tanggal Kirim</th>
+                <th className="py-2 px-4">Nama barang</th>
+                <th className="py-2 px-4">Kuantitas</th>
+                <th className="py-2 px-4">Customer</th>
+                <th className="py-2 px-4">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {salesData.map((item, i) => (
+                <tr key={i} className="border-b">
+                  <td className="py-2 px-4">{item.tanggal}</td>
+                  <td className="py-2 px-4">{item.namaBarang}</td>
+                  <td className="py-2 px-4">{item.kuantitas}</td>
+                  <td className="py-2 px-4">{item.customer}</td>
+                  <td className="py-2 px-4">
+                    <span
+                      className={`text-xs font-medium px-2 py-1 rounded ${
+                        item.status === "Selesai"
+                          ? "bg-green-400 text-white"
+                          : "bg-red-400 text-white"
+                      }`}
+                    >
+                      {item.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
-        {/* stok gudang */}
-        <div className="bg-white flex-1 p-4 border border-black-6 rounded-lg">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-semibold">Stok gudang</h2>
-            <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
-              <FiMaximize2 size={24} color="" />
-            </div>
-          </div>
-
-          {/* the items */}
-          <div className="flex w-full gap-4 px-4 justify-center">
-            {/* item 1 */}
-            <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
-              <div className="flex flex-col justify-center gap-2">
-                <div className="flex flex-col items-center">
-                  <p className="text-[40px] font-bold">20</p>
-                  <p className="text-xl">Barang</p>
-                </div>
-                <div className="rounded-[4px] bg-[#87FF8B] flex items-center">
-                  <p className="w-full text-center">aman</p>
-                </div>
-              </div>
-            </div>
-            {/* item 2 */}
-            <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
-              <div className="flex flex-col justify-center gap-2">
-                <div className="flex flex-col items-center">
-                  <p className="text-[40px] font-bold">5</p>
-                  <p className="text-xl">Barang</p>
-                </div>
-                <div className="rounded-[4px] bg-[#FF5E5E] flex items-center">
-                  <p className="w-full text-center">kritis</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* stok gudang */}
-        <div className="bg-white flex-1 p-4 border border-black-6 rounded-lg">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-semibold">Stok toko</h2>
-            <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
-              <FiMaximize2 size={24} color="" />
-            </div>
-          </div>
-
-          {/* the items */}
-          <div className="flex w-full gap-4 px-4 justify-center">
-            {/* item 1 */}
-            <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
-              <div className="flex flex-col justify-center gap-2">
-                <div className="flex flex-col items-center">
-                  <p className="text-[40px] font-bold">20</p>
-                  <p className="text-xl">Barang</p>
-                </div>
-                <div className="rounded-[4px] bg-[#87FF8B] flex items-center">
-                  <p className="w-full text-center">aman</p>
-                </div>
-              </div>
-            </div>
-            {/* item 2 */}
-            <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
-              <div className="flex flex-col justify-center gap-2">
-                <div className="flex flex-col items-center">
-                  <p className="text-[40px] font-bold">5</p>
-                  <p className="text-xl">Barang</p>
-                </div>
-                <div className="rounded-[4px] bg-[#FF5E5E] flex items-center">
-                  <p className="w-full text-center">kritis</p>
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* Right: Pie Chart */}
+        <div className="w-1/3 bg-white p-4 rounded-lg border">
+          <h2 className="text-xl font-bold mb-4">Presentase Penjualan</h2>
+          <ResponsiveContainer width="100%" height={250}>
+            <PieChart>
+              <Pie
+                data={pieData}
+                dataKey="value"
+                nameKey="name"
+                innerRadius={50}
+                outerRadius={80}
+                labelLine={false}
+                paddingAngle={2}
+              >
+                {pieData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
+              <Legend verticalAlign="middle" align="right" layout="vertical" />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>
