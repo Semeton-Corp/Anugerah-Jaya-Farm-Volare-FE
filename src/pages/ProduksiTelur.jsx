@@ -106,6 +106,69 @@ const produksiDetail = [
   },
 ];
 
+const detailAyamData = [
+  {
+    kandang: "Kandang A1",
+    kategori: "DOC",
+    usiaMinggu: 49,
+    hidup: 4000,
+    sakit: 50,
+    mati: 10,
+    pakanKg: 20,
+    mortalitas: "3%",
+    vaksin: "Vaksin A (5 ml)",
+    obat: "Obat B (4ml)",
+  },
+  {
+    kandang: "Kandang A2",
+    kategori: "Grower",
+    usiaMinggu: 49,
+    hidup: 1200,
+    sakit: 20,
+    mati: 12,
+    pakanKg: 40,
+    mortalitas: "0.8%",
+    vaksin: "-",
+    obat: "-",
+  },
+  {
+    kandang: "Kandang A3",
+    kategori: "Pre Layer",
+    usiaMinggu: 49,
+    hidup: 1200,
+    sakit: 20,
+    mati: 12,
+    pakanKg: 40,
+    mortalitas: "0.8%",
+    vaksin: "-",
+    obat: "-",
+  },
+  {
+    kandang: "Kandang A4",
+    kategori: "Layer",
+    usiaMinggu: 49,
+    hidup: 1200,
+    sakit: 20,
+    mati: 12,
+    pakanKg: 40,
+    mortalitas: "0.8%",
+    vaksin: "-",
+    obat: "-",
+  },
+  {
+    kandang: "Kandang A5",
+    kategori: "Afkir",
+    usiaMinggu: 49,
+    hidup: 1200,
+    sakit: 20,
+    mati: 12,
+    pakanKg: 40,
+    mortalitas: "0.8%",
+    vaksin: "-",
+    obat: "-",
+  },
+];
+
 const ProduksiTelur = () => {
   return (
     <div className="flex flex-col px-4 py-3 gap-4 ">
@@ -278,7 +341,7 @@ const ProduksiTelur = () => {
       <div className=" flex gap-4 h-65">
         <div className=" w-full bg-white px-8 py-6 rounded-lg border border-black-6">
           <div className="flex justify-between items-start mb-4">
-            <h2 className="text-lg font-semibold">Detail Penjualan</h2>
+            <h2 className="text-lg font-semibold">Detail Produksi</h2>
             <div className="p-2 hover:bg-gray-100 rounded-full cursor-pointer">
               <FiMaximize2 size={18} />
             </div>

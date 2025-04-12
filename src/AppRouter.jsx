@@ -9,6 +9,7 @@ import Penjualan from "./pages/Penjualan";
 import ProduksiTelur from "./pages/ProduksiTelur";
 import Ayam from "./pages/Ayam";
 import OverviewKepalaGudang from "./pages/OverviewKepalaGudang";
+import Kinerja from "./pages/Kinerja";
 
 const AppRouter = createBrowserRouter([
   {
@@ -18,6 +19,8 @@ const AppRouter = createBrowserRouter([
       { path: "overview", element: <OverviewOwner /> },
       { path: "penjualan", element: <Penjualan /> },
       { path: "produksi-telur", element: <ProduksiTelur /> },
+      { path: "ayam", element: <Ayam /> },
+      { path: "kinerja", element: <Kinerja /> },
     ],
   },
   {
