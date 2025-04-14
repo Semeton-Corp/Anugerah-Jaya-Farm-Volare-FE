@@ -63,6 +63,9 @@ const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
                 onClick={() => {
                   if (hasSubTabs) {
                     toggleSubmenu(item.tabName);
+                    if (!isExpanded) {
+                      toggleSidebar();
+                    }
                   } else {
                     navigate(fullPath);
                   }
@@ -72,7 +75,7 @@ const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
               />
 
               {hasSubTabs && isExpandedMenu && (
-                <div className="ml-8 mt-2 space-y-2">
+                <div className="ml-8 mt-3 me-4 space-y-3">
                   {item.subTabs.map((subTab, sIdx) => {
                     const subLabel =
                       typeof subTab === "string"
@@ -89,10 +92,10 @@ const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
                       <div
                         key={sIdx}
                         onClick={() => navigate(fullSubPath)}
-                        className={`text-sm rounded-md py-2 px-3 cursor-pointer font-medium ${
+                        className={`text-sm rounded-md py-3 px-3 cursor-pointer font-medium ${
                           isSubSelected
-                            ? "bg-gray-400 text-white"
-                            : "bg-gray-200 text-black hover:bg-gray-300"
+                            ? "bg-[#A6A6A6] text-[#424242]"
+                            : "bg-[#D9D9D9] text-[#424242] hover:bg-[#A6A6A6]"
                         }`}
                       >
                         {subLabel}
@@ -108,7 +111,12 @@ const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
 
       <div className="flex items-center justify-center p-4">
         <button
-          onClick={toggleSidebar}
+          onClick={() => {
+            if (expandedMenu) {
+              toggleSubmenu();
+            }
+            toggleSidebar();
+          }}
           className={`${isExpanded ? "ml-auto" : ""}`}
         >
           {isExpanded ? (
