@@ -5,6 +5,7 @@ import {
 } from "react-icons/md";
 import { sidebarMenus } from "../data/SidebarMenus";
 import { useLocation, useNavigate } from "react-router-dom";
+import { IoIosArrowDown, IoIosArrowForward } from "react-icons/io";
 
 const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
   const location = useLocation();
@@ -14,6 +15,11 @@ const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
   const menuItems = sidebarMenus[role] || [];
 
   const currentPath = location.pathname;
+  const [expandedMenu, setExpandedMenu] = useState(null);
+
+  const toggleSubmenu = (tabName) => {
+    setExpandedMenu(expandedMenu === tabName ? null : tabName);
+  };
 
   return (
     <div
@@ -26,20 +32,80 @@ const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
           const rolePath = role.toLowerCase().replace(/\s+/g, "-");
           const tabPath = item.tabName.toLowerCase().replace(/\s+/g, "-");
           const fullPath = `/${rolePath}/${tabPath}`;
-          const isSelected = currentPath === fullPath;
+
+          const hasSubTabs =
+            Array.isArray(item.subTabs) && item.subTabs.length > 0;
+          const isExpandedMenu = expandedMenu === item.tabName;
+
+          // Determine if any subTab is selected
+          const isAnySubTabSelected =
+            hasSubTabs &&
+            item.subTabs.some((subTab) => {
+              const subLabel =
+                typeof subTab === "string" ? subTab : subTab?.tabName || "";
+              const subPath = subLabel
+                .toString()
+                .toLowerCase()
+                .replace(/\s+/g, "-");
+              const fullSubPath = `/${rolePath}/${tabPath}/${subPath}`;
+              return currentPath === fullSubPath;
+            });
+
+          const isSelected = currentPath === fullPath || isAnySubTabSelected;
 
           return (
-            <SidebarItem
-              key={idx}
-              icon={item.icon}
-              tabName={item.tabName}
-              isExpanded={isExpanded}
-              isSelected={isSelected}
-              onClick={() => navigate(fullPath)}
-            />
+            <div key={idx}>
+              <SidebarItem
+                icon={item.icon}
+                tabName={item.tabName}
+                isExpanded={isExpanded}
+                isSelected={isSelected}
+                onClick={() => {
+                  if (hasSubTabs) {
+                    toggleSubmenu(item.tabName);
+                  } else {
+                    navigate(fullPath);
+                  }
+                }}
+                showArrow={hasSubTabs}
+                isArrowDown={isExpandedMenu}
+              />
+
+              {hasSubTabs && isExpandedMenu && (
+                <div className="ml-8 mt-2 space-y-2">
+                  {item.subTabs.map((subTab, sIdx) => {
+                    const subLabel =
+                      typeof subTab === "string"
+                        ? subTab
+                        : subTab?.tabName || "";
+                    const subPath = subLabel
+                      .toString()
+                      .toLowerCase()
+                      .replace(/\s+/g, "-");
+                    const fullSubPath = `/${rolePath}/${tabPath}/${subPath}`;
+                    const isSubSelected = currentPath === fullSubPath;
+
+                    return (
+                      <div
+                        key={sIdx}
+                        onClick={() => navigate(fullSubPath)}
+                        className={`text-sm rounded-md py-2 px-3 cursor-pointer font-medium ${
+                          isSubSelected
+                            ? "bg-gray-400 text-white"
+                            : "bg-gray-200 text-black hover:bg-gray-300"
+                        }`}
+                      >
+                        {subLabel}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           );
         })}
       </nav>
+
       <div className="flex items-center justify-center p-4">
         <button
           onClick={toggleSidebar}
@@ -56,19 +122,31 @@ const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
   );
 };
 
-const SidebarItem = ({ icon, tabName, isExpanded, isSelected, onClick }) => {
+const SidebarItem = ({
+  icon,
+  tabName,
+  isExpanded,
+  isSelected,
+  onClick,
+  showArrow,
+  isArrowDown,
+}) => {
   return (
     <div
       onClick={onClick}
       className={`flex items-center mx-4 py-4 rounded-[6px] cursor-pointer transition
-        ${isExpanded ? "justify-start px-6" : "justify-center"}
-        ${isSelected ? "bg-orange-500" : "bg-orange-50 hover:bg-green-600"}
-      `}
+        ${isExpanded ? "justify-between px-6" : "justify-center"}
+        ${isSelected ? "bg-orange-500" : "bg-orange-50 hover:bg-green-600"}`}
     >
-      <div>{icon}</div>
-      {isExpanded && (
-        <span className="text-black-13 mx-4 font-semibold">{tabName}</span>
-      )}
+      <div className="flex items-center gap-2">
+        {icon}
+        {isExpanded && (
+          <span className="text-black-13 font-semibold">{tabName}</span>
+        )}
+      </div>
+      {isExpanded &&
+        showArrow &&
+        (isArrowDown ? <IoIosArrowDown /> : <IoIosArrowForward />)}
     </div>
   );
 };

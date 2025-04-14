@@ -12,6 +12,9 @@ import OverviewKepalaGudang from "./pages/OverviewKepalaGudang";
 import Kinerja from "./pages/Kinerja";
 import Gudang from "./pages/Gudang";
 import Toko from "./pages/Toko";
+import OverviewKelolaPegawai from "./pages/OverviewKelolaPegawai";
+import DaftarPegawai from "./pages/DaftarPegawai";
+import TugasPegawai from "./pages/TugasPegawai";
 
 const AppRouter = createBrowserRouter([
   {
@@ -25,6 +28,23 @@ const AppRouter = createBrowserRouter([
       { path: "kinerja", element: <Kinerja /> },
       { path: "gudang", element: <Gudang /> },
       { path: "toko", element: <Toko /> },
+      {
+        path: "kelola-pegawai",
+        children: [
+          {
+            path: "overview",
+            element: <OverviewKelolaPegawai />,
+          },
+          {
+            path: "daftar-pegawai",
+            element: <DaftarPegawai />,
+          },
+          {
+            path: "tugas-pegawai",
+            element: <TugasPegawai />,
+          },
+        ],
+      },
     ],
   },
   {

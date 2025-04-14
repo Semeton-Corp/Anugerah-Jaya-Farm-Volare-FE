@@ -54,6 +54,11 @@ export const sidebarMenus = {
       icon: <img src={kelolaPegawai} alt="Overview Icon" className="h-4 w-4" />,
       tabName: "Kelola Pegawai",
       element: <OverviewOwner />,
+      subTabs: [
+        { tabName: "Overview", path: "overview" },
+        { tabName: "Daftar Pegawai", path: "daftar-pegawai" },
+        { tabName: "Tugas Pegawai", path: "tugas-pegawai" },
+      ],
     },
     {
       icon: <img src={cashflow} alt="Overview Icon" className="h-4 w-4" />,
