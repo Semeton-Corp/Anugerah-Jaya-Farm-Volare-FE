@@ -178,7 +178,7 @@ const ProduksiTelur = () => {
         <div className="flex gap-2">
           <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
             <MdStore size={18} />
-            <div className="text-base font-medium ms-2">Semua Toko</div>
+            <div className="text-base font-medium ms-2">Semua site</div>
           </div>
           <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
             <PiCalendarBlank size={18} />
@@ -370,9 +370,9 @@ const ProduksiTelur = () => {
                   <td className="py-2 px-4">{item.pecah}</td>
                   <td className="py-2 px-4">{item.reject}</td>
                   <td className="py-2 px-4">{item.abnormality}</td>
-                  <td className="py-2 px-4">
+                  <td className="py-2 px-4 flex justify-center">
                     <span
-                      className={`text-xs font-medium px-2 py-1 rounded ${
+                      className={`w-24 py-1 flex justify-center rounded text-sm font-semibold ${
                         item.keterangan === "aman"
                           ? "bg-aman-box-surface-color text-aman-text-color"
                           : "bg-kritis-box-surface-color text-kritis-text-color"

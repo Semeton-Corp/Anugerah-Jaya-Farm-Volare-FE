@@ -331,7 +331,7 @@ const Ayam = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left border-collapse">
             <thead>
-              <tr className="bg-green-700 text-white">
+              <tr className="bg-green-700 text-white text-center">
                 <th className="py-2 px-4">Kandang</th>
                 <th className="py-2 px-4">Kategori</th>
                 <th className="py-2 px-4">Usia (minggu)</th>
@@ -348,7 +348,7 @@ const Ayam = () => {
               {detailAyamData.map((row, index) => (
                 <tr
                   key={index}
-                  className="border-t border-gray-200 hover:bg-gray-50"
+                  className="border-t border-gray-200 hover:bg-gray-50 text-center"
                 >
                   <td className="py-2 px-4">{row.kandang}</td>
                   <td className="py-2 px-4">{row.kategori}</td>

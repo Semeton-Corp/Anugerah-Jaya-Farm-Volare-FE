@@ -356,7 +356,7 @@ const Kinerja = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-green-700 text-white text-left">
+              <tr className="bg-green-700 text-white text-center">
                 <th className="py-2 px-4">Kandang</th>
                 <th className="py-2 px-4">Usia</th>
                 <th className="py-2 px-4">Jumlah</th>
@@ -370,7 +370,7 @@ const Kinerja = () => {
             </thead>
             <tbody>
               {kinerjaAyamData.map((row, index) => (
-                <tr key={index} className="border-b">
+                <tr key={index} className="border-b text-center">
                   <td className="py-2 px-4">{row.kandang}</td>
                   <td className="py-2 px-4">{row.usia}</td>
                   <td className="py-2 px-4">{row.jumlah}</td>
@@ -379,7 +379,7 @@ const Kinerja = () => {
                   <td className="py-2 px-4">{row.beratTelur}</td>
                   <td className="py-2 px-4">{row.fcr}</td>
                   <td className="py-2 px-4">{row.hdp}</td>
-                  <td className="py-2 px-4">
+                  <td className="py-2 px-4 flex justify-center">
                     <div
                       className={`w-24 py-1 flex justify-center rounded text-sm font-semibold ${
                         row.produktivitas === "Produktif"

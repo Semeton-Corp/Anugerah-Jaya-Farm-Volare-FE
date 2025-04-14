@@ -245,7 +245,7 @@ const Penjualan = () => {
 
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-green-700 text-white text-left">
+              <tr className="bg-green-700 text-white text-center">
                 <th className="py-2 px-4">Tanggal Kirim</th>
                 <th className="py-2 px-4">Nama barang</th>
                 <th className="py-2 px-4">Kuantitas</th>
@@ -256,13 +256,13 @@ const Penjualan = () => {
             <tbody>
               {salesData.map((item, i) => (
                 <tr key={i} className="border-b">
-                  <td className="py-2 px-4">{item.tanggal}</td>
-                  <td className="py-2 px-4">{item.namaBarang}</td>
-                  <td className="py-2 px-4">{item.kuantitas}</td>
-                  <td className="py-2 px-4">{item.customer}</td>
-                  <td className="py-2 px-4">
+                  <td className="py-2 px-4 text-center">{item.tanggal}</td>
+                  <td className="py-2 px-4 text-center">{item.namaBarang}</td>
+                  <td className="py-2 px-4 text-center">{item.kuantitas}</td>
+                  <td className="py-2 px-4 text-center">{item.customer}</td>
+                  <td className="py-2 px-4 text-center flex justify-center">
                     <span
-                      className={`text-xs font-medium px-2 py-1 rounded ${
+                      className={`w-28 flex justify-center text-xs font-medium px-2 py-1 rounded ${
                         item.status === "Selesai"
                           ? "bg-aman-box-surface-color text-aman-text-color"
                           : "bg-kritis-box-surface-color text-kritis-text-color"
