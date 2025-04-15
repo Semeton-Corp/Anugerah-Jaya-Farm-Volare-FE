@@ -125,15 +125,10 @@ const OverviewKelolaPegawai = () => {
     <div className="flex flex-col px-4 py-3 gap-4 ">
       {/* header section */}
       <div className="flex justify-between mb-2 flex-wrap gap-4">
-        <h1 className="text-3xl font-bold">Kinerja</h1>
         <div className="flex gap-2">
           <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-            <FaLocationDot size={18} />
+            <MdStore size={18} />
             <div className="text-base font-medium ms-2">Semua Site</div>
-          </div>
-          <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-            <GiBirdCage size={18} />
-            <div className="text-base font-medium ms-2">Semua kandang</div>
           </div>
 
           <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
@@ -248,7 +243,7 @@ const OverviewKelolaPegawai = () => {
 
         <div className="w-3/5 bg-white p-4 rounded-lg border border-gray-300">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-xl font-semibold">Kinerja perusahaan</h2>
+            <h2 className="text-lg font-semibold">Kinerja perusahaan</h2>
             <select
               value={selectedFilter}
               onChange={(e) => setSelectedFilter(e.target.value)}
@@ -279,15 +274,15 @@ const OverviewKelolaPegawai = () => {
       {/* detail penjualan */}
       <div className="bg-white p-4 rounded-lg border border-gray-300">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">Detail kinerja ayam</h2>
+          <h2 className="text-lg font-semibold">Daftar pegawai hari ini</h2>
           <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
             <FiMaximize2 size={24} color="" />
           </div>
         </div>
-        <div className="overflow-x-auto">
+        <div className="">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-green-700 text-white text-center">
+              <tr className="bg-green-700 text-white text-left">
                 <th className="py-2 px-4">Pegawai</th>
                 <th className="py-2 px-4">Jabatan</th>
                 <th className="py-2 px-4">Status</th>
@@ -296,11 +291,11 @@ const OverviewKelolaPegawai = () => {
                 <th className="py-2 px-4">Jumlah Lembur</th>
               </tr>
             </thead>
-            <tbody className="text-center">
+            <tbody className="">
               {pegawaiHariIni.map((item, index) => (
                 <tr key={index} className="border-b ">
-                  <td className="py-2 px-4 flex justify-center">
-                    <div className="flex w-72 justify-between items-center gap-6">
+                  <td className="py-2 px-4 ">
+                    <div className="flex w-72 gap-6">
                       {/* profile picture */}
                       <div className="h-12 w-12 rounded-full overflow-hidden">
                         <img src={profileAvatar} alt="Profile Avatar" />
@@ -319,7 +314,7 @@ const OverviewKelolaPegawai = () => {
                   </td>
                   <td className=" items-center px-4">{item.jabatan}</td>
                   <td className="py-2 px-4">
-                    <div className="flex justify-center items-center h-full">
+                    <div className="flex items-center h-full">
                       <div
                         className={`min-w-[80px] py-1 px-2 rounded text-sm font-semibold text-center ${
                           item.status === "Hadir"
@@ -332,13 +327,13 @@ const OverviewKelolaPegawai = () => {
                     </div>
                   </td>
                   <td className="py-2 px-4">
-                    <div className="flex justify-center items-center h-full">
+                    <div className="flex  items-center h-full">
                       <p className="pe-2">{item.jamMasuk}</p>
                       <p className="">WIB</p>
                     </div>
                   </td>
                   <td className="py-2 px-4">
-                    <div className="flex justify-center items-center h-full">
+                    <div className="flex  items-center h-full">
                       <p className="pe-2">{item.jamPulang}</p>
                       <p className="">WIB</p>
                     </div>
