@@ -79,7 +79,7 @@ const aktivitasTokoData = [
     satuan: "Ikat",
     kuantitas: 4000,
     tempat: "Gudang A1",
-    keterangan: "kritis",
+    keterangan: "Barang Keluar",
   },
   {
     tanggal: "21 Maret 2025",
@@ -88,7 +88,7 @@ const aktivitasTokoData = [
     satuan: "Butir",
     kuantitas: 1200,
     tempat: "Gudang A1",
-    keterangan: "kritis",
+    keterangan: "Barang Keluar",
   },
   {
     tanggal: "22 Maret 2025",
@@ -97,7 +97,7 @@ const aktivitasTokoData = [
     satuan: "Butir",
     kuantitas: 1200,
     tempat: "Gudang A1",
-    keterangan: "aman",
+    keterangan: "Barang Masuk",
   },
   {
     tanggal: "23 Maret 2025",
@@ -106,7 +106,7 @@ const aktivitasTokoData = [
     satuan: "Butir",
     kuantitas: 1200,
     tempat: "Gudang A1",
-    keterangan: "aman",
+    keterangan: "Barang Masuk",
   },
 ];
 
@@ -288,10 +288,10 @@ const Toko = () => {
                   <td className="py-2 px-4">{item.tempat}</td>
                   <td className="py-2 px-4 flex justify-center">
                     <span
-                      className={`w-24 py-1 flex justify-center rounded text-sm font-semibold ${
-                        item.keterangan === "aman"
+                      className={`w-36 py-1 flex justify-center rounded text-sm font-semibold ${
+                        item.keterangan === "Barang Masuk"
                           ? "bg-aman-box-surface-color text-aman-text-color"
-                          : "bg-kritis-box-surface-color text-kritis-text-color"
+                          : "bg-orange-200 text-kritis-text-color"
                       }`}
                     >
                       {item.keterangan}
