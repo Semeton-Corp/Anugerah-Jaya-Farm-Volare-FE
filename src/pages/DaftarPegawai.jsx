@@ -97,7 +97,7 @@ const DaftarPegawai = () => {
       <div className=" rounded-[4px] border border-black-6">
         <div className="px-6 pt-8 pb-4 flex items-center justify-between border-b ">
           <p className="text-lg font-bold">Pegawai Aktif</p>
-          <div className="rounded-[4px] py-2 px-6 bg-green-500 flex items-center justify-center text-white text-base font-medium hover:bg-green-600 cursor-pointer">
+          <div className="rounded-[4px] py-2 px-6 bg-green-700 flex items-center justify-center text-white text-base font-medium hover:bg-green-900 cursor-pointer">
             + Tambah pegawai
           </div>
         </div>

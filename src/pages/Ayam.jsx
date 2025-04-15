@@ -77,8 +77,6 @@ const detailAyamData = [
     mati: 10,
     pakanKg: 20,
     mortalitas: "3%",
-    vaksin: "Vaksin A (5 ml)",
-    obat: "Obat B (4ml)",
   },
   {
     kandang: "Kandang A2",
@@ -89,8 +87,6 @@ const detailAyamData = [
     mati: 12,
     pakanKg: 40,
     mortalitas: "0.8%",
-    vaksin: "-",
-    obat: "-",
   },
   {
     kandang: "Kandang A3",
@@ -101,8 +97,6 @@ const detailAyamData = [
     mati: 12,
     pakanKg: 40,
     mortalitas: "0.8%",
-    vaksin: "-",
-    obat: "-",
   },
   {
     kandang: "Kandang A4",
@@ -113,8 +107,6 @@ const detailAyamData = [
     mati: 12,
     pakanKg: 40,
     mortalitas: "0.8%",
-    vaksin: "-",
-    obat: "-",
   },
   {
     kandang: "Kandang A5",
@@ -125,8 +117,6 @@ const detailAyamData = [
     mati: 12,
     pakanKg: 40,
     mortalitas: "0.8%",
-    vaksin: "-",
-    obat: "-",
   },
 ];
 
@@ -340,8 +330,6 @@ const Ayam = () => {
                 <th className="py-2 px-4">Mati</th>
                 <th className="py-2 px-4">Pakan (Kg)</th>
                 <th className="py-2 px-4">Mortalitas</th>
-                <th className="py-2 px-4">Vaksin</th>
-                <th className="py-2 px-4">Obat</th>
               </tr>
             </thead>
             <tbody>
@@ -358,8 +346,6 @@ const Ayam = () => {
                   <td className="py-2 px-4">{row.mati}</td>
                   <td className="py-2 px-4">{row.pakanKg}</td>
                   <td className="py-2 px-4">{row.mortalitas}</td>
-                  <td className="py-2 px-4">{row.vaksin}</td>
-                  <td className="py-2 px-4">{row.obat}</td>
                 </tr>
               ))}
             </tbody>
