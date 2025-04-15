@@ -94,8 +94,8 @@ const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
                         onClick={() => navigate(fullSubPath)}
                         className={`text-sm rounded-md py-3 px-3 cursor-pointer font-medium ${
                           isSubSelected
-                            ? "bg-[#A6A6A6] text-[#424242]"
-                            : "bg-[#D9D9D9] text-[#424242] hover:bg-[#A6A6A6]"
+                            ? "bg-orange-500"
+                            : "bg-orange-50 hover:bg-green-600"
                         }`}
                       >
                         {subLabel}
