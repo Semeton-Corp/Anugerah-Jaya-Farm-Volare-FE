@@ -1,16 +1,50 @@
 import React from "react";
 import logo from "../assets/logo_ajf.svg";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { login } from "../services/authService";
 
 const Login = () => {
   const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   function forgotPasswordHandle() {
     navigate("/auth/forgot-password");
   }
 
-  function loginHandle() {
-    console.log("LOGIN BUTTON CLICKED");
+  async function loginHandle() {
+    setLoading(true);
+    setError(null);
+
+    try {
+      console.log("email", email);
+      console.log("password", email);
+
+      const response = await login(email, password);
+      const { accessToken, role } = response.data.data;
+
+      console.log("response", response);
+
+      localStorage.setItem("token", accessToken);
+      localStorage.setItem("role", role);
+
+      if (role === "Owner") navigate("/owner");
+      else if (role === "Pekerja Kandang")
+        navigate("/pekerja-kandang/overview");
+      else if (role === "Pekerja Telur") navigate("/pekerja-telur/overview");
+      else if (role === "Kepala Gudang & Admin Rekap")
+        navigate("/kepala-gudang/overview");
+      else navigate("/");
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Login gagal. Cek email dan password Anda.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -44,6 +78,8 @@ const Login = () => {
             id="email"
             placeholder="Masukkan email anda"
             className="w-full p-3 border-2 bg-green-50 border-green-200 placeholder-normal rounded-lg focus:outline-none focus:ring-2 focus:green-400"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 
@@ -55,6 +91,8 @@ const Login = () => {
             id="password"
             placeholder="Masukkan kata sandi anda"
             className="w-full p-3 border-2 bg-green-50 border-green-200 placeholder-normal rounded-lg focus:outline-none focus:ring-2 focus:green-400"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </div>
 

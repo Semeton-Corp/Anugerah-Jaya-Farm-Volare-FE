@@ -48,16 +48,6 @@ const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
                 .toLowerCase()
                 .replace(/\s+/g, "-");
               const fullSubPath = `/${rolePath}/${tabPath}/${subPath}`;
-
-              console.log("🔍 --- Debug SubTab Matching ---");
-              console.log("hasSubTabs:", hasSubTabs);
-              console.log("subLabel:", subLabel);
-              console.log("subPath:", subPath);
-              console.log("fullSubPath:", fullSubPath);
-              console.log("currentPath:", currentPath);
-              console.log("Match:", currentPath === fullSubPath);
-              console.log("--------------------------------");
-
               return currentPath === fullSubPath;
             });
 

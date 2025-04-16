@@ -21,6 +21,8 @@ import DetailAyam from "./pages/DetailAyam";
 import DetailKinerjaAyam from "./pages/DetailKinerjaAyam";
 import DetailStokGudang from "./pages/DetailStokGudang";
 import RiwayatAktivitasToko from "./pages/RiwayatAktivitasToko";
+import DetailStokToko from "./pages/DetailStokToko";
+import RiwayatAktivitasGudang from "./pages/RiwayatAktivitasGudang";
 
 const AppRouter = createBrowserRouter([
   {
@@ -60,10 +62,20 @@ const AppRouter = createBrowserRouter([
         element: <Gudang />,
         children: [
           { path: "detail-stok-gudang", element: <DetailStokGudang /> },
+          {
+            path: "riwayat-aktivitas-gudang",
+            element: <RiwayatAktivitasGudang />,
+          },
+        ],
+      },
+      {
+        path: "toko",
+        element: <Toko />,
+        children: [
+          { path: "detail-stok-toko", element: <DetailStokToko /> },
           { path: "riwayat-aktivitas-toko", element: <RiwayatAktivitasToko /> },
         ],
       },
-      { path: "toko", element: <Toko /> },
       {
         path: "kelola-pegawai",
         children: [

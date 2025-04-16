@@ -77,7 +77,7 @@ const riwayatGudangData = [
 
 const Gudang = () => {
   const location = useLocation();
-  const detailPages = ["detail-stok-gudang", "riwayat-aktivitas-toko"];
+  const detailPages = ["detail-stok-gudang", "riwayat-aktivitas-gudang"];
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
@@ -91,9 +91,9 @@ const Gudang = () => {
     navigate(detailPath);
   };
 
-  const RiwayatAktivitasTokoHandle = () => {
+  const riwayatAktivitasGudangHandle = () => {
     const currentPath = location.pathname;
-    const detailPath = currentPath + "/riwayat-aktivitas-toko";
+    const detailPath = currentPath + "/riwayat-aktivitas-gudang";
 
     navigate(detailPath);
   };
@@ -228,7 +228,7 @@ const Gudang = () => {
                     {stokGudangData.map((item, index) => (
                       <tr key={index} className="border-b text-center">
                         <td className="py-2 px-4">{item.namaBarang}</td>
-                        <td className="py-2 px-4">{item.idBarang}</td>
+                        <td className="py-2 px-4">{item.id}</td>
                         <td className="py-2 px-4">{item.jenisBarang}</td>
                         <td className="py-2 px-4">{item.qty}</td>
                         <td className="py-2 px-4">{item.lokasiSimpan}</td>
@@ -255,9 +255,11 @@ const Gudang = () => {
           {/* detail penjualan */}
           <div className="bg-white p-4 rounded-lg border border-gray-300">
             <div className="flex justify-between items-start mb-4">
-              <h2 className="text-lg font-semibold">Riwayat Aktivitas Toko</h2>
+              <h2 className="text-lg font-semibold">
+                Riwayat Aktivitas Gudang
+              </h2>
               <div
-                onClick={RiwayatAktivitasTokoHandle}
+                onClick={riwayatAktivitasGudangHandle}
                 className="p-2 rounded-full hover:bg-black-4 cursor-pointer"
               >
                 <FiMaximize2 size={24} color="" />
@@ -281,7 +283,7 @@ const Gudang = () => {
                     <tr key={index} className="border-b text-center">
                       <td className="py-2 px-4">{item.tanggal}</td>
                       <td className="py-2 px-4">{item.namaBarang}</td>
-                      <td className="py-2 px-4">{item.idBarang}</td>
+                      <td className="py-2 px-4">{item.id}</td>
                       <td className="py-2 px-4">{item.jenisBarang}</td>
                       <td className="py-2 px-4">{item.qty}</td>
                       <td className="py-2 px-4">{item.lokasiSimpan}</td>
