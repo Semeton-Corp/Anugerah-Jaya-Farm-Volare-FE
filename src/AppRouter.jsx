@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import AuthLayout from "./layouts/AuthLayout";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -15,18 +15,54 @@ import Toko from "./pages/Toko";
 import OverviewKelolaPegawai from "./pages/OverviewKelolaPegawai";
 import DaftarPegawai from "./pages/DaftarPegawai";
 import TugasPegawai from "./pages/TugasPegawai";
+import DetailPenjualan from "./pages/DetailPenjualan";
+import DetailProduksi from "./pages/DetailProduksi";
+import DetailAyam from "./pages/DetailAyam";
+import DetailKinerjaAyam from "./pages/DetailKinerjaAyam";
+import DetailStokGudang from "./pages/DetailStokGudang";
+import RiwayatAktivitasToko from "./pages/RiwayatAktivitasToko";
 
 const AppRouter = createBrowserRouter([
+  {
+    path: "",
+    element: <Navigate to="auth" replace />,
+  },
   {
     path: "/owner",
     element: <MainLayout role="Owner" />,
     children: [
+      { path: "", element: <Navigate to="overview" replace /> },
       { path: "overview", element: <OverviewOwner /> },
-      { path: "penjualan", element: <Penjualan /> },
-      { path: "produksi-telur", element: <ProduksiTelur /> },
-      { path: "ayam", element: <Ayam /> },
-      { path: "kinerja", element: <Kinerja /> },
-      { path: "gudang", element: <Gudang /> },
+      {
+        path: "penjualan",
+        element: <Penjualan />,
+        children: [{ path: "detail-penjualan", element: <DetailPenjualan /> }],
+      },
+      {
+        path: "produksi-telur",
+        element: <ProduksiTelur />,
+        children: [{ path: "detail-produksi", element: <DetailProduksi /> }],
+      },
+      {
+        path: "ayam",
+        element: <Ayam />,
+        children: [{ path: "detail-ayam", element: <DetailAyam /> }],
+      },
+      {
+        path: "kinerja",
+        element: <Kinerja />,
+        children: [
+          { path: "detail-kinerja-ayam", element: <DetailKinerjaAyam /> },
+        ],
+      },
+      {
+        path: "gudang",
+        element: <Gudang />,
+        children: [
+          { path: "detail-stok-gudang", element: <DetailStokGudang /> },
+          { path: "riwayat-aktivitas-toko", element: <RiwayatAktivitasToko /> },
+        ],
+      },
       { path: "toko", element: <Toko /> },
       {
         path: "kelola-pegawai",
@@ -75,6 +111,7 @@ const AppRouter = createBrowserRouter([
     path: "/auth",
     element: <AuthLayout />,
     children: [
+      { path: "", element: <Navigate to="login" replace /> },
       { path: "login", element: <Login /> },
       { path: "forgot-password", element: <ForgotPassword /> },
       { path: "verification", element: <Verification /> },
