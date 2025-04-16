@@ -26,6 +26,7 @@ import RiwayatAktivitasGudang from "./pages/RiwayatAktivitasGudang";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Tugas from "./pages/Tugas";
 import Presensi from "./pages/Presensi";
+import InputAyam from "./pages/InputAyam";
 
 const AppRouter = createBrowserRouter([
   {
@@ -112,6 +113,7 @@ const AppRouter = createBrowserRouter([
       },
     ],
   },
+
   // PEKERJA KANDANG ROUTE
   {
     path: "/pekerja-kandang",
@@ -122,32 +124,21 @@ const AppRouter = createBrowserRouter([
         element: <MainLayout role="Pekerja Kandang" />,
         children: [
           { path: "", element: <Navigate to="overview" replace /> },
-          {
-            path: "overview",
-            element: <Ayam />,
-          },
+          { path: "overview", element: <Ayam /> },
           {
             path: "ayam",
             element: <DetailAyam />,
+            children: [
+              {
+                path: "input-ayam",
+                element: <InputAyam />,
+              },
+            ],
           },
-          {
-            path: "tugas",
-            element: <Tugas />,
-          },
-          {
-            path: "presensi",
-            element: <Presensi />,
-          },
+          { path: "tugas", element: <Tugas /> },
+          { path: "presensi", element: <Presensi /> },
         ],
       },
-    ],
-  },
-  {
-    path: "/pekerja-kandang",
-    element: <MainLayout role="Pekerja Kandang" />,
-    children: [
-      { path: "overview", element: <Ayam /> },
-      // Add more specific tab pages here
     ],
   },
   {
