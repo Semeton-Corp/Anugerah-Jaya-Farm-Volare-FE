@@ -8,10 +8,11 @@ import gudang from "../assets/icon_nav/icon_nav_gudang.svg";
 import toko from "../assets/icon_nav/icon_nav_toko.svg";
 import kelolaPegawai from "../assets/icon_nav/icon_nav_kelola_pegawai.svg";
 import cashflow from "../assets/icon_nav/icon_nav_cashflow.svg";
-
+import { GrNotes } from "react-icons/gr";
 import OverviewOwner from "../pages/OverviewOwner";
 import Penjualan from "../pages/Penjualan";
 import ProduksiTelur from "../pages/ProduksiTelur";
+import { BsPersonSquare } from "react-icons/bs";
 
 export const sidebarMenus = {
   Owner: [
@@ -67,12 +68,26 @@ export const sidebarMenus = {
     },
   ],
   "Pekerja Kandang": [
-    { icon: <Home />, tabName: "Kandang" },
     {
-      icon: <img src={cashflow} alt="Overview Icon" className="h-4 w-4" />,
-      tabName: "Cashflow",
+      icon: <img src={overview} alt="Overview Icon" className="h-4 w-4" />,
+      tabName: "Overview",
+      element: <OverviewOwner />,
     },
-    // add more items
+    {
+      icon: <img src={ayam} alt="Overview Icon" className="h-4 w-4" />,
+      tabName: "Ayam",
+      element: <OverviewOwner />,
+    },
+    {
+      icon: <GrNotes size={20} />,
+      tabName: "Tugas",
+      element: <OverviewOwner />,
+    },
+    {
+      icon: <BsPersonSquare size={20} />,
+      tabName: "Presensi",
+      element: <OverviewOwner />,
+    },
   ],
   "Pekerja Telur": [
     { icon: <Home />, tabName: "Telur Harian" },
