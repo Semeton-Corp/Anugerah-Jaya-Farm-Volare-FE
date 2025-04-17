@@ -18,3 +18,12 @@ export const getChickenMonitoring = () => {
     },
   });
 };
+
+export const deleteChickenData = (dataId) => {
+  return api.delete(`/chickens/monitorings/${dataId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};

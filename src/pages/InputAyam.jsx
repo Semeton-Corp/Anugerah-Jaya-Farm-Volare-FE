@@ -63,8 +63,10 @@ const InputAyam = () => {
   const [cages, setCages] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [selectedCages, setSelectedCages] = useState("");
-  const [selectedChikenCategory, setSelectedChikenCategory] = useState("");
+  const [selectedCages, setSelectedCages] = useState(0);
+  const [selectedChikenCategory, setSelectedChikenCategory] = useState(
+    kategoriAyam[0]
+  );
   const [ageChiken, setAgeChiken] = useState(0);
   const [totalLiveChicken, setTotalLiveChicken] = useState(0);
   const [totalSickChicken, setTotalSickChicken] = useState(0);
@@ -119,7 +121,12 @@ const InputAyam = () => {
     const fetchCages = async () => {
       try {
         const response = await getCage();
-        setCages(response.data.data); // adjust based on your API response
+        const data = response.data.data;
+        setCages(data);
+
+        if (data.length > 0) {
+          setSelectedCages(data[0].id);
+        }
       } catch (error) {
         console.error("Gagal memuat data kandang:", error);
       } finally {

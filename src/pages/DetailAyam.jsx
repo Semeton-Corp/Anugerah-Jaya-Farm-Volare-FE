@@ -5,28 +5,7 @@ import { MdDelete } from "react-icons/md";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getChickenMonitoring } from "../services/chickenMonitorings";
-
-import { MdEgg, MdShoppingCart } from "react-icons/md";
-import { PiMoneyWavyFill } from "react-icons/pi";
-import {
-  FaArrowUpLong,
-  FaArrowDownLong,
-  FaTriangleExclamation,
-} from "react-icons/fa6";
-import { FiMaximize2 } from "react-icons/fi";
-import { BsCheckCircleFill } from "react-icons/bs";
-import { TfiReload } from "react-icons/tfi";
-
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  CartesianGrid,
-} from "recharts";
+import { deleteChickenData } from "../services/chickenMonitorings";
 
 // const detailAyamData = [
 //   {
@@ -103,29 +82,19 @@ const DetailAyam = () => {
   const inputAyamHandle = () => {
     navigate(`${location.pathname}/input-ayam`);
   };
-  useEffect(() => {
-    const fetchDataAyam = async () => {
-      try {
-        const response = await getChickenMonitoring();
-        if (response.status === 200) {
-          const formattedData = response.data.data.map((item) => ({
-            kandang: item.cage?.name || "Unknown",
-            kategori: item.chickenCategory,
-            usiaMinggu: item.age,
-            hidup: item.totalLiveChicken,
-            sakit: item.totalSickChicken,
-            mati: item.totalDeathChicken,
-            pakanKg: item.totalFeed,
-            mortalitas: `${item.mortalityRate}%`,
-          }));
 
-          setDetailAyamState(formattedData);
-        }
-      } catch (error) {
-        console.error("Gagal memuat data ayam:", error);
+  const fetchDataAyam = async () => {
+    try {
+      const response = await getChickenMonitoring();
+      if (response.status === 200) {
+        setDetailAyamState(response.data.data);
       }
-    };
+    } catch (error) {
+      console.error("Gagal memuat data ayam:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchDataAyam();
 
     if (location.state?.refetch) {
@@ -133,6 +102,16 @@ const DetailAyam = () => {
       window.history.replaceState({}, document.title);
     }
   }, [location]);
+
+  async function deleteDataHandle(dataId) {
+    try {
+      const response = await deleteChickenData(dataId);
+      await fetchDataAyam(); // langsung reload data
+      
+    } catch (error) {
+      console.error("Gagal menghapus data ayam:", error);
+    }
+  }
 
   // Render detail input page only
   if (isDetailPage) {
@@ -197,14 +176,19 @@ const DetailAyam = () => {
                   key={index}
                   className="border-t border-gray-200 hover:bg-gray-50 text-center"
                 >
-                  <td className="py-2 px-4">{row.kandang}</td>
-                  <td className="py-2 px-4">{row.kategori}</td>
-                  <td className="py-2 px-4">{row.usiaMinggu}</td>
-                  <td className="py-2 px-4">{row.hidup}</td>
-                  <td className="py-2 px-4">{row.sakit}</td>
-                  <td className="py-2 px-4">{row.mati}</td>
-                  <td className="py-2 px-4">{row.pakanKg}</td>
-                  <td className="py-2 px-4">{row.mortalitas}</td>
+                  <td className="py-2 px-4">{row.cage.name}</td>
+                  <td className="py-2 px-4">{row.chickenCategory}</td>
+                  <td className="py-2 px-4">{row.age}</td>
+                  <td className="py-2 px-4">{row.totalLiveChicken}</td>
+                  <td className="py-2 px-4">{row.totalSickChicken}</td>
+                  <td className="py-2 px-4">{row.totalDeathChicken}</td>
+                  <td className="py-2 px-4">{row.totalFeed}</td>
+                  <td className="py-2 px-4">
+                    <div className="flex gap-2 justify-center">
+                      <p>{row.mortalityRate}</p>
+                      <p>%</p>
+                    </div>
+                  </td>
                   {userRole === "Pekerja Kandang" && (
                     <td className="py-2 px-4 flex justify-center gap-4">
                       <BiSolidEditAlt
@@ -212,6 +196,9 @@ const DetailAyam = () => {
                         className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
                       />
                       <MdDelete
+                        onClick={() => {
+                          deleteDataHandle(row.id);
+                        }}
                         size={24}
                         className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
                       />
