@@ -163,6 +163,11 @@ const InputAyam = () => {
       // Example send to API if needed
       const response = await inputAyam(payload);
       console.log("RESPONSE STATUS: ", response.status);
+
+      if (response.status == 200) {
+        const rolePath = userRole?.toLowerCase().replace(/\s+/g, "-");
+        navigate(`/${rolePath}/ayam`, { state: { refetch: true } });
+      }
       // await api.post("/chickens/monitorings", payload);
     } catch (err) {
       console.error("Gagal menyimpan data:", err);
