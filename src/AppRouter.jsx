@@ -27,6 +27,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Tugas from "./pages/Tugas";
 import Presensi from "./pages/Presensi";
 import InputAyam from "./pages/InputAyam";
+import InputTelur from "./pages/InputTelur";
 
 const AppRouter = createBrowserRouter([
   {
@@ -133,6 +134,10 @@ const AppRouter = createBrowserRouter([
                 path: "input-ayam",
                 element: <InputAyam />,
               },
+              {
+                path: "input-ayam/:id",
+                element: <InputAyam />,
+              },
             ],
           },
           { path: "tugas", element: <Tugas /> },
@@ -141,12 +146,36 @@ const AppRouter = createBrowserRouter([
       },
     ],
   },
+
+  // PEKERJA TELUR ROUTE
   {
     path: "/pekerja-telur",
-    element: <MainLayout role="Pekerja Telur" />,
+    element: <ProtectedRoute allowedRoles={["Pekerja Telur"]} />,
     children: [
-      { path: "overview", element: <ProduksiTelur /> },
-      // Add more tabs here
+      {
+        path: "",
+        element: <MainLayout role="Pekerja Telur" />,
+        children: [
+          { path: "", element: <Navigate to="overview" replace /> },
+          { path: "overview", element: <ProduksiTelur /> },
+          {
+            path: "produksi-telur",
+            element: <DetailProduksi />,
+            children: [
+              {
+                path: "input-telur",
+                element: <InputTelur />,
+              },
+              {
+                path: "input-ayam/:id",
+                element: <InputAyam />,
+              },
+            ],
+          },
+          { path: "tugas", element: <Tugas /> },
+          { path: "presensi", element: <Presensi /> },
+        ],
+      },
     ],
   },
   {

@@ -90,8 +90,26 @@ export const sidebarMenus = {
     },
   ],
   "Pekerja Telur": [
-    { icon: <Home />, tabName: "Telur Harian" },
-    // add more items
+    {
+      icon: <img src={overview} alt="Overview Icon" className="h-4 w-4" />,
+      tabName: "Overview",
+      element: <OverviewOwner />,
+    },
+    {
+      icon: <img src={produksiTelur} alt="Overview Icon" className="h-4 w-4" />,
+      tabName: "Produksi Telur",
+      element: <ProduksiTelur />,
+    },
+    {
+      icon: <GrNotes size={20} />,
+      tabName: "Tugas",
+      element: <OverviewOwner />,
+    },
+    {
+      icon: <BsPersonSquare size={20} />,
+      tabName: "Presensi",
+      element: <OverviewOwner />,
+    },
   ],
   "Kepala Gudang & Admin Rekap": [
     { icon: <Home />, tabName: "Gudang" },

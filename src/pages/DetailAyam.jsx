@@ -107,10 +107,14 @@ const DetailAyam = () => {
     try {
       const response = await deleteChickenData(dataId);
       await fetchDataAyam(); // langsung reload data
-      
     } catch (error) {
       console.error("Gagal menghapus data ayam:", error);
     }
+  }
+
+  async function editDataHandle(dataId) {
+    const currectPath = location.pathname;
+    navigate(`${currectPath}/input-ayam/${dataId}`);
   }
 
   // Render detail input page only
@@ -192,6 +196,7 @@ const DetailAyam = () => {
                   {userRole === "Pekerja Kandang" && (
                     <td className="py-2 px-4 flex justify-center gap-4">
                       <BiSolidEditAlt
+                      onClick={()=>{editDataHandle(row.id)}}
                         size={24}
                         className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
                       />

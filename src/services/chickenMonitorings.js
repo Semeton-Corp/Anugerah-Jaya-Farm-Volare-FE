@@ -27,3 +27,12 @@ export const deleteChickenData = (dataId) => {
     },
   });
 };
+
+export const getChickenMonitoringById = (dataId) => {
+  return api.get(`/chickens/monitorings/${dataId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};

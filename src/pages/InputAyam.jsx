@@ -3,6 +3,8 @@ import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getCage } from "../services/cage";
 import { kategoriAyam } from "../data/KategoriAyam";
 import { inputAyam } from "../services/chickenMonitorings";
+import { getChickenMonitoringById } from "../services/chickenMonitorings";
+import { useParams } from "react-router-dom";
 
 const detailAyamData = [
   {
@@ -62,8 +64,11 @@ const InputAyam = () => {
 
   const [cages, setCages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { id } = useParams();
 
   const [selectedCages, setSelectedCages] = useState(0);
+  const selectedCageName = cages.find((cage) => cage.id === selectedCages);
+
   const [selectedChikenCategory, setSelectedChikenCategory] = useState(
     kategoriAyam[0]
   );
@@ -124,6 +129,23 @@ const InputAyam = () => {
         const data = response.data.data;
         setCages(data);
 
+        if (id) {
+          console.log("THERE IS AN ID: ", id);
+          const updateResponse = await getChickenMonitoringById(id);
+          const data = updateResponse.data.data;
+          console.log("THERE IS DATA: ", data);
+
+          setSelectedCages(data.cage.id);
+          setSelectedChikenCategory(data.chickenCategory);
+          setAgeChiken(data.age);
+          setTotalLiveChicken(data.totalLiveChicken);
+          setTotalSickChicken(data.totalSickChicken);
+          setTotalDeathChicken(data.totalDeathChicken);
+          setTotalFeed(data.totalFeed);
+          setVaksinList(data.chickenVaccines || []);
+          setObatList(data.chickenDiseases || []);
+        }
+
         if (data.length > 0) {
           setSelectedCages(data[0].id);
         }
@@ -139,6 +161,9 @@ const InputAyam = () => {
 
   async function simpanAyamHandle() {
     setLoading(true);
+    if (id) {
+    }
+
     try {
       const chickenVaccines = vaksinList.map((v) => ({
         vaccine: v.jenis,
@@ -171,7 +196,7 @@ const InputAyam = () => {
       const response = await inputAyam(payload);
       console.log("RESPONSE STATUS: ", response.status);
 
-      if (response.status == 200) {
+      if (response.status == 201) {
         const rolePath = userRole?.toLowerCase().replace(/\s+/g, "-");
         navigate(`/${rolePath}/ayam`, { state: { refetch: true } });
       }
@@ -200,7 +225,7 @@ const InputAyam = () => {
         <select
           className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
           value={selectedCages}
-          onChange={(e) => setSelectedCages(e.target.value)}
+          onChange={(e) => setSelectedCages(Number(e.target.value))}
         >
           {cages.map((cage) => (
             <option key={cage.id} value={cage.id}>
@@ -227,6 +252,7 @@ const InputAyam = () => {
             <label className="block font-medium mb-1">Usia ayam</label>
             <input
               type="number"
+              value={ageChiken}
               className="bg-black-4 w-full border rounded p-2"
               onChange={(e) => {
                 setAgeChiken(e.target.value);
@@ -241,6 +267,7 @@ const InputAyam = () => {
             <label className="block font-medium mb-1">Jumlah ayam hidup</label>
             <input
               type="number"
+              value={totalLiveChicken}
               className="w-full bg-black-4 border rounded p-2"
               onChange={(e) => {
                 setTotalLiveChicken(e.target.value);
@@ -251,6 +278,7 @@ const InputAyam = () => {
             <label className="block font-medium mb-1">Jumlah ayam sakit</label>
             <input
               type="number"
+              value={totalSickChicken}
               className="w-full bg-black-4 border rounded p-2"
               onChange={(e) => {
                 setTotalSickChicken(e.target.value);
@@ -261,6 +289,7 @@ const InputAyam = () => {
             <label className="block font-medium mb-1">Jumlah ayam mati</label>
             <input
               type="number"
+              value={totalDeathChicken}
               className="w-full border bg-black-4 rounded p-2"
               onChange={(e) => {
                 setTotalDeathChicken(e.target.value);
@@ -274,6 +303,7 @@ const InputAyam = () => {
           <label className="block font-medium mb-1">Jumlah pakan (Kg)</label>
           <input
             type="number"
+            value={totalFeed}
             className="w-full border rounded p-2 bg-black-4"
             onChange={(e) => {
               setTotalFeed(e.target.value);
