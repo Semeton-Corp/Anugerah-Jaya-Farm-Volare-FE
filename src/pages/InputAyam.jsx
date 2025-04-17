@@ -1,28 +1,8 @@
-import React, { useState } from "react";
-import { PiCalendarBlank } from "react-icons/pi";
-import { BiSolidEditAlt } from "react-icons/bi";
-import { MdDelete } from "react-icons/md";
-import { MdEgg, MdShoppingCart } from "react-icons/md";
-import { PiMoneyWavyFill } from "react-icons/pi";
-import {
-  FaArrowUpLong,
-  FaArrowDownLong,
-  FaTriangleExclamation,
-} from "react-icons/fa6";
-import { FiMaximize2 } from "react-icons/fi";
-import { BsCheckCircleFill } from "react-icons/bs";
-import { TfiReload } from "react-icons/tfi";
-
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  CartesianGrid,
-} from "recharts";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate, Outlet } from "react-router-dom";
+import { getCage } from "../services/cage";
+import { kategoriAyam } from "../data/KategoriAyam";
+import { inputAyam } from "../services/chickenMonitorings";
 
 const detailAyamData = [
   {
@@ -78,136 +58,365 @@ const detailAyamData = [
 ];
 
 const InputAyam = () => {
-  const [vaksinExpanded, setVaksinExpanded] = useState(true);
   const [obatExpanded, setObatExpanded] = useState(true);
 
+  const [cages, setCages] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [selectedCages, setSelectedCages] = useState("");
+  const [selectedChikenCategory, setSelectedChikenCategory] = useState("");
+  const [ageChiken, setAgeChiken] = useState(0);
+  const [totalLiveChicken, setTotalLiveChicken] = useState(0);
+  const [totalSickChicken, setTotalSickChicken] = useState(0);
+  const [totalDeathChicken, setTotalDeathChicken] = useState(0);
+  const [totalFeed, setTotalFeed] = useState(0);
+
+  const userRole = localStorage.getItem("role");
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const [vaksinExpanded, setVaksinExpanded] = useState(false);
+  const [vaksinList, setVaksinList] = useState([
+    { jenis: "", dosis: "", satuan: "" },
+  ]);
+
+  const handleVaksinChange = (index, field, value) => {
+    const newList = [...vaksinList];
+    newList[index][field] = value;
+    setVaksinList(newList);
+  };
+
+  const addVaksinInput = () => {
+    setVaksinList([...vaksinList, { jenis: "", dosis: "", satuan: "" }]);
+
+    if (!vaksinExpanded) {
+      setVaksinExpanded(true);
+    }
+  };
+
+  const [obatList, setObatList] = useState([
+    { penyakit: "", jenis: "", dosis: "", satuan: "" },
+  ]);
+
+  const handleObatChange = (index, field, value) => {
+    const newList = [...obatList];
+    newList[index][field] = value;
+    setObatList(newList);
+  };
+
+  const addObatInput = () => {
+    setObatList([
+      ...obatList,
+      { penyakit: "", jenis: "", dosis: "", satuan: "" },
+    ]);
+
+    if (!obatExpanded) {
+      setObatExpanded(true);
+    }
+  };
+
+  useEffect(() => {
+    const fetchCages = async () => {
+      try {
+        const response = await getCage();
+        setCages(response.data.data); // adjust based on your API response
+      } catch (error) {
+        console.error("Gagal memuat data kandang:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCages();
+  }, []);
+
+  async function simpanAyamHandle() {
+    setLoading(true);
+    try {
+      const chickenVaccines = vaksinList.map((v) => ({
+        vaccine: v.jenis,
+        dose: parseFloat(v.dosis),
+        unit: v.satuan,
+      }));
+
+      const chickenDiseases = obatList.map((o) => ({
+        disease: o.penyakit,
+        medicine: o.jenis,
+        dose: parseFloat(o.dosis),
+        unit: o.satuan,
+      }));
+
+      const payload = {
+        cageId: parseInt(selectedCages),
+        chickenCategory: selectedChikenCategory,
+        age: parseInt(ageChiken),
+        totalLiveChicken: parseInt(totalLiveChicken),
+        totalSickChicken: parseInt(totalSickChicken),
+        totalDeathChicken: parseInt(totalDeathChicken),
+        totalFeed: parseFloat(totalFeed),
+        chickenDiseases,
+        chickenVaccines,
+      };
+
+      console.log("Payload ready to send: ", payload);
+
+      // Example send to API if needed
+      const response = await inputAyam(payload);
+      console.log("RESPONSE STATUS: ", response.status);
+      // await api.post("/chickens/monitorings", payload);
+    } catch (err) {
+      console.error("Gagal menyimpan data:", err);
+    }
+  }
+
   return (
-    <div className="w-full mx-auto p-6 bg-white shadow rounded border">
-      <h2 className="text-lg font-semibold mb-1">Input data harian</h2>
-      <p className="text-sm mb-6">20 Maret 2025</p>
-
-      {/* Pilih kandang */}
-      <label className="block font-medium mb-1">Pilih kandang</label>
-      <select className="w-full border rounded p-2 mb-4">
-        <option>Pilih kandang...</option>
-      </select>
-
-      {/* Kategori dan Usia Ayam */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block font-medium mb-1">Kategori ayam</label>
-          <select className="w-full border rounded p-2">
-            <option>Pilih kandang...</option>
-          </select>
-        </div>
-        <div>
-          <label className="block font-medium mb-1">Usia ayam</label>
-          <select className="w-full border rounded p-2">
-            <option>Pilih kandang...</option>
-          </select>
-        </div>
+    <div className="flex flex-col px-4 py-3 gap-4">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-2 flex-wrap gap-4">
+        <h1 className="text-3xl font-bold">
+          {userRole === "Pekerja Kandang" ? "Data Ayam" : "Detail Ayam"}
+        </h1>
       </div>
 
-      {/* Jumlah ayam */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-        <div>
-          <label className="block font-medium mb-1">Jumlah ayam hidup</label>
-          <input type="number" className="w-full border rounded p-2" />
-        </div>
-        <div>
-          <label className="block font-medium mb-1">Jumlah ayam sakit</label>
-          <input type="number" className="w-full border rounded p-2" />
-        </div>
-        <div>
-          <label className="block font-medium mb-1">Jumlah ayam mati</label>
-          <input type="number" className="w-full border rounded p-2" />
-        </div>
-      </div>
+      {/* Table Section */}
+      <div className="w-full mx-auto p-6 bg-white shadow rounded border">
+        <h2 className="text-lg font-semibold mb-1">Input data harian</h2>
+        <p className="text-sm mb-6">20 Maret 2025</p>
 
-      {/* Jumlah pakan */}
-      <div className="mt-4">
-        <label className="block font-medium mb-1">Jumlah pakan (Kg)</label>
-        <input type="number" className="w-full border rounded p-2" />
-      </div>
-
-      {/* Vaksin Section */}
-      <div className="mt-6 border rounded p-4">
-        <div
-          className="flex items-center cursor-pointer mb-3"
-          onClick={() => setVaksinExpanded(!vaksinExpanded)}
+        {/* Pilih kandang */}
+        <label className="block font-medium  mb-1">Pilih kandang</label>
+        <select
+          className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
+          value={selectedCages}
+          onChange={(e) => setSelectedCages(e.target.value)}
         >
-          <span className="mr-2">{vaksinExpanded ? "▼" : "▶"}</span>
-          <strong>Vaksin</strong>
+          {cages.map((cage) => (
+            <option key={cage.id} value={cage.id}>
+              {cage.name}
+            </option>
+          ))}
+        </select>
+
+        {/* Kategori dan Usia Ayam */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block font-medium mb-1">Kategori ayam</label>
+            <select
+              className="w-full border cursor-pointer  bg-black-4 rounded p-2"
+              value={selectedChikenCategory}
+              onChange={(e) => setSelectedChikenCategory(e.target.value)}
+            >
+              {kategoriAyam.map((kategori, index) => {
+                return <option key={index}>{kategori}</option>;
+              })}
+            </select>
+          </div>
+          <div>
+            <label className="block font-medium mb-1">Usia ayam</label>
+            <input
+              type="number"
+              className="bg-black-4 w-full border rounded p-2"
+              onChange={(e) => {
+                setAgeChiken(e.target.value);
+              }}
+            />
+          </div>
         </div>
 
-        {vaksinExpanded && (
-          <>
-            <label className="block font-medium mb-1">Jenis Vaksin</label>
-            <input type="text" className="w-full border rounded p-2 mb-4" />
+        {/* Jumlah ayam */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          <div>
+            <label className="block font-medium mb-1">Jumlah ayam hidup</label>
+            <input
+              type="number"
+              className="w-full bg-black-4 border rounded p-2"
+              onChange={(e) => {
+                setTotalLiveChicken(e.target.value);
+              }}
+            />
+          </div>
+          <div>
+            <label className="block font-medium mb-1">Jumlah ayam sakit</label>
+            <input
+              type="number"
+              className="w-full bg-black-4 border rounded p-2"
+              onChange={(e) => {
+                setTotalSickChicken(e.target.value);
+              }}
+            />
+          </div>
+          <div>
+            <label className="block font-medium mb-1">Jumlah ayam mati</label>
+            <input
+              type="number"
+              className="w-full border bg-black-4 rounded p-2"
+              onChange={(e) => {
+                setTotalDeathChicken(e.target.value);
+              }}
+            />
+          </div>
+        </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block font-medium mb-1">Dosis</label>
-                <input type="text" className="w-full border rounded p-2" />
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Satuan Dosis</label>
+        {/* Jumlah pakan */}
+        <div className="mt-4">
+          <label className="block font-medium mb-1">Jumlah pakan (Kg)</label>
+          <input
+            type="number"
+            className="w-full border rounded p-2 bg-black-4"
+            onChange={(e) => {
+              setTotalFeed(e.target.value);
+            }}
+          />
+        </div>
+
+        {/* Vaksin Section */}
+        <div className="mt-6 border rounded p-4 ">
+          <div
+            className="flex items-center cursor-pointer mb-3"
+            onClick={() => setVaksinExpanded(!vaksinExpanded)}
+          >
+            <span className="mr-2">{vaksinExpanded ? "▼" : "▶"}</span>
+            <strong>Vaksin</strong>
+          </div>
+
+          {vaksinExpanded &&
+            vaksinList.map((vaksin, index) => (
+              <div
+                key={index}
+                className="mb-6 border rounded-[4px] px-4 py-6 border-black-6 bg-black-4"
+              >
+                <label className="block font-medium mb-1">Jenis Vaksin</label>
                 <input
                   type="text"
-                  placeholder="cth : ml"
-                  className="w-full border rounded p-2"
+                  className="w-full border rounded p-2 mb-4 bg-white"
+                  value={vaksin.jenis}
+                  onChange={(e) =>
+                    handleVaksinChange(index, "jenis", e.target.value)
+                  }
                 />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-medium mb-1">Dosis</label>
+                    <input
+                      type="text"
+                      className="w-full border rounded p-2 bg-white"
+                      value={vaksin.dosis}
+                      onChange={(e) =>
+                        handleVaksinChange(index, "dosis", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-medium mb-1">
+                      Satuan Dosis
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="contoh : ml"
+                      className="w-full border rounded p-2 bg-white"
+                      value={vaksin.satuan}
+                      onChange={(e) =>
+                        handleVaksinChange(index, "satuan", e.target.value)
+                      }
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-
-            <button className="mt-4 bg-emerald-700 text-white py-2 px-4 rounded hover:bg-emerald-600">
-              Tambah vaksin
-            </button>
-          </>
-        )}
-      </div>
-
-      {/* Obat Section */}
-      <div className="mt-6 border rounded p-4">
-        <div
-          className="flex items-center cursor-pointer mb-3"
-          onClick={() => setObatExpanded(!obatExpanded)}
-        >
-          <span className="mr-2">{obatExpanded ? "▼" : "▶"}</span>
-          <strong>Obat</strong>
+            ))}
+          <button
+            onClick={addVaksinInput}
+            className="mt-2 bg-emerald-700 text-white py-2 px-4 rounded hover:bg-emerald-600 cursor-pointer"
+          >
+            Tambah vaksin
+          </button>
         </div>
 
-        {obatExpanded && (
-          <>
-            <label className="block font-medium mb-1">Penyakit</label>
-            <input type="text" className="w-full border rounded p-2 mb-4" />
+        {/* Obat Section */}
+        <div className="mt-6 border rounded p-4">
+          <div
+            className="flex items-center cursor-pointer mb-3"
+            onClick={() => setObatExpanded(!obatExpanded)}
+          >
+            <span className="mr-2">{obatExpanded ? "▼" : "▶"}</span>
+            <strong>Obat</strong>
+          </div>
 
-            <label className="block font-medium mb-1">Jenis Obat</label>
-            <input type="text" className="w-full border rounded p-2 mb-4" />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block font-medium mb-1">Dosis</label>
-                <input type="text" className="w-full border rounded p-2" />
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Satuan Dosis</label>
+          {obatExpanded &&
+            obatList.map((obat, index) => (
+              <div
+                key={index}
+                className="mb-6 border rounded-[4px] px-4 py-6 border-black-6 bg-black-4"
+              >
+                <label className="block font-medium mb-1">Penyakit</label>
                 <input
                   type="text"
-                  placeholder="cth : ml"
-                  className="w-full border rounded p-2"
+                  className="w-full border rounded p-2 mb-4 bg-white"
+                  value={obat.penyakit}
+                  onChange={(e) =>
+                    handleObatChange(index, "penyakit", e.target.value)
+                  }
                 />
-              </div>
-            </div>
-          </>
-        )}
-      </div>
 
-      {/* Simpan Button */}
-      <div className="mt-6 text-right">
-        <button className="bg-emerald-700 text-white py-2 px-6 rounded hover:bg-emerald-600">
-          Simpan
-        </button>
+                <label className="block font-medium mb-1">Jenis Obat</label>
+                <input
+                  type="text"
+                  className="w-full border rounded p-2 mb-4 bg-white"
+                  value={obat.jenis}
+                  onChange={(e) =>
+                    handleObatChange(index, "jenis", e.target.value)
+                  }
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-medium mb-1">Dosis</label>
+                    <input
+                      type="text"
+                      className="w-full border rounded p-2 bg-white"
+                      value={obat.dosis}
+                      onChange={(e) =>
+                        handleObatChange(index, "dosis", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-medium mb-1">
+                      Satuan Dosis
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="cth : ml"
+                      className="w-full border rounded p-2 bg-white"
+                      value={obat.satuan}
+                      onChange={(e) =>
+                        handleObatChange(index, "satuan", e.target.value)
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+
+          <button
+            onClick={addObatInput}
+            className="mt-2 bg-emerald-700 text-white py-2 px-4 rounded hover:bg-emerald-600 cursor-pointer"
+          >
+            Tambah Obat
+          </button>
+        </div>
+
+        {/* Simpan Button */}
+        <div className="mt-6 text-right ">
+          <button
+            onClick={() => {
+              simpanAyamHandle();
+            }}
+            className="bg-emerald-700 text-white py-2 px-6 rounded hover:bg-emerald-600 cursor-pointer"
+          >
+            Simpan
+          </button>
+        </div>
       </div>
     </div>
   );
