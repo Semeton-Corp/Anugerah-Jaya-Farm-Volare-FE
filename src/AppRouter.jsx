@@ -167,8 +167,8 @@ const AppRouter = createBrowserRouter([
                 element: <InputTelur />,
               },
               {
-                path: "input-ayam/:id",
-                element: <InputAyam />,
+                path: "input-telur/:id",
+                element: <InputTelur />,
               },
             ],
           },

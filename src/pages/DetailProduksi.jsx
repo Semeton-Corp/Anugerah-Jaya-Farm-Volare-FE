@@ -65,6 +65,11 @@ const DetailProduksi = () => {
     fetchDataTelur();
   });
 
+  async function editDataHandle(dataId) {
+    const currectPath = location.pathname;
+    navigate(`${currectPath}/input-telur/${dataId}`);
+  }
+
   if (isDetailPage) {
     return <Outlet />;
   }
@@ -126,7 +131,12 @@ const DetailProduksi = () => {
                   <td className="py-2 px-4">{item.totalCrackedEgg}</td>
                   <td className="py-2 px-4">{item.totalBrokeEgg}</td>
                   <td className="py-2 px-4">{item.totalRejectEgg}</td>
-                  <td className="py-2 px-4">{item.abnormalityRate}</td>
+                  <td className="py-2 px-4">
+                    <div className="flex justify-center">
+                      <p>{Number(item.abnormalityRate).toFixed(2)} </p>
+                      <p>%</p>
+                    </div>
+                  </td>
                   <td className="py-2 px-4 flex justify-center">
                     <span
                       className={`w-24 py-1 flex justify-center rounded text-sm font-semibold ${
@@ -142,7 +152,7 @@ const DetailProduksi = () => {
                     <td className="py-2 px-4 text-center">
                       <div className="inline-flex gap-4 justify-center items-center">
                         <BiSolidEditAlt
-                          onClick={() => console.log("Edit", item.kandang)}
+                          onClick={() => editDataHandle(item.id)}
                           size={24}
                           className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
                         />

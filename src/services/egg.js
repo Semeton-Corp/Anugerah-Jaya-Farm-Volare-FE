@@ -27,3 +27,21 @@ export const deleteEggData = (dataId) => {
     },
   });
 };
+
+export const getEggMonitoringById = (dataId) => {
+  return api.get(`/eggs/monitorings/${dataId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const updateEggMonitoring = (dataId, payload) => {
+  return api.put(`/eggs/monitorings/${dataId}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
