@@ -36,3 +36,12 @@ export const getChickenMonitoringById = (dataId) => {
     },
   });
 };
+
+export const updateChickenMonitoring = (dataId, payload) => {
+  return api.put(`/chickens/monitorings/${dataId}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};

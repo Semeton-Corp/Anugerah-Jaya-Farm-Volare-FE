@@ -32,13 +32,10 @@ const Login = () => {
       localStorage.setItem("token", accessToken);
       localStorage.setItem("role", role);
 
-      if (role === "Owner") navigate("/owner");
-      else if (role === "Pekerja Kandang")
-        navigate("/pekerja-kandang/overview");
-      else if (role === "Pekerja Telur") navigate("/pekerja-telur/overview");
-      else if (role === "Kepala Gudang & Admin Rekap")
-        navigate("/kepala-gudang/overview");
-      else navigate("/");
+      if (response.status === 200) {
+        const rolePath = role.toLowerCase().replace(/\s+/g, "-");
+        navigate(`/${rolePath}`);
+      }
     } catch (err) {
       console.error("Login error:", err);
       setError("Login gagal. Cek email dan password Anda.");
@@ -70,56 +67,59 @@ const Login = () => {
           </p>
         </div>
 
-        {/* email field */}
-        <div className="mb-4">
-          <p className="text-base md:text-lg font-medium">Email</p>
-          <input
-            type="email"
-            id="email"
-            placeholder="Masukkan email anda"
-            className="w-full p-3 border-2 bg-green-50 border-green-200 placeholder-normal rounded-lg focus:outline-none focus:ring-2 focus:green-400"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            loginHandle();
+          }}
+        >
+          {/* email field */}
+          <div className="mb-4">
+            <p className="text-base md:text-lg font-medium">Email</p>
+            <input
+              type="email"
+              id="email"
+              placeholder="Masukkan email anda"
+              className="w-full p-3 border-2 bg-green-50 border-green-200 placeholder-normal rounded-lg focus:outline-none focus:ring-2 focus:green-400"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
 
-        {/* email field */}
-        <div className="mb-4">
-          <p className="text-base md:text-lg font-medium">Kata Sandi</p>
-          <input
-            type="password"
-            id="password"
-            placeholder="Masukkan kata sandi anda"
-            className="w-full p-3 border-2 bg-green-50 border-green-200 placeholder-normal rounded-lg focus:outline-none focus:ring-2 focus:green-400"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
+          {/* password field */}
+          <div className="mb-4">
+            <p className="text-base md:text-lg font-medium">Kata Sandi</p>
+            <input
+              type="password"
+              id="password"
+              placeholder="Masukkan kata sandi anda"
+              className="w-full p-3 border-2 bg-green-50 border-green-200 placeholder-normal rounded-lg focus:outline-none focus:ring-2 focus:green-400"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
 
-        {/* lupa password */}
-        <div className="flex justify-between mb-4">
-          <div></div>
-          <p
-            onClick={() => {
-              forgotPasswordHandle();
-            }}
-            className="text-sm md:text-base underline text-dark-active cursor-pointer hover:text-light-hover"
-          >
-            Lupa Password?
-          </p>
-        </div>
+          {/* lupa password */}
+          <div className="flex justify-between mb-4">
+            <div></div>
+            <p
+              onClick={forgotPasswordHandle}
+              className="text-sm md:text-base underline text-dark-active cursor-pointer hover:text-light-hover"
+            >
+              Lupa Password?
+            </p>
+          </div>
 
-        {/* login button */}
-        <div className="">
-          <button
-            onClick={() => {
-              loginHandle();
-            }}
-            className="w-full bg-green-700 text-white font-semibold py-3 rounded-lg hover:bg-green-800 transition duration-300"
-          >
-            Masuk
-          </button>
-        </div>
+          {/* login button */}
+          <div className="">
+            <button
+              type="submit"
+              className="w-full bg-green-700 text-white font-semibold py-3 rounded-lg hover:bg-green-800 transition duration-300"
+            >
+              Masuk
+            </button>
+          </div>
+        </form>
       </div>
       {/* right login item */}
       <div className="w-full top-0 md:absolute right-0 sm:top-0 md:z-0 md:w-1/2 h-[40%] md:h-full">

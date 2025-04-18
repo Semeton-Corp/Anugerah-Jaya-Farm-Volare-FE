@@ -111,9 +111,82 @@ export const sidebarMenus = {
       element: <OverviewOwner />,
     },
   ],
-  "Kepala Gudang & Admin Rekap": [
-    { icon: <Home />, tabName: "Gudang" },
-    { icon: <Settings />, tabName: "Rekap" },
+  "Pekerja Toko": [
+    {
+      icon: <img src={overview} alt="Overview Icon" className="h-4 w-4" />,
+      tabName: "Overview",
+      element: <OverviewOwner />,
+    },
+    {
+      icon: <img src={toko} alt="Overview Icon" className="h-4 w-4" />,
+      tabName: "Kasir",
+      element: <OverviewOwner />,
+      subTabs: [
+        { tabName: "Antrian Pesanan", path: "antrian-pesanan" },
+        { tabName: "Daftar Pesanan", path: "daftar-pesanan" },
+        { tabName: "Pembayaran Cicilan", path: "pembayaran-cicilan" },
+      ],
+    },
+    {
+      icon: <img src={toko} alt="Overview Icon" className="h-4 w-4" />,
+      tabName: "Stok Toko",
+      element: <OverviewOwner />,
+      subTabs: [
+        { tabName: "Overview Stok", path: "overview-stok" },
+        { tabName: "Dalam Pesanan", path: "dalam-pesanan" },
+        { tabName: "Riwayat Stok", path: "riwayat-stok" },
+      ],
+    },
+    {
+      icon: <GrNotes size={20} />,
+      tabName: "Tugas",
+      element: <OverviewOwner />,
+    },
+    {
+      icon: <BsPersonSquare size={20} />,
+      tabName: "Presensi",
+      element: <OverviewOwner />,
+    },
+  ],
+  "Kepala Kandang": [
+    {
+      icon: <img src={overview} alt="Overview Icon" className="h-4 w-4" />,
+      tabName: "Overview",
+      element: <OverviewOwner />,
+    },
+    {
+      icon: <img src={produksiTelur} alt="Overview Icon" className="h-4 w-4" />,
+      tabName: "Produksi Telur",
+      element: <ProduksiTelur />,
+    },
+    {
+      icon: <img src={ayam} alt="ayam Icon" className="h-4 w-4" />,
+      tabName: "Ayam",
+      element: <OverviewOwner />,
+      subTabs: [
+        { tabName: "Overview Ayam", path: "overview-ayam" },
+        { tabName: "Data Ayam", path: "data-ayam" },
+      ],
+    },
+    {
+      icon: <img src={gudang} alt="ayam Icon" className="h-4 w-4" />,
+      tabName: "Gudang",
+      element: <OverviewOwner />,
+      subTabs: [
+        { tabName: "Overview Gudang", path: "overview-gudang" },
+        { tabName: "Riwayat Gudang", path: "riwayat-gudang" },
+      ],
+    },
+    {
+      icon: <GrNotes size={20} />,
+      tabName: "Tugas",
+      element: <OverviewOwner />,
+    },
+    {
+      icon: <BsPersonSquare size={20} />,
+      tabName: "Presensi",
+      element: <OverviewOwner />,
+    },
     // add more items
   ],
 };

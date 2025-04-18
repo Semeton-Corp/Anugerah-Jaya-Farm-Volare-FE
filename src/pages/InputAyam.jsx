@@ -7,6 +7,7 @@ import { getChickenMonitoringById } from "../services/chickenMonitorings";
 import { useParams } from "react-router-dom";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
 import { MdDelete } from "react-icons/md";
+import { updateChickenMonitoring } from "../services/chickenMonitorings";
 
 const detailAyamData = [
   {
@@ -141,8 +142,25 @@ const InputAyam = () => {
           setTotalSickChicken(data.totalSickChicken);
           setTotalDeathChicken(data.totalDeathChicken);
           setTotalFeed(data.totalFeed);
-          setVaksinList(data.chickenVaccines || []);
-          setObatList(data.chickenDiseases || []);
+
+          const vaksinListget = data.chickenVaccines.map((v) => ({
+            id: v.id,
+            jenis: v.vaccine,
+            dosis: parseFloat(v.dose),
+            satuan: v.unit,
+          }));
+          setVaksinList(vaksinListget || []);
+
+          const chickenDiseasesGet = data.chickenDiseases.map((o) => ({
+            id: o.id,
+            penyakit: o.disease,
+            jenis: o.medicine,
+            dosis: parseFloat(o.dose),
+            satuan: o.unit,
+          }));
+
+          console.log("OBAT: ", data.chickenDiseases);
+          setObatList(chickenDiseasesGet || []);
         } else {
           if (data.length > 0) {
             setSelectedCage(data[0].id);
@@ -160,48 +178,75 @@ const InputAyam = () => {
 
   async function simpanAyamHandle() {
     setLoading(true);
-    if (id) {
-    }
 
-    try {
-      const chickenVaccines = vaksinList.map((v) => ({
+    const chickenVaccines = vaksinList.map((v) => {
+      const vaccinesItem = {
         vaccine: v.jenis,
         dose: parseFloat(v.dosis),
         unit: v.satuan,
-      }));
+      };
 
-      const chickenDiseases = obatList.map((o) => ({
+      if (v.id) {
+        vaccinesItem.id = v.id;
+      }
+
+      return vaccinesItem;
+    });
+
+    const chickenDiseases = obatList.map((o) => {
+      const diseasesItem = {
         disease: o.penyakit,
         medicine: o.jenis,
         dose: parseFloat(o.dosis),
         unit: o.satuan,
-      }));
-
-      const payload = {
-        cageId: parseInt(selectedCage),
-        chickenCategory: selectedChikenCategory,
-        age: parseInt(ageChiken),
-        totalLiveChicken: parseInt(totalLiveChicken),
-        totalSickChicken: parseInt(totalSickChicken),
-        totalDeathChicken: parseInt(totalDeathChicken),
-        totalFeed: parseFloat(totalFeed),
-        chickenDiseases,
-        chickenVaccines,
       };
-
-      console.log("Payload ready to send: ", payload);
-
-      // Example send to API if needed
-      const response = await inputAyam(payload);
-      console.log("RESPONSE STATUS: ", response.status);
-
-      if (response.status == 200) {
-        const rolePath = userRole?.toLowerCase().replace(/\s+/g, "-");
-        navigate(`/${rolePath}/ayam`, { state: { refetch: true } });
+      if (o.id) {
+        diseasesItem.id = o.id;
       }
-      // await api.post("/chickens/monitorings", payload);
-    } catch (err) {
-      console.error("Gagal menyimpan data:", err);
+
+      return diseasesItem;
+    });
+
+    const payload = {
+      cageId: parseInt(selectedCage),
+      chickenCategory: selectedChikenCategory,
+      age: parseInt(ageChiken),
+      totalLiveChicken: parseInt(totalLiveChicken),
+      totalSickChicken: parseInt(totalSickChicken),
+      totalDeathChicken: parseInt(totalDeathChicken),
+      totalFeed: parseFloat(totalFeed),
+      chickenDiseases,
+      chickenVaccines,
+    };
+
+    console.log("Payload ready to send: ", payload);
+
+    if (id) {
+      try {
+        const updateResponse = await updateChickenMonitoring(id, payload);
+        console.log("RESPONSE STATUS: ", updateResponse.status);
+
+        if (updateResponse.status == 200) {
+          const rolePath = userRole?.toLowerCase().replace(/\s+/g, "-");
+          navigate(`/${rolePath}/ayam`, { state: { refetch: true } });
+        }
+      } catch (error) {
+        console.error("Gagal mengupdate data:", error);
+      }
+    } else {
+      try {
+        // Example send to API if needed
+        const response = await inputAyam(payload);
+        console.log("RESPONSE STATUS: ", response.status);
+
+        if (response.status == 201) {
+          const rolePath = userRole?.toLowerCase().replace(/\s+/g, "-");
+          navigate(`/${rolePath}/ayam`, { state: { refetch: true } });
+        }
+        // await api.post("/chickens/monitorings", payload);
+      } catch (error) {
+        console.error("Gagal menyimpan data:", error);
+      }
     }
   }
 
@@ -340,7 +385,6 @@ const InputAyam = () => {
                     }}
                     className="flex hover:text-black-7 cursor-pointer"
                   >
-                    {" "}
                     <p>Hapus Vaksin</p>
                     <button>
                       <MdDelete size={24} />
@@ -352,7 +396,7 @@ const InputAyam = () => {
                 <input
                   type="text"
                   className="w-full border rounded p-2 mb-4 bg-white"
-                  value={vaksin.jenis}
+                  value={getDisplayValue(vaksin.jenis)}
                   onChange={(e) =>
                     handleVaksinChange(index, "jenis", e.target.value)
                   }
@@ -364,7 +408,7 @@ const InputAyam = () => {
                     <input
                       type="text"
                       className="w-full border rounded p-2 bg-white"
-                      value={vaksin.dosis}
+                      value={getDisplayValue(vaksin.dosis)}
                       onChange={(e) =>
                         handleVaksinChange(index, "dosis", e.target.value)
                       }
@@ -378,7 +422,7 @@ const InputAyam = () => {
                       type="text"
                       placeholder="contoh : ml"
                       className="w-full border rounded p-2 bg-white"
-                      value={vaksin.satuan}
+                      value={getDisplayValue(vaksin.satuan)}
                       onChange={(e) =>
                         handleVaksinChange(index, "satuan", e.target.value)
                       }
@@ -415,7 +459,7 @@ const InputAyam = () => {
                 <input
                   type="text"
                   className="w-full border rounded p-2 mb-4 bg-white"
-                  value={obat.penyakit}
+                  value={getDisplayValue(obat.penyakit)}
                   onChange={(e) =>
                     handleObatChange(index, "penyakit", e.target.value)
                   }
@@ -425,7 +469,7 @@ const InputAyam = () => {
                 <input
                   type="text"
                   className="w-full border rounded p-2 mb-4 bg-white"
-                  value={obat.jenis}
+                  value={getDisplayValue(obat.jenis)}
                   onChange={(e) =>
                     handleObatChange(index, "jenis", e.target.value)
                   }
@@ -437,7 +481,7 @@ const InputAyam = () => {
                     <input
                       type="text"
                       className="w-full border rounded p-2 bg-white"
-                      value={obat.dosis}
+                      value={getDisplayValue(obat.dosis)}
                       onChange={(e) =>
                         handleObatChange(index, "dosis", e.target.value)
                       }
@@ -451,7 +495,7 @@ const InputAyam = () => {
                       type="text"
                       placeholder="cth : ml"
                       className="w-full border rounded p-2 bg-white"
-                      value={obat.satuan}
+                      value={getDisplayValue(obat.satuan)}
                       onChange={(e) =>
                         handleObatChange(index, "satuan", e.target.value)
                       }
@@ -478,6 +522,25 @@ const InputAyam = () => {
             className="bg-emerald-700 text-white py-2 px-6 rounded hover:bg-emerald-600 cursor-pointer"
           >
             Simpan
+          </button>
+        </div>
+
+        {/* Simpan Button */}
+        <div className="mt-6 text-right ">
+          <button
+            onClick={() => {
+              console.log("✅ selectedChikenCategory:", selectedChikenCategory);
+              console.log("📅 ageChiken:", ageChiken);
+              console.log("🐔 totalLiveChicken:", totalLiveChicken);
+              console.log("🤒 totalSickChicken:", totalSickChicken);
+              console.log("💀 totalDeathChicken:", totalDeathChicken);
+              console.log("🌾 totalFeed:", totalFeed);
+              console.log("💉 vaksinList:", vaksinList);
+              console.log("💊 obatList:", obatList);
+            }}
+            className="bg-emerald-700 text-white py-2 px-6 rounded hover:bg-emerald-600 cursor-pointer"
+          >
+            Check
           </button>
         </div>
       </div>

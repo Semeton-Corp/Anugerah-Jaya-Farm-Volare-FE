@@ -8,7 +8,7 @@ import OverviewOwner from "./pages/OverviewOwner";
 import Penjualan from "./pages/Penjualan";
 import ProduksiTelur from "./pages/ProduksiTelur";
 import Ayam from "./pages/Ayam";
-import OverviewKepalaGudang from "./pages/OverviewKepalaGudang";
+import OverviewKepalaKandang from "./pages/OverviewKepalaKandang";
 import Kinerja from "./pages/Kinerja";
 import Gudang from "./pages/Gudang";
 import Toko from "./pages/Toko";
@@ -28,6 +28,13 @@ import Tugas from "./pages/Tugas";
 import Presensi from "./pages/Presensi";
 import InputAyam from "./pages/InputAyam";
 import InputTelur from "./pages/InputTelur";
+import AntrianPesanan from "./pages/AntrianPesanan";
+import DaftarPesanan from "./pages/DaftarPesanan";
+import PembayaranCicilan from "./pages/PembayaranCicilan";
+import OverviewStok from "./pages/OverviewStok";
+import DalamPesanan from "./pages/DalamPesanan";
+import RiwayatStok from "./pages/RiwayatStok";
+import RiwayatGudang from "./pages/RiwayatGudang";
 
 const AppRouter = createBrowserRouter([
   {
@@ -178,12 +185,103 @@ const AppRouter = createBrowserRouter([
       },
     ],
   },
+
+  // PEKERJA TOKO ROUTE
   {
-    path: "/kepala-gudang",
-    element: <MainLayout role="Kepala Gudang & Admin Rekap" />,
+    path: "/pekerja-toko",
+    element: <ProtectedRoute allowedRoles={["Pekerja Toko"]} />,
     children: [
-      { path: "overview", element: <OverviewKepalaGudang /> },
-      // Add more tabs here
+      {
+        path: "",
+        element: <MainLayout role="Pekerja Toko" />,
+        children: [
+          { path: "", element: <Navigate to="overview" replace /> },
+          { path: "overview", element: <Toko /> },
+          {
+            path: "kasir",
+            children: [
+              {
+                path: "antrian-pesanan",
+                element: <AntrianPesanan />,
+              },
+              {
+                path: "daftar-pesanan",
+                element: <DaftarPesanan />,
+              },
+              {
+                path: "pembayaran-cicilan",
+                element: <PembayaranCicilan />,
+              },
+            ],
+          },
+          {
+            path: "stok-toko",
+            children: [
+              {
+                path: "overview-stok",
+                element: <OverviewStok />,
+              },
+              {
+                path: "dalam-pesanan",
+                element: <DalamPesanan />,
+              },
+              {
+                path: "riwayat-stok",
+                element: <RiwayatStok />,
+              },
+            ],
+          },
+          { path: "tugas", element: <Tugas /> },
+          { path: "presensi", element: <Presensi /> },
+        ],
+      },
+    ],
+  },
+  // KEPALA KANDANG ROUTE
+  {
+    path: "/kepala-kandang",
+    element: <ProtectedRoute allowedRoles={["Kepala Kandang"]} />,
+    children: [
+      {
+        path: "",
+        element: <MainLayout role="Kepala Kandang" />,
+        children: [
+          { path: "", element: <Navigate to="overview" replace /> },
+          { path: "overview", element: <OverviewKepalaKandang /> },
+          {
+            path: "produksi-telur",
+            element: <ProduksiTelur />,
+          },
+          {
+            path: "ayam",
+            children: [
+              {
+                path: "overview-ayam",
+                element: <Ayam />,
+              },
+              {
+                path: "data-ayam",
+                element: <DetailAyam />,
+              },
+            ],
+          },
+          {
+            path: "gudang",
+            children: [
+              {
+                path: "overview-gudang",
+                element: <Gudang />,
+              },
+              {
+                path: "riwayat-gudang",
+                element: <RiwayatGudang />,
+              },
+            ],
+          },
+          { path: "tugas", element: <Tugas /> },
+          { path: "presensi", element: <Presensi /> },
+        ],
+      },
     ],
   },
   {

@@ -109,7 +109,7 @@ const Tugas = () => {
                   </span>
                 </td>
                 <td className="py-2 px-4 flex gap-2">
-                  <button className="cursor-pointer bg-green-900 text-white text-sm font-semibold px-4 py-1 rounded hover:bg-green-700">
+                  <button className="cursor-pointer bg-green-700 text-white text-sm font-semibold px-4 py-1 rounded hover:bg-green-900">
                     Ambil
                   </button>
                 </td>
