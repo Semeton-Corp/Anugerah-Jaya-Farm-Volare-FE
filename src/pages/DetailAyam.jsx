@@ -88,6 +88,7 @@ const DetailAyam = () => {
       const response = await getChickenMonitoring();
       if (response.status === 200) {
         setDetailAyamState(response.data.data);
+        // console.log("DetailAyamData: ", response.data.data);
       }
     } catch (error) {
       console.error("Gagal memuat data ayam:", error);
@@ -196,7 +197,9 @@ const DetailAyam = () => {
                   {userRole === "Pekerja Kandang" && (
                     <td className="py-2 px-4 flex justify-center gap-4">
                       <BiSolidEditAlt
-                      onClick={()=>{editDataHandle(row.id)}}
+                        onClick={() => {
+                          editDataHandle(row.id);
+                        }}
                         size={24}
                         className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
                       />

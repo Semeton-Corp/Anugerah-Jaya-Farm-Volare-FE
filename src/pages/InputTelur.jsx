@@ -54,11 +54,6 @@ const InputTelur = () => {
     fetchCages();
   }, []);
 
-  useEffect(() => {
-    const selected = cages.find((c) => c.id === selectedCage);
-    // if (selected) setSelectedCageName(selected.name);
-  }, [selectedCage, cages]);
-
   const handleSubmit = async () => {
     const cageId = Number(selectedCage);
 

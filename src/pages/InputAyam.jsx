@@ -5,6 +5,8 @@ import { kategoriAyam } from "../data/KategoriAyam";
 import { inputAyam } from "../services/chickenMonitorings";
 import { getChickenMonitoringById } from "../services/chickenMonitorings";
 import { useParams } from "react-router-dom";
+import { getTodayDateInBahasa } from "../utils/dateFormat";
+import { MdDelete } from "react-icons/md";
 
 const detailAyamData = [
   {
@@ -60,14 +62,14 @@ const detailAyamData = [
 ];
 
 const InputAyam = () => {
-  const [obatExpanded, setObatExpanded] = useState(true);
+  const [obatExpanded, setObatExpanded] = useState(false);
 
   const [cages, setCages] = useState([]);
   const [loading, setLoading] = useState(true);
   const { id } = useParams();
 
-  const [selectedCages, setSelectedCages] = useState(0);
-  const selectedCageName = cages.find((cage) => cage.id === selectedCages);
+  const [selectedCage, setSelectedCage] = useState(0);
+  const selectedCageName = cages.find((cage) => cage.id === selectedCage);
 
   const [selectedChikenCategory, setSelectedChikenCategory] = useState(
     kategoriAyam[0]
@@ -83,9 +85,7 @@ const InputAyam = () => {
   const navigate = useNavigate();
 
   const [vaksinExpanded, setVaksinExpanded] = useState(false);
-  const [vaksinList, setVaksinList] = useState([
-    { jenis: "", dosis: "", satuan: "" },
-  ]);
+  const [vaksinList, setVaksinList] = useState([]);
 
   const handleVaksinChange = (index, field, value) => {
     const newList = [...vaksinList];
@@ -101,9 +101,7 @@ const InputAyam = () => {
     }
   };
 
-  const [obatList, setObatList] = useState([
-    { penyakit: "", jenis: "", dosis: "", satuan: "" },
-  ]);
+  const [obatList, setObatList] = useState([]);
 
   const handleObatChange = (index, field, value) => {
     const newList = [...obatList];
@@ -135,7 +133,8 @@ const InputAyam = () => {
           const data = updateResponse.data.data;
           console.log("THERE IS DATA: ", data);
 
-          setSelectedCages(data.cage.id);
+          setSelectedCage(data.cage.id);
+
           setSelectedChikenCategory(data.chickenCategory);
           setAgeChiken(data.age);
           setTotalLiveChicken(data.totalLiveChicken);
@@ -144,10 +143,10 @@ const InputAyam = () => {
           setTotalFeed(data.totalFeed);
           setVaksinList(data.chickenVaccines || []);
           setObatList(data.chickenDiseases || []);
-        }
-
-        if (data.length > 0) {
-          setSelectedCages(data[0].id);
+        } else {
+          if (data.length > 0) {
+            setSelectedCage(data[0].id);
+          }
         }
       } catch (error) {
         console.error("Gagal memuat data kandang:", error);
@@ -179,7 +178,7 @@ const InputAyam = () => {
       }));
 
       const payload = {
-        cageId: parseInt(selectedCages),
+        cageId: parseInt(selectedCage),
         chickenCategory: selectedChikenCategory,
         age: parseInt(ageChiken),
         totalLiveChicken: parseInt(totalLiveChicken),
@@ -196,7 +195,7 @@ const InputAyam = () => {
       const response = await inputAyam(payload);
       console.log("RESPONSE STATUS: ", response.status);
 
-      if (response.status == 201) {
+      if (response.status == 200) {
         const rolePath = userRole?.toLowerCase().replace(/\s+/g, "-");
         navigate(`/${rolePath}/ayam`, { state: { refetch: true } });
       }
@@ -205,6 +204,8 @@ const InputAyam = () => {
       console.error("Gagal menyimpan data:", err);
     }
   }
+
+  const getDisplayValue = (val) => (val === 0 ? "" : val);
 
   return (
     <div className="flex flex-col px-4 py-3 gap-4">
@@ -218,14 +219,17 @@ const InputAyam = () => {
       {/* Table Section */}
       <div className="w-full mx-auto p-6 bg-white shadow rounded border">
         <h2 className="text-lg font-semibold mb-1">Input data harian</h2>
-        <p className="text-sm mb-6">20 Maret 2025</p>
+        <p className="text-sm mb-6">{getTodayDateInBahasa()}</p>
 
         {/* Pilih kandang */}
         <label className="block font-medium  mb-1">Pilih kandang</label>
         <select
           className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
-          value={selectedCages}
-          onChange={(e) => setSelectedCages(Number(e.target.value))}
+          value={selectedCage}
+          onChange={(e) => {
+            const id = Number(e.target.value);
+            setSelectedCage(id);
+          }}
         >
           {cages.map((cage) => (
             <option key={cage.id} value={cage.id}>
@@ -252,7 +256,7 @@ const InputAyam = () => {
             <label className="block font-medium mb-1">Usia ayam</label>
             <input
               type="number"
-              value={ageChiken}
+              value={getDisplayValue(ageChiken)}
               className="bg-black-4 w-full border rounded p-2"
               onChange={(e) => {
                 setAgeChiken(e.target.value);
@@ -267,7 +271,7 @@ const InputAyam = () => {
             <label className="block font-medium mb-1">Jumlah ayam hidup</label>
             <input
               type="number"
-              value={totalLiveChicken}
+              value={getDisplayValue(totalLiveChicken)}
               className="w-full bg-black-4 border rounded p-2"
               onChange={(e) => {
                 setTotalLiveChicken(e.target.value);
@@ -278,7 +282,7 @@ const InputAyam = () => {
             <label className="block font-medium mb-1">Jumlah ayam sakit</label>
             <input
               type="number"
-              value={totalSickChicken}
+              value={getDisplayValue(totalSickChicken)}
               className="w-full bg-black-4 border rounded p-2"
               onChange={(e) => {
                 setTotalSickChicken(e.target.value);
@@ -289,7 +293,7 @@ const InputAyam = () => {
             <label className="block font-medium mb-1">Jumlah ayam mati</label>
             <input
               type="number"
-              value={totalDeathChicken}
+              value={getDisplayValue(totalDeathChicken)}
               className="w-full border bg-black-4 rounded p-2"
               onChange={(e) => {
                 setTotalDeathChicken(e.target.value);
@@ -303,7 +307,7 @@ const InputAyam = () => {
           <label className="block font-medium mb-1">Jumlah pakan (Kg)</label>
           <input
             type="number"
-            value={totalFeed}
+            value={getDisplayValue(totalFeed)}
             className="w-full border rounded p-2 bg-black-4"
             onChange={(e) => {
               setTotalFeed(e.target.value);
@@ -327,6 +331,23 @@ const InputAyam = () => {
                 key={index}
                 className="mb-6 border rounded-[4px] px-4 py-6 border-black-6 bg-black-4"
               >
+                <div className="flex underline   justify-end p-2">
+                  <div
+                    onClick={() => {
+                      const newList = [...vaksinList];
+                      newList.splice(index, 1);
+                      setVaksinList(newList);
+                    }}
+                    className="flex hover:text-black-7 cursor-pointer"
+                  >
+                    {" "}
+                    <p>Hapus Vaksin</p>
+                    <button>
+                      <MdDelete size={24} />
+                    </button>
+                  </div>
+                </div>
+
                 <label className="block font-medium mb-1">Jenis Vaksin</label>
                 <input
                   type="text"
