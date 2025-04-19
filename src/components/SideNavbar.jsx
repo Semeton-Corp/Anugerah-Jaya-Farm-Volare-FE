@@ -97,11 +97,7 @@ const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
                     const isSubSelected =
                       currentPath === fullSubPath ||
                       currentPath.startsWith(fullSubPath + "/");
-                    console.log("==================");
 
-                    console.log("fullSubPath: ", fullSubPath);
-                    console.log("currentPath", currentPath);
-                    console.log("isSubSelected", isSubSelected);
 
                     return (
                       <div

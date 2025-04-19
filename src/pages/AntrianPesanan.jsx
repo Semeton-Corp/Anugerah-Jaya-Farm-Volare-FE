@@ -5,31 +5,32 @@ import { MdStore } from "react-icons/md";
 import { TbEggCrackedFilled } from "react-icons/tb";
 import { FiMaximize2 } from "react-icons/fi";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
+import { getTodayDateInBahasa } from "../utils/dateFormat";
 
 const dataAntrianPesanan = [
   {
-    nomorAntrian: 1,
+    nomorAntrian: "1",
     tanggalKirim: "22 Maret 2025",
     namaBarang: "Telur OK",
-    kuantitas: "12 ikat",
+    kuantitas: "12 Ikat",
+    pengirim: "Toko A",
     customer: "Pak Tono",
-    status: "pending",
   },
   {
-    nomorAntrian: 2,
+    nomorAntrian: "2",
     tanggalKirim: "22 Maret 2025",
     namaBarang: "Telur retak",
     kuantitas: "12 Karpet",
+    pengirim: "Toko B",
     customer: "Pak Adi",
-    status: "pending",
   },
   {
-    nomorAntrian: 3,
+    nomorAntrian: "3",
     tanggalKirim: "22 Maret 2025",
     namaBarang: "Telur pecah",
     kuantitas: "10 Karpet",
+    pengirim: "Gudang A1",
     customer: "Pak Yono",
-    status: "pending",
   },
 ];
 
@@ -57,18 +58,9 @@ const AntrianPesanan = () => {
         <div className="flex flex-col px-4 py-3 gap-4 ">
           {/* header section */}
           <div className="flex justify-between mb-2 flex-wrap gap-4">
-            <h1 className="text-3xl font-bold">Produksi Telur</h1>
-            <div className="flex gap-2">
-              <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-                <MdStore size={18} />
-                <div className="text-base font-medium ms-2">Semua site</div>
-              </div>
-              <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-                <PiCalendarBlank size={18} />
-                <div className="text-base font-medium ms-2">
-                  Hari ini (20 Mar 2025)
-                </div>
-              </div>
+            <h1 className="text-3xl font-bold">Kasir</h1>
+            <div className="text-base flex gap-2">
+              <p>{`Hari ini (${getTodayDateInBahasa()})`}</p>
             </div>
           </div>
 
@@ -160,6 +152,7 @@ const AntrianPesanan = () => {
                     <th className="py-2 px-4">Tanggal Kirim</th>
                     <th className="py-2 px-4">Nama Barang</th>
                     <th className="py-2 px-4">Kuantitas</th>
+                    <th className="py-2 px-4">Pengirim</th>
                     <th className="py-2 px-4">Customer</th>
                     <th className="py-2 px-4">Aksi</th>
                     <th className="py-2 px-4"></th>
@@ -177,6 +170,7 @@ const AntrianPesanan = () => {
                       <td className="py-2 px-4">{item.tanggalKirim}</td>
                       <td className="py-2 px-4">{item.namaBarang}</td>
                       <td className="py-2 px-4">{item.kuantitas}</td>
+                      <td className="py-2 px-4">{item.pengirim}</td>
                       <td className="py-2 px-4">{item.customer}</td>
                       <td className="py-2 px-4">
                         <button className="px-3 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer">
