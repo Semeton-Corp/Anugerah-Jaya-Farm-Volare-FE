@@ -228,7 +228,7 @@ const InputAyam = () => {
 
         if (updateResponse.status == 200) {
           const rolePath = userRole?.toLowerCase().replace(/\s+/g, "-");
-          navigate(`/${rolePath}/ayam`, { state: { refetch: true } });
+          navigate(-1);
         }
       } catch (error) {
         console.error("Gagal mengupdate data:", error);
@@ -241,7 +241,7 @@ const InputAyam = () => {
 
         if (response.status == 201) {
           const rolePath = userRole?.toLowerCase().replace(/\s+/g, "-");
-          navigate(`/${rolePath}/ayam`, { state: { refetch: true } });
+          navigate(-1, { state: { refetch: true } });
         }
         // await api.post("/chickens/monitorings", payload);
       } catch (error) {

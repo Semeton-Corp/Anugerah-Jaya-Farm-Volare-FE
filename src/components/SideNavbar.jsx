@@ -33,6 +33,11 @@ const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
           const tabPath = item.tabName.toLowerCase().replace(/\s+/g, "-");
           const fullPath = `/${rolePath}/${tabPath}`;
 
+          const currentPathStr = Array.isArray(currentPath)
+            ? currentPath[0]
+            : currentPath;
+          const fullPathStr = Array.isArray(fullPath) ? fullPath[0] : fullPath;
+
           const hasSubTabs =
             Array.isArray(item.subTabs) && item.subTabs.length > 0;
           const isExpandedMenu = expandedMenu === item.tabName;
@@ -52,8 +57,8 @@ const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
             });
 
           const isSelected =
-            currentPath === fullPath ||
-            currentPath.startsWith(fullPath + "/") ||
+            currentPathStr === fullPathStr ||
+            currentPathStr.startsWith(fullPathStr + "/") ||
             isAnySubTabSelected;
 
           return (
@@ -89,7 +94,14 @@ const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
                       .toLowerCase()
                       .replace(/\s+/g, "-");
                     const fullSubPath = `/${rolePath}/${tabPath}/${subPath}`;
-                    const isSubSelected = currentPath === fullSubPath;
+                    const isSubSelected =
+                      currentPath === fullSubPath ||
+                      currentPath.startsWith(fullSubPath + "/");
+                    console.log("==================");
+
+                    console.log("fullSubPath: ", fullSubPath);
+                    console.log("currentPath", currentPath);
+                    console.log("isSubSelected", isSubSelected);
 
                     return (
                       <div

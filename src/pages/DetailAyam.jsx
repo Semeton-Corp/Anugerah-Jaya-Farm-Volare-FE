@@ -131,7 +131,7 @@ const DetailAyam = () => {
         <h1 className="text-3xl font-bold">
           {userRole === "Pekerja Kandang" ? "Data Ayam" : "Detail Ayam"}
         </h1>
-        {userRole === "Pekerja Kandang" && (
+        {(userRole === "Pekerja Kandang" || userRole === "Kepala Kandang") && (
           <div
             onClick={inputAyamHandle}
             className="flex items-center rounded-lg px-4 py-2 bg-green-700 hover:bg-green-900 cursor-pointer"
@@ -147,7 +147,9 @@ const DetailAyam = () => {
       <div className="bg-white p-4 border rounded-lg w-full border-black-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">
-            {userRole === "Pekerja Kandang" ? "Data harian ayam" : ""}
+            {userRole === "Pekerja Kandang" || "Kepala Kandang"
+              ? "Data harian ayam"
+              : ""}
           </h2>
 
           <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
@@ -170,7 +172,8 @@ const DetailAyam = () => {
                 <th className="py-2 px-4">Mati</th>
                 <th className="py-2 px-4">Pakan (Kg)</th>
                 <th className="py-2 px-4">Mortalitas</th>
-                {userRole === "Pekerja Kandang" && (
+                {(userRole === "Pekerja Kandang" ||
+                  userRole === "Kepala Kandang") && (
                   <th className="py-2 px-4">Aksi</th>
                 )}
               </tr>
@@ -194,7 +197,8 @@ const DetailAyam = () => {
                       <p>%</p>
                     </div>
                   </td>
-                  {userRole === "Pekerja Kandang" && (
+                  {(userRole === "Pekerja Kandang" ||
+                    userRole === "Kepala Kandang") && (
                     <td className="py-2 px-4 flex justify-center gap-4">
                       <BiSolidEditAlt
                         onClick={() => {

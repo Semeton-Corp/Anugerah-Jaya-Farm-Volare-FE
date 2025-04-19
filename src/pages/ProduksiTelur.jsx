@@ -177,7 +177,7 @@ const ProduksiTelur = () => {
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
-  
+
   const detailProduksiHandle = () => {
     const currentPath = location.pathname;
     const detailPath = currentPath + "/detail-produksi";
@@ -274,7 +274,7 @@ const ProduksiTelur = () => {
             {/* penjualan telur */}
             <div className="p-4 w-full rounded-md border-2 border-black-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">Telur Pecah</h2>
+                <h2 className="text-lg font-semibold">Telur Reject</h2>
                 <div className="p-2 rounded-xl bg-green-700">
                   <TbEggCrackedFilled size={24} color="white" />
                 </div>

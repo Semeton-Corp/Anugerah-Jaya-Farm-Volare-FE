@@ -35,6 +35,7 @@ import OverviewStok from "./pages/OverviewStok";
 import DalamPesanan from "./pages/DalamPesanan";
 import RiwayatStok from "./pages/RiwayatStok";
 import RiwayatGudang from "./pages/RiwayatGudang";
+import InputDataPesanan from "./pages/InputDataPesanan";
 
 const AppRouter = createBrowserRouter([
   {
@@ -203,6 +204,12 @@ const AppRouter = createBrowserRouter([
               {
                 path: "antrian-pesanan",
                 element: <AntrianPesanan />,
+                children: [
+                  {
+                    path: "input-data-pesanan",
+                    element: <InputDataPesanan />,
+                  },
+                ],
               },
               {
                 path: "daftar-pesanan",
@@ -262,12 +269,26 @@ const AppRouter = createBrowserRouter([
               {
                 path: "data-ayam",
                 element: <DetailAyam />,
+                children: [
+                  {
+                    path: "input-ayam",
+                    element: <InputAyam />,
+                  },
+                  {
+                    path: "input-ayam/:id",
+                    element: <InputAyam />,
+                  },
+                ],
               },
             ],
           },
           {
             path: "gudang",
             children: [
+              {
+                path: "overview-gudang",
+                element: <Gudang />,
+              },
               {
                 path: "overview-gudang",
                 element: <Gudang />,
