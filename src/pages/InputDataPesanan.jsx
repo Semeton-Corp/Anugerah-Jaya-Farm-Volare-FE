@@ -6,6 +6,7 @@ import { TbEggCrackedFilled } from "react-icons/tb";
 import { FiMaximize2 } from "react-icons/fi";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
+import { useState, useRef } from "react";
 
 const dataAntrianPesanan = [
   {
@@ -38,16 +39,31 @@ const InputDataPesanan = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const detailPages = ["input-data-pesanan"];
+  const dateInputRef = useRef(null);
+
+  const [selectedStore, setSelectedStore] = useState("");
+  const [selectedItem, setSelectedItem] = useState("");
+
+  const [customer, setCustomer] = useState("");
+  const [phone, setPhone] = useState(0);
+  const today = new Date().toISOString().split("T")[0];
+  const [selectedDate, setSelectedDate] = useState(today);
+  const [paymentStatus, setPaymentStatus] = useState("Belum Lunas");
+
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
 
-  const inputDataPesananHandle = () => {
-    const currentPath = location.pathname;
-    const inputPath = currentPath + "/input-data-pesanan";
-
-    navigate(inputPath);
+  const openDatePicker = () => {
+    // Modern browsers support showPicker()
+    if (dateInputRef.current?.showPicker) {
+      dateInputRef.current.showPicker();
+    } else {
+      // fallback
+      dateInputRef.current?.click();
+    }
   };
 
   return (
@@ -131,16 +147,243 @@ const InputDataPesanan = () => {
         <h1 className="text-lg font-bold">Input Data Pesanan</h1>
 
         {/* Pilih Toko/Gudang */}
-        <label
+        <label className="block font-medium  mt-4">Pilih Toko</label>
+        <select
           className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
-          value={selectedCage}
-          onChange={(e) => {}}
+          value={selectedStore}
+          onChange={(e) => {
+            setSelectedStore(e.target.value);
+          }}
         >
-          Pilih Toko/Gudang
-        </label>
-        <select className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
-        ></select>
+          <option className="text-black-6" value="" disabled hidden>
+            Pilih toko yang sesuai dengan tempat penjualan telur
+          </option>
+          <option value="toko1"> Toko1</option>
+          <option value="toko2"> Toko2</option>
+        </select>
+
+        {/* nama pelanggan & nomor telpon */}
+        <div className="flex justify-between gap-4">
+          <div className="w-full">
+            <label className="block font-medium  mt-4">Nama Pelanggan</label>
+            <input
+              className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
+              type="text"
+              placeholder="Masukkan nama barang"
+            />
+          </div>
+
+          <div className="w-full">
+            <label className="block font-medium  mt-4">Nomor Telepon</label>
+            <input
+              className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
+              type="number"
+              placeholder="Masukkan nomor telepon"
+              onChange={(e) => {
+                setPhone(e.target.value);
+              }}
+            />
+          </div>
+        </div>
+
+        {/* nama barang & jumlah barang */}
+        <div className="flex justify-between gap-4">
+          <div className="w-full">
+            <label className="block font-medium  mt-4">Nama Barang</label>
+            <select
+              className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
+              value={selectedItem}
+              onChange={(e) => {
+                setSelectedItem(e.target.value);
+              }}
+            >
+              <option className="text-black-6" value="" disabled hidden>
+                Pilih toko yang sesuai dengan tempat penjualan telur
+              </option>
+              <option value="barang1"> Barang 1</option>
+              <option value="barang2"> Barang 2</option>
+            </select>
+          </div>
+
+          <div className="w-full">
+            <label className="block font-medium  mt-4">Jumlah Barang</label>
+            <div className="flex justify-between gap-4">
+              <div className="w-full">
+                <input
+                  className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
+                  type="number"
+                  placeholder="Masukkan nama barang"
+                />
+              </div>
+
+              <div className="w-full">
+                <select
+                  className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
+                  value={phone}
+                  onChange={(e) => {
+                    setPhone(e.target.value);
+                  }}
+                >
+                  <option disabled hidden value="">
+                    Pilih satuan kuantitas
+                  </option>
+                  <option value="kilogram">Kilogram</option>
+                  <option value="liter">Liter</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* harga (butir) & tanggal kirim */}
+        <div className="flex justify-between gap-4">
+          <div className="w-full">
+            <label className="block font-medium  mt-4">Harga (Butir)</label>
+            <input
+              className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
+              type="number  "
+              placeholder="Masukkan nama barang"
+            />
+          </div>
+
+          <div className="w-full">
+            <label className="block font-medium mt-4">Tanggal Kirim</label>
+            <input
+              ref={dateInputRef}
+              className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
+              type="date"
+              value={selectedDate}
+              onClick={() => {
+                // Manually open the date picker when the input is clicked
+                if (dateInputRef.current?.showPicker) {
+                  dateInputRef.current.showPicker(); // Modern browsers
+                }
+              }}
+              onChange={(e) => setSelectedDate(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="flex w-full justify-end p-4">
+          <div>
+            <div className="text-xl font-semibold">Total</div>
+            <div className="font-semibold text-3xl flex">
+              <p className="me-2">RP</p>
+              <p className="">500.000</p>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Status Pembayaran */}
+      <div className="p-4 border border-black-6 rounded-[4px]">
+        <div className="flex justify-between">
+          <h1 className="text-lg font-bold">Input Data Pesanan</h1>
+          <div
+            className="px-5 py-3 bg-orange-400 rounded-[4px] hover:bg-orange-600 cursor-pointer"
+            onClick={() => setShowPaymentModal(true)}
+          >
+            Pilih Pembayaran
+          </div>
+        </div>
+
+        {/* table */}
+        <div className="mt-4">
+          <table className="w-full">
+            <thead className="w-full bg-green-700 rounded-2xl text-white ">
+              <tr className="">
+                <th className="px-4 py-2 ">Tangggal</th>
+                <th className="px-4 py-2">Nominal Pembayaran</th>
+                <th className="px-4 py-2">Sisa Cicilan</th>
+                <th className="px-4 py-2"></th>
+              </tr>
+            </thead>
+            <tbody className="border-b">
+              <tr>
+                <td className="px-4 py-2 "></td>
+                <td className="px-4 py-2"></td>
+                <td className="px-4 py-2"></td>
+                <td className="px-4 py-2"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* status pembayaran */}
+        <div className="flex mt-4 items-center justify-between">
+          <div className="flex items-center gap-4">
+            {" "}
+            <h1 className="text-lg font-bold">Status Pembayaran: </h1>
+            <div
+              className={`px-5 py-3 text-xl rounded-[4px] ${
+                paymentStatus === "Belum Lunas"
+                  ? "bg-orange-200 text-kritis-text-color"
+                  : "bg-aman-box-surface-color text-aman-text-color"
+              }`}
+            >
+              {paymentStatus}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-xl font-semibold">Sisa cicilan</div>
+            <div className="font-semibold text-3xl flex">
+              <p className="me-2">RP</p>
+              <p className="">400.000</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* simpan button */}
+      <div className="flex justify-end mb-8">
+        <div className="px-5 py-3 bg-green-700 rounded-[4px] hover:bg-green-900 cursor-pointer text-white">
+          Simpan
+        </div>
+      </div>
+
+      {showPaymentModal && (
+        <div className="fixed w-full inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="w-full bg-white mx-40 p-6 rounded-lg shadow-xl relative">
+            <h3 className="text-xl font-bold mb-4">Pembayaran</h3>
+
+            {/* Metode Pembayaran */}
+            <label className="block mb-2 font-medium">Metode Pembayaran</label>
+            <select className="w-full border p-2 rounded mb-4">
+              <option className="text-black-6" value="" disabled hidden>
+                Pilih Metode Pembayaran
+              </option>
+              <option>Penuh</option>
+              <option>Cicil</option>
+            </select>
+
+            {/* Nominal Bayar */}
+            <label className="block mb-2 font-medium">Nominal Bayar</label>
+            <input
+              type="number"
+              className="w-full border p-2 rounded mb-4"
+              placeholder="Masukkan nominal pembayaran"
+            />
+
+            {/* Bukti Pembayaran */}
+            <label className="block mb-2 font-medium">Bukti Pembayaran</label>
+            <input type="file" className="w-full border p-2 rounded mb-4" />
+
+            {/* Buttons */}
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowPaymentModal(false)}
+                className="px-4 py-2 bg-gray-300 hover:bg-gray-500 rounded cursor-pointer"
+              >
+                Batal
+              </button>
+              <button className="px-4 py-2 bg-green-700 hover:bg-green-900 text-white rounded cursor-pointer">
+                Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
