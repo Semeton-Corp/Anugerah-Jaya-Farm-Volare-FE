@@ -118,9 +118,17 @@ const DetailAyam = () => {
   async function deleteDataHandle(dataId) {
     try {
       const response = await deleteChickenData(dataId);
-      await fetchDataAyam(); // langsung reload data
+      console.log("response.status", response.status);
+
+      if (response.status === 204) {
+        alert("✅ Data berhasil dihapus!");
+        await fetchDataAyam();
+      } else {
+        alert("⚠️ Gagal menghapus data. Silakan coba lagi.");
+      }
     } catch (error) {
       console.error("Gagal menghapus data ayam:", error);
+      alert("❌ Terjadi kesalahan saat menghapus data.");
     }
   }
 

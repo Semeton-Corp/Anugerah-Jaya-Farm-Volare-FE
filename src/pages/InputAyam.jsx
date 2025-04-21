@@ -116,7 +116,7 @@ const InputAyam = () => {
   const addObatInput = () => {
     setObatList([
       ...obatList,
-      { penyakit: "", jenis: "", dosis: "", satuan: "" },
+      { penyakit: "", jenis: "", dosis: "", satuan: "mililiter" },
     ]);
 
     if (!obatExpanded) {
@@ -165,7 +165,9 @@ const InputAyam = () => {
 
           if (vaksinListget.length > 0) {
             setVaksinExpanded(true);
-          } else if (chickenDiseasesGet.length > 0) {
+          }
+
+          if (chickenDiseasesGet.length > 0) {
             setObatExpanded(true);
           }
 
@@ -583,7 +585,7 @@ const InputAyam = () => {
         </div>
 
         {/* Simpan Button */}
-        <div className="mt-6 text-right ">
+        {/* <div className="mt-6 text-right ">
           <button
             onClick={() => {
               console.log("✅ selectedChikenCategory:", selectedChikenCategory);
@@ -599,7 +601,7 @@ const InputAyam = () => {
           >
             Check
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );
