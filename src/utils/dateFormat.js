@@ -21,3 +21,8 @@ export const getTodayDateInBahasa = () => {
 
   return `${day} ${month} ${year}`;
 };
+
+export const formatDateToDDMMYYYY = (dateString) => {
+  const [year, month, day] = dateString.split("-");
+  return `${day}-${month}-${year}`;
+};

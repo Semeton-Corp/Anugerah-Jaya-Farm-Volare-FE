@@ -5,7 +5,10 @@ import { MdStore } from "react-icons/md";
 import { TbEggCrackedFilled } from "react-icons/tb";
 import { FiMaximize2 } from "react-icons/fi";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
-import { getTodayDateInBahasa } from "../utils/dateFormat";
+import {
+  getTodayDateInBahasa,
+  formatDateToDDMMYYYY,
+} from "../utils/dateFormat";
 import { useState, useRef } from "react";
 
 const dataAntrianPesanan = [
@@ -46,9 +49,15 @@ const InputDataPesanan = () => {
 
   const [customer, setCustomer] = useState("");
   const [phone, setPhone] = useState(0);
+  const [quantity, setQuantity] = useState(0);
+  const [price, setPrice] = useState(0);
+  const [nominal, setNominal] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [remaining, getRemaining] = useState(0);
+
   const today = new Date().toISOString().split("T")[0];
   const [selectedDate, setSelectedDate] = useState(today);
-  const [paymentStatus, setPaymentStatus] = useState("Belum Lunas");
+  const [paymentStatus, setPaymentStatus] = useState("Cicilan");
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
@@ -64,6 +73,10 @@ const InputDataPesanan = () => {
       // fallback
       dateInputRef.current?.click();
     }
+  };
+
+  const updateTotal = () => {
+    setTotal(price * quantity);
   };
 
   return (
@@ -170,6 +183,10 @@ const InputDataPesanan = () => {
               className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
               type="text"
               placeholder="Masukkan nama barang"
+              value={customer}
+              onChange={(e) => {
+                setCustomer(e.target.value);
+              }}
             />
           </div>
 
@@ -213,6 +230,11 @@ const InputDataPesanan = () => {
                   className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
                   type="number"
                   placeholder="Masukkan nama barang"
+                  value={quantity === 0 ? "" : quantity}
+                  onChange={(e) => {
+                    setQuantity(e.target.value);
+                    updateTotal();
+                  }}
                 />
               </div>
 
@@ -243,6 +265,11 @@ const InputDataPesanan = () => {
               className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
               type="number  "
               placeholder="Masukkan nama barang"
+              value={price}
+              onChange={(e) => {
+                setPrice(e.target.value);
+                updateTotal();
+              }}
             />
           </div>
 
@@ -269,7 +296,9 @@ const InputDataPesanan = () => {
             <div className="text-xl font-semibold">Total</div>
             <div className="font-semibold text-3xl flex">
               <p className="me-2">RP</p>
-              <p className="">500.000</p>
+              <p className="">
+                {total === 0 ? "-" : Intl.NumberFormat("id-ID").format(total)}
+              </p>
             </div>
           </div>
         </div>
@@ -312,16 +341,15 @@ const InputDataPesanan = () => {
         {/* status pembayaran */}
         <div className="flex mt-4 items-center justify-between">
           <div className="flex items-center gap-4">
-            {" "}
             <h1 className="text-lg font-bold">Status Pembayaran: </h1>
             <div
               className={`px-5 py-3 text-xl rounded-[4px] ${
-                paymentStatus === "Belum Lunas"
+                paymentStatus === "Cicilan"
                   ? "bg-orange-200 text-kritis-text-color"
                   : "bg-aman-box-surface-color text-aman-text-color"
               }`}
             >
-              {paymentStatus}
+              {paymentStatus === "Cicilan" ? "Belum Lunas" : "Lunas"}
             </div>
           </div>
 
@@ -329,7 +357,11 @@ const InputDataPesanan = () => {
             <div className="text-xl font-semibold">Sisa cicilan</div>
             <div className="font-semibold text-3xl flex">
               <p className="me-2">RP</p>
-              <p className="">400.000</p>
+              <p className="">
+                {remaining === 0
+                  ? "-"
+                  : Intl.NumberFormat("id-ID").format(remaining)}
+              </p>
             </div>
           </div>
         </div>
@@ -337,7 +369,22 @@ const InputDataPesanan = () => {
 
       {/* simpan button */}
       <div className="flex justify-end mb-8">
-        <div className="px-5 py-3 bg-green-700 rounded-[4px] hover:bg-green-900 cursor-pointer text-white">
+        <div
+          onClick={() => {
+            console.log("===== Form Data =====");
+            console.log("Toko:", selectedStore);
+            console.log("Barang:", selectedItem);
+            console.log("Nama Pelanggan:", customer);
+            console.log("No. Telepon:", phone);
+            console.log("Jumlah:", quantity);
+            console.log("Harga:", price);
+            console.log("Tanggal Kirim:", formatDateToDDMMYYYY(selectedDate));
+            console.log("Status Pembayaran:", paymentStatus);
+            console.log("Nominal:", nominal);
+            console.log("=====================");
+          }}
+          className="px-5 py-3 bg-green-700 rounded-[4px] hover:bg-green-900 cursor-pointer text-white"
+        >
           Simpan
         </div>
       </div>
@@ -349,12 +396,18 @@ const InputDataPesanan = () => {
 
             {/* Metode Pembayaran */}
             <label className="block mb-2 font-medium">Metode Pembayaran</label>
-            <select className="w-full border p-2 rounded mb-4">
+            <select
+              className="w-full border p-2 rounded mb-4"
+              value={paymentStatus}
+              onChange={(e) => {
+                setPaymentStatus(e.target.value);
+              }}
+            >
               <option className="text-black-6" value="" disabled hidden>
                 Pilih Metode Pembayaran
               </option>
-              <option>Penuh</option>
-              <option>Cicil</option>
+              <option value="Penuh">Penuh</option>
+              <option value="Cicilan">Cicil</option>
             </select>
 
             {/* Nominal Bayar */}
@@ -363,6 +416,10 @@ const InputDataPesanan = () => {
               type="number"
               className="w-full border p-2 rounded mb-4"
               placeholder="Masukkan nominal pembayaran"
+              value={nominal}
+              onChange={(e) => {
+                setNominal(e.target.value);
+              }}
             />
 
             {/* Bukti Pembayaran */}

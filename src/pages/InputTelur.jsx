@@ -10,10 +10,12 @@ const InputTelur = () => {
   const [cages, setCages] = useState([]);
   const [selectedCage, setSelectedCage] = useState(0);
   // const [selectedCageName, setSelectedCageName] = useState("");
-  const [ok, setOk] = useState(0);
-  const [retak, setRetak] = useState(0);
-  const [pecah, setPecah] = useState(0);
-  const [reject, setReject] = useState(0);
+  const [ok, setOk] = useState("");
+  const [retak, setRetak] = useState("");
+  const [pecah, setPecah] = useState("");
+  const [reject, setReject] = useState("");
+  const [weight, setWeight] = useState("");
+
   const navigate = useNavigate();
 
   const { id } = useParams();
@@ -24,7 +26,10 @@ const InputTelur = () => {
         const response = await getCage();
         const data = response.data.data;
         setCages(data);
-        console.log("Kandang: ", data);
+        setSelectedCage(data[0].id);
+        // console.log("data: ", data[0].id);
+
+        // console.log("Kandang: ", data);
 
         if (id) {
           const updateResponse = await getEggMonitoringById(id);
@@ -68,6 +73,7 @@ const InputTelur = () => {
       totalCrackedEgg: parseInt(retak),
       totalBrokeEgg: parseInt(pecah),
       totalRejectEgg: parseInt(reject),
+      weight: parseInt(weight),
     };
 
     console.log("payload: ", payload);
@@ -171,10 +177,24 @@ const InputTelur = () => {
           </div>
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label className="block font-medium mb-1">Berat Telur (Kg)</label>
+            <input
+              type="number"
+              className="w-full border rounded p-2 bg-black-4"
+              placeholder="Masukkan jumlah telur..."
+              value={getDisplayValue(weight)}
+              onChange={(e) => setWeight(e.target.value)}
+            />
+          </div>
+        </div>
+
         <div className="mt-6 text-right">
           <button
             onClick={() => {
               handleSubmit();
+              console.log("selectedCage: ", selectedCage);
             }}
             className="bg-emerald-700 text-white py-2 px-6 rounded hover:bg-emerald-600 cursor-pointer"
           >
