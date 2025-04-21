@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getChickenMonitoring } from "../services/chickenMonitorings";
 import { deleteChickenData } from "../services/chickenMonitorings";
+import { getTodayDateInBahasa } from "../utils/dateFormat";
 
 // const detailAyamData = [
 //   {
@@ -77,10 +78,18 @@ const DetailAyam = () => {
 
   const [detailAyamData, setDetailAyamState] = useState([]);
 
-  const isDetailPage = location.pathname.includes("input-ayam");
+  const detailPages = ["input-ayam", "detail-vaksin-obat"];
+
+  const isDetailPage = detailPages.some((segment) =>
+    location.pathname.includes(segment)
+  );
 
   const inputAyamHandle = () => {
     navigate(`${location.pathname}/input-ayam`);
+  };
+
+  const detailVaksinObatHandle = () => {
+    navigate(`${location.pathname}/detail-vaksin-obat`);
   };
 
   const fetchDataAyam = async () => {
@@ -88,6 +97,8 @@ const DetailAyam = () => {
       const response = await getChickenMonitoring();
       if (response.status === 200) {
         setDetailAyamState(response.data.data);
+        console.log("response.data.data: ", response.data.data);
+
         // console.log("DetailAyamData: ", response.data.data);
       }
     } catch (error) {
@@ -152,10 +163,21 @@ const DetailAyam = () => {
               : ""}
           </h2>
 
-          <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-            <PiCalendarBlank size={18} />
-            <div className="text-base font-medium ms-2">
-              Hari ini (20 Mar 2025)
+          <div className="flex gap-4">
+            <div
+              onClick={detailVaksinObatHandle}
+              className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
+            >
+              <div className="text-base font-medium ms-2">
+                Detail Vaksin & Obat
+              </div>
+            </div>
+
+            <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+              <PiCalendarBlank size={18} />
+              <div className="text-base font-medium ms-2">
+                {`Hari ini (${getTodayDateInBahasa()})`}
+              </div>
             </div>
           </div>
         </div>

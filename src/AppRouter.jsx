@@ -36,6 +36,7 @@ import DalamPesanan from "./pages/DalamPesanan";
 import RiwayatStok from "./pages/RiwayatStok";
 import RiwayatGudang from "./pages/RiwayatGudang";
 import InputDataPesanan from "./pages/InputDataPesanan";
+import DetailVaksinObat from "./pages/DetailVaksinObat";
 
 const AppRouter = createBrowserRouter([
   {
@@ -142,9 +143,14 @@ const AppRouter = createBrowserRouter([
                 path: "input-ayam",
                 element: <InputAyam />,
               },
+
               {
                 path: "input-ayam/:id",
                 element: <InputAyam />,
+              },
+              {
+                path: "detail-vaksin-obat",
+                element: <DetailVaksinObat />,
               },
             ],
           },

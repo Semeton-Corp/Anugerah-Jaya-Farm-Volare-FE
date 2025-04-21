@@ -95,7 +95,10 @@ const InputAyam = () => {
   };
 
   const addVaksinInput = () => {
-    setVaksinList([...vaksinList, { jenis: "", dosis: "", satuan: "" }]);
+    setVaksinList([
+      ...vaksinList,
+      { jenis: "", dosis: "", satuan: "mililiter" },
+    ]);
 
     if (!vaksinExpanded) {
       setVaksinExpanded(true);
@@ -149,6 +152,7 @@ const InputAyam = () => {
             dosis: parseFloat(v.dose),
             satuan: v.unit,
           }));
+
           setVaksinList(vaksinListget || []);
 
           const chickenDiseasesGet = data.chickenDiseases.map((o) => ({
@@ -158,6 +162,12 @@ const InputAyam = () => {
             dosis: parseFloat(o.dose),
             satuan: o.unit,
           }));
+
+          if (vaksinListget.length > 0) {
+            setVaksinExpanded(true);
+          } else if (chickenDiseasesGet.length > 0) {
+            setObatExpanded(true);
+          }
 
           console.log("OBAT: ", data.chickenDiseases);
           setObatList(chickenDiseasesGet || []);
@@ -179,33 +189,63 @@ const InputAyam = () => {
   async function simpanAyamHandle() {
     setLoading(true);
 
-    const chickenVaccines = vaksinList.map((v) => {
-      const vaccinesItem = {
+    // Validate chickenVaccines
+    const chickenVaccines = [];
+    for (const v of vaksinList) {
+      if (!v.jenis || !v.dosis || !v.satuan) {
+        alert("Semua field vaksin harus diisi terlebih dahulu!");
+        console.log("v.jenis: ", v.jenis);
+        console.log("v.dosis: ", v.dosis);
+        console.log("v.satuan: ", v.satuan);
+
+        setLoading(false);
+        return; // STOP ENTIRE FUNCTION
+      }
+
+      const item = {
         vaccine: v.jenis,
         dose: parseFloat(v.dosis),
         unit: v.satuan,
       };
+      if (v.id) item.id = v.id;
 
-      if (v.id) {
-        vaccinesItem.id = v.id;
+      chickenVaccines.push(item);
+    }
+
+    // Validate chickenDiseases
+    const chickenDiseases = [];
+    for (const o of obatList) {
+      if (!o.penyakit || !o.jenis || !o.dosis || !o.satuan) {
+        alert("Semua field obat harus diisi terlebih dahulu!");
+        setLoading(false);
+        return; // STOP ENTIRE FUNCTION
       }
 
-      return vaccinesItem;
-    });
-
-    const chickenDiseases = obatList.map((o) => {
-      const diseasesItem = {
+      const item = {
         disease: o.penyakit,
         medicine: o.jenis,
         dose: parseFloat(o.dosis),
         unit: o.satuan,
       };
-      if (o.id) {
-        diseasesItem.id = o.id;
-      }
+      if (o.id) item.id = o.id;
 
-      return diseasesItem;
-    });
+      chickenDiseases.push(item);
+    }
+
+    // Check required main fields
+    if (
+      !selectedCage ||
+      !selectedChikenCategory ||
+      !ageChiken ||
+      !totalLiveChicken ||
+      !totalSickChicken ||
+      !totalDeathChicken ||
+      !totalFeed
+    ) {
+      alert("Semua field utama harus diisi!");
+      setLoading(false);
+      return; // STOP ENTIRE FUNCTION
+    }
 
     const payload = {
       cageId: parseInt(selectedCage),
@@ -221,32 +261,22 @@ const InputAyam = () => {
 
     console.log("Payload ready to send: ", payload);
 
-    if (id) {
-      try {
+    try {
+      if (id) {
         const updateResponse = await updateChickenMonitoring(id, payload);
-        console.log("RESPONSE STATUS: ", updateResponse.status);
-
-        if (updateResponse.status == 200) {
-          const rolePath = userRole?.toLowerCase().replace(/\s+/g, "-");
+        if (updateResponse.status === 200) {
           navigate(-1);
         }
-      } catch (error) {
-        console.error("Gagal mengupdate data:", error);
-      }
-    } else {
-      try {
-        // Example send to API if needed
+      } else {
         const response = await inputAyam(payload);
-        console.log("RESPONSE STATUS: ", response.status);
-
-        if (response.status == 201) {
-          const rolePath = userRole?.toLowerCase().replace(/\s+/g, "-");
+        if (response.status === 201) {
           navigate(-1, { state: { refetch: true } });
         }
-        // await api.post("/chickens/monitorings", payload);
-      } catch (error) {
-        console.error("Gagal menyimpan data:", error);
       }
+    } catch (error) {
+      console.error("Gagal menyimpan atau mengupdate data ayam:", error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -406,7 +436,7 @@ const InputAyam = () => {
                   <div>
                     <label className="block font-medium mb-1">Dosis</label>
                     <input
-                      type="text"
+                      type="number"
                       className="w-full border rounded p-2 bg-white"
                       value={getDisplayValue(vaksin.dosis)}
                       onChange={(e) =>
@@ -418,15 +448,18 @@ const InputAyam = () => {
                     <label className="block font-medium mb-1">
                       Satuan Dosis
                     </label>
-                    <input
-                      type="text"
-                      placeholder="contoh : ml"
+                    <select
                       className="w-full border rounded p-2 bg-white"
-                      value={getDisplayValue(vaksin.satuan)}
+                      value={vaksin.satuan}
                       onChange={(e) =>
                         handleVaksinChange(index, "satuan", e.target.value)
                       }
-                    />
+                    >
+                      <option value="mililiter">mililiter</option>
+                      <option value="liter">liter</option>
+                      <option value="gram">gram</option>
+                      <option value="kilogram">kilogram</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -455,6 +488,26 @@ const InputAyam = () => {
                 key={index}
                 className="mb-6 border rounded-[4px] px-4 py-6 border-black-6 bg-black-4"
               >
+                <div className="flex underline   justify-end p-2">
+                  <div
+                    onClick={() => {
+                      const newList = [...obatList];
+                      console.log("newList", newList);
+
+                      newList.splice(index, 1);
+                      console.log("splice:", obatList.splice(index, 1));
+
+                      setObatList(newList);
+                    }}
+                    className="flex hover:text-black-7 cursor-pointer"
+                  >
+                    <p>Hapus Obat</p>
+                    <button>
+                      <MdDelete size={24} />
+                    </button>
+                  </div>
+                </div>
+
                 <label className="block font-medium mb-1">Penyakit</label>
                 <input
                   type="text"
@@ -479,7 +532,7 @@ const InputAyam = () => {
                   <div>
                     <label className="block font-medium mb-1">Dosis</label>
                     <input
-                      type="text"
+                      type="number"
                       className="w-full border rounded p-2 bg-white"
                       value={getDisplayValue(obat.dosis)}
                       onChange={(e) =>
@@ -487,19 +540,23 @@ const InputAyam = () => {
                       }
                     />
                   </div>
+
                   <div>
                     <label className="block font-medium mb-1">
                       Satuan Dosis
                     </label>
-                    <input
-                      type="text"
-                      placeholder="cth : ml"
+                    <select
                       className="w-full border rounded p-2 bg-white"
                       value={getDisplayValue(obat.satuan)}
                       onChange={(e) =>
                         handleObatChange(index, "satuan", e.target.value)
                       }
-                    />
+                    >
+                      <option value="mililiter">mililiter</option>
+                      <option value="liter">liter</option>
+                      <option value="gram">gram</option>
+                      <option value="kilogram">kilogram</option>
+                    </select>
                   </div>
                 </div>
               </div>

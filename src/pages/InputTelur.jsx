@@ -62,6 +62,11 @@ const InputTelur = () => {
   const handleSubmit = async () => {
     const cageId = Number(selectedCage);
 
+    if (!cageId || !ok || !retak || !pecah || !reject || !weight) {
+      alert("Semua field harus diisi terlebih dahulu!");
+      return;
+    }
+
     if (!Number.isInteger(cageId)) {
       console.error("Invalid cageId:", selectedCage);
       return;
@@ -134,7 +139,7 @@ const InputTelur = () => {
         </select>
 
         {/* Form Telur */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div>
             <label className="block font-medium mb-1">Telur OK</label>
             <input
