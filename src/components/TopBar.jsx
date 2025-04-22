@@ -7,6 +7,9 @@ import { useNavigate } from "react-router-dom";
 
 export default function TopBar() {
   const navigate = useNavigate();
+  const userName = localStorage.getItem("userName");
+  const role = localStorage.getItem("role");
+  const photoProfile = localStorage.getItem("photoProfile");
 
   const [isOptionExpanded, setIsOptionExpanded] = useState(false);
   const profileHandle = () => {
@@ -51,15 +54,13 @@ export default function TopBar() {
             <div className="flex items-center gap-6">
               {/* profile picture */}
               <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full overflow-hidden">
-                <img src={profileAvatar} alt="Profile Avatar" />
+                <img src={photoProfile} alt="Profile Avatar" />
               </div>
 
               {/* user name + role */}
               <div className="">
-                <p className="text-base font-bold leading-tight">
-                  Jaya Mandiri
-                </p>
-                <p className="text-sm text-gray-500">Owner</p>
+                <p className="text-base font-bold leading-tight">{userName}</p>
+                <p className="text-sm text-gray-500">{role}</p>
               </div>
 
               {/* dropdown arrow */}

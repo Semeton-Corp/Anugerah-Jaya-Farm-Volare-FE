@@ -5,10 +5,15 @@ import { inputTelur } from "../services/egg";
 import { getEggMonitoringById } from "../services/egg";
 import { useParams } from "react-router-dom";
 import { updateEggMonitoring } from "../services/egg";
+import { getWarehouses } from "../services/warehouse";
 
 const InputTelur = () => {
   const [cages, setCages] = useState([]);
   const [selectedCage, setSelectedCage] = useState(0);
+
+  const [warehouses, setWarehouses] = useState([]);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(0);
+
   // const [selectedCageName, setSelectedCageName] = useState("");
   const [ok, setOk] = useState("");
   const [retak, setRetak] = useState("");
@@ -56,13 +61,38 @@ const InputTelur = () => {
       }
     };
 
+    const fetchWarehouses = async () => {
+      try {
+        const response = await getWarehouses();
+        if (response.status == 200) {
+          setWarehouses(response.data.data);
+          console.log("list warehouse: ", response.data.data);
+
+          setSelectedWarehouse(response.data.data[0].id);
+          console.log("selected warehouse: ", response.data.data[0].id);
+        }
+      } catch (error) {
+        console.error("Gagal memuat data gudang:", error);
+      }
+    };
+
     fetchCages();
+    fetchWarehouses();
   }, []);
 
   const handleSubmit = async () => {
     const cageId = Number(selectedCage);
+    const warehouseId = Number(selectedWarehouse);
 
-    if (!cageId || !ok || !retak || !pecah || !reject || !weight) {
+    if (
+      !cageId ||
+      !warehouseId ||
+      !ok ||
+      !retak ||
+      !pecah ||
+      !reject ||
+      !weight
+    ) {
       alert("Semua field harus diisi terlebih dahulu!");
       return;
     }
@@ -74,6 +104,7 @@ const InputTelur = () => {
 
     const payload = {
       cageId,
+      warehouseId,
       totalGoodEgg: parseInt(ok),
       totalCrackedEgg: parseInt(retak),
       totalBrokeEgg: parseInt(pecah),
@@ -108,7 +139,16 @@ const InputTelur = () => {
           console.log("status bukan 200:", response.data);
         }
       } catch (error) {
-        console.error("Gagal mengirim data telur:", error);
+        const errorMessage =
+          error?.response?.data?.message || error.message || "Terjadi kesalahan";
+  
+        if (errorMessage === "egg monitoring already exists for today") {
+          alert("Sudah terdapat data untuk kandang yang dipilih hari ini!");
+        } else {
+          alert("Gagal menyimpan data: " + errorMessage);
+        }
+  
+        console.error("Gagal menyimpan atau mengupdate data ayam:", errorMessage);
       }
     }
   };
@@ -120,6 +160,23 @@ const InputTelur = () => {
       <div className="w-full mx-auto p-6 bg-white shadow rounded border">
         <h2 className="text-lg font-semibold mb-1">Input data harian</h2>
         <p className="text-sm mb-6">20 Maret 2025</p>
+
+        {/* Pilih gudang */}
+        <label className="block font-medium mb-1">Pilih gudang</label>
+        <select
+          className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-6"
+          value={selectedWarehouse.id}
+          onChange={(e) => {
+            const id = Number(e.target.value);
+            setSelectedWarehouse(id);
+          }}
+        >
+          {warehouses.map((warehouse) => (
+            <option key={warehouse.id} value={warehouse.id}>
+              {warehouse.name}
+            </option>
+          ))}
+        </select>
 
         {/* Pilih kandang */}
         <label className="block font-medium mb-1">Pilih kandang</label>

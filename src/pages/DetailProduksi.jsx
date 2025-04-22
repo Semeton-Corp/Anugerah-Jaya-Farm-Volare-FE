@@ -107,12 +107,16 @@ const DetailProduksi = () => {
             <thead>
               <tr className="bg-green-700 text-white text-center">
                 <th className="py-2 px-4">Kandang</th>
-                <th className="py-2 px-4">QTY (butir)</th>
+                <th className="py-2 px-4">QTY Total</th>
                 <th className="py-2 px-4">OK</th>
                 <th className="py-2 px-4">Retak</th>
                 <th className="py-2 px-4">Pecah</th>
                 <th className="py-2 px-4">Reject</th>
                 <th className="py-2 px-4">%Abnormality</th>
+
+                <th className="py-2 px-4">Berat Telur (Kg)</th>
+                <th className="py-2 px-4">Gudang Simpan</th>
+
                 <th className="py-2 px-4">Keterangan</th>
                 {userRole === "Pekerja Telur" && (
                   <th className="py-2 px-4">Aksi</th>
@@ -137,6 +141,9 @@ const DetailProduksi = () => {
                       <p>%</p>
                     </div>
                   </td>
+                  <td className="py-2 px-4">{item.weight}</td>
+                  <td className="py-2 px-4">{item.warehouse.name}</td>
+
                   <td className="py-2 px-4 flex justify-center">
                     <span
                       className={`w-24 py-1 flex justify-center rounded text-sm font-semibold ${

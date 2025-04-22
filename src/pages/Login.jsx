@@ -25,15 +25,17 @@ const Login = () => {
       console.log("password", email);
 
       const response = await login(email, password);
-      const { accessToken, role } = response.data.data;
+      const { accessToken, role, photoProfile, name } = response.data.data;
 
       console.log("response", response);
 
       localStorage.setItem("token", accessToken);
-      localStorage.setItem("role", role);
+      localStorage.setItem("role", role.name);
+      localStorage.setItem("userName", name);
+      localStorage.setItem("photoProfile", photoProfile);
 
       if (response.status === 200) {
-        const rolePath = role.toLowerCase().replace(/\s+/g, "-");
+        const rolePath = role.name.toLowerCase().replace(/\s+/g, "-");
         navigate(`/${rolePath}`);
       }
     } catch (err) {

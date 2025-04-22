@@ -266,17 +266,29 @@ const InputAyam = () => {
     try {
       if (id) {
         const updateResponse = await updateChickenMonitoring(id, payload);
+
         if (updateResponse.status === 200) {
           navigate(-1);
         }
       } else {
         const response = await inputAyam(payload);
+        console.log("response status: ", response.status);
+        console.log("response message: ", response.message);
         if (response.status === 201) {
           navigate(-1, { state: { refetch: true } });
         }
       }
     } catch (error) {
-      console.error("Gagal menyimpan atau mengupdate data ayam:", error);
+      const errorMessage =
+        error?.response?.data?.message || error.message || "Terjadi kesalahan";
+
+      if (errorMessage === "chicken monitoring already exists for today") {
+        alert("Sudah terdapat data untuk kandang yang dipilih hari ini!");
+      } else {
+        alert("Gagal menyimpan data: " + errorMessage);
+      }
+
+      console.error("Gagal menyimpan atau mengupdate data ayam:", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -585,7 +597,7 @@ const InputAyam = () => {
         </div>
 
         {/* Simpan Button */}
-        {/* <div className="mt-6 text-right ">
+        <div className="mt-6 text-right ">
           <button
             onClick={() => {
               console.log("✅ selectedChikenCategory:", selectedChikenCategory);
@@ -601,7 +613,7 @@ const InputAyam = () => {
           >
             Check
           </button>
-        </div> */}
+        </div>
       </div>
     </div>
   );
