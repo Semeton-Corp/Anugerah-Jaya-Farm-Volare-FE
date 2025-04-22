@@ -68,7 +68,7 @@ const InputDataPesanan = () => {
   const [sendDate, setSendDate] = useState(today);
   const [paymentDate, setPaymentDate] = useState(today);
 
-  const [paymentType, setPaymentType] = useState("Cicilan");
+  const [paymentType, setPaymentType] = useState("Cicil");
   const [paymentMethod, setPaymentMethod] = useState("Tunai");
 
   const [paymentProof, setPaymentProof] = useState("https://example.com");
@@ -120,8 +120,8 @@ const InputDataPesanan = () => {
 
   const submitHandle = async () => {
     const storeSalePayment = {
-      paymentDate: paymentDate,
-      nominal: nominal,
+      paymentDate: formatDateToDDMMYYYY(paymentDate),
+      nominal: nominal.toString(),
       paymentProof: paymentProof,
       paymentMethod: paymentMethod,
     };
@@ -129,19 +129,25 @@ const InputDataPesanan = () => {
     const payload = {
       customer: customer,
       phone: phone.toString(),
-      warehouseItemId: parseInt(selectedItem),
+      warehouseItemId: selectedItem.id,
+      saleUnit: unit,
       storeId: selectedStore,
       quantity: quantity,
-      price: price,
-      sendDate: sendDate,
+      price: price.toString(),
+      sendDate: formatDateToDDMMYYYY(sendDate),
       paymentType: paymentType,
       storeSalePayment: storeSalePayment,
     };
 
+    // console.log("payload is ready: ", payload);
+
     try {
       const response = await createStoreSale(payload);
+      // console.log("response: ", response);
 
-      console.log("response: ", response);
+      if (response.status == 201) {
+        navigate(-1);
+      }
     } catch (error) {
       console.log("response: ", error);
 
@@ -412,12 +418,12 @@ const InputDataPesanan = () => {
             <h1 className="text-lg font-bold">Status Pembayaran: </h1>
             <div
               className={`px-5 py-3 text-xl rounded-[4px] ${
-                paymentType === "Cicilan"
+                paymentType === "Cicil"
                   ? "bg-orange-200 text-kritis-text-color"
                   : "bg-aman-box-surface-color text-aman-text-color"
               }`}
             >
-              {paymentType === "Cicilan" ? "Belum Lunas" : "Lunas"}
+              {paymentType === "Cicil" ? "Belum Lunas" : "Lunas"}
             </div>
           </div>
 
@@ -478,7 +484,7 @@ const InputDataPesanan = () => {
                 Pilih Metode Pembayaran
               </option>
               <option value="Penuh">Penuh</option>
-              <option value="Cicilan">Cicil</option>
+              <option value="Cicil">Cicil</option>
             </select>
 
             {/* Metode Pembayaran */}
