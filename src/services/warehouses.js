@@ -9,3 +9,15 @@ export const getWarehouses = () => {
     },
   });
 };
+
+export const getWarehouseItems = (category, storeId) => {
+  return api.get("/warehouses/items", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    params: {
+      category: category,
+      storeId: storeId,
+    },
+  });
+};

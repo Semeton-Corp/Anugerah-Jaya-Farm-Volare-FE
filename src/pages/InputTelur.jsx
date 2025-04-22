@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCage } from "../services/cage";
-import { inputTelur } from "../services/egg";
-import { getEggMonitoringById } from "../services/egg";
+import { getCage } from "../services/cages";
+import { inputTelur } from "../services/eggs";
+import { getEggMonitoringById } from "../services/eggs";
 import { useParams } from "react-router-dom";
-import { updateEggMonitoring } from "../services/egg";
-import { getWarehouses } from "../services/warehouse";
+import { updateEggMonitoring } from "../services/eggs";
+import { getWarehouses } from "../services/warehouses";
 
 const InputTelur = () => {
   const [cages, setCages] = useState([]);
@@ -140,15 +140,20 @@ const InputTelur = () => {
         }
       } catch (error) {
         const errorMessage =
-          error?.response?.data?.message || error.message || "Terjadi kesalahan";
-  
+          error?.response?.data?.message ||
+          error.message ||
+          "Terjadi kesalahan";
+
         if (errorMessage === "egg monitoring already exists for today") {
           alert("Sudah terdapat data untuk kandang yang dipilih hari ini!");
         } else {
           alert("Gagal menyimpan data: " + errorMessage);
         }
-  
-        console.error("Gagal menyimpan atau mengupdate data ayam:", errorMessage);
+
+        console.error(
+          "Gagal menyimpan atau mengupdate data ayam:",
+          errorMessage
+        );
       }
     }
   };

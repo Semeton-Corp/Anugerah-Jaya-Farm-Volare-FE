@@ -3,9 +3,9 @@ import { BiSolidEditAlt } from "react-icons/bi";
 import { MdDelete } from "react-icons/md";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
-import { getEggMonitoring } from "../services/egg";
+import { getEggMonitoring } from "../services/eggs";
 import { PiCalendarBlank } from "react-icons/pi";
-import { deleteEggData } from "../services/egg";
+import { deleteEggData } from "../services/eggs";
 
 // const produksiDetail = [
 //   {

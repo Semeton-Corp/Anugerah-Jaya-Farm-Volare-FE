@@ -5,11 +5,15 @@ import { MdStore } from "react-icons/md";
 import { TbEggCrackedFilled } from "react-icons/tb";
 import { FiMaximize2 } from "react-icons/fi";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
+import { getStores } from "../services/stores";
+import { getWarehouseItems } from "../services/warehouses";
 import {
   getTodayDateInBahasa,
   formatDateToDDMMYYYY,
 } from "../utils/dateFormat";
 import { useState, useRef } from "react";
+import { useEffect } from "react";
+import { createStoreSale } from "../services/stores";
 
 const dataAntrianPesanan = [
   {
@@ -44,20 +48,30 @@ const InputDataPesanan = () => {
   const detailPages = ["input-data-pesanan"];
   const dateInputRef = useRef(null);
 
+  const [stores, setStores] = useState([]);
   const [selectedStore, setSelectedStore] = useState("");
+
+  const [items, setItems] = useState([]);
   const [selectedItem, setSelectedItem] = useState("");
 
   const [customer, setCustomer] = useState("");
   const [phone, setPhone] = useState(0);
   const [quantity, setQuantity] = useState(0);
+  const [unit, setUnit] = useState("Ikat");
+
   const [price, setPrice] = useState(0);
   const [nominal, setNominal] = useState(0);
   const [total, setTotal] = useState(0);
   const [remaining, getRemaining] = useState(0);
 
   const today = new Date().toISOString().split("T")[0];
-  const [selectedDate, setSelectedDate] = useState(today);
-  const [paymentStatus, setPaymentStatus] = useState("Cicilan");
+  const [sendDate, setSendDate] = useState(today);
+  const [paymentDate, setPaymentDate] = useState(today);
+
+  const [paymentType, setPaymentType] = useState("Cicilan");
+  const [paymentMethod, setPaymentMethod] = useState("Tunai");
+
+  const [paymentProof, setPaymentProof] = useState("https://example.com");
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
@@ -65,20 +79,75 @@ const InputDataPesanan = () => {
     location.pathname.includes(segment)
   );
 
-  const openDatePicker = () => {
-    // Modern browsers support showPicker()
-    if (dateInputRef.current?.showPicker) {
-      dateInputRef.current.showPicker();
-    } else {
-      // fallback
-      dateInputRef.current?.click();
+  const fetchStoresData = async () => {
+    try {
+      const response = await getStores();
+
+      if (response.status == 200) {
+        setStores(response.data.data);
+        setSelectedStore(response.data.data[0].id);
+      }
+    } catch (error) {
+      alert("Gagal memuat data toko: ", error);
+      console.log("error: ", error);
     }
   };
 
-  const updateTotal = () => {
-    setTotal(price * quantity);
+  const fetchItemsData = async (storeId) => {
+    try {
+      const response = await getWarehouseItems("Telur", storeId);
+      console.log("response ", response);
+
+      if (response.status == 200) {
+        setItems(response.data.data);
+        setSelectedItem(response.data.data[0]);
+      }
+    } catch (error) {}
   };
 
+  useEffect(() => {
+    fetchStoresData();
+    fetchItemsData(selectedStore);
+  }, []);
+
+  useEffect(() => {
+    fetchItemsData(selectedStore);
+  }, [selectedStore]);
+
+  useEffect(() => {
+    setTotal(price * quantity);
+  }, [price, quantity]);
+
+  const submitHandle = async () => {
+    const storeSalePayment = {
+      paymentDate: paymentDate,
+      nominal: nominal,
+      paymentProof: paymentProof,
+      paymentMethod: paymentMethod,
+    };
+
+    const payload = {
+      customer: customer,
+      phone: phone.toString(),
+      warehouseItemId: parseInt(selectedItem),
+      storeId: selectedStore,
+      quantity: quantity,
+      price: price,
+      sendDate: sendDate,
+      paymentType: paymentType,
+      storeSalePayment: storeSalePayment,
+    };
+
+    try {
+      const response = await createStoreSale(payload);
+
+      console.log("response: ", response);
+    } catch (error) {
+      console.log("response: ", error);
+
+      alert("Gagal menyimpan data pesanan");
+    }
+  };
   return (
     <div className="flex flex-col px-4 py-3 gap-4 ">
       {/* header section */}
@@ -168,11 +237,11 @@ const InputDataPesanan = () => {
             setSelectedStore(e.target.value);
           }}
         >
-          <option className="text-black-6" value="" disabled hidden>
-            Pilih toko yang sesuai dengan tempat penjualan telur
-          </option>
-          <option value="toko1"> Toko1</option>
-          <option value="toko2"> Toko2</option>
+          {stores.map((store) => (
+            <option value={store.id} key={store.id}>
+              {store.name}
+            </option>
+          ))}
         </select>
 
         {/* nama pelanggan & nomor telpon */}
@@ -214,11 +283,11 @@ const InputDataPesanan = () => {
                 setSelectedItem(e.target.value);
               }}
             >
-              <option className="text-black-6" value="" disabled hidden>
-                Pilih toko yang sesuai dengan tempat penjualan telur
-              </option>
-              <option value="barang1"> Barang 1</option>
-              <option value="barang2"> Barang 2</option>
+              {items.map((item) => (
+                <option value={item.id} key={item.id}>
+                  {item.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -232,8 +301,7 @@ const InputDataPesanan = () => {
                   placeholder="Masukkan nama barang"
                   value={quantity === 0 ? "" : quantity}
                   onChange={(e) => {
-                    setQuantity(e.target.value);
-                    updateTotal();
+                    setQuantity(Number(e.target.value));
                   }}
                 />
               </div>
@@ -241,16 +309,17 @@ const InputDataPesanan = () => {
               <div className="w-full">
                 <select
                   className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
-                  value={phone}
+                  value={unit}
                   onChange={(e) => {
-                    setPhone(e.target.value);
+                    setUnit(e.target.value);
                   }}
                 >
                   <option disabled hidden value="">
                     Pilih satuan kuantitas
                   </option>
-                  <option value="kilogram">Kilogram</option>
-                  <option value="liter">Liter</option>
+                  <option value="Ikat">Ikat</option>
+                  <option value="Karpet">Karpet</option>
+                  <option value="Butir">Butir</option>
                 </select>
               </div>
             </div>
@@ -260,7 +329,7 @@ const InputDataPesanan = () => {
         {/* harga (butir) & tanggal kirim */}
         <div className="flex justify-between gap-4">
           <div className="w-full">
-            <label className="block font-medium  mt-4">Harga (Butir)</label>
+            <label className="block font-medium  mt-4">{`Harga (per ${unit})`}</label>
             <input
               className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
               type="number  "
@@ -268,7 +337,6 @@ const InputDataPesanan = () => {
               value={price}
               onChange={(e) => {
                 setPrice(e.target.value);
-                updateTotal();
               }}
             />
           </div>
@@ -279,14 +347,14 @@ const InputDataPesanan = () => {
               ref={dateInputRef}
               className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
               type="date"
-              value={selectedDate}
+              value={sendDate}
               onClick={() => {
                 // Manually open the date picker when the input is clicked
                 if (dateInputRef.current?.showPicker) {
                   dateInputRef.current.showPicker(); // Modern browsers
                 }
               }}
-              onChange={(e) => setSelectedDate(e.target.value)}
+              onChange={(e) => setSendDate(e.target.value)}
             />
           </div>
         </div>
@@ -344,12 +412,12 @@ const InputDataPesanan = () => {
             <h1 className="text-lg font-bold">Status Pembayaran: </h1>
             <div
               className={`px-5 py-3 text-xl rounded-[4px] ${
-                paymentStatus === "Cicilan"
+                paymentType === "Cicilan"
                   ? "bg-orange-200 text-kritis-text-color"
                   : "bg-aman-box-surface-color text-aman-text-color"
               }`}
             >
-              {paymentStatus === "Cicilan" ? "Belum Lunas" : "Lunas"}
+              {paymentType === "Cicilan" ? "Belum Lunas" : "Lunas"}
             </div>
           </div>
 
@@ -377,11 +445,14 @@ const InputDataPesanan = () => {
             console.log("Nama Pelanggan:", customer);
             console.log("No. Telepon:", phone);
             console.log("Jumlah:", quantity);
+            console.log("Unit:", unit);
             console.log("Harga:", price);
-            console.log("Tanggal Kirim:", formatDateToDDMMYYYY(selectedDate));
-            console.log("Status Pembayaran:", paymentStatus);
+            console.log("Tanggal Kirim:", formatDateToDDMMYYYY(sendDate));
+            console.log("Status Pembayaran:", paymentType);
             console.log("Nominal:", nominal);
             console.log("=====================");
+
+            submitHandle();
           }}
           className="px-5 py-3 bg-green-700 rounded-[4px] hover:bg-green-900 cursor-pointer text-white"
         >
@@ -394,13 +465,13 @@ const InputDataPesanan = () => {
           <div className="w-full bg-white mx-40 p-6 rounded-lg shadow-xl relative">
             <h3 className="text-xl font-bold mb-4">Pembayaran</h3>
 
-            {/* Metode Pembayaran */}
-            <label className="block mb-2 font-medium">Metode Pembayaran</label>
+            {/* Tipe Pembayaran */}
+            <label className="block mb-2 font-medium">Tipe Pembayaran</label>
             <select
               className="w-full border p-2 rounded mb-4"
-              value={paymentStatus}
+              value={paymentType}
               onChange={(e) => {
-                setPaymentStatus(e.target.value);
+                setPaymentType(e.target.value);
               }}
             >
               <option className="text-black-6" value="" disabled hidden>
@@ -408,6 +479,22 @@ const InputDataPesanan = () => {
               </option>
               <option value="Penuh">Penuh</option>
               <option value="Cicilan">Cicil</option>
+            </select>
+
+            {/* Metode Pembayaran */}
+            <label className="block mb-2 font-medium">Metode Pembayaran</label>
+            <select
+              className="w-full border p-2 rounded mb-4"
+              value={paymentMethod}
+              onChange={(e) => {
+                setPaymentMethod(e.target.value);
+              }}
+            >
+              <option className="text-black-6" value="" disabled hidden>
+                Pilih Metode Pembayaran
+              </option>
+              <option value="Tunai">Tunai</option>
+              <option value="Non Tunai">Non Tunai</option>
             </select>
 
             {/* Nominal Bayar */}
@@ -420,6 +507,23 @@ const InputDataPesanan = () => {
               onChange={(e) => {
                 setNominal(e.target.value);
               }}
+            />
+
+            {/* Tanggal Bayar */}
+
+            <label className="block font-medium ">Tanggal Bayar</label>
+            <input
+              ref={dateInputRef}
+              className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
+              type="date"
+              value={paymentDate}
+              onClick={() => {
+                // Manually open the date picker when the input is clicked
+                if (dateInputRef.current?.showPicker) {
+                  dateInputRef.current.showPicker(); // Modern browsers
+                }
+              }}
+              onChange={(e) => setPaymentDate(e.target.value)}
             />
 
             {/* Bukti Pembayaran */}

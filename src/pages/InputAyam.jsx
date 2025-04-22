@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
-import { getCage } from "../services/cage";
+import { getCage } from "../services/cages";
 import { kategoriAyam } from "../data/KategoriAyam";
 import { inputAyam } from "../services/chickenMonitorings";
 import { getChickenMonitoringById } from "../services/chickenMonitorings";
@@ -279,6 +279,8 @@ const InputAyam = () => {
         }
       }
     } catch (error) {
+      console.log("error:", error);
+
       const errorMessage =
         error?.response?.data?.message || error.message || "Terjadi kesalahan";
 
@@ -597,7 +599,7 @@ const InputAyam = () => {
         </div>
 
         {/* Simpan Button */}
-        <div className="mt-6 text-right ">
+        {/* <div className="mt-6 text-right ">
           <button
             onClick={() => {
               console.log("✅ selectedChikenCategory:", selectedChikenCategory);
@@ -613,7 +615,7 @@ const InputAyam = () => {
           >
             Check
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );
