@@ -97,7 +97,7 @@ const DetailAyam = () => {
       const response = await getChickenMonitoring();
       if (response.status === 200) {
         setDetailAyamState(response.data.data);
-        console.log("response.data.data: ", response.data.data);
+        // console.log("response.data.data: ", response.data.data);
 
         // console.log("DetailAyamData: ", response.data.data);
       }

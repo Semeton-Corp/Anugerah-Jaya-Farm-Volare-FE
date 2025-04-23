@@ -25,40 +25,37 @@ const DetailVaksinObat = () => {
 
   const [detailAyamData, setDetailAyamState] = useState([]);
 
-  const detailPages = ["input-ayam", "detail-vaksin-obat"];
+  const detailPages = ["input-ayam"];
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
 
-  const inputAyamHandle = () => {
-    navigate(`${location.pathname}/input-ayam`);
+  async function editDataHandle(dataId) {
+    const currectPath = location.pathname;
+    navigate(`${currectPath}/input-ayam/${dataId}`);
+  }
+
+  const fetchDataAyam = async () => {
+    try {
+      const response = await getChickenMonitoring();
+      if (response.status === 200) {
+        setDetailAyamState(response.data.data);
+        console.log("DetailAyamData: ", response.data.data);
+      }
+    } catch (error) {
+      console.error("Gagal memuat data ayam:", error);
+    }
   };
 
-  const detailVaksinObatHandle = () => {
-    navigate(`${location.pathname}/detail-vaksin-obat`);
-  };
+  useEffect(() => {
+    fetchDataAyam();
 
-  //   const fetchDataAyam = async () => {
-  //     try {
-  //       const response = await getChickenMonitoring();
-  //       if (response.status === 200) {
-  //         setDetailAyamState(response.data.data);
-  //         // console.log("DetailAyamData: ", response.data.data);
-  //       }
-  //     } catch (error) {
-  //       console.error("Gagal memuat data ayam:", error);
-  //     }
-  //   };
-
-  //   useEffect(() => {
-  //     fetchDataAyam();
-
-  //     if (location.state?.refetch) {
-  //       fetchDataAyam();
-  //       window.history.replaceState({}, document.title);
-  //     }
-  //   }, [location]);
+    if (location.state?.refetch) {
+      fetchDataAyam();
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   //   async function deleteDataHandle(dataId) {
   //     try {
@@ -74,10 +71,11 @@ const DetailVaksinObat = () => {
   //     navigate(`${currectPath}/input-ayam/${dataId}`);
   //   }
 
-  //   // Render detail input page only
-  //   if (isDetailPage) {
-  //     return <Outlet />;
-  //   }
+  // Render detail input page only
+  if (isDetailPage) {
+    return <Outlet />;
+  }
+
   return (
     <div className="flex flex-col px-4 py-3 gap-4">
       {/* Header */}
@@ -115,14 +113,39 @@ const DetailVaksinObat = () => {
                   <td className="py-2 px-4">{row.cage.name}</td>
                   <td className="py-2 px-4">{row.chickenCategory}</td>
                   <td className="py-2 px-4">{row.age}</td>
-                  <td className="py-2 px-4">{row.totalLiveChicken}</td>
-                  <td className="py-2 px-4">{row.totalSickChicken}</td>
-                  <td className="py-2 px-4">{row.totalDeathChicken}</td>
-                  <td className="py-2 px-4">{row.totalFeed}</td>
+                  <td className="py-2 px-4">
+                    {row.chickenVaccines && row.chickenVaccines.length > 0 ? (
+                      row.chickenVaccines.map((vaccine, index) => (
+                        <p
+                          key={index}
+                        >{`${vaccine.vaccine} (${vaccine.dose} ${vaccine.unit})`}</p>
+                      ))
+                    ) : (
+                      <p>-</p>
+                    )}
+                  </td>
                   <td className="py-2 px-4">
                     <div className="flex gap-2 justify-center">
-                      <p>{row.mortalityRate}</p>
-                      <p>%</p>
+                      {row.chickenDiseases && row.chickenDiseases.length > 0 ? (
+                        row.chickenDiseases.map((vaccine, index) => (
+                          <p
+                            key={index}
+                          >{`${vaccine.medicine} (${vaccine.dose} ${vaccine.unit})`}</p>
+                        ))
+                      ) : (
+                        <p>-</p>
+                      )}
+                    </div>
+                  </td>
+                  <td className="py-2 px-4">
+                    <div className="flex gap-2 justify-center">
+                      {row.chickenDiseases && row.chickenDiseases.length > 0 ? (
+                        row.chickenDiseases.map((vaccine, index) => (
+                          <p key={index}>{`${vaccine.disease}`}</p>
+                        ))
+                      ) : (
+                        <p>-</p>
+                      )}
                     </div>
                   </td>
                   {(userRole === "Pekerja Kandang" ||
@@ -131,13 +154,6 @@ const DetailVaksinObat = () => {
                       <BiSolidEditAlt
                         onClick={() => {
                           editDataHandle(row.id);
-                        }}
-                        size={24}
-                        className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                      />
-                      <MdDelete
-                        onClick={() => {
-                          deleteDataHandle(row.id);
                         }}
                         size={24}
                         className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"

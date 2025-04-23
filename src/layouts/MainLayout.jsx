@@ -7,7 +7,7 @@ import { useState } from "react";
 const MainLayout = ({ role }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  console.log("MAIN LAYOUT ROLE: ", role);
+  // console.log("MAIN LAYOUT ROLE: ", role);
 
   return (
     <div className="relative min-h-screen bg-gray-50">

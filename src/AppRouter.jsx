@@ -151,6 +151,12 @@ const AppRouter = createBrowserRouter([
               {
                 path: "detail-vaksin-obat",
                 element: <DetailVaksinObat />,
+                children: [
+                  {
+                    path: "input-ayam/:id",
+                    element: <InputAyam />,
+                  },
+                ],
               },
             ],
           },

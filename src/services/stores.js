@@ -9,6 +9,14 @@ export const getStores = () => {
   });
 };
 
+export const getListStoreSale = () => {
+  return api.get("/stores/sales", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export const createStoreSale = (payload) => {
   return api.post("/stores/sales", payload, {
     headers: {

@@ -6,38 +6,42 @@ import { TbEggCrackedFilled } from "react-icons/tb";
 import { FiMaximize2 } from "react-icons/fi";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
+import { useState } from "react";
+import { getListStoreSale } from "../services/stores";
 
-const dataAntrianPesanan = [
-  {
-    nomorAntrian: "1",
-    tanggalKirim: "22 Maret 2025",
-    namaBarang: "Telur OK",
-    kuantitas: "12 Ikat",
-    pengirim: "Toko A",
-    customer: "Pak Tono",
-  },
-  {
-    nomorAntrian: "2",
-    tanggalKirim: "22 Maret 2025",
-    namaBarang: "Telur retak",
-    kuantitas: "12 Karpet",
-    pengirim: "Toko B",
-    customer: "Pak Adi",
-  },
-  {
-    nomorAntrian: "3",
-    tanggalKirim: "22 Maret 2025",
-    namaBarang: "Telur pecah",
-    kuantitas: "10 Karpet",
-    pengirim: "Gudang A1",
-    customer: "Pak Yono",
-  },
-];
+// const dataAntrianPesanan = [
+//   {
+//     nomorAntrian: "1",
+//     tanggalKirim: "22 Maret 2025",
+//     namaBarang: "Telur OK",
+//     kuantitas: "12 Ikat",
+//     pengirim: "Toko A",
+//     customer: "Pak Tono",
+//   },
+//   {
+//     nomorAntrian: "2",
+//     tanggalKirim: "22 Maret 2025",
+//     namaBarang: "Telur retak",
+//     kuantitas: "12 Karpet",
+//     pengirim: "Toko B",
+//     customer: "Pak Adi",
+//   },
+//   {
+//     nomorAntrian: "3",
+//     tanggalKirim: "22 Maret 2025",
+//     namaBarang: "Telur pecah",
+//     kuantitas: "10 Karpet",
+//     pengirim: "Gudang A1",
+//     customer: "Pak Yono",
+//   },
+// ];
 
 const AntrianPesanan = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const detailPages = ["input-data-pesanan"];
+
+  const [dataAntrianPesanan, setDataAntrianPesanan] = useState([]);
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
@@ -49,6 +53,22 @@ const AntrianPesanan = () => {
 
     navigate(inputPath);
   };
+
+  const fetchDataAntrianPesanan = async () => {
+    try {
+      const response = await getListStoreSale();
+      console.log("response: ", response);
+      if (response.status == 200) {
+        setDataAntrianPesanan(response.data.data);
+      }
+    } catch (error) {
+      alert("Gagal memuat data antrian pesanan: ", error);
+    }
+  };
+
+  useState(() => {
+    fetchDataAntrianPesanan();
+  }, []);
 
   return (
     <>
@@ -159,18 +179,18 @@ const AntrianPesanan = () => {
                   </tr>
                 </thead>
                 <tbody className="text-center">
-                  {dataAntrianPesanan.map((item, i) => (
-                    <tr key={i} className="border-b">
+                  {dataAntrianPesanan.map((item, index) => (
+                    <tr key={index} className="border-b">
                       <td className="py-2 px-4">
                         <div className="flex justify-center">
                           <p>#</p>
-                          <p>{item.nomorAntrian}</p>
+                          <p>{index + 1}</p>
                         </div>
                       </td>
-                      <td className="py-2 px-4">{item.tanggalKirim}</td>
-                      <td className="py-2 px-4">{item.namaBarang}</td>
-                      <td className="py-2 px-4">{item.kuantitas}</td>
-                      <td className="py-2 px-4">{item.pengirim}</td>
+                      <td className="py-2 px-4">{item.sentDate}</td>
+                      <td className="py-2 px-4">{item.warehouseItem.name}</td>
+                      <td className="py-2 px-4">{item.quantity}</td>
+                      <td className="py-2 px-4">{item.store.name}</td>
                       <td className="py-2 px-4">{item.customer}</td>
                       <td className="py-2 px-4">
                         <button className="px-3 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer">

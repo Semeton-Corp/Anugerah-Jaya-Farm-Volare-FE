@@ -45,3 +45,27 @@ export const updateChickenMonitoring = (dataId, payload) => {
     },
   });
 };
+
+export const deleteChickenVaccineMonitoring = (chickenMonitoringId, id) => {
+  return api.delete(
+    `/chickens/monitorings/${chickenMonitoringId}/vaccines/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    }
+  );
+};
+
+export const deleteChickenDiseaseMonitoring = (chickenMonitoringId, id) => {
+  return api.delete(
+    `/chickens/monitorings/${chickenMonitoringId}/diseases/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    }
+  );
+};

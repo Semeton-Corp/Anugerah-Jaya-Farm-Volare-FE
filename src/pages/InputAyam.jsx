@@ -8,59 +8,10 @@ import { useParams } from "react-router-dom";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
 import { MdDelete } from "react-icons/md";
 import { updateChickenMonitoring } from "../services/chickenMonitorings";
-
-const detailAyamData = [
-  {
-    kandang: "Kandang A1",
-    kategori: "DOC",
-    usiaMinggu: 49,
-    hidup: 4000,
-    sakit: 50,
-    mati: 10,
-    pakanKg: 20,
-    mortalitas: "3%",
-  },
-  {
-    kandang: "Kandang A2",
-    kategori: "Grower",
-    usiaMinggu: 49,
-    hidup: 1200,
-    sakit: 20,
-    mati: 12,
-    pakanKg: 40,
-    mortalitas: "0.8%",
-  },
-  {
-    kandang: "Kandang A3",
-    kategori: "Pre Layer",
-    usiaMinggu: 49,
-    hidup: 1200,
-    sakit: 20,
-    mati: 12,
-    pakanKg: 40,
-    mortalitas: "0.8%",
-  },
-  {
-    kandang: "Kandang A4",
-    kategori: "Layer",
-    usiaMinggu: 49,
-    hidup: 1200,
-    sakit: 20,
-    mati: 12,
-    pakanKg: 40,
-    mortalitas: "0.8%",
-  },
-  {
-    kandang: "Kandang A5",
-    kategori: "Afkir",
-    usiaMinggu: 49,
-    hidup: 1200,
-    sakit: 20,
-    mati: 12,
-    pakanKg: 40,
-    mortalitas: "0.8%",
-  },
-];
+import {
+  deleteChickenVaccineMonitoring,
+  deleteChickenDiseaseMonitoring,
+} from "../services/chickenMonitorings";
 
 const InputAyam = () => {
   const [obatExpanded, setObatExpanded] = useState(false);
@@ -296,6 +247,42 @@ const InputAyam = () => {
     }
   }
 
+  const deleteVaccineHandle = async (chickenMonitoringId, id) => {
+    var isDeleted = false;
+    try {
+      const response = await deleteChickenVaccineMonitoring(
+        chickenMonitoringId,
+        id
+      );
+      console.log("response :", response.status);
+      if (response.status == 204) {
+        isDeleted = true;
+      }
+    } catch (error) {
+      alert("Gagal menghapus data vaksin: ", error);
+    }
+
+    return isDeleted;
+  };
+
+  const deleteDiseaseHandle = async (chickenMonitoringId, id) => {
+    var isDeleted = false;
+    try {
+      const response = await deleteChickenDiseaseMonitoring(
+        chickenMonitoringId,
+        id
+      );
+      console.log("response :", response.status);
+      if (response.status == 204) {
+        isDeleted = true;
+      }
+    } catch (error) {
+      alert("Gagal menghapus data penyakit/obat: ", error);
+    }
+
+    return isDeleted;
+  };
+
   const getDisplayValue = (val) => (val === 0 ? "" : val);
 
   return (
@@ -425,9 +412,20 @@ const InputAyam = () => {
                 <div className="flex underline   justify-end p-2">
                   <div
                     onClick={() => {
-                      const newList = [...vaksinList];
-                      newList.splice(index, 1);
-                      setVaksinList(newList);
+                      if (vaksin.id) {
+                        const isDeleted = deleteVaccineHandle(id, vaksin.id);
+                        console.log("isDeleted: ", isDeleted);
+
+                        if (isDeleted) {
+                          const newList = [...vaksinList];
+                          newList.splice(index, 1);
+                          setVaksinList(newList);
+                        }
+                      } else {
+                        const newList = [...vaksinList];
+                        newList.splice(index, 1);
+                        setVaksinList(newList);
+                      }
                     }}
                     className="flex hover:text-black-7 cursor-pointer"
                   >
@@ -507,13 +505,20 @@ const InputAyam = () => {
                 <div className="flex underline   justify-end p-2">
                   <div
                     onClick={() => {
-                      const newList = [...obatList];
-                      console.log("newList", newList);
+                      if (obat.id) {
+                        const isDeleted = deleteDiseaseHandle(id, obat.id);
+                        console.log("isDeleted: ", isDeleted);
 
-                      newList.splice(index, 1);
-                      console.log("splice:", obatList.splice(index, 1));
-
-                      setObatList(newList);
+                        if (isDeleted) {
+                          const newList = [...obatList];
+                          newList.splice(index, 1);
+                          setObatList(newList);
+                        }
+                      } else {
+                        const newList = [...obatList];
+                        newList.splice(index, 1);
+                        setObatList(newList);
+                      }
                     }}
                     className="flex hover:text-black-7 cursor-pointer"
                   >
