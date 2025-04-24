@@ -26,3 +26,8 @@ export const formatDateToDDMMYYYY = (dateString) => {
   const [year, month, day] = dateString.split("-");
   return `${day}-${month}-${year}`;
 };
+
+export const convertToInputDateFormat = (dateStr) => {
+  const [day, month, year] = dateStr.split("-");
+  return `${year}-${month}-${day}`;
+}

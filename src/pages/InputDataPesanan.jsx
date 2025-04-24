@@ -16,6 +16,7 @@ import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { createStoreSale } from "../services/stores";
 import { getStoreSaleById } from "../services/stores";
+import { convertToInputDateFormat } from "../utils/dateFormat";
 
 const InputDataPesanan = () => {
   const location = useLocation();
@@ -24,6 +25,8 @@ const InputDataPesanan = () => {
   const dateInputRef = useRef(null);
 
   const { id } = useParams();
+  const [isEditable, setEditable] = useState(true);
+
   const [stores, setStores] = useState([]);
   const [selectedStore, setSelectedStore] = useState("");
 
@@ -40,13 +43,13 @@ const InputDataPesanan = () => {
   const [total, setTotal] = useState(0);
   const [remaining, setRemaining] = useState(0);
 
+  const [paymentHistory, setPaymentHistory] = useState([]);
+
   const today = new Date().toISOString().split("T")[0];
   const [sendDate, setSendDate] = useState(today);
   const [paymentDate, setPaymentDate] = useState(today);
-
   const [paymentType, setPaymentType] = useState("Cicil");
   const [paymentMethod, setPaymentMethod] = useState("Tunai");
-
   const [paymentProof, setPaymentProof] = useState("https://example.com");
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -97,7 +100,11 @@ const InputDataPesanan = () => {
         setQuantity(response.data.data.quantity);
         setUnit(response.data.data.saleUnit);
         setPrice(response.data.data.price);
-        setSendDate(response.data.data.sentDate);
+        setSendDate(convertToInputDateFormat(response.data.data.sentDate));
+        setTotal(response.data.data.totalPrice);
+
+        setPaymentHistory(response.data.data.payments);
+        setRemaining(response.data.data.remainingPayment);
       }
     } catch (error) {}
   };
@@ -108,6 +115,7 @@ const InputDataPesanan = () => {
 
     if (id) {
       fetchEditSaleStoreData(id);
+      setEditable(false);
     }
   }, []);
 
@@ -120,7 +128,9 @@ const InputDataPesanan = () => {
   }, [price, quantity]);
 
   useEffect(() => {
-    setRemaining(total - nominal);
+    if (!id) {
+      setRemaining(total - nominal);
+    }
   }, [total, nominal]);
 
   const submitHandle = async () => {
@@ -144,7 +154,7 @@ const InputDataPesanan = () => {
       storeSalePayment: storeSalePayment,
     };
 
-    // console.log("payload is ready: ", payload);
+    console.log("payload is ready: ", payload);
 
     try {
       const response = await createStoreSale(payload);
@@ -270,7 +280,7 @@ const InputDataPesanan = () => {
           <div className="w-full">
             <label className="block font-medium  mt-4">Nama Pelanggan</label>
             <input
-              className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
+              className="w-full border bg-black-4 cursor-text rounded p-2 mb-4"
               type="text"
               placeholder="Masukkan nama barang"
               value={customer}
@@ -283,7 +293,7 @@ const InputDataPesanan = () => {
           <div className="w-full">
             <label className="block font-medium  mt-4">Nomor Telepon</label>
             <input
-              className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
+              className="w-full border bg-black-4 cursor-text rounded p-2 mb-4"
               type="number"
               placeholder="Masukkan nomor telepon"
               value={phone}
@@ -318,7 +328,7 @@ const InputDataPesanan = () => {
             <div className="flex justify-between gap-4">
               <div className="w-full">
                 <input
-                  className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
+                  className="w-full border bg-black-4 cursor-text rounded p-2 mb-4"
                   type="number"
                   placeholder="Masukkan nama barang"
                   value={quantity === 0 ? "" : quantity}
@@ -353,7 +363,7 @@ const InputDataPesanan = () => {
           <div className="w-full">
             <label className="block font-medium  mt-4">{`Harga (per ${unit})`}</label>
             <input
-              className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
+              className="w-full border bg-black-4 cursor-text rounded p-2 mb-4"
               type="number  "
               placeholder="Masukkan nama barang"
               value={price}
@@ -418,14 +428,34 @@ const InputDataPesanan = () => {
                 <th className="px-4 py-2">Bukti</th>
               </tr>
             </thead>
-            <tbody className="border-b">
-              {paymentDate &&
-              paymentMethod &&
-              nominal &&
-              remaining &&
-              paymentProof ? (
+            <tbody className="border-b text-center">
+              {paymentHistory && paymentHistory.length > 0 ? (
+                paymentHistory.map((payment, index) => (
+                  <tr key={index}>
+                    <td className="px-4 py-2">
+                      {formatDateToDDMMYYYY(payment.date)}
+                    </td>
+                    <td className="px-4 py-2">{payment.method}</td>
+                    <td className="px-4 py-2">
+                      Rp {Intl.NumberFormat("id-ID").format(payment.nominal)}
+                    </td>
+                    <td className="px-4 py-2">
+                      Rp {Intl.NumberFormat("id-ID").format(payment.remaining)}
+                    </td>
+                    <td className="px-4 py-2 underline cursor-pointer">
+                      Lihat Bukti
+                    </td>
+                  </tr>
+                ))
+              ) : paymentDate &&
+                paymentMethod &&
+                nominal &&
+                remaining &&
+                paymentProof ? (
                 <tr>
-                  <td className="px-4 py-2">{paymentDate}</td>
+                  <td className="px-4 py-2">
+                    {formatDateToDDMMYYYY(paymentDate)}
+                  </td>
                   <td className="px-4 py-2">{paymentMethod}</td>
                   <td className="px-4 py-2">
                     Rp {Intl.NumberFormat("id-ID").format(nominal)}
@@ -534,23 +564,33 @@ const InputDataPesanan = () => {
       {showPaymentModal && (
         <div className="fixed w-full inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="w-full bg-white mx-40 p-6 rounded-lg shadow-xl relative">
-            <h3 className="text-xl font-bold mb-4">Pembayaran</h3>
+            <h3 className="text-xl font-bold mb-4">
+              {id ? "Tambah Pembayaran" : "Pembayaran"}
+            </h3>
 
             {/* Tipe Pembayaran */}
-            <label className="block mb-2 font-medium">Tipe Pembayaran</label>
-            <select
-              className="w-full border p-2 rounded mb-4"
-              value={paymentType}
-              onChange={(e) => {
-                setPaymentType(e.target.value);
-              }}
-            >
-              <option className="text-black-6" value="" disabled hidden>
-                Pilih Metode Pembayaran
-              </option>
-              <option value="Penuh">Penuh</option>
-              <option value="Cicil">Cicil</option>
-            </select>
+            {id ? (
+              <></>
+            ) : (
+              <>
+                <label className="block mb-2 font-medium">
+                  Tipe Pembayaran
+                </label>
+                <select
+                  className="w-full border p-2 rounded mb-4"
+                  value={paymentType}
+                  onChange={(e) => {
+                    setPaymentType(e.target.value);
+                  }}
+                >
+                  <option className="text-black-6" value="" disabled hidden>
+                    Pilih Metode Pembayaran
+                  </option>
+                  <option value="Penuh">Penuh</option>
+                  <option value="Cicil">Cicil</option>
+                </select>{" "}
+              </>
+            )}
 
             {/* Metode Pembayaran */}
             <label className="block mb-2 font-medium">Metode Pembayaran</label>
@@ -574,7 +614,7 @@ const InputDataPesanan = () => {
               type="number"
               className="w-full border p-2 rounded mb-4"
               placeholder="Masukkan nominal pembayaran"
-              value={nominal}
+              value={nominal == 0 ? "" : nominal}
               onChange={(e) => {
                 setNominal(e.target.value);
               }}
