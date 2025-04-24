@@ -13,34 +13,9 @@ import {
 } from "../utils/dateFormat";
 import { useState, useRef } from "react";
 import { useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { createStoreSale } from "../services/stores";
-
-const dataAntrianPesanan = [
-  {
-    nomorAntrian: "1",
-    tanggalKirim: "22 Maret 2025",
-    namaBarang: "Telur OK",
-    kuantitas: "12 Ikat",
-    pengirim: "Toko A",
-    customer: "Pak Tono",
-  },
-  {
-    nomorAntrian: "2",
-    tanggalKirim: "22 Maret 2025",
-    namaBarang: "Telur retak",
-    kuantitas: "12 Karpet",
-    pengirim: "Toko B",
-    customer: "Pak Adi",
-  },
-  {
-    nomorAntrian: "3",
-    tanggalKirim: "22 Maret 2025",
-    namaBarang: "Telur pecah",
-    kuantitas: "10 Karpet",
-    pengirim: "Gudang A1",
-    customer: "Pak Yono",
-  },
-];
+import { getStoreSaleById } from "../services/stores";
 
 const InputDataPesanan = () => {
   const location = useLocation();
@@ -48,6 +23,7 @@ const InputDataPesanan = () => {
   const detailPages = ["input-data-pesanan"];
   const dateInputRef = useRef(null);
 
+  const { id } = useParams();
   const [stores, setStores] = useState([]);
   const [selectedStore, setSelectedStore] = useState("");
 
@@ -62,7 +38,7 @@ const InputDataPesanan = () => {
   const [price, setPrice] = useState(0);
   const [nominal, setNominal] = useState(0);
   const [total, setTotal] = useState(0);
-  const [remaining, getRemaining] = useState(0);
+  const [remaining, setRemaining] = useState(0);
 
   const today = new Date().toISOString().split("T")[0];
   const [sendDate, setSendDate] = useState(today);
@@ -96,7 +72,7 @@ const InputDataPesanan = () => {
   const fetchItemsData = async (storeId) => {
     try {
       const response = await getWarehouseItems("Telur", storeId);
-      console.log("response ", response);
+      // console.log("response ", response);
 
       if (response.status == 200) {
         setItems(response.data.data);
@@ -105,9 +81,34 @@ const InputDataPesanan = () => {
     } catch (error) {}
   };
 
+  const fetchEditSaleStoreData = async (id) => {
+    try {
+      const response = await getStoreSaleById(id);
+      console.log("id: ", id);
+
+      console.log("response get sale by id: ", response);
+      // console.log("customer name: ", response.data.data.customer);
+
+      if (response.status == 200) {
+        setSelectedStore(response.data.data.store.id);
+        setCustomer(response.data.data.customer);
+        setPhone(response.data.data.phone);
+        setSelectedItem(response.data.data.warehouseItem.name);
+        setQuantity(response.data.data.quantity);
+        setUnit(response.data.data.saleUnit);
+        setPrice(response.data.data.price);
+        setSendDate(response.data.data.sentDate);
+      }
+    } catch (error) {}
+  };
+
   useEffect(() => {
     fetchStoresData();
     fetchItemsData(selectedStore);
+
+    if (id) {
+      fetchEditSaleStoreData(id);
+    }
   }, []);
 
   useEffect(() => {
@@ -117,6 +118,10 @@ const InputDataPesanan = () => {
   useEffect(() => {
     setTotal(price * quantity);
   }, [price, quantity]);
+
+  useEffect(() => {
+    setRemaining(total - nominal);
+  }, [total, nominal]);
 
   const submitHandle = async () => {
     const storeSalePayment = {
@@ -131,7 +136,7 @@ const InputDataPesanan = () => {
       phone: phone.toString(),
       warehouseItemId: selectedItem.id,
       saleUnit: unit,
-      storeId: selectedStore,
+      storeId: parseInt(selectedStore),
       quantity: quantity,
       price: price.toString(),
       sendDate: formatDateToDDMMYYYY(sendDate),
@@ -149,90 +154,100 @@ const InputDataPesanan = () => {
         navigate(-1);
       }
     } catch (error) {
-      console.log("response: ", error);
+      // console.log("response: ", error);
 
       alert("Gagal menyimpan data pesanan");
     }
   };
+
   return (
     <div className="flex flex-col px-4 py-3 gap-4 ">
       {/* header section */}
       <div className="flex justify-between mb-2 flex-wrap gap-4">
-        <h1 className="text-3xl font-bold">Input Data Pesanan</h1>
+        <h1 className="text-3xl font-bold">
+          {id ? "Detail Pesanan" : "Input Data Pesanan"}
+        </h1>
         <div className="text-base flex gap-2">
           <p>{`Hari ini (${getTodayDateInBahasa()})`}</p>
         </div>
       </div>
 
       {/* Telur  ok, retak, pecah, reject*/}
-      <div className="flex md:grid-cols-2 gap-4 justify-between">
-        {/* telur OK */}
-        <div className="p-4 w-full rounded-md border-2 border-black-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Telur OK</h2>
-            <div className="p-2 rounded-xl bg-green-700">
-              <MdEgg size={24} color="white" />
+
+      {id ? (
+        <></>
+      ) : (
+        <div className="flex md:grid-cols-2 gap-4 justify-between">
+          {/* telur OK */}
+          <div className="p-4 w-full rounded-md border-2 border-black-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Telur OK</h2>
+              <div className="p-2 rounded-xl bg-green-700">
+                <MdEgg size={24} color="white" />
+              </div>
+            </div>
+
+            <div className="flex justify-center flex-wrap gap-4">
+              {/* item ikat */}
+              <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+                <p className="text-3xl font-bold text-center">50</p>
+                <p className="text-xl text-center">Ikat</p>
+              </div>
+              {/* item karpet */}
+              <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+                <p className="text-3xl font-bold text-center">100</p>
+                <p className="text-xl text-center">Karpet</p>
+              </div>
+              {/* item butir */}
+              <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+                <p className="text-3xl font-bold text-center">1000</p>
+                <p className="text-xl text-center">Butir</p>
+              </div>
             </div>
           </div>
 
-          <div className="flex justify-center flex-wrap gap-4">
-            {/* item ikat */}
-            <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-              <p className="text-3xl font-bold text-center">50</p>
-              <p className="text-xl text-center">Ikat</p>
+          {/* telur Retak */}
+          <div className="p-4 w-full rounded-md border-2 border-black-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Telur Retak</h2>
+              <div className="p-2 rounded-xl bg-green-700">
+                <TbEggCrackedFilled size={24} color="white" />
+              </div>
             </div>
-            {/* item karpet */}
-            <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-              <p className="text-3xl font-bold text-center">100</p>
-              <p className="text-xl text-center">Karpet</p>
+
+            <div className="flex justify-center flex-wrap gap-4">
+              {/* item butir */}
+              <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+                <p className="text-3xl font-bold text-center">30</p>
+                <p className="text-xl text-center">Butir</p>
+              </div>
             </div>
-            {/* item butir */}
-            <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-              <p className="text-3xl font-bold text-center">1000</p>
-              <p className="text-xl text-center">Butir</p>
+          </div>
+          {/* penjualan telur */}
+          <div className="p-4 w-full rounded-md border-2 border-black-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Telur Pecah</h2>
+              <div className="p-2 rounded-xl bg-green-700">
+                <TbEggCrackedFilled size={24} color="white" />
+              </div>
+            </div>
+
+            <div className="flex justify-center flex-wrap gap-4">
+              {/* item butir */}
+              <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+                <p className="text-3xl font-bold text-center">80</p>
+                <p className="text-xl text-center">Butir</p>
+              </div>
             </div>
           </div>
         </div>
-
-        {/* telur Retak */}
-        <div className="p-4 w-full rounded-md border-2 border-black-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Telur Retak</h2>
-            <div className="p-2 rounded-xl bg-green-700">
-              <TbEggCrackedFilled size={24} color="white" />
-            </div>
-          </div>
-
-          <div className="flex justify-center flex-wrap gap-4">
-            {/* item butir */}
-            <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-              <p className="text-3xl font-bold text-center">30</p>
-              <p className="text-xl text-center">Butir</p>
-            </div>
-          </div>
-        </div>
-        {/* penjualan telur */}
-        <div className="p-4 w-full rounded-md border-2 border-black-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Telur Pecah</h2>
-            <div className="p-2 rounded-xl bg-green-700">
-              <TbEggCrackedFilled size={24} color="white" />
-            </div>
-          </div>
-
-          <div className="flex justify-center flex-wrap gap-4">
-            {/* item butir */}
-            <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-              <p className="text-3xl font-bold text-center">80</p>
-              <p className="text-xl text-center">Butir</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* InputDataPesanan box  */}
       <div className="p-4 border border-black-6 rounded-[4px]">
-        <h1 className="text-lg font-bold">Input Data Pesanan</h1>
+        <h1 className="text-lg font-bold">
+          {id ? "Detail Data Pesanan" : "Input Data Pesanan"}
+        </h1>
 
         {/* Pilih Toko/Gudang */}
         <label className="block font-medium  mt-4">Pilih Toko</label>
@@ -271,6 +286,7 @@ const InputDataPesanan = () => {
               className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
               type="number"
               placeholder="Masukkan nomor telepon"
+              value={phone}
               onChange={(e) => {
                 setPhone(e.target.value);
               }}
@@ -381,7 +397,7 @@ const InputDataPesanan = () => {
       {/* Status Pembayaran */}
       <div className="p-4 border border-black-6 rounded-[4px]">
         <div className="flex justify-between">
-          <h1 className="text-lg font-bold">Input Data Pesanan</h1>
+          <h1 className="text-lg font-bold">Pembayaran</h1>
           <div
             className="px-5 py-3 bg-orange-400 rounded-[4px] hover:bg-orange-600 cursor-pointer"
             onClick={() => setShowPaymentModal(true)}
@@ -393,21 +409,41 @@ const InputDataPesanan = () => {
         {/* table */}
         <div className="mt-4">
           <table className="w-full">
-            <thead className="w-full bg-green-700 rounded-2xl text-white ">
-              <tr className="">
-                <th className="px-4 py-2 ">Tangggal</th>
+            <thead className="w-full bg-green-700 text-white">
+              <tr>
+                <th className="px-4 py-2">Tanggal</th>
+                <th className="px-4 py-2">Metode Pembayaran</th>
                 <th className="px-4 py-2">Nominal Pembayaran</th>
                 <th className="px-4 py-2">Sisa Cicilan</th>
-                <th className="px-4 py-2"></th>
+                <th className="px-4 py-2">Bukti</th>
               </tr>
             </thead>
             <tbody className="border-b">
-              <tr>
-                <td className="px-4 py-2 "></td>
-                <td className="px-4 py-2"></td>
-                <td className="px-4 py-2"></td>
-                <td className="px-4 py-2"></td>
-              </tr>
+              {paymentDate &&
+              paymentMethod &&
+              nominal &&
+              remaining &&
+              paymentProof ? (
+                <tr>
+                  <td className="px-4 py-2">{paymentDate}</td>
+                  <td className="px-4 py-2">{paymentMethod}</td>
+                  <td className="px-4 py-2">
+                    Rp {Intl.NumberFormat("id-ID").format(nominal)}
+                  </td>
+                  <td className="px-4 py-2">
+                    Rp {Intl.NumberFormat("id-ID").format(remaining)}
+                  </td>
+                  <td className="px-4 py-2 underline cursor-pointer">
+                    Lihat Bukti
+                  </td>
+                </tr>
+              ) : (
+                <tr>
+                  <td colSpan={5} className="text-center py-4 text-gray-500">
+                    Belum ada data pembayaran.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -463,6 +499,35 @@ const InputDataPesanan = () => {
           className="px-5 py-3 bg-green-700 rounded-[4px] hover:bg-green-900 cursor-pointer text-white"
         >
           Simpan
+        </div>
+      </div>
+
+      {/* simpan button */}
+      <div className="flex justify-end mb-8">
+        <div
+          onClick={() => {
+            console.log("===== Form Data =====");
+            console.log("ID:", id);
+            console.log("Toko:", selectedStore);
+            console.log("Barang:", selectedItem);
+            console.log("Nama Pelanggan:", customer);
+            console.log("No. Telepon:", phone);
+            console.log("Jumlah:", quantity);
+            console.log("Satuan:", unit);
+            console.log("Harga:", price);
+            console.log("Total:", total);
+            console.log("Tanggal Kirim:", sendDate);
+            console.log("Tanggal Bayar:", paymentDate);
+            console.log("Jenis Pembayaran:", paymentType);
+            console.log("Metode Pembayaran:", paymentMethod);
+            console.log("Nominal Bayar:", nominal);
+            console.log("Sisa Cicilan:", remaining);
+            console.log("Bukti Pembayaran:", paymentProof);
+            console.log("=====================");
+          }}
+          className="px-5 py-3 bg-green-700 rounded-[4px] hover:bg-green-900 cursor-pointer text-white"
+        >
+          CHECK
         </div>
       </div>
 
@@ -544,7 +609,10 @@ const InputDataPesanan = () => {
               >
                 Batal
               </button>
-              <button className="px-4 py-2 bg-green-700 hover:bg-green-900 text-white rounded cursor-pointer">
+              <button
+                onClick={() => setShowPaymentModal(false)}
+                className="px-4 py-2 bg-green-700 hover:bg-green-900 text-white rounded cursor-pointer"
+              >
                 Simpan
               </button>
             </div>

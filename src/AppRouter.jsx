@@ -221,6 +221,10 @@ const AppRouter = createBrowserRouter([
                     path: "input-data-pesanan",
                     element: <InputDataPesanan />,
                   },
+                  {
+                    path: "input-data-pesanan/:id",
+                    element: <InputDataPesanan />,
+                  },
                 ],
               },
               {

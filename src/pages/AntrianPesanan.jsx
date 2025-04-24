@@ -54,6 +54,13 @@ const AntrianPesanan = () => {
     navigate(inputPath);
   };
 
+  const editDataPesananHandle = (id) => {
+    const currentPath = location.pathname;
+    const inputPath = currentPath + "/input-data-pesanan/" + id;
+
+    navigate(inputPath);
+  };
+
   const fetchDataAntrianPesanan = async () => {
     try {
       const response = await getListStoreSale();
@@ -153,7 +160,7 @@ const AntrianPesanan = () => {
           {/* chart, incomes, and history section */}
 
           {/* detail penjualan */}
-          <div className=" flex gap-4 h-65">
+          <div className=" flex gap-4 ">
             <div className=" w-full bg-white px-8 py-6 rounded-lg border border-black-6">
               <div className="flex justify-between items-start mb-4">
                 <h2 className="text-lg font-semibold">Antrian Pesanan</h2>
@@ -198,8 +205,10 @@ const AntrianPesanan = () => {
                         </button>
                       </td>
                       <td className="py-2 px-4">
-                        {" "}
-                        <p className="underline font-bold hover:text-black-6 cursor-pointer">
+                        <p
+                          onClick={() => editDataPesananHandle(item.id)}
+                          className="underline font-medium hover:text-black-6 cursor-pointer"
+                        >
                           Detail
                         </p>
                       </td>
