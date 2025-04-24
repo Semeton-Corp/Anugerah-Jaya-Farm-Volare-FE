@@ -32,3 +32,19 @@ export const createStoreSale = (payload) => {
     },
   });
 };
+
+export const createStoreSalePayment = (id, payload) => {
+  return api.post(`/stores/sales/${id}/payments`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const updateStoreSalePayment = (storeSaleId, id, payload) => {
+  return api.put(`/stores/sales/${storeSaleId}/payments/${id}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

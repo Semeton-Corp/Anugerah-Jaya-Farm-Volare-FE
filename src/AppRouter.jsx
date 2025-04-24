@@ -230,6 +230,12 @@ const AppRouter = createBrowserRouter([
               {
                 path: "daftar-pesanan",
                 element: <DaftarPesanan />,
+                children: [
+                  {
+                    path: "input-data-pesanan/:id",
+                    element: <InputDataPesanan />,
+                  },
+                ],
               },
               {
                 path: "pembayaran-cicilan",

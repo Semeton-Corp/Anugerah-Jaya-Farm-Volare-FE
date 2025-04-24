@@ -3,7 +3,8 @@ import { PiCalendarBlank } from "react-icons/pi";
 import { MdEgg, MdShoppingCart } from "react-icons/md";
 import { MdStore } from "react-icons/md";
 import { TbEggCrackedFilled } from "react-icons/tb";
-import { FiMaximize2 } from "react-icons/fi";
+import { BiSolidEditAlt } from "react-icons/bi";
+import { MdDelete } from "react-icons/md";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getStores } from "../services/stores";
 import { getWarehouseItems } from "../services/warehouses";
@@ -17,6 +18,8 @@ import { useParams } from "react-router-dom";
 import { createStoreSale } from "../services/stores";
 import { getStoreSaleById } from "../services/stores";
 import { convertToInputDateFormat } from "../utils/dateFormat";
+import { createStoreSalePayment } from "../services/stores";
+import { updateStoreSalePayment } from "../services/stores";
 
 const InputDataPesanan = () => {
   const location = useLocation();
@@ -49,10 +52,13 @@ const InputDataPesanan = () => {
   const [sendDate, setSendDate] = useState(today);
   const [paymentDate, setPaymentDate] = useState(today);
   const [paymentType, setPaymentType] = useState("Cicil");
+  const [paymentStatus, setPaymentStatus] = useState("Belum Lunas");
   const [paymentMethod, setPaymentMethod] = useState("Tunai");
   const [paymentProof, setPaymentProof] = useState("https://example.com");
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [paymentId, setPaymentId] = useState(0);
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
@@ -105,6 +111,7 @@ const InputDataPesanan = () => {
 
         setPaymentHistory(response.data.data.payments);
         setRemaining(response.data.data.remainingPayment);
+        setPaymentStatus(response.data.data.paymentStatus);
       }
     } catch (error) {}
   };
@@ -164,9 +171,112 @@ const InputDataPesanan = () => {
         navigate(-1);
       }
     } catch (error) {
-      // console.log("response: ", error);
+      console.log("response: ", error.response.data.message);
+      if (
+        error.response.data.message == "nominal is not equal to total price"
+      ) {
+        alert(
+          "Jumlah pembayaran penuh harus memiliki nominal yang sama dengan tagihan total"
+        );
+      } else {
+        alert("Gagal menyimpan data pesanan");
+      }
+    }
+  };
 
-      alert("Gagal menyimpan data pesanan");
+  const editSubmitHandle = async () => {
+    const storeSalePayment = paymentHistory;
+
+    const payload = {
+      customer: customer,
+      phone: phone.toString(),
+      warehouseItemId: selectedItem.id,
+      saleUnit: unit,
+      storeId: parseInt(selectedStore),
+      quantity: quantity,
+      price: price.toString(),
+      sendDate: formatDateToDDMMYYYY(sendDate),
+      paymentType: paymentType,
+      storeSalePayment: storeSalePayment,
+    };
+
+    console.log("payload is ready: ", payload);
+
+    try {
+      const response = await createStoreSale(payload);
+      // console.log("response: ", response);
+
+      if (response.status == 201) {
+        navigate(-1);
+      }
+    } catch (error) {
+      console.log("response: ", error.response.data.message);
+      if (
+        error.response.data.message == "nominal is not equal to total price"
+      ) {
+        alert(
+          "Jumlah pembayaran penuh harus memiliki nominal yang sama dengan tagihan total"
+        );
+      } else {
+        alert("Gagal menyimpan data pesanan");
+      }
+    }
+  };
+
+  const createStoreSalePaymentHandle = async (id) => {
+    const payload = {
+      paymentDate: formatDateToDDMMYYYY(paymentDate),
+      nominal: nominal.toString(),
+      paymentProof: paymentProof,
+      paymentMethod: paymentMethod,
+    };
+
+    try {
+      const response = await createStoreSalePayment(id, payload);
+      console.log("response: ", response);
+      if (response.status == 201) {
+        fetchEditSaleStoreData(id);
+        setShowPaymentModal(false);
+      }
+    } catch (error) {
+      // console.log("error:", error.response.data.message);
+
+      if (
+        error.response.data.message ==
+        "total payment is greater than total price"
+      ) {
+        alert(
+          "Pembayaran yang dilakukan melebihi total tagihan, periksa kembali nominal bayar! "
+        );
+      } else {
+        alert("Gagal menambahkan pembayaran ");
+      }
+    }
+  };
+
+  const updateStoreSalePaymentHandle = async () => {
+    const payload = {
+      paymentDate: formatDateToDDMMYYYY(paymentDate),
+      nominal: nominal.toString(),
+      paymentProof: paymentProof,
+    };
+
+    try {
+      const response = await updateStoreSalePayment(id, paymentId, payload);
+      console.log("response: ", response);
+      if (response.status == 200) {
+        fetchEditSaleStoreData(id);
+        setPaymentType("Cicil");
+        setPaymentMethod("Tunai");
+        setNominal(0);
+        setPaymentDate(today);
+        setPaymentId(0);
+        setShowEditModal(false);
+      }
+    } catch (error) {
+      // console.log("error:", error.response.data.message);
+
+      alert("Gagal memperbaharui pembayaran ");
     }
   };
 
@@ -410,7 +520,13 @@ const InputDataPesanan = () => {
           <h1 className="text-lg font-bold">Pembayaran</h1>
           <div
             className="px-5 py-3 bg-orange-400 rounded-[4px] hover:bg-orange-600 cursor-pointer"
-            onClick={() => setShowPaymentModal(true)}
+            onClick={() => {
+              if (paymentStatus == "Lunas") {
+                alert("Pesanan ini sudah Lunas!");
+              } else {
+                setShowPaymentModal(true);
+              }
+            }}
           >
             Pilih Pembayaran
           </div>
@@ -426,16 +542,15 @@ const InputDataPesanan = () => {
                 <th className="px-4 py-2">Nominal Pembayaran</th>
                 <th className="px-4 py-2">Sisa Cicilan</th>
                 <th className="px-4 py-2">Bukti</th>
+                <th className="px-4 py-2"></th>
               </tr>
             </thead>
             <tbody className="border-b text-center">
               {paymentHistory && paymentHistory.length > 0 ? (
                 paymentHistory.map((payment, index) => (
                   <tr key={index}>
-                    <td className="px-4 py-2">
-                      {formatDateToDDMMYYYY(payment.date)}
-                    </td>
-                    <td className="px-4 py-2">{payment.method}</td>
+                    <td className="px-4 py-2">{payment.date}</td>
+                    <td className="px-4 py-2">{payment.paymentMethod}</td>
                     <td className="px-4 py-2">
                       Rp {Intl.NumberFormat("id-ID").format(payment.nominal)}
                     </td>
@@ -444,6 +559,25 @@ const InputDataPesanan = () => {
                     </td>
                     <td className="px-4 py-2 underline cursor-pointer">
                       Lihat Bukti
+                    </td>
+                    <td className="px-4 py-2 flex gap-3 justify-center">
+                      <BiSolidEditAlt
+                        onClick={() => {
+                          setNominal(payment.nominal);
+                          setPaymentDate(
+                            convertToInputDateFormat(payment.date)
+                          );
+                          setPaymentId(payment.id);
+                          setShowEditModal(true);
+                        }}
+                        size={24}
+                        className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                      />
+                      <MdDelete
+                        onClick={() => {}}
+                        size={24}
+                        className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                      />
                     </td>
                   </tr>
                 ))
@@ -484,12 +618,12 @@ const InputDataPesanan = () => {
             <h1 className="text-lg font-bold">Status Pembayaran: </h1>
             <div
               className={`px-5 py-3 text-xl rounded-[4px] ${
-                paymentType === "Cicil"
+                paymentStatus === "Belum Lunas"
                   ? "bg-orange-200 text-kritis-text-color"
                   : "bg-aman-box-surface-color text-aman-text-color"
               }`}
             >
-              {paymentType === "Cicil" ? "Belum Lunas" : "Lunas"}
+              {paymentStatus}
             </div>
           </div>
 
@@ -524,7 +658,11 @@ const InputDataPesanan = () => {
             console.log("Nominal:", nominal);
             console.log("=====================");
 
-            submitHandle();
+            if (id) {
+              editSubmitHandle();
+            } else {
+              submitHandle();
+            }
           }}
           className="px-5 py-3 bg-green-700 rounded-[4px] hover:bg-green-900 cursor-pointer text-white"
         >
@@ -533,7 +671,7 @@ const InputDataPesanan = () => {
       </div>
 
       {/* simpan button */}
-      <div className="flex justify-end mb-8">
+      {/* <div className="flex justify-end mb-8">
         <div
           onClick={() => {
             console.log("===== Form Data =====");
@@ -559,7 +697,7 @@ const InputDataPesanan = () => {
         >
           CHECK
         </div>
-      </div>
+      </div> */}
 
       {showPaymentModal && (
         <div className="fixed w-full inset-0 bg-black/60 flex items-center justify-center z-50">
@@ -644,13 +782,105 @@ const InputDataPesanan = () => {
             {/* Buttons */}
             <div className="flex justify-end gap-2">
               <button
-                onClick={() => setShowPaymentModal(false)}
+                onClick={() => {
+                  if (id) {
+                    setShowPaymentModal(false);
+                  } else {
+                    setPaymentType("Cicil");
+                    setPaymentMethod("Tunai");
+                    setNominal(0);
+                    setPaymentDate(today);
+                    setShowPaymentModal(false);
+                  }
+                }}
                 className="px-4 py-2 bg-gray-300 hover:bg-gray-500 rounded cursor-pointer"
               >
                 Batal
               </button>
               <button
-                onClick={() => setShowPaymentModal(false)}
+                onClick={() => {
+                  if (id) {
+                    createStoreSalePaymentHandle(id);
+                  } else {
+                    setShowPaymentModal(false);
+                  }
+                }}
+                className="px-4 py-2 bg-green-700 hover:bg-green-900 text-white rounded cursor-pointer"
+              >
+                Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEditModal && (
+        <div className="fixed w-full inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="w-full bg-white mx-40 p-6 rounded-lg shadow-xl relative">
+            <h3 className="text-xl font-bold mb-4">
+              {id ? "Tambah Pembayaran" : "Pembayaran"}
+            </h3>
+
+            {/* Nominal Bayar */}
+            <label className="block mb-2 font-medium">Nominal Bayar</label>
+            <input
+              type="number"
+              className="w-full border p-2 rounded mb-4"
+              placeholder="Masukkan nominal pembayaran"
+              value={nominal == 0 ? "" : nominal}
+              onChange={(e) => {
+                setNominal(e.target.value);
+              }}
+            />
+
+            {/* Tanggal Bayar */}
+
+            <label className="block font-medium ">Tanggal Bayar</label>
+            <input
+              ref={dateInputRef}
+              className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
+              type="date"
+              value={paymentDate}
+              onClick={() => {
+                // Manually open the date picker when the input is clicked
+                if (dateInputRef.current?.showPicker) {
+                  dateInputRef.current.showPicker(); // Modern browsers
+                }
+              }}
+              onChange={(e) => setPaymentDate(e.target.value)}
+            />
+
+            {/* Bukti Pembayaran */}
+            <label className="block mb-2 font-medium">Bukti Pembayaran</label>
+            <input type="file" className="w-full border p-2 rounded mb-4" />
+
+            {/* Buttons */}
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  if (id) {
+                    setShowEditModal(false);
+                  } else {
+                    setPaymentType("Cicil");
+                    setPaymentMethod("Tunai");
+                    setNominal(0);
+                    setPaymentDate(today);
+                    setPaymentId(0);
+                    setShowEditModal(false);
+                  }
+                }}
+                className="px-4 py-2 bg-gray-300 hover:bg-gray-500 rounded cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => {
+                  if (id) {
+                    updateStoreSalePaymentHandle();
+                  } else {
+                    setShowPaymentModal(false);
+                  }
+                }}
                 className="px-4 py-2 bg-green-700 hover:bg-green-900 text-white rounded cursor-pointer"
               >
                 Simpan
