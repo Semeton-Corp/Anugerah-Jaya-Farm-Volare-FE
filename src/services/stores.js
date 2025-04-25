@@ -33,6 +33,14 @@ export const createStoreSale = (payload) => {
   });
 };
 
+export const updateStoreSale = (storeSaleId, payload) => {
+  return api.put(`/stores/sales/${storeSaleId}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export const createStoreSalePayment = (id, payload) => {
   return api.post(`/stores/sales/${id}/payments`, payload, {
     headers: {

@@ -20,6 +20,7 @@ import { getStoreSaleById } from "../services/stores";
 import { convertToInputDateFormat } from "../utils/dateFormat";
 import { createStoreSalePayment } from "../services/stores";
 import { updateStoreSalePayment } from "../services/stores";
+import { updateStoreSale } from "../services/stores";
 
 const InputDataPesanan = () => {
   const location = useLocation();
@@ -193,6 +194,7 @@ const InputDataPesanan = () => {
       warehouseItemId: selectedItem.id,
       saleUnit: unit,
       storeId: parseInt(selectedStore),
+      isSend: true,
       quantity: quantity,
       price: price.toString(),
       sendDate: formatDateToDDMMYYYY(sendDate),
@@ -203,14 +205,14 @@ const InputDataPesanan = () => {
     console.log("payload is ready: ", payload);
 
     try {
-      const response = await createStoreSale(payload);
-      // console.log("response: ", response);
+      const response = await updateStoreSale(id, payload);
+      console.log("response update: ", response);
 
-      if (response.status == 201) {
+      if (response.status == 200) {
         navigate(-1);
       }
     } catch (error) {
-      console.log("response: ", error.response.data.message);
+      console.log("response: ", error);
       if (
         error.response.data.message == "nominal is not equal to total price"
       ) {
@@ -236,6 +238,11 @@ const InputDataPesanan = () => {
       console.log("response: ", response);
       if (response.status == 201) {
         fetchEditSaleStoreData(id);
+        setShowPaymentModal(false);
+        setPaymentType("Cicil");
+        setPaymentMethod("Tunai");
+        setNominal(0);
+        setPaymentDate(today);
         setShowPaymentModal(false);
       }
     } catch (error) {
@@ -275,8 +282,16 @@ const InputDataPesanan = () => {
       }
     } catch (error) {
       // console.log("error:", error.response.data.message);
-
-      alert("Gagal memperbaharui pembayaran ");
+      if (
+        error.response.data.message ==
+        "total payment is greater than total price"
+      ) {
+        alert(
+          "Pembayaran yang dilakukan melebihi total tagihan, periksa kembali nominal bayar! "
+        );
+      } else {
+        alert("Gagal menambahkan pembayaran ");
+      }
     }
   };
 
@@ -671,7 +686,7 @@ const InputDataPesanan = () => {
       </div>
 
       {/* simpan button */}
-      {/* <div className="flex justify-end mb-8">
+      <div className="flex justify-end mb-8">
         <div
           onClick={() => {
             console.log("===== Form Data =====");
@@ -697,7 +712,7 @@ const InputDataPesanan = () => {
         >
           CHECK
         </div>
-      </div> */}
+      </div>
 
       {showPaymentModal && (
         <div className="fixed w-full inset-0 bg-black/60 flex items-center justify-center z-50">
@@ -785,6 +800,10 @@ const InputDataPesanan = () => {
                 onClick={() => {
                   if (id) {
                     setShowPaymentModal(false);
+                    setPaymentType("Cicil");
+                    setPaymentMethod("Tunai");
+                    setNominal(0);
+                    setPaymentDate(today);
                   } else {
                     setPaymentType("Cicil");
                     setPaymentMethod("Tunai");
@@ -814,6 +833,7 @@ const InputDataPesanan = () => {
         </div>
       )}
 
+      {/* EDIT MODAL */}
       {showEditModal && (
         <div className="fixed w-full inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="w-full bg-white mx-40 p-6 rounded-lg shadow-xl relative">
@@ -860,6 +880,10 @@ const InputDataPesanan = () => {
                 onClick={() => {
                   if (id) {
                     setShowEditModal(false);
+                    setPaymentType("Cicil");
+                    setPaymentMethod("Tunai");
+                    setNominal(0);
+                    setPaymentDate(today);
                   } else {
                     setPaymentType("Cicil");
                     setPaymentMethod("Tunai");

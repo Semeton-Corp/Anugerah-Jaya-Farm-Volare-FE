@@ -8,28 +8,6 @@ import { useLocation, useNavigate, Outlet } from "react-router-dom";
 
 import { FaWarehouse, FaTruck } from "react-icons/fa";
 
-const produksiDetail = [
-  {
-    kandang: "Kandang A1",
-    qty: 1000,
-    ok: 800,
-    retak: 12,
-    pecah: 100,
-    reject: 40,
-    abnormality: "3%",
-    keterangan: "aman",
-  },
-  {
-    kandang: "Kandang A2",
-    qty: 1000,
-    ok: 800,
-    retak: 12,
-    pecah: 100,
-    reject: 40,
-    abnormality: "12%",
-    keterangan: "kritis",
-  },
-];
 
 const stokTokoData = [
   {
