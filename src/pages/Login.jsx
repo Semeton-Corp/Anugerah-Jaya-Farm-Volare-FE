@@ -2,6 +2,7 @@ import React from "react";
 import logo from "../assets/logo_ajf.svg";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { login } from "../services/authServices";
 
 const Login = () => {
@@ -45,6 +46,16 @@ const Login = () => {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (token && role) {
+      const rolePath = role.toLowerCase().replace(/\s+/g, "-");
+      navigate(`/${rolePath}`);
+    }
+  }, []);
 
   return (
     <div className="relative md:h-screen w-screen">

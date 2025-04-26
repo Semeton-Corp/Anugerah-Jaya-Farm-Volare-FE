@@ -8,6 +8,9 @@ import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
 import { useState } from "react";
 import { getListStoreSale } from "../services/stores";
+import { useEffect } from "react";
+import { updateStoreSale } from "../services/stores";
+import { formatDateToDDMMYYYY } from "../utils/dateFormat";
 
 // const dataAntrianPesanan = [
 //   {
@@ -67,15 +70,47 @@ const AntrianPesanan = () => {
       console.log("response: ", response);
       if (response.status == 200) {
         setDataAntrianPesanan(response.data.data);
+        console.log("dataAntrianpesanan: ", response.data.data);
       }
     } catch (error) {
       alert("Gagal memuat data antrian pesanan: ", error);
     }
   };
 
+  const sendHandle = async (id, item) => {
+    const payload = {
+      customer: item.customer,
+      phone: item.phone.toString(),
+      warehouseItemId: item.selectedItem,
+      saleUnit: item.unit,
+      storeId: item.store.id,
+      isSend: true,
+      quantity: item.quantity,
+      sendDate: formatDateToDDMMYYYY(item.sentDate),
+      paymentType: item.paymentType,
+      storeSalePayment: item.storeSalePayment,
+    };
+
+    try {
+      const response = await updateStoreSale(id, payload);
+      console.log("response send: ", response);
+    } catch (error) {
+      console.log("send error: ", error);
+    }
+  };
+
   useState(() => {
     fetchDataAntrianPesanan();
   }, []);
+
+  useEffect(() => {
+    fetchDataAntrianPesanan();
+
+    if (location.state?.refetch) {
+      fetchDataAntrianPesanan();
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   return (
     <>
@@ -200,9 +235,18 @@ const AntrianPesanan = () => {
                       <td className="py-2 px-4">{item.store.name}</td>
                       <td className="py-2 px-4">{item.customer}</td>
                       <td className="py-2 px-4">
-                        <button className="px-3 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer">
-                          Kirim Telur
-                        </button>
+                        {item.isSend ? (
+                          <></>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              sendHandle(item.id, item);
+                            }}
+                            className="px-3 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer"
+                          >
+                            Kirim Telur
+                          </button>
+                        )}
                       </td>
                       <td className="py-2 px-4">
                         <p

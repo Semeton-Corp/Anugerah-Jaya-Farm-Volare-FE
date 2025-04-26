@@ -82,11 +82,11 @@ const InputDataPesanan = () => {
   const fetchItemsData = async (storeId) => {
     try {
       const response = await getWarehouseItems("Telur", storeId);
-      // console.log("response ", response);
+      console.log("response fetch item data", response);
 
       if (response.status == 200) {
         setItems(response.data.data);
-        setSelectedItem(response.data.data[0]);
+        setSelectedItem(response.data.data[0].id);
       }
     } catch (error) {}
   };
@@ -152,7 +152,7 @@ const InputDataPesanan = () => {
     const payload = {
       customer: customer,
       phone: phone.toString(),
-      warehouseItemId: selectedItem.id,
+      warehouseItemId: selectedItem,
       saleUnit: unit,
       storeId: parseInt(selectedStore),
       quantity: quantity,
@@ -169,7 +169,7 @@ const InputDataPesanan = () => {
       // console.log("response: ", response);
 
       if (response.status == 201) {
-        navigate(-1);
+        navigate(-1, { state: { refetch: true } });
       }
     } catch (error) {
       console.log("response: ", error.response.data.message);
@@ -191,10 +191,10 @@ const InputDataPesanan = () => {
     const payload = {
       customer: customer,
       phone: phone.toString(),
-      warehouseItemId: selectedItem.id,
+      warehouseItemId: selectedItem,
       saleUnit: unit,
       storeId: parseInt(selectedStore),
-      isSend: true,
+      isSend: false,
       quantity: quantity,
       price: price.toString(),
       sendDate: formatDateToDDMMYYYY(sendDate),
@@ -209,7 +209,7 @@ const InputDataPesanan = () => {
       console.log("response update: ", response);
 
       if (response.status == 200) {
-        navigate(-1);
+        navigate(-1, { state: { refetch: true } });
       }
     } catch (error) {
       console.log("response: ", error);
