@@ -10,14 +10,12 @@ import { getTodayDateInBahasa } from "../utils/dateFormat";
 import { MdEgg, MdShoppingCart } from "react-icons/md";
 import { FaCartShopping } from "react-icons/fa6";
 
-import { FaWarehouse, FaTruck } from "react-icons/fa";
-
 const stokTokoData = [
   {
     namaBarang: "Telur OK",
     idBarang: "ID1234",
     satuan: "Ikat",
-    kuantitas: 4000,
+    kuantitas: 40,
     tempat: "Toko A",
     keterangan: "kritis",
   },
@@ -25,7 +23,7 @@ const stokTokoData = [
     namaBarang: "Telur Retak",
     idBarang: "ID1234",
     satuan: "Butir",
-    kuantitas: 1200,
+    kuantitas: 12,
     tempat: "Toko B",
     keterangan: "kritis",
   },
@@ -33,7 +31,7 @@ const stokTokoData = [
     namaBarang: "Telur Pecah",
     idBarang: "ID1234",
     satuan: "Butir",
-    kuantitas: 1200,
+    kuantitas: 12,
     tempat: "Toko C",
     keterangan: "aman",
   },
@@ -41,7 +39,7 @@ const stokTokoData = [
     namaBarang: "Telur Retak",
     idBarang: "ID1234",
     satuan: "Butir",
-    kuantitas: 1200,
+    kuantitas: 12,
     tempat: "Toko D",
     keterangan: "aman",
   },
@@ -185,7 +183,7 @@ const OverviewStok = () => {
             {/* telur OK */}
             <div className="p-4 w-full rounded-md border-2 border-black-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">Telur OK</h2>
+                <h2 className="text-lg font-semibold">Stok Telur OK</h2>
                 <div className="p-2 rounded-xl bg-green-700">
                   <MdEgg size={24} color="white" />
                 </div>
@@ -213,7 +211,7 @@ const OverviewStok = () => {
             {/* telur Retak */}
             <div className="p-4 w-full rounded-md border-2 border-black-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">Telur Retak</h2>
+                <h2 className="text-lg font-semibold">Stok Telur Retak</h2>
                 <div className="p-2 rounded-xl bg-green-700">
                   <TbEggCrackedFilled size={24} color="white" />
                 </div>
@@ -230,7 +228,7 @@ const OverviewStok = () => {
             {/* penjualan telur */}
             <div className="p-4 w-full rounded-md border-2 border-black-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">Telur Pecah</h2>
+                <h2 className="text-lg font-semibold">Stok Telur Pecah</h2>
                 <div className="p-2 rounded-xl bg-green-700">
                   <TbEggCrackedFilled size={24} color="white" />
                 </div>
@@ -336,22 +334,22 @@ const OverviewStok = () => {
                     <td className="px-4 py-2">
                       <span
                         className={`py-1 px-5 rounded text-sm font-semibold ${
-                          item.keterangan === "aman"
+                          item.keterangan === "Selesai"
                             ? "bg-aman-box-surface-color text-aman-text-color"
+                            : item.keterangan === "Pending"
+                            ? "bg-green-200 text-green-900"
+                            : item.keterangan === "Sedang Dikirim"
+                            ? "bg-orange-200 text-orange-900"
                             : "bg-kritis-box-surface-color text-kritis-text-color"
                         }`}
                       >
                         {item.keterangan}
                       </span>
                     </td>
-                    <td className="px-4 py-2">
-                      {item.aksi === "Barang Sampai" ? (
-                        <button className="bg-green-700 text-white px-3 py-1 rounded text-xs">
-                          Barang Sampai
-                        </button>
-                      ) : item.aksi === "Edit" ? (
-                        <button className="text-black">✏️</button>
-                      ) : null}
+                    <td className="px-4 py-2 text-sm font-semibold">
+                      <button className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-900 cursor-pointer">
+                        Barang Sampai
+                      </button>
                     </td>
                   </tr>
                 ))}

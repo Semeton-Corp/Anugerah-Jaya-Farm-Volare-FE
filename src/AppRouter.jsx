@@ -37,6 +37,11 @@ import RiwayatStok from "./pages/RiwayatStok";
 import RiwayatGudang from "./pages/RiwayatGudang";
 import InputDataPesanan from "./pages/InputDataPesanan";
 import DetailVaksinObat from "./pages/DetailVaksinObat";
+import DaftarSuplier from "./pages/DaftarSuplier";
+import PesananToko from "./pages/PesananToko";
+import DaftarBarang from "./pages/DaftarBarang";
+import PesananToko from "./pages/PesananToko";
+import DaftarSuplier from "./pages/DaftarSuplier";
 
 const AppRouter = createBrowserRouter([
   {
@@ -312,12 +317,20 @@ const AppRouter = createBrowserRouter([
                 element: <Gudang />,
               },
               {
-                path: "overview-gudang",
-                element: <Gudang />,
+                path: "daftar-barang",
+                element: <DaftarBarang />,
+              },
+              {
+                path: "pesanan-toko",
+                element: <PesananToko />,
               },
               {
                 path: "riwayat-gudang",
                 element: <RiwayatGudang />,
+              },
+              {
+                path: "daftar-suplier",
+                element: <DaftarSuplier />,
               },
             ],
           },
