@@ -240,10 +240,6 @@ const AppRouter = createBrowserRouter([
                   },
                 ],
               },
-              {
-                path: "pembayaran-cicilan",
-                element: <PembayaranCicilan />,
-              },
             ],
           },
           {
@@ -329,6 +325,35 @@ const AppRouter = createBrowserRouter([
               {
                 path: "daftar-suplier",
                 element: <DaftarSuplier />,
+              },
+            ],
+          },
+          {
+            path: "kasir",
+            children: [
+              {
+                path: "antrian-pesanan",
+                element: <AntrianPesanan />,
+                children: [
+                  {
+                    path: "input-data-pesanan",
+                    element: <InputDataPesanan />,
+                  },
+                  {
+                    path: "input-data-pesanan/:id",
+                    element: <InputDataPesanan />,
+                  },
+                ],
+              },
+              {
+                path: "daftar-pesanan",
+                element: <DaftarPesanan />,
+                children: [
+                  {
+                    path: "input-data-pesanan/:id",
+                    element: <InputDataPesanan />,
+                  },
+                ],
               },
             ],
           },

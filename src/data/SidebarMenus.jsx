@@ -124,7 +124,6 @@ export const sidebarMenus = {
       subTabs: [
         { tabName: "Antrian Pesanan", path: "antrian-pesanan" },
         { tabName: "Daftar Pesanan", path: "daftar-pesanan" },
-        { tabName: "Pembayaran Cicilan", path: "pembayaran-cicilan" },
       ],
     },
     {
@@ -178,6 +177,15 @@ export const sidebarMenus = {
         { tabName: "Pesanan Toko", path: "pesanan-toko" },
         { tabName: "Riwayat Gudang", path: "riwayat-gudang" },
         { tabName: "Daftar Suplier", path: "daftar-suplier" },
+      ],
+    },
+    {
+      icon: <img src={toko} alt="Overview Icon" className="h-4 w-4" />,
+      tabName: "Kasir",
+      element: <OverviewOwner />,
+      subTabs: [
+        { tabName: "Antrian Pesanan", path: "antrian-pesanan" },
+        { tabName: "Daftar Pesanan", path: "daftar-pesanan" },
       ],
     },
     {
