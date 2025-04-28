@@ -141,7 +141,6 @@ const usiaAyamData = [
   { name: "Afkir", value: 100 },
 ];
 
-
 const Kinerja = () => {
   const location = useLocation();
   const detailPages = ["detail-kinerja-ayam"];
@@ -389,7 +388,7 @@ const Kinerja = () => {
                           className={`w-24 py-1 flex justify-center rounded text-sm font-semibold ${
                             row.produktivitas === "Produktif"
                               ? "bg-aman-box-surface-color text-aman-text-color"
-                              : "bg-kritis-box-surface-color text-kritis-text-color"
+                              : "bg-orange-200 text-orange-900"
                           }`}
                         >
                           {row.produktivitas}

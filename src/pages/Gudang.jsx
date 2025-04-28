@@ -4,14 +4,6 @@ import { HiMiniExclamationTriangle } from "react-icons/hi2";
 import { FaClock } from "react-icons/fa6";
 import { BiSolidBox } from "react-icons/bi";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
-
-import { TbEggCrackedFilled } from "react-icons/tb";
-import {
-  GiBirdCage,
-  GiHealthDecrease,
-  GiChicken,
-  GiDeathSkull,
-} from "react-icons/gi";
 import { FiMaximize2 } from "react-icons/fi";
 import { FaPercentage, FaWarehouse, FaTruck } from "react-icons/fa";
 
