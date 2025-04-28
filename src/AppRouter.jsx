@@ -40,8 +40,6 @@ import DetailVaksinObat from "./pages/DetailVaksinObat";
 import DaftarSuplier from "./pages/DaftarSuplier";
 import PesananToko from "./pages/PesananToko";
 import DaftarBarang from "./pages/DaftarBarang";
-import PesananToko from "./pages/PesananToko";
-import DaftarSuplier from "./pages/DaftarSuplier";
 
 const AppRouter = createBrowserRouter([
   {
