@@ -23,7 +23,6 @@ const TambahTugasRutin = () => {
   const { id } = useParams();
 
   const [locations, setLocations] = useState([]);
-
   const [selectedLocation, setSelectedLocation] = useState([]);
 
   const [selectedCage, setSelectedCage] = useState(0);
@@ -36,6 +35,7 @@ const TambahTugasRutin = () => {
   const [totalLiveChicken, setTotalLiveChicken] = useState(0);
   const [totalSickChicken, setTotalSickChicken] = useState(0);
   const [totalDeathChicken, setTotalDeathChicken] = useState(0);
+  const [slot, setSlot] = useState(0);
   const [totalFeed, setTotalFeed] = useState(0);
 
   const userRole = localStorage.getItem("role");
@@ -105,68 +105,9 @@ const TambahTugasRutin = () => {
       console.log("gagal :", error);
     }
   };
+
   useEffect(() => {
-    const fetchCages = async () => {
-      try {
-        const response = await getCage();
-        const data = response.data.data;
-        setCages(data);
-
-        if (id) {
-          console.log("THERE IS AN ID: ", id);
-          const updateResponse = await getChickenMonitoringById(id);
-          const data = updateResponse.data.data;
-          console.log("THERE IS DATA: ", data);
-
-          setSelectedCage(data.cage.id);
-
-          setSelectedChikenCategory(data.chickenCategory);
-          setAgeChiken(data.age);
-          setTotalLiveChicken(data.totalLiveChicken);
-          setTotalSickChicken(data.totalSickChicken);
-          setTotalDeathChicken(data.totalDeathChicken);
-          setTotalFeed(data.totalFeed);
-
-          const vaksinListget = data.chickenVaccines.map((v) => ({
-            id: v.id,
-            jenis: v.vaccine,
-            dosis: parseFloat(v.dose),
-            satuan: v.unit,
-          }));
-
-          setVaksinList(vaksinListget || []);
-
-          const chickenDiseasesGet = data.chickenDiseases.map((o) => ({
-            id: o.id,
-            penyakit: o.disease,
-            jenis: o.medicine,
-            dosis: parseFloat(o.dose),
-            satuan: o.unit,
-          }));
-
-          if (vaksinListget.length > 0) {
-            setVaksinExpanded(true);
-          }
-
-          if (chickenDiseasesGet.length > 0) {
-            setObatExpanded(true);
-          }
-
-          console.log("OBAT: ", data.chickenDiseases);
-          setObatList(chickenDiseasesGet || []);
-        } else {
-          if (data.length > 0) {
-            setSelectedCage(data[0].id);
-          }
-        }
-      } catch (error) {
-        console.error("Gagal memuat data kandang:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCages();
+    fetchLocations();
   }, []);
 
   async function simpanAyamHandle() {
@@ -278,42 +219,6 @@ const TambahTugasRutin = () => {
     }
   }
 
-  const deleteVaccineHandle = async (chickenMonitoringId, id) => {
-    var isDeleted = false;
-    try {
-      const response = await deleteChickenVaccineMonitoring(
-        chickenMonitoringId,
-        id
-      );
-      console.log("response :", response.status);
-      if (response.status == 204) {
-        isDeleted = true;
-      }
-    } catch (error) {
-      alert("Gagal menghapus data vaksin: ", error);
-    }
-
-    return isDeleted;
-  };
-
-  const deleteDiseaseHandle = async (chickenMonitoringId, id) => {
-    var isDeleted = false;
-    try {
-      const response = await deleteChickenDiseaseMonitoring(
-        chickenMonitoringId,
-        id
-      );
-      console.log("response :", response.status);
-      if (response.status == 204) {
-        isDeleted = true;
-      }
-    } catch (error) {
-      alert("Gagal menghapus data penyakit/obat: ", error);
-    }
-
-    return isDeleted;
-  };
-
   const getDisplayValue = (val) => (val === 0 ? "" : val);
 
   return (
@@ -343,215 +248,30 @@ const TambahTugasRutin = () => {
         <label className="block font-medium  mt-4">Lokasi</label>
         <select
           className="w-full border border-black-6 bg-black-4 cursor-pointer rounded p-2 mb-4"
-          value={selectedCage}
+          value={selectedLocation.name}
           onChange={(e) => {
-            const id = Number(e.target.value);
-            setSelectedCage(id);
+            setSelectedLocation(e.target.value);
           }}
         >
-          {locations.map((cage) => (
-            <option key={cage.id} value={cage.id}>
-              {cage.name}
+          {locations.map((location) => (
+            <option key={location.name} value={location}>
+              {location.name}
             </option>
           ))}
         </select>
 
-        {/* Vaksin Section */}
-        <div className="mt-6 border border-black-6 rounded p-4 ">
-          <div
-            className="flex items-center cursor-pointer mb-3"
-            onClick={() => setVaksinExpanded(!vaksinExpanded)}
-          >
-            <span className="mr-2">{vaksinExpanded ? "▼" : "▶"}</span>
-            <strong>Vaksin</strong>
-          </div>
-
-          {vaksinExpanded &&
-            vaksinList.map((vaksin, index) => (
-              <div
-                key={index}
-                className="mb-6 border rounded-[4px] px-4 py-6 border-black-6 bg-black-4"
-              >
-                <div className="flex underline   justify-end p-2">
-                  <div
-                    onClick={() => {
-                      if (vaksin.id) {
-                        const isDeleted = deleteVaccineHandle(id, vaksin.id);
-                        console.log("isDeleted: ", isDeleted);
-
-                        if (isDeleted) {
-                          const newList = [...vaksinList];
-                          newList.splice(index, 1);
-                          setVaksinList(newList);
-                        }
-                      } else {
-                        const newList = [...vaksinList];
-                        newList.splice(index, 1);
-                        setVaksinList(newList);
-                      }
-                    }}
-                    className="flex hover:text-black-7 cursor-pointer"
-                  >
-                    <p>Hapus Vaksin</p>
-                    <button>
-                      <MdDelete size={24} />
-                    </button>
-                  </div>
-                </div>
-
-                <label className="block font-medium mb-1">Jenis Vaksin</label>
-                <input
-                  type="text"
-                  className="w-full border rounded p-2 mb-4 bg-white"
-                  value={getDisplayValue(vaksin.jenis)}
-                  onChange={(e) =>
-                    handleVaksinChange(index, "jenis", e.target.value)
-                  }
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block font-medium mb-1">Dosis</label>
-                    <input
-                      type="number"
-                      className="w-full border rounded p-2 bg-white"
-                      value={getDisplayValue(vaksin.dosis)}
-                      onChange={(e) =>
-                        handleVaksinChange(index, "dosis", e.target.value)
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-medium mb-1">
-                      Satuan Dosis
-                    </label>
-                    <select
-                      className="w-full border rounded p-2 bg-white"
-                      value={vaksin.satuan}
-                      onChange={(e) =>
-                        handleVaksinChange(index, "satuan", e.target.value)
-                      }
-                    >
-                      <option value="mililiter">mililiter</option>
-                      <option value="liter">liter</option>
-                      <option value="gram">gram</option>
-                      <option value="kilogram">kilogram</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            ))}
-          <button
-            onClick={addVaksinInput}
-            className="mt-2 bg-emerald-700 text-white py-2 px-4 rounded hover:bg-emerald-600 cursor-pointer"
-          >
-            Tambah vaksin
-          </button>
-        </div>
-
-        {/* Obat Section */}
-        <div className="mt-6 border border-black-6 rounded p-4">
-          <div
-            className="flex items-center cursor-pointer mb-3"
-            onClick={() => setObatExpanded(!obatExpanded)}
-          >
-            <span className="mr-2">{obatExpanded ? "▼" : "▶"}</span>
-            <strong>Obat</strong>
-          </div>
-
-          {obatExpanded &&
-            obatList.map((obat, index) => (
-              <div
-                key={index}
-                className="mb-6 border  rounded-[4px] px-4 py-6 border-black-6 bg-black-4"
-              >
-                <div className="flex underline   justify-end p-2">
-                  <div
-                    onClick={() => {
-                      if (obat.id) {
-                        const isDeleted = deleteDiseaseHandle(id, obat.id);
-                        console.log("isDeleted: ", isDeleted);
-
-                        if (isDeleted) {
-                          const newList = [...obatList];
-                          newList.splice(index, 1);
-                          setObatList(newList);
-                        }
-                      } else {
-                        const newList = [...obatList];
-                        newList.splice(index, 1);
-                        setObatList(newList);
-                      }
-                    }}
-                    className="flex hover:text-black-7 cursor-pointer"
-                  >
-                    <p>Hapus Obat</p>
-                    <button>
-                      <MdDelete size={24} />
-                    </button>
-                  </div>
-                </div>
-
-                <label className="block font-medium mb-1">Penyakit</label>
-                <input
-                  type="text"
-                  className="w-full border rounded p-2 mb-4 bg-white"
-                  value={getDisplayValue(obat.penyakit)}
-                  onChange={(e) =>
-                    handleObatChange(index, "penyakit", e.target.value)
-                  }
-                />
-
-                <label className="block font-medium mb-1">Jenis Obat</label>
-                <input
-                  type="text"
-                  className="w-full border rounded p-2 mb-4 bg-white"
-                  value={getDisplayValue(obat.jenis)}
-                  onChange={(e) =>
-                    handleObatChange(index, "jenis", e.target.value)
-                  }
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block font-medium mb-1">Dosis</label>
-                    <input
-                      type="number"
-                      className="w-full border rounded p-2 bg-white"
-                      value={getDisplayValue(obat.dosis)}
-                      onChange={(e) =>
-                        handleObatChange(index, "dosis", e.target.value)
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-medium mb-1">
-                      Satuan Dosis
-                    </label>
-                    <select
-                      className="w-full border rounded p-2 bg-white"
-                      value={getDisplayValue(obat.satuan)}
-                      onChange={(e) =>
-                        handleObatChange(index, "satuan", e.target.value)
-                      }
-                    >
-                      <option value="mililiter">mililiter</option>
-                      <option value="liter">liter</option>
-                      <option value="gram">gram</option>
-                      <option value="kilogram">kilogram</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-          <button
-            onClick={addObatInput}
-            className="mt-2 bg-emerald-700 text-white py-2 px-4 rounded hover:bg-emerald-600 cursor-pointer"
-          >
-            Tambah Obat
-          </button>
+        {/* nama tugas tambahan */}
+        <div className="mt-4">
+          <label className="block font-medium mb-1">Slot Pekerja</label>
+          <input
+            type="number"
+            value={getDisplayValue(slot)}
+            placeholder="Masukkan Jumlah Pekerja"
+            className="w-1/2 border border-black-6 rounded p-2 bg-black-4"
+            onChange={(e) => {
+              setSlot(e.target.value);
+            }}
+          />
         </div>
 
         {/* Simpan Button */}
