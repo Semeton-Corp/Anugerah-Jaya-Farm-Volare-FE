@@ -22,6 +22,28 @@ export const getTodayDateInBahasa = () => {
   return `${day} ${month} ${year}`;
 };
 
+export const translateDateToBahasa = (dateStr) => {
+  const monthMap = {
+    January: "Januari",
+    February: "Februari",
+    March: "Maret",
+    April: "April",
+    May: "Mei",
+    June: "Juni",
+    July: "Juli",
+    August: "Agustus",
+    September: "September",
+    October: "Oktober",
+    November: "November",
+    December: "Desember",
+  };
+
+  const [day, monthEng, year] = dateStr.split(" ");
+  const monthInd = monthMap[monthEng];
+
+  return `${day} ${monthInd} ${year}`;
+};
+
 export const formatDateToDDMMYYYY = (dateString) => {
   const [year, month, day] = dateString.split("-");
   return `${day}-${month}-${year}`;
@@ -30,4 +52,4 @@ export const formatDateToDDMMYYYY = (dateString) => {
 export const convertToInputDateFormat = (dateStr) => {
   const [day, month, year] = dateStr.split("-");
   return `${year}-${month}-${day}`;
-}
+};

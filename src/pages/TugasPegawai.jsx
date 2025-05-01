@@ -1,6 +1,10 @@
 import React from "react";
 import { IoSearch } from "react-icons/io5";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getListDailyWorks, getAdditionalWorks } from "../services/dailyWorks";
+import { translateDateToBahasa } from "../utils/dateFormat";
+import { useLocation, useNavigate, Outlet } from "react-router-dom";
+
 import { IoIosArrowDown } from "react-icons/io";
 import { PiCalendarBlank } from "react-icons/pi";
 import profileAvatar from "../assets/profile_avatar.svg";
@@ -48,12 +52,67 @@ const tugasRutin = [
 ];
 
 const TugasPegawai = () => {
-  const [query, setQuery] = useState("");
+  const userRole = localStorage.getItem("role");
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const [tugasRutinData, setTugasRutinData] = useState([]);
+  const [tugasTambahanData, setTugasTambahanData] = useState([]);
+
+  const detailPages = ["tambah-tugas-rutin"];
+
+  const isDetailPage = detailPages.some((segment) =>
+    location.pathname.includes(segment)
+  );
+
+  const fetchTugasRutinData = async () => {
+    try {
+      const response = await getListDailyWorks();
+      // console.log("response fetch tugas rutin data: ", response);
+
+      if (response.status == 200) {
+        setTugasRutinData(response.data.data);
+      }
+    } catch (error) {
+      alert("Terjadi kesalahan saat memuat tugas rutin");
+      console.log("Error: ", error);
+    }
+  };
+
+  const fetchTugasTambahanData = async () => {
+    try {
+      const response = await getAdditionalWorks();
+      console.log("response fetch tugas tambahan data: ", response);
+
+      if (response.status == 200) {
+        setTugasTambahanData(response.data.data);
+      }
+    } catch (error) {
+      alert("Terjadi kesalahan saat memuat tugas rutin");
+      console.log("Error: ", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTugasRutinData();
+    fetchTugasTambahanData();
+  }, []);
+
+  const tambahTugasHandle = () => {
+     navigate(`${location.pathname}/tambah-tugas-rutin`);
+  };
+
+  const editTugasHandle = (roleId) => {};
 
   const handleSearch = (e) => {
     setQuery(e.target.value);
     onSearch(e.target.value); // Call parent function with search input
   };
+
+  if (isDetailPage) {
+    return <Outlet />;
+  }
+
   return (
     <div className="flex flex-col px-4 py-3 gap-4 ">
       {/* header */}
@@ -84,12 +143,14 @@ const TugasPegawai = () => {
               </tr>
             </thead>
             <tbody className="">
-              {tugasTambahan.map((item, index) => (
+              {tugasTambahanData.map((item, index) => (
                 <tr key={index} className="border-b border-black-6">
-                  <td className="py-2 px-4">{item.tanggal}</td>
-                  <td className="py-2 px-4">{item.tugas}</td>
-                  <td className="py-2 px-4">{item.lokasi}</td>
-                  <td className="py-2 px-4">{item.slotPekerja}</td>
+                  <td className="py-2 px-4">
+                    {translateDateToBahasa(item.date)}
+                  </td>
+                  <td className="py-2 px-4">{item.description}</td>
+                  <td className="py-2 px-4">{item.location}</td>
+                  <td className="py-2 px-4">{item.remainingSlot}</td>
                   <td className="py-3 px-4">
                     <span
                       className={`w-36 py-1 flex justify-center rounded text-sm font-semibold ${
@@ -119,7 +180,11 @@ const TugasPegawai = () => {
       <div className=" rounded-[4px] border border-black-6">
         <div className="px-6 pt-8 pb-4 flex items-center justify-between">
           <p className="text-lg font-bold">Tugas Rutin</p>
-          <div className="rounded-[4px] py-2 px-6 bg-green-700 flex items-center justify-center text-white text-base font-medium hover:bg-green-900 cursor-pointer">
+
+          <div
+            onClick={() => tambahTugasHandle()}
+            className="rounded-[4px] py-2 px-6 bg-green-700  text-white font-medium hover:bg-green-900 cursor-pointer"
+          >
             + Tambah tugas rutin
           </div>
         </div>
@@ -127,23 +192,27 @@ const TugasPegawai = () => {
         {/* tugas tambahan table */}
         <div className="px-6 py-2 ">
           <table className="w-full mb-8">
-            <thead className="px-8 rounded-[4px] bg-green-700 text-white text-left">
+            <thead className="px-8 rounded-[4px] bg-green-700 text-white text-center">
               <tr>
                 <th className="py-2 px-4">Jabatan</th>
                 <th className="py-2 px-4">Jumlah Tugas</th>
                 <th className="py-2 px-4">Jumlah Pekerja</th>
-                <th className="py-2 px-4"></th>
+                <th className="py-2 px-4">Aksi </th>
               </tr>
             </thead>
             <tbody className="">
-              {tugasRutin.map((item, index) => (
-                <tr key={index} className="border-b border-black-6">
-                  <td className="py-2 px-4">{item.jabatan}</td>
-                  <td className="py-2 px-4">{item.jumlahTugas}</td>
-                  <td className="py-2 px-4">{item.jumlahPekerja}</td>
-
-                  <td className="py-2 px-4 underline text-black hover:text-black-6 cursor-pointer">
-                    Detail
+              {tugasRutinData.map((item, index) => (
+                <tr key={index} className="border-b border-black-6 text-center">
+                  <td className="py-2 px-4">{item.role.name}</td>
+                  <td className="py-2 px-4">{item.totalWork}</td>
+                  <td className="py-2 px-4">{item.totalStaff}</td>
+                  <td className="py-2 px-4 flex justify-center">
+                    <span
+                      onClick={editTugasHandle(item.role.id)}
+                      className="rounded-[4px] py-2 px-6 bg-green-700  text-white font-medium hover:bg-green-900 cursor-pointer"
+                    >
+                      + Edit tugas rutin
+                    </span>
                   </td>
                 </tr>
               ))}
