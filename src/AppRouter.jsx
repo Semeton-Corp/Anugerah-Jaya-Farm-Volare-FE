@@ -40,7 +40,7 @@ import DetailVaksinObat from "./pages/DetailVaksinObat";
 import DaftarSuplier from "./pages/DaftarSuplier";
 import PesananToko from "./pages/PesananToko";
 import DaftarBarang from "./pages/DaftarBarang";
-import TambahTugasRutin from "./pages/TambahTugasRutin";
+import TambahTugasTambahan from "./pages/TambahTugasTambahan";
 
 const AppRouter = createBrowserRouter([
   {
@@ -122,8 +122,9 @@ const AppRouter = createBrowserRouter([
                 element: <TugasPegawai />,
                 children: [
                   {
-                    path: "tambah-tugas-rutin",
-                    element: <TambahTugasRutin />,
+                    path: "tambah-tugas-tambahan",
+                    element: <TambahTugasTambahan />,
+                    
                   },
                 ],
               },

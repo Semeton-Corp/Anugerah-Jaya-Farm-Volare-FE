@@ -59,7 +59,7 @@ const TugasPegawai = () => {
   const [tugasRutinData, setTugasRutinData] = useState([]);
   const [tugasTambahanData, setTugasTambahanData] = useState([]);
 
-  const detailPages = ["tambah-tugas-rutin"];
+  const detailPages = ["tambah-tugas-rutin", "tambah-tugas-tambahan"];
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
@@ -96,10 +96,15 @@ const TugasPegawai = () => {
   useEffect(() => {
     fetchTugasRutinData();
     fetchTugasTambahanData();
-  }, []);
+    if (location.state?.refetch) {
+      fetchTugasRutinData();
+      fetchTugasTambahanData();
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
-  const tambahTugasHandle = () => {
-     navigate(`${location.pathname}/tambah-tugas-rutin`);
+  const tambahTugasTambahanHandle = () => {
+    navigate(`${location.pathname}/tambah-tugas-tambahan`);
   };
 
   const editTugasHandle = (roleId) => {};
@@ -124,7 +129,10 @@ const TugasPegawai = () => {
       <div className=" rounded-[4px] border border-black-6">
         <div className="px-6 pt-8 pb-4 flex items-center justify-between">
           <p className="text-lg font-bold">Tugas Tambahan</p>
-          <div className="rounded-[4px] py-2 px-6 bg-green-700 flex items-center justify-center text-white text-base font-medium hover:bg-green-900 cursor-pointer">
+          <div
+            onClick={() => tambahTugasTambahanHandle()}
+            className="rounded-[4px] py-2 px-6 bg-green-700 flex items-center justify-center text-white text-base font-medium hover:bg-green-900 cursor-pointer"
+          >
             + Tambah tugas
           </div>
         </div>
@@ -181,11 +189,8 @@ const TugasPegawai = () => {
         <div className="px-6 pt-8 pb-4 flex items-center justify-between">
           <p className="text-lg font-bold">Tugas Rutin</p>
 
-          <div
-            onClick={() => tambahTugasHandle()}
-            className="rounded-[4px] py-2 px-6 bg-green-700  text-white font-medium hover:bg-green-900 cursor-pointer"
-          >
-            + Tambah tugas rutin
+          <div className="rounded-[4px] py-2 px-6 bg-green-700  text-white font-medium hover:bg-green-900 cursor-pointer">
+            + Tambah tugas
           </div>
         </div>
 

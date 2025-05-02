@@ -11,11 +11,19 @@ export const getListDailyWorks = () => {
 };
 
 export const getAdditionalWorks = () => {
-    return api.get("/works/additionals", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-    });
-  };
+  return api.get("/works/additionals", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
 
+export const createAdditionalWorks = (payload) => {
+  return api.post("/works/additionals", payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
