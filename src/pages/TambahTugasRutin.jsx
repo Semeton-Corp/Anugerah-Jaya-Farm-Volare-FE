@@ -6,6 +6,7 @@ import { getCage } from "../services/cages";
 import { useParams } from "react-router-dom";
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 import { getRoles } from "../services/roles";
+import { getDailyWorkByRoleId } from "../services/dailyWorks";
 
 const TambahTugasRutin = () => {
   const { id } = useParams();
@@ -50,6 +51,20 @@ const TambahTugasRutin = () => {
       if (rolesResponse.status === 200) {
         setRoles(rolesResponse.data.data);
         setSelectedRole(rolesResponse.data.data[0]);
+        fetchDailyWork(rolesResponse.data.data[0].id);
+      }
+      //   console.log("response: ", response);
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const fetchDailyWork = async (roleId) => {
+    try {
+      const dailyWorkResponse = await getDailyWorkByRoleId(roleId);
+      console.log("dailyWorkResponse.data.data: ", dailyWorkResponse.data.data);
+      if (dailyWorkResponse.status === 200) {
+        setTasks(dailyWorkResponse.data.data.dailyWorks);
       }
       //   console.log("response: ", response);
     } catch (error) {
@@ -61,13 +76,22 @@ const TambahTugasRutin = () => {
     fetchRoles();
   }, []);
 
-  const getDisplayValue = (val) => (val === 0 ? "" : val);
+  useEffect(() => {
+    if (selectedRole?.id) {
+      fetchDailyWork(selectedRole.id);
+    }
+  }, [selectedRole]);
+
+  const getDisplayValue = (val) => {
+    if (val === 0 || val === undefined || val === null) return "";
+    return val;
+  };
 
   return (
     <div className="flex flex-col px-4 py-3 gap-4">
       {/* Header */}
       <div className="flex justify-between items-center mb-2 flex-wrap gap-4">
-        <h1 className="text-3xl font-bold">Tambah Tugas Tambahan</h1>
+        <h1 className="text-3xl font-bold">Tambah Tugas Rutin</h1>
       </div>
 
       {/* Table Section */}
@@ -114,7 +138,10 @@ const TambahTugasRutin = () => {
           {tasks.length > 0 ? (
             tasks.map((task, index) =>
               task.isExpanded ? (
-                <div className="p-6 border flex flex-col gap-4 border-black-6 rounded-[4px] bg-black-4 mb-4">
+                <div
+                  key={index}
+                  className="p-6 border flex flex-col gap-4 border-black-6 rounded-[4px] bg-black-4 mb-4"
+                >
                   <div className="flex justify-between items-center text-base font-bold">
                     <p>{`Tambah Tugas ${index + 1}`}</p>
                     <IoIosArrowUp
@@ -167,7 +194,7 @@ const TambahTugasRutin = () => {
                   </div>
                 </div>
               ) : (
-                <div></div>
+                <div key={index}></div>
               )
             )
           ) : (
@@ -193,6 +220,7 @@ const TambahTugasRutin = () => {
             onClick={() => {
               console.log("tasks: ", tasks);
               console.log("selectedRole: ", selectedRole);
+              console.log("selectedRole.id: ", selectedRole.id);
             }}
             className="bg-green-700 text-white py-2 px-6 rounded hover:bg-green-900 cursor-pointer"
           >

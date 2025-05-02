@@ -27,3 +27,12 @@ export const createAdditionalWorks = (payload) => {
     },
   });
 };
+
+export const getDailyWorkByRoleId = (roleId) => {
+  return api.get(`/works/dailies/${roleId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
