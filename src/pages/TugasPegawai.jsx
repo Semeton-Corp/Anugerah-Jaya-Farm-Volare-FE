@@ -107,6 +107,10 @@ const TugasPegawai = () => {
     navigate(`${location.pathname}/tambah-tugas-tambahan`);
   };
 
+  const tambahTugasRutinHandle = () => {
+    navigate(`${location.pathname}/tambah-tugas-rutin`);
+  };
+
   const editTugasHandle = (roleId) => {};
 
   const handleSearch = (e) => {
@@ -189,7 +193,10 @@ const TugasPegawai = () => {
         <div className="px-6 pt-8 pb-4 flex items-center justify-between">
           <p className="text-lg font-bold">Tugas Rutin</p>
 
-          <div className="rounded-[4px] py-2 px-6 bg-green-700  text-white font-medium hover:bg-green-900 cursor-pointer">
+          <div
+            onClick={tambahTugasRutinHandle}
+            className="rounded-[4px] py-2 px-6 bg-green-700  text-white font-medium hover:bg-green-900 cursor-pointer"
+          >
             + Tambah tugas
           </div>
         </div>

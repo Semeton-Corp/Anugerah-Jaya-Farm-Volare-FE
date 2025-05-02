@@ -41,6 +41,7 @@ import DaftarSuplier from "./pages/DaftarSuplier";
 import PesananToko from "./pages/PesananToko";
 import DaftarBarang from "./pages/DaftarBarang";
 import TambahTugasTambahan from "./pages/TambahTugasTambahan";
+import TambahTugasRutin from "./pages/TambahTugasRutin";
 
 const AppRouter = createBrowserRouter([
   {
@@ -124,7 +125,10 @@ const AppRouter = createBrowserRouter([
                   {
                     path: "tambah-tugas-tambahan",
                     element: <TambahTugasTambahan />,
-                    
+                  },
+                  {
+                    path: "tambah-tugas-rutin",
+                    element: <TambahTugasRutin />,
                   },
                 ],
               },
