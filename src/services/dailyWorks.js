@@ -36,3 +36,12 @@ export const getDailyWorkByRoleId = (roleId) => {
     },
   });
 };
+
+export const createUpdateDailyWorkByRoleId = (payload) => {
+  return api.post(`/works/dailies`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};

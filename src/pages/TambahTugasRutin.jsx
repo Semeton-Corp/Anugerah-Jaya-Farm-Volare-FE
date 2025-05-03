@@ -7,8 +7,13 @@ import { useParams } from "react-router-dom";
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 import { getRoles } from "../services/roles";
 import { getDailyWorkByRoleId } from "../services/dailyWorks";
+import { createUpdateDailyWorkByRoleId } from "../services/dailyWorks";
 
 const TambahTugasRutin = () => {
+  const userRole = localStorage.getItem("role");
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const { id } = useParams();
 
   const [locations, setLocations] = useState(["Kandang", "Toko", "Gudang"]);
@@ -36,9 +41,12 @@ const TambahTugasRutin = () => {
     setTasks(newList);
   };
 
-  const userRole = localStorage.getItem("role");
-  const location = useLocation();
-  const navigate = useNavigate();
+  const changeExpandTaskItem = (index) => {
+    const isExpandTemp = tasks[index]["isExpanded"];
+    const newList = [...tasks];
+    newList[index]["isExpanded"] = !isExpandTemp;
+    setTasks(newList);
+  };
 
   const tambahTugasHarianHandle = () => {
     addTask();
@@ -85,6 +93,25 @@ const TambahTugasRutin = () => {
   const getDisplayValue = (val) => {
     if (val === 0 || val === undefined || val === null) return "";
     return val;
+  };
+
+  const simpanHandle = async () => {
+    const payload = {
+      roleId: selectedRole.id,
+      dailyWorkDetail: tasks,
+    };
+
+    try {
+      const createResponse = await createUpdateDailyWorkByRoleId(payload);
+      // console.log("createResponse: ", createResponse);
+      if (createResponse.status == 201) {
+        navigate(-1, { state: { refetch: true } });
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+
+    console.log("payload: ", payload);
   };
 
   return (
@@ -143,11 +170,24 @@ const TambahTugasRutin = () => {
                   className="p-6 border flex flex-col gap-4 border-black-6 rounded-[4px] bg-black-4 mb-4"
                 >
                   <div className="flex justify-between items-center text-base font-bold">
-                    <p>{`Tambah Tugas ${index + 1}`}</p>
-                    <IoIosArrowUp
-                      size={24}
-                      className="hover:bg-black-6 cursor-pointer"
-                    />
+                    {task.description && task.id ? (
+                      <p>{`Tugas ${index + 1}`}</p>
+                    ) : (
+                      <p>{`Tambah Tugas ${index + 1}`}</p>
+                    )}
+                    <div
+                      onClick={() => {
+                        changeExpandTaskItem(index);
+                        if (task.description == "") {
+                          const newList = [...tasks];
+                          newList.splice(index, 1);
+                          setTasks(newList);
+                        }
+                      }}
+                      className="p-2 hover:bg-black-6 cursor-pointer"
+                    >
+                      <IoIosArrowUp size={24} />
+                    </div>
                   </div>
 
                   {/* nama tugas */}
@@ -194,7 +234,22 @@ const TambahTugasRutin = () => {
                   </div>
                 </div>
               ) : (
-                <div key={index}></div>
+                <div
+                  key={index}
+                  className="p-6 border flex flex-col gap-4 border-black-6 rounded-[4px] bg-black-4 mb-4"
+                >
+                  <div className="flex justify-between items-center text-base font-medium">
+                    <p>{task.description}</p>
+                    <div
+                      onClick={() => {
+                        changeExpandTaskItem(index);
+                      }}
+                      className="p-2 hover:bg-black-6 cursor-pointer"
+                    >
+                      <IoIosArrowDown size={24} />
+                    </div>
+                  </div>
+                </div>
               )
             )
           ) : (
@@ -207,7 +262,9 @@ const TambahTugasRutin = () => {
         {/* Simpan Button */}
         <div className="mt-6 text-right ">
           <button
-            onClick={() => {}}
+            onClick={() => {
+              simpanHandle();
+            }}
             className="bg-green-700 text-white py-2 px-6 rounded hover:bg-green-900 cursor-pointer"
           >
             Simpan
