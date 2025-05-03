@@ -127,7 +127,15 @@ const AppRouter = createBrowserRouter([
                     element: <TambahTugasTambahan />,
                   },
                   {
+                    path: "tambah-tugas-tambahan/:id",
+                    element: <TambahTugasTambahan />,
+                  },
+                  {
                     path: "tambah-tugas-rutin",
+                    element: <TambahTugasRutin />,
+                  },
+                  {
+                    path: "tambah-tugas-rutin/:id",
                     element: <TambahTugasRutin />,
                   },
                 ],

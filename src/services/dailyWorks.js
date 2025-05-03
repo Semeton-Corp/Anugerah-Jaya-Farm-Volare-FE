@@ -19,6 +19,15 @@ export const getAdditionalWorks = () => {
   });
 };
 
+export const getAdditionalWorkById = (id) => {
+  return api.get(`/works/additionals/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
 export const createAdditionalWorks = (payload) => {
   return api.post("/works/additionals", payload, {
     headers: {

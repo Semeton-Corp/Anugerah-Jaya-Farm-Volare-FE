@@ -16,8 +16,8 @@ const TambahTugasRutin = () => {
 
   const { id } = useParams();
 
-  const [locations, setLocations] = useState(["Kandang", "Toko", "Gudang"]);
-  const [selectedLocation, setSelectedLocation] = useState(locations[0]);
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
+  const [deletedTasks, setDeletedTasks] = useState([]);
 
   const [roles, setRoles] = useState([]);
   const [selectedRole, setSelectedRole] = useState();
@@ -48,6 +48,10 @@ const TambahTugasRutin = () => {
     setTasks(newList);
   };
 
+  const switchModeHandle = () => {
+    setIsDeleteMode(!isDeleteMode);
+  };
+
   const tambahTugasHarianHandle = () => {
     addTask();
   };
@@ -55,11 +59,21 @@ const TambahTugasRutin = () => {
   const fetchRoles = async () => {
     try {
       const rolesResponse = await getRoles();
-      console.log("rolesResponse.data.data: ", rolesResponse.data.data);
+      // console.log("rolesResponse.data.data: ", rolesResponse.data.data);
       if (rolesResponse.status === 200) {
         setRoles(rolesResponse.data.data);
-        setSelectedRole(rolesResponse.data.data[0]);
         fetchDailyWork(rolesResponse.data.data[0].id);
+        if (id) {
+          const targetId = id;
+          const role = rolesResponse.data.data.find((role) => {
+            return role.id == targetId;
+          });
+          console.log("role: ", role);
+          setSelectedRole(role);
+        } else {
+          // console.log("rolesResponse.data.data[0]", rolesResponse.data.data[0]);
+          setSelectedRole(rolesResponse.data.data[0]);
+        }
       }
       //   console.log("response: ", response);
     } catch (error) {
@@ -150,21 +164,53 @@ const TambahTugasRutin = () => {
           <div className="flex gap-4 mb-4">
             {/* tambah tugas button */}
             <div
-              onClick={tambahTugasHarianHandle}
+              onClick={() => {
+                if (!isDeleteMode) {
+                  tambahTugasHarianHandle();
+                }
+              }}
               className="rounded-[4px] py-2 px-6 bg-green-700 flex items-center justify-center text-white text-base font-medium hover:bg-green-900 cursor-pointer"
             >
               + Tambah tugas
             </div>
 
             {/* hapus button */}
-            <div className="rounded-[4px] py-2 px-6 bg-kritis-box-surface-color flex items-center justify-center text-white text-base font-medium hover:bg-kritis-text-color cursor-pointer">
+            <div
+              onClick={switchModeHandle}
+              className={`rounded-[4px] py-2 px-6 flex items-center justify-center cursor-pointer ${
+                isDeleteMode
+                  ? "bg-white text-warning-icon-color border border-black-7 hover:bg-black-7"
+                  : "bg-kritis-box-surface-color  border text-white text-base font-medium hover:bg-kritis-text-color"
+              }  `}
+            >
               Hapus Tugas
             </div>
           </div>
 
           {tasks.length > 0 ? (
             tasks.map((task, index) =>
-              task.isExpanded ? (
+              isDeleteMode ? (
+                <div
+                  key={index}
+                  className="p-6 border flex flex-col gap-4 border-black-6 rounded-[4px] bg-black-4 mb-4"
+                >
+                  <div className="flex justify-between items-center text-base font-medium">
+                    <p>{task.description}</p>
+                    <input
+                      type="checkbox"
+                      checked={task.checked}
+                      onChange={() => {
+                        setDeletedTasks((prev) =>
+                          prev.includes(index)
+                            ? prev.filter((i) => i !== index)
+                            : [...prev, index]
+                        );
+                      }}
+                      className="w-10 h-10 cursor-pointer accent-warning-icon-color"
+                    />
+                  </div>
+                </div>
+              ) : task.isExpanded ? (
                 <div
                   key={index}
                   className="p-6 border flex flex-col gap-4 border-black-6 rounded-[4px] bg-black-4 mb-4"
@@ -260,16 +306,29 @@ const TambahTugasRutin = () => {
         </div>
 
         {/* Simpan Button */}
-        <div className="mt-6 text-right ">
-          <button
-            onClick={() => {
-              simpanHandle();
-            }}
-            className="bg-green-700 text-white py-2 px-6 rounded hover:bg-green-900 cursor-pointer"
-          >
-            Simpan
-          </button>
-        </div>
+        {isDeleteMode ? (
+          <div className="mt-6 text-right ">
+            <button
+              onClick={() => {
+                // DO DELETE HANDLE
+              }}
+              className="py-2 px-6 rounded bg-kritis-box-surface-color  border text-white text-base font-medium hover:bg-kritis-text-color cursor-pointer"
+            >
+              Hapus Tugas Harian
+            </button>
+          </div>
+        ) : (
+          <div className="mt-6 text-right ">
+            <button
+              onClick={() => {
+                simpanHandle();
+              }}
+              className="bg-green-700 text-white py-2 px-6 rounded hover:bg-green-900 cursor-pointer"
+            >
+              Simpan
+            </button>
+          </div>
+        )}
 
         {/* Simpan Button */}
         <div className="mt-6 text-right ">
@@ -278,6 +337,7 @@ const TambahTugasRutin = () => {
               console.log("tasks: ", tasks);
               console.log("selectedRole: ", selectedRole);
               console.log("selectedRole.id: ", selectedRole.id);
+              console.log("deletedTasks: ", deletedTasks);
             }}
             className="bg-green-700 text-white py-2 px-6 rounded hover:bg-green-900 cursor-pointer"
           >

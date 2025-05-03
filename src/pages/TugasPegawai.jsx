@@ -107,11 +107,17 @@ const TugasPegawai = () => {
     navigate(`${location.pathname}/tambah-tugas-tambahan`);
   };
 
+  const detailTugasTambahanHandle = (id) => {
+    navigate(`${location.pathname}/tambah-tugas-tambahan/${id}`);
+  };
+
   const tambahTugasRutinHandle = () => {
     navigate(`${location.pathname}/tambah-tugas-rutin`);
   };
 
-  const editTugasHandle = (roleId) => {};
+  const editTugasRutinHandle = (id) => {
+    navigate(`${location.pathname}/tambah-tugas-rutin/${id}`);
+  };
 
   const handleSearch = (e) => {
     setQuery(e.target.value);
@@ -177,7 +183,10 @@ const TugasPegawai = () => {
                     </span>
                   </td>
 
-                  <td className="py-2 px-4 underline text-black hover:text-black-6 cursor-pointer">
+                  <td
+                    onClick={() => detailTugasTambahanHandle(item.id)}
+                    className="py-2 px-4 underline text-black hover:text-black-6 cursor-pointer"
+                  >
                     Detail
                   </td>
                 </tr>
@@ -220,7 +229,9 @@ const TugasPegawai = () => {
                   <td className="py-2 px-4">{item.totalStaff}</td>
                   <td className="py-2 px-4 flex justify-center">
                     <span
-                      onClick={editTugasHandle(item.role.id)}
+                      onClick={() => {
+                        editTugasRutinHandle(item.role.id);
+                      }}
                       className="rounded-[4px] py-2 px-6 bg-green-700  text-white font-medium hover:bg-green-900 cursor-pointer"
                     >
                       + Edit tugas rutin

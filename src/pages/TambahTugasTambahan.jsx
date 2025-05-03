@@ -4,7 +4,11 @@ import { getStores } from "../services/stores";
 import { getWarehouses } from "../services/warehouses";
 import { getCage } from "../services/cages";
 import { useParams } from "react-router-dom";
-import { createAdditionalWorks } from "../services/dailyWorks";
+import {
+  createAdditionalWorks,
+  getAdditionalWorkById,
+} from "../services/dailyWorks";
+import { translateDateToBahasa } from "../utils/dateFormat";
 
 const TambahTugasTambahan = () => {
   const { id } = useParams();
@@ -15,6 +19,8 @@ const TambahTugasTambahan = () => {
   const [slot, setSlot] = useState(0);
   const [description, setDescription] = useState("");
 
+  const [additionalWorkStaffInformation, setAdditionalWorkStaffInformation] =
+    useState([]);
   const userRole = localStorage.getItem("role");
   const location = useLocation();
   const navigate = useNavigate();
@@ -42,9 +48,29 @@ const TambahTugasTambahan = () => {
   //   }
   // };
 
-  // useEffect(() => {
-  //   fetchLocations();
-  // }, []);
+  const fetchAdditionalData = async (id) => {
+    try {
+      const getAdditionalResponse = await getAdditionalWorkById(id);
+      console.log("getAdditionalResponse: ", getAdditionalResponse);
+      if (getAdditionalResponse.status == 200) {
+        setDescription(getAdditionalResponse.data.data.description);
+        setSelectedLocation(getAdditionalResponse.data.data.location);
+        setSlot(getAdditionalResponse.data.data.slot);
+        setAdditionalWorkStaffInformation(
+          getAdditionalResponse.data.data.additionalWorkStaffInformation
+        );
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    // fetchLocations();
+    if (id) {
+      fetchAdditionalData(id);
+    }
+  }, []);
 
   const tambahTugasHandle = async () => {
     const payload = {
@@ -70,7 +96,9 @@ const TambahTugasTambahan = () => {
     <div className="flex flex-col px-4 py-3 gap-4">
       {/* Header */}
       <div className="flex justify-between items-center mb-2 flex-wrap gap-4">
-        <h1 className="text-3xl font-bold">Tambah Tugas Tambahan</h1>
+        <h1 className="text-3xl font-bold">
+          {id ? "Detail Tugas Tambahan" : "Tambah Tugas Tambahan"}
+        </h1>
       </div>
 
       {/* Table Section */}
@@ -122,16 +150,75 @@ const TambahTugasTambahan = () => {
           />
         </div>
 
-        {/* Simpan Button */}
-        <div className="mt-6 text-right ">
-          <button
-            onClick={() => {
-              tambahTugasHandle();
-            }}
-            className="bg-green-700 text-white py-2 px-6 rounded hover:bg-green-900 cursor-pointer"
-          >
-            Simpan
-          </button>
+        {id ? (
+          <div className="mt-4">
+            <label className="block font-medium">Pegawai yang mengambil</label>
+            <div className=" py-2 ">
+              <table className="w-full mb-8">
+                <thead className="px-8 rounded-[4px] bg-green-700 text-white text-center">
+                  <tr>
+                    <th className="py-2 px-4">Tanggal</th>
+                    <th className="py-2 px-4">Waktu</th>
+                    <th className="py-2 px-4">Nama Pegawai</th>
+                    <th className="py-2 px-4">Status </th>
+                  </tr>
+                </thead>
+                <tbody className="">
+                  {additionalWorkStaffInformation.map((item, index) => (
+                    <tr
+                      key={index}
+                      className="border-b border-black-6 text-center"
+                    >
+                      <td className="py-2 px-4">
+                        {translateDateToBahasa(item.date)}
+                      </td>
+                      <td className="py-2 px-4">{item.time}</td>
+                      <td className="py-2 px-4">{item.staffName}</td>
+                      <td className="py-2 px-4 flex justify-center">
+                        <span
+                          className={`w-36 py-1 flex justify-center rounded text-sm font-semibold ${
+                            item.isDone
+                              ? "bg-aman-box-surface-color text-aman-text-color"
+                              : "bg-orange-200 text-kritis-text-color"
+                          }`}
+                        >
+                          {item.isDone ? "Selesai" : "Dalam Proses"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : (
+          <></>
+        )}
+
+        <div className="flex gap-4 justify-end">
+          {/* Hapus Tugas Button */}
+          <div className="mt-6 text-right ">
+            <button
+              onClick={() => {
+                // hapus handle
+              }}
+              className="bg-kritis-box-surface-color text-white py-2 px-6 rounded hover:bg-kritis-text-color cursor-pointer"
+            >
+              Hapus Tugas Tambahan
+            </button>
+          </div>
+
+          {/* Simpan Button */}
+          <div className="mt-6 text-right ">
+            <button
+              onClick={() => {
+                tambahTugasHandle();
+              }}
+              className="bg-green-700 text-white py-2 px-6 rounded hover:bg-green-900 cursor-pointer"
+            >
+              Simpan
+            </button>
+          </div>
         </div>
 
         {/* Simpan Button */}
