@@ -28,6 +28,24 @@ export const getAdditionalWorkById = (id) => {
   });
 };
 
+export const updateAdditionalWorkById = (id, payload) => {
+  return api.put(`/works/additionals/${id}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const deleteAdditionalWorkById = (id) => {
+  return api.delete(`/works/additionals/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
 export const createAdditionalWorks = (payload) => {
   return api.post("/works/additionals", payload, {
     headers: {

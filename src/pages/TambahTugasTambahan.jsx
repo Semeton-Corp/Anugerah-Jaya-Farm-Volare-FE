@@ -9,6 +9,8 @@ import {
   getAdditionalWorkById,
 } from "../services/dailyWorks";
 import { translateDateToBahasa } from "../utils/dateFormat";
+import { deleteAdditionalWorkById } from "../services/dailyWorks";
+import { updateAdditionalWorkById } from "../services/dailyWorks";
 
 const TambahTugasTambahan = () => {
   const { id } = useParams();
@@ -92,6 +94,35 @@ const TambahTugasTambahan = () => {
 
   const getDisplayValue = (val) => (val === 0 ? "" : val);
 
+  const deleteAdditionalsWork = async (id) => {
+    try {
+      const deleteResponse = await deleteAdditionalWorkById(id);
+      // console.log("deleteResponse: ", deleteResponse);
+      if (deleteResponse.status == 204) {
+        navigate(-1, { state: { refetch: true } });
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const updateTugasHandle = async (id) => {
+    const payload = {
+      description,
+      slot: parseInt(slot),
+      location: selectedLocation,
+    };
+
+    try {
+      const updateResponse = await updateAdditionalWorkById(id, payload);
+      // console.log("updateResponse: ", updateResponse);
+      if (updateResponse.status == 200) {
+        navigate(-1, { state: { refetch: true } });
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
   return (
     <div className="flex flex-col px-4 py-3 gap-4">
       {/* Header */}
@@ -200,7 +231,7 @@ const TambahTugasTambahan = () => {
           <div className="mt-6 text-right ">
             <button
               onClick={() => {
-                // hapus handle
+                deleteAdditionalsWork(id);
               }}
               className="bg-kritis-box-surface-color text-white py-2 px-6 rounded hover:bg-kritis-text-color cursor-pointer"
             >
@@ -212,7 +243,11 @@ const TambahTugasTambahan = () => {
           <div className="mt-6 text-right ">
             <button
               onClick={() => {
-                tambahTugasHandle();
+                if (id) {
+                  updateTugasHandle(id);
+                } else {
+                  tambahTugasHandle();
+                }
               }}
               className="bg-green-700 text-white py-2 px-6 rounded hover:bg-green-900 cursor-pointer"
             >
@@ -222,7 +257,7 @@ const TambahTugasTambahan = () => {
         </div>
 
         {/* Simpan Button */}
-        {/* <div className="mt-6 text-right ">
+        <div className="mt-6 text-right ">
           <button
             onClick={() => {
               console.log("description:", description);
@@ -233,7 +268,7 @@ const TambahTugasTambahan = () => {
           >
             Check
           </button>
-        </div> */}
+        </div>
       </div>
     </div>
   );
