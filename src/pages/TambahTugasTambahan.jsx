@@ -8,7 +8,10 @@ import {
   createAdditionalWorks,
   getAdditionalWorkById,
 } from "../services/dailyWorks";
-import { translateDateToBahasa } from "../utils/dateFormat";
+import {
+  translateDateToBahasa,
+  formatDateToDDMMYYYY,
+} from "../utils/dateFormat";
 import { deleteAdditionalWorkById } from "../services/dailyWorks";
 import { updateAdditionalWorkById } from "../services/dailyWorks";
 
@@ -201,7 +204,7 @@ const TambahTugasTambahan = () => {
                       className="border-b border-black-6 text-center"
                     >
                       <td className="py-2 px-4">
-                        {translateDateToBahasa(item.date)}
+                        {formatDateToDDMMYYYY(item.date)}
                       </td>
                       <td className="py-2 px-4">{item.time}</td>
                       <td className="py-2 px-4">{item.staffName}</td>

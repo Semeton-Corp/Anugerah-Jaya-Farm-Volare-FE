@@ -1,34 +1,68 @@
 import React from "react";
 import { FiCheck } from "react-icons/fi";
-
-const tugasTambahanData = [
-  {
-    tanggal: "27 Maret 2025",
-    tugas: "Dekorasi kandang untuk 17 Agustus",
-    lokasi: "Kandang",
-    slotPekerja: 3,
-    status: "Belum diproses",
-  },
-  {
-    tanggal: "25 Maret 2025",
-    tugas: "Dekorasi toko untuk 17 Agustus",
-    lokasi: "Toko",
-    slotPekerja: 0,
-    status: "Dalam Proses",
-  },
-  {
-    tanggal: "19 Maret 2025",
-    tugas: "Perbaikan pintu gudang",
-    lokasi: "Gudang",
-    slotPekerja: 0,
-    status: "Selesai",
-  },
-];
+import {
+  getAdditionalWorks,
+  takeAdditionalWorks,
+} from "../services/dailyWorks";
+import { useState, useEffect } from "react";
+import { translateDateToBahasa } from "../utils/dateFormat";
+// const tugasTambahanData = [
+//   {
+//     tanggal: "27 Maret 2025",
+//     tugas: "Dekorasi kandang untuk 17 Agustus",
+//     lokasi: "Kandang",
+//     slotPekerja: 3,
+//     status: "Belum diproses",
+//   },
+//   {
+//     tanggal: "25 Maret 2025",
+//     tugas: "Dekorasi toko untuk 17 Agustus",
+//     lokasi: "Toko",
+//     slotPekerja: 0,
+//     status: "Dalam Proses",
+//   },
+//   {
+//     tanggal: "19 Maret 2025",
+//     tugas: "Perbaikan pintu gudang",
+//     lokasi: "Gudang",
+//     slotPekerja: 0,
+//     status: "Selesai",
+//   },
+// ];
 
 const Tugas = () => {
+  const [tugasTambahanData, setTugasTambahanData] = useState([]);
+
+  const fetchTugasTambahanData = async () => {
+    try {
+      const response = await getAdditionalWorks();
+      console.log("response fetch tugas tambahan data: ", response);
+
+      if (response.status == 200) {
+        setTugasTambahanData(response.data.data);
+      }
+    } catch (error) {
+      alert("Terjadi kesalahan saat memuat tugas rutin");
+      console.log("Error: ", error);
+    }
+  };
+
+  const takeAdditionalTaskHandle = async (id) => {
+    try {
+      const takeResponse = await takeAdditionalWorks(id);
+      console.log("takeResponse: ", takeResponse);
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTugasTambahanData();
+  }, []);
+
   const getStatusStyle = (status) => {
     switch (status) {
-      case "Belum diproses":
+      case "Belum Diproses":
         return "bg-[#FF5E5E] text-[#640404]";
       case "Dalam Proses":
         return "bg-orange-200 text-krisis-text-color";
@@ -86,19 +120,21 @@ const Tugas = () => {
               <th className="py-2 px-4">Tanggal</th>
               <th className="py-2 px-4">Tugas Tambahan</th>
               <th className="py-2 px-4">Lokasi</th>
-              <th className="py-2 px-4">Slot Pekerja</th>
+              <th className="py-2 px-4">Sisa Slot</th>
               <th className="py-2 px-4">Status</th>
               <th className="py-2 px-4">Status</th>
               <th className="py-2 px-4"></th>
             </tr>
           </thead>
           <tbody>
-            {tugasTambahanData.map((item, index) => (
+            {tugasTambahanData?.map((item, index) => (
               <tr key={index} className="border-b">
-                <td className="py-2 px-4">{item.tanggal}</td>
-                <td className="py-2 px-4">{item.tugas}</td>
-                <td className="py-2 px-4">{item.lokasi}</td>
-                <td className="py-2 px-4">{item.slotPekerja}</td>
+                <td className="py-2 px-4">
+                  {translateDateToBahasa(item.date)}
+                </td>
+                <td className="py-2 px-4">{item.description}</td>
+                <td className="py-2 px-4">{item.location}</td>
+                <td className="py-2 px-4">{item.remainingSlot}</td>
                 <td className="py-2 px-4">
                   <span
                     className={`px-3 py-1 rounded text-sm font-medium ${getStatusStyle(
@@ -109,7 +145,13 @@ const Tugas = () => {
                   </span>
                 </td>
                 <td className="py-2 px-4 flex gap-2">
-                  <button className="cursor-pointer bg-green-700 text-white text-sm font-semibold px-4 py-1 rounded hover:bg-green-900">
+                  <button
+                    onClick={() => {
+                      // console.log("item.id: ", item.id);
+                      takeAdditionalTaskHandle(item.id);
+                    }}
+                    className="cursor-pointer bg-green-700 text-white text-sm font-semibold px-4 py-1 rounded hover:bg-green-900"
+                  >
                     Ambil
                   </button>
                 </td>

@@ -41,7 +41,7 @@ const Login = () => {
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError("Login gagal. Cek email dan password Anda.");
+      alert("Login gagal. Cek email dan password Anda.");
     } finally {
       setLoading(false);
     }

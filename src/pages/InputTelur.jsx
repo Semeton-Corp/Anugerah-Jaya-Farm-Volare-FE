@@ -38,19 +38,22 @@ const InputTelur = () => {
 
         if (id) {
           const updateResponse = await getEggMonitoringById(id);
-          console.log("updateResponse: ", updateResponse.status);
+          console.log("updateResponse: ", updateResponse);
 
           const data = updateResponse.data.data;
+          if (updateResponse.status == 200) {
+            setSelectedCage(data.cage.id);
+            setSelectedWarehouse(data.warehouse.id);
+            setOk(data.totalGoodEggs);
+            setRetak(data.totalCrackedEggs);
+            setPecah(data.totalBrokeEggs);
+            setReject(data.totalRejectEggs);
+            setWeight(data.weight);
+          }
 
-          setSelectedCage(data.cage.id);
-          console.log("Nama kandang: ", data.cage.name);
+          // console.log("Nama kandang: ", data.cage.name);
 
           // setSelectedCageName(data.cage.name);
-
-          setOk(data.totalGoodEggs);
-          setRetak(data.totalCrackedEggs);
-          setPecah(data.totalBrokeEggs);
-          setReject(data.totalRejectEggs);
         } else {
           if (data.length > 0) {
             // setSelectedCageName(cages[0]?.name);
@@ -170,7 +173,7 @@ const InputTelur = () => {
         <label className="block font-medium mb-1">Pilih gudang</label>
         <select
           className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-6"
-          value={selectedWarehouse.id}
+          value={selectedWarehouse}
           onChange={(e) => {
             const id = Number(e.target.value);
             setSelectedWarehouse(id);
@@ -263,12 +266,26 @@ const InputTelur = () => {
               handleSubmit();
               console.log("selectedCage: ", selectedCage);
             }}
-            className="bg-emerald-700 text-white py-2 px-6 rounded hover:bg-emerald-600 cursor-pointer"
+            className="bg-green-700 text-white py-2 px-6 rounded hover:bg-green-900 cursor-pointer"
           >
             Simpan
           </button>
         </div>
       </div>
+      {/* <button
+        onClick={() => {
+          console.log("Selected Cage ID:", selectedCage);
+          console.log("Selected Warehouse ID:", selectedWarehouse);
+          console.log("OK:", ok);
+          console.log("Retak:", retak);
+          console.log("Pecah:", pecah);
+          console.log("Reject:", reject);
+          console.log("Weight:", weight);
+          console.log("Route Param ID:", id);
+        }}
+      >
+        Check
+      </button> */}
     </div>
   );
 };

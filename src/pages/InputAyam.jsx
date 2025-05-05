@@ -585,7 +585,7 @@ const InputAyam = () => {
 
           <button
             onClick={addObatInput}
-            className="mt-2 bg-emerald-700 text-white py-2 px-4 rounded hover:bg-emerald-600 cursor-pointer"
+            className="mt-2 bg-green-700 text-white py-2 px-4 rounded hover:bg-green-900 cursor-pointer"
           >
             Tambah Obat
           </button>
@@ -597,7 +597,7 @@ const InputAyam = () => {
             onClick={() => {
               simpanAyamHandle();
             }}
-            className="bg-emerald-700 text-white py-2 px-6 rounded hover:bg-emerald-600 cursor-pointer"
+            className="bg-green-700 text-white py-2 px-6 rounded hover:bg-green-900 cursor-pointer"
           >
             Simpan
           </button>
