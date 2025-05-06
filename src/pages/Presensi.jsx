@@ -1,7 +1,101 @@
 import React from "react";
+import { getTodayDateInBahasa } from "../utils/dateFormat";
+import { PiCalendarBlank } from "react-icons/pi";
 
 const Presensi = () => {
-  return <div className="text-3xl">PRESENSI</div>;
+  const attendanceData = [
+    {
+      date: "25 Maret 2025",
+      in: "07:00",
+      out: "17:00",
+      overtime: "2 Jam",
+      status: "Hadir",
+    },
+    {
+      date: "24 Maret 2025",
+      in: "07:00",
+      out: "12:00",
+      overtime: "-",
+      status: "Hadir",
+    },
+    {
+      date: "23 Maret 2025",
+      in: "-",
+      out: "-",
+      overtime: "-",
+      status: "Tidak Hadir",
+    },
+    {
+      date: "22 Maret 2025",
+      in: "-",
+      out: "-",
+      overtime: "-",
+      status: "Tidak Hadir",
+    },
+  ];
+
+  return (
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Presensi</h1>
+
+      {/* Presensi Harian */}
+      <div className="bg-white rounded border border-black-6 p-6 mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="font-semibold text-lg">Presensi Harian</h2>
+          <p className="text-sm">{getTodayDateInBahasa()}</p>
+        </div>
+        <div className="bg-aman-box-surface-color hover:bg-[#1D7E20] hover:text-white cursor-pointer text-aman-text-color text-center py-2 rounded text-lg font-semibold">
+          Hadir
+        </div>
+      </div>
+
+      {/* Tabel Presensi */}
+      <div className="bg-white rounded border border-black-6 p-6">
+        <div className="flex justify-between items-center mb-2 flex-wrap gap-4">
+          <div></div>
+          <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+            <PiCalendarBlank size={18} />
+            <div className="text-base font-medium ms-2">
+              Hari ini ({getTodayDateInBahasa()})
+            </div>
+          </div>
+        </div>
+
+        <table className="w-full border-collapse ">
+          <thead className="bg-green-700 text-white text-sm">
+            <tr>
+              <th className="p-2 text-left">Tanggal</th>
+              <th className="p-2 text-left">Jam masuk</th>
+              <th className="p-2 text-left">Jam pulang</th>
+              <th className="p-2 text-left">Jumlah Lembur</th>
+              <th className="p-2 text-left">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {attendanceData.map((row, i) => (
+              <tr key={i} className="border-b">
+                <td className="p-2">{row.date}</td>
+                <td className="p-2">{row.in}</td>
+                <td className="p-2">{row.out}</td>
+                <td className="p-2">{row.overtime}</td>
+                <td className="p-2">
+                  <span
+                    className={`px-3 py-1 rounded ${
+                      row.status === "Hadir"
+                        ? "bg-aman-box-surface-color text-aman-text-color"
+                        : "bg-kritis-box-surface-color text-kritis-text-color"
+                    }`}
+                  >
+                    {row.status}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 };
 
 export default Presensi;

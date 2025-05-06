@@ -6,6 +6,7 @@ import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getEggMonitoring } from "../services/eggs";
 import { PiCalendarBlank } from "react-icons/pi";
 import { deleteEggData } from "../services/eggs";
+import { getTodayDateInBahasa } from "../utils/dateFormat";
 
 // const produksiDetail = [
 //   {
@@ -82,7 +83,7 @@ const DetailProduksi = () => {
         <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
           <PiCalendarBlank size={18} />
           <div className="text-base font-medium ms-2">
-            Hari ini (20 Mar 2025)
+            Hari ini ({getTodayDateInBahasa()})
           </div>
         </div>
       </div>
