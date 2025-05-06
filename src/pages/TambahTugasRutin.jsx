@@ -7,7 +7,10 @@ import { useParams } from "react-router-dom";
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 import { getRoles } from "../services/roles";
 import { getDailyWorkByRoleId } from "../services/dailyWorks";
-import { createUpdateDailyWorkByRoleId } from "../services/dailyWorks";
+import {
+  createUpdateDailyWorkByRoleId,
+  deleteDailyWorkByRoleId,
+} from "../services/dailyWorks";
 
 const TambahTugasRutin = () => {
   const userRole = localStorage.getItem("role");
@@ -52,10 +55,15 @@ const TambahTugasRutin = () => {
     setIsDeleteMode(!isDeleteMode);
   };
 
+  useEffect(() => {
+    if (isDeleteMode == false) {
+      setDeletedTasks([]);
+    }
+  }, [isDeleteMode]);
+
   const tambahTugasHarianHandle = () => {
     addTask();
   };
-
 
   const fetchRoles = async () => {
     try {
@@ -95,6 +103,28 @@ const TambahTugasRutin = () => {
     }
   };
 
+  const deleteTaskHandle = async () => {
+    try {
+      const deleteResponse = await Promise.all(
+        deletedTasks.map(
+          async (taskId) => await deleteDailyWorkByRoleId(taskId)
+        )
+      );
+
+      const allSucceeded = deleteResponse.every(
+        (res) => res.status >= 200 && res.status < 300
+      );
+
+      if (allSucceeded) {
+        navigate(-1, { state: { refetch: true } });
+        console.log("All deletions succeeded!");
+      } else {
+        console.warn("Some deletions failed.", deleteResponse);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
   useEffect(() => {
     fetchRoles();
   }, []);
@@ -103,6 +133,7 @@ const TambahTugasRutin = () => {
     if (selectedRole?.id) {
       fetchDailyWork(selectedRole.id);
     }
+    setIsDeleteMode(false);
   }, [selectedRole]);
 
   const getDisplayValue = (val) => {
@@ -202,9 +233,9 @@ const TambahTugasRutin = () => {
                       checked={task.checked}
                       onChange={() => {
                         setDeletedTasks((prev) =>
-                          prev.includes(index)
-                            ? prev.filter((i) => i !== index)
-                            : [...prev, index]
+                          prev.includes(task.id)
+                            ? prev.filter((i) => i !== task.id)
+                            : [...prev, task.id]
                         );
                       }}
                       className="w-10 h-10 cursor-pointer accent-warning-icon-color"
@@ -311,7 +342,7 @@ const TambahTugasRutin = () => {
           <div className="mt-6 text-right ">
             <button
               onClick={() => {
-                // DO DELETE HANDLE
+                deleteTaskHandle();
               }}
               className="py-2 px-6 rounded bg-kritis-box-surface-color  border text-white text-base font-medium hover:bg-kritis-text-color cursor-pointer"
             >

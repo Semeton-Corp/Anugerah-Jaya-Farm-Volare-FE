@@ -198,29 +198,40 @@ const TambahTugasTambahan = () => {
                   </tr>
                 </thead>
                 <tbody className="">
-                  {additionalWorkStaffInformation.map((item, index) => (
-                    <tr
-                      key={index}
-                      className="border-b border-black-6 text-center"
-                    >
-                      <td className="py-2 px-4">
-                        {formatDateToDDMMYYYY(item.date)}
-                      </td>
-                      <td className="py-2 px-4">{item.time}</td>
-                      <td className="py-2 px-4">{item.staffName}</td>
-                      <td className="py-2 px-4 flex justify-center">
-                        <span
-                          className={`w-36 py-1 flex justify-center rounded text-sm font-semibold ${
-                            item.isDone
-                              ? "bg-aman-box-surface-color text-aman-text-color"
-                              : "bg-orange-200 text-kritis-text-color"
-                          }`}
-                        >
-                          {item.isDone ? "Selesai" : "Dalam Proses"}
-                        </span>
+                  {additionalWorkStaffInformation.length > 0 ? (
+                    additionalWorkStaffInformation.map((item, index) => (
+                      <tr
+                        key={index}
+                        className="border-b border-black-6 text-center"
+                      >
+                        <td className="py-2 px-4">
+                          {formatDateToDDMMYYYY(item.date)}
+                        </td>
+                        <td className="py-2 px-4">{item.time}</td>
+                        <td className="py-2 px-4">{item.staffName}</td>
+                        <td className="py-2 px-4 flex justify-center">
+                          <span
+                            className={`w-36 py-1 flex justify-center rounded text-sm font-semibold ${
+                              item.isDone
+                                ? "bg-aman-box-surface-color text-aman-text-color"
+                                : "bg-orange-200 text-kritis-text-color"
+                            }`}
+                          >
+                            {item.isDone ? "Selesai" : "Dalam Proses"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="4"
+                        className="py-4 px-4 text-center text-black-9"
+                      >
+                        Belum ada pegawai yang mengambil pekerjaan
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
@@ -230,17 +241,21 @@ const TambahTugasTambahan = () => {
         )}
 
         <div className="flex gap-4 justify-end">
+          {id ? (
+            <div className="mt-6 text-right ">
+              <button
+                onClick={() => {
+                  deleteAdditionalsWork(id);
+                }}
+                className="bg-kritis-box-surface-color text-white py-2 px-6 rounded hover:bg-kritis-text-color cursor-pointer"
+              >
+                Hapus Tugas Tambahan
+              </button>
+            </div>
+          ) : (
+            <></>
+          )}
           {/* Hapus Tugas Button */}
-          <div className="mt-6 text-right ">
-            <button
-              onClick={() => {
-                deleteAdditionalsWork(id);
-              }}
-              className="bg-kritis-box-surface-color text-white py-2 px-6 rounded hover:bg-kritis-text-color cursor-pointer"
-            >
-              Hapus Tugas Tambahan
-            </button>
-          </div>
 
           {/* Simpan Button */}
           <div className="mt-6 text-right ">

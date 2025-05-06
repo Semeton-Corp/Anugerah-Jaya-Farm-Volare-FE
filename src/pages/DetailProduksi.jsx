@@ -112,12 +112,20 @@ const DetailProduksi = () => {
                 <th className="py-2 px-4">Retak</th>
                 <th className="py-2 px-4">Pecah</th>
                 <th className="py-2 px-4">Reject</th>
-                <th className="py-2 px-4">%Abnormality</th>
-
-                <th className="py-2 px-4">Berat Telur (Kg)</th>
-                <th className="py-2 px-4">Gudang Simpan</th>
+                {userRole == "Pekerja Telur" ? (
+                  <>
+                    <th className="py-2 px-4">%Abnormality</th>
+                    <th className="py-2 px-4">Berat Telur (Kg)</th>
+                    <th className="py-2 px-4">Gudang Simpan</th>
+                  </>
+                ) : (
+                  <></>
+                )}
 
                 <th className="py-2 px-4">Keterangan</th>
+                {userRole === "Pekerja Gudang" && (
+                  <th className="py-2 px-4">Aksi</th>
+                )}
                 {userRole === "Pekerja Telur" && (
                   <th className="py-2 px-4">Aksi</th>
                 )}
@@ -135,14 +143,20 @@ const DetailProduksi = () => {
                   <td className="py-2 px-4">{item.totalCrackedEgg}</td>
                   <td className="py-2 px-4">{item.totalBrokeEgg}</td>
                   <td className="py-2 px-4">{item.totalRejectEgg}</td>
-                  <td className="py-2 px-4">
-                    <div className="flex justify-center">
-                      <p>{Number(item.abnormalityRate).toFixed(2)} </p>
-                      <p>%</p>
-                    </div>
-                  </td>
-                  <td className="py-2 px-4">{item.weight}</td>
-                  <td className="py-2 px-4">{item.warehouse.name}</td>
+                  {userRole == "Pekerja Telur" ? (
+                    <>
+                      <td className="py-2 px-4">
+                        <div className="flex justify-center">
+                          <p>{Number(item.abnormalityRate).toFixed(2)} </p>
+                          <p>%</p>
+                        </div>
+                      </td>
+                      <td className="py-2 px-4">{item.weight}</td>
+                      <td className="py-2 px-4">{item.warehouse.name}</td>
+                    </>
+                  ) : (
+                    <></>
+                  )}
 
                   <td className="py-2 px-4 flex justify-center">
                     <span
@@ -155,6 +169,13 @@ const DetailProduksi = () => {
                       {item.description}
                     </span>
                   </td>
+                  {userRole === "Pekerja Gudang" && (
+                    <th className="py-2 px-4 ">
+                      <span className="px-4 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer">
+                        Barang Sampai
+                      </span>
+                    </th>
+                  )}
                   {userRole === "Pekerja Telur" && (
                     <td className="py-2 px-4 text-center">
                       <div className="inline-flex gap-4 justify-center items-center">

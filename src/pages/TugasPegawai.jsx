@@ -161,36 +161,46 @@ const TugasPegawai = () => {
               </tr>
             </thead>
             <tbody className="">
-              {tugasTambahanData.map((item, index) => (
-                <tr key={index} className="border-b border-black-6">
-                  <td className="py-2 px-4">
-                    {translateDateToBahasa(item.date)}
-                  </td>
-                  <td className="py-2 px-4">{item.description}</td>
-                  <td className="py-2 px-4">{item.location}</td>
-                  <td className="py-2 px-4">{item.remainingSlot}</td>
-                  <td className="py-3 px-4">
-                    <span
-                      className={`w-36 py-1 flex justify-center rounded text-sm font-semibold ${
-                        item.status === "Selesai"
-                          ? "bg-aman-box-surface-color text-aman-text-color"
-                          : item.status === "Dalam Proses"
-                          ? "bg-orange-200 text-kritis-text-color"
-                          : "bg-kritis-box-surface-color text-kritis-text-color"
-                      }`}
+              {tugasTambahanData.length > 0 ? (
+                tugasTambahanData.map((item, index) => (
+                  <tr key={index} className="border-b border-black-6">
+                    <td className="py-2 px-4">
+                      {translateDateToBahasa(item.date)}
+                    </td>
+                    <td className="py-2 px-4">{item.description}</td>
+                    <td className="py-2 px-4">{item.location}</td>
+                    <td className="py-2 px-4">{item.remainingSlot}</td>
+                    <td className="py-3 px-4">
+                      <span
+                        className={`w-36 py-1 flex justify-center rounded text-sm font-semibold ${
+                          item.status === "Selesai"
+                            ? "bg-aman-box-surface-color text-aman-text-color"
+                            : item.status === "Sedang Diproses"
+                            ? "bg-orange-200 text-kritis-text-color"
+                            : "bg-kritis-box-surface-color text-kritis-text-color"
+                        }`}
+                      >
+                        {item.status}
+                      </span>
+                    </td>
+                    <td
+                      onClick={() => detailTugasTambahanHandle(item.id)}
+                      className="py-2 px-4 underline text-black hover:text-black-6 cursor-pointer"
                     >
-                      {item.status}
-                    </span>
-                  </td>
-
+                      Detail
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
                   <td
-                    onClick={() => detailTugasTambahanHandle(item.id)}
-                    className="py-2 px-4 underline text-black hover:text-black-6 cursor-pointer"
+                    colSpan="6"
+                    className="py-4 px-4 text-center text-black-9"
                   >
-                    Detail
+                    Belum ada tugas tambahan yang mengambil pekerjaan
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

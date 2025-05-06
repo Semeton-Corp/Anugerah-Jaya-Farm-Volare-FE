@@ -200,4 +200,44 @@ export const sidebarMenus = {
     },
     // add more items
   ],
+  "Pekerja Gudang": [
+    {
+      icon: <img src={produksiTelur} alt="Overview Icon" className="h-4 w-4" />,
+      tabName: "Produksi Telur",
+      element: <ProduksiTelur />,
+    },
+    {
+      icon: <img src={gudang} alt="ayam Icon" className="h-4 w-4" />,
+      tabName: "Gudang",
+      element: <OverviewOwner />,
+      subTabs: [
+        { tabName: "Stok Gudang", path: "stok-gudang" },
+        { tabName: "Pengadaan Barang", path: "pengadaan-barang" },
+        { tabName: "Daftar Barang", path: "daftar-barang" },
+        { tabName: "Pesanan Toko", path: "pesanan-toko" },
+        { tabName: "Riwayat Gudang", path: "riwayat-gudang" },
+        { tabName: "Daftar Suplier", path: "daftar-suplier" },
+      ],
+    },
+    {
+      icon: <img src={toko} alt="Overview Icon" className="h-4 w-4" />,
+      tabName: "Kasir",
+      element: <OverviewOwner />,
+      subTabs: [
+        { tabName: "Antrian Pesanan", path: "antrian-pesanan" },
+        { tabName: "Daftar Pesanan", path: "daftar-pesanan" },
+      ],
+    },
+    {
+      icon: <GrNotes size={20} />,
+      tabName: "Tugas",
+      element: <OverviewOwner />,
+    },
+    {
+      icon: <BsPersonSquare size={20} />,
+      tabName: "Presensi",
+      element: <OverviewOwner />,
+    },
+    // add more items
+  ],
 };

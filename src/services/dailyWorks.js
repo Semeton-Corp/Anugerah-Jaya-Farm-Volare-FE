@@ -85,3 +85,12 @@ export const createUpdateDailyWorkByRoleId = (payload) => {
     },
   });
 };
+
+export const deleteDailyWorkByRoleId = (id) => {
+  return api.delete(`/works/dailies/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};

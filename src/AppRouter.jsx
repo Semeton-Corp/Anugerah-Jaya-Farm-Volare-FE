@@ -42,6 +42,7 @@ import PesananToko from "./pages/PesananToko";
 import DaftarBarang from "./pages/DaftarBarang";
 import TambahTugasTambahan from "./pages/TambahTugasTambahan";
 import TambahTugasRutin from "./pages/TambahTugasRutin";
+import PengadaanBarang from "./pages/PengadaanBarang";
 
 const AppRouter = createBrowserRouter([
   {
@@ -329,6 +330,85 @@ const AppRouter = createBrowserRouter([
               {
                 path: "overview-gudang",
                 element: <Gudang />,
+              },
+              {
+                path: "daftar-barang",
+                element: <DaftarBarang />,
+              },
+              {
+                path: "pesanan-toko",
+                element: <PesananToko />,
+              },
+              {
+                path: "riwayat-gudang",
+                element: <RiwayatGudang />,
+              },
+              {
+                path: "daftar-suplier",
+                element: <DaftarSuplier />,
+              },
+            ],
+          },
+          {
+            path: "kasir",
+            children: [
+              {
+                path: "antrian-pesanan",
+                element: <AntrianPesanan />,
+                children: [
+                  {
+                    path: "input-data-pesanan",
+                    element: <InputDataPesanan />,
+                  },
+                  {
+                    path: "input-data-pesanan/:id",
+                    element: <InputDataPesanan />,
+                  },
+                ],
+              },
+              {
+                path: "daftar-pesanan",
+                element: <DaftarPesanan />,
+                children: [
+                  {
+                    path: "input-data-pesanan/:id",
+                    element: <InputDataPesanan />,
+                  },
+                ],
+              },
+            ],
+          },
+          { path: "tugas", element: <Tugas /> },
+          { path: "presensi", element: <Presensi /> },
+        ],
+      },
+    ],
+  },
+
+  // PEKERJA GUDANG
+  {
+    path: "/pekerja-gudang",
+    element: <ProtectedRoute allowedRoles={["Pekerja Gudang"]} />,
+    children: [
+      {
+        path: "",
+        element: <MainLayout role="Pekerja Gudang" />,
+        children: [
+          { path: "", element: <Navigate to="produksi-telur" replace /> },
+          {
+            path: "produksi-telur",
+            element: <DetailProduksi />,
+          },
+          {
+            path: "gudang",
+            children: [
+              {
+                path: "stok-gudang",
+                element: <Gudang />,
+              },
+              {
+                path: "pengadaan-barang",
+                element: <PengadaanBarang />,
               },
               {
                 path: "daftar-barang",
