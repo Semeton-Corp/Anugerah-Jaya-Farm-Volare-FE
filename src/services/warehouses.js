@@ -22,6 +22,22 @@ export const getWarehouseItems = (category, storeId) => {
   });
 };
 
+export const getWarehouseItemById = (id) => {
+  return api.get(`/warehouses/items/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const updateWarehouseItem = (payload, id) => {
+  return api.put(`/warehouses/items/${id}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export const createWarehouseItems = (payload) => {
   return api.post("/warehouses/items", payload, {
     headers: {

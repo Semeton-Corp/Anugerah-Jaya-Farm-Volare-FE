@@ -5,7 +5,11 @@ import { inputTelur } from "../services/eggs";
 import { getEggMonitoringById } from "../services/eggs";
 import { useParams } from "react-router-dom";
 import { updateEggMonitoring } from "../services/eggs";
-import { getWarehouses } from "../services/warehouses";
+import {
+  getWarehouseItemById,
+  getWarehouses,
+  updateWarehouseItem,
+} from "../services/warehouses";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
 import { createWarehouseItems } from "../services/warehouses";
 
@@ -26,12 +30,6 @@ const TambahBarangBaru = () => {
   const [selectedCategory, setSelectedCategory] = useState(category[0]);
   const [unit, setUnit] = useState("");
 
-  const [ok, setOk] = useState("");
-  const [retak, setRetak] = useState("");
-  const [pecah, setPecah] = useState("");
-  const [reject, setReject] = useState("");
-  const [weight, setWeight] = useState("");
-
   const navigate = useNavigate();
 
   const { id } = useParams();
@@ -51,8 +49,25 @@ const TambahBarangBaru = () => {
     }
   };
 
+  const fetchWarehouseItembyId = async (id) => {
+    try {
+      const detailResponse = await getWarehouseItemById(id);
+      console.log("detailResponse: ", detailResponse);
+      if (detailResponse.status == 200) {
+        setName(detailResponse.data.data.name);
+        setSelectedCategory(detailResponse.data.data.category);
+        setUnit(detailResponse.data.data.unit);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
   useEffect(() => {
     fetchWarehouses();
+    if (id) {
+      fetchWarehouseItembyId(id);
+    }
   }, []);
 
   const handleSubmit = async () => {
@@ -61,14 +76,27 @@ const TambahBarangBaru = () => {
       unit: unit,
       category: selectedCategory,
     };
-    try {
-      const createResponse = await createWarehouseItems(payload);
-      // console.log("createResponse: ", createResponse);
-      if (createResponse.status == 201) {
-        navigate(-1, { state: { refecth: true } });
+
+    if (id) {
+      try {
+        const updateResponse = await updateWarehouseItem(payload, id);
+        // console.log("updateResponse: ", updateResponse);
+        if (updateResponse.status == 200) {
+          navigate(-1, { state: { refecth: true } });
+        }
+      } catch (error) {
+        console.log("error :", error);
       }
-    } catch (error) {
-      console.log("error :", error);
+    } else {
+      try {
+        const createResponse = await createWarehouseItems(payload);
+        // console.log("createResponse: ", createResponse);
+        if (createResponse.status == 201) {
+          navigate(-1, { state: { refecth: true } });
+        }
+      } catch (error) {
+        console.log("error :", error);
+      }
     }
   };
 

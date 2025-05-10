@@ -102,14 +102,15 @@ const DaftarBarang = () => {
     }
   }
 
+  const editDataHandle = async (id) => {
+    navigate(`${location.pathname}/tambah-barang-baru/${id}`);
+  };
 
   // Render detail input page only
   if (isDetailPage) {
     return <Outlet />;
   }
-  
-  
-  
+
   // Render main table page
   return (
     <div className="flex flex-col px-4 py-3 gap-4">
@@ -154,14 +155,14 @@ const DaftarBarang = () => {
                   <td className="py-2 px-4 flex justify-center gap-4">
                     <BiSolidEditAlt
                       onClick={() => {
-                        editDataHandle(row.id);
+                        editDataHandle(data.id);
                       }}
                       size={24}
                       className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
                     />
                     <MdDelete
                       onClick={() => {
-                        deleteDataHandle(row.id);
+                        deleteDataHandle(data.id);
                       }}
                       size={24}
                       className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"

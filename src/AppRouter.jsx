@@ -427,6 +427,10 @@ const AppRouter = createBrowserRouter([
                     path: "tambah-barang-baru",
                     element: <TambahBarangBaru />,
                   },
+                  {
+                    path: "tambah-barang-baru/:id",
+                    element: <TambahBarangBaru />,
+                  },
                 ],
               },
               {
