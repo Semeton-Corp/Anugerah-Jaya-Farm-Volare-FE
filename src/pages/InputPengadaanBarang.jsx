@@ -5,8 +5,13 @@ import { inputTelur } from "../services/eggs";
 import { getEggMonitoringById } from "../services/eggs";
 import { useParams } from "react-router-dom";
 import { updateEggMonitoring } from "../services/eggs";
-import { getWarehouses } from "../services/warehouses";
+import {
+  createWarehouseOrderItem,
+  getWarehouseItems,
+  getWarehouses,
+} from "../services/warehouses";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
+import { getSuppliers } from "../services/supplier";
 
 const InputPengadaanBarang = () => {
   const [cages, setCages] = useState([]);
@@ -14,6 +19,14 @@ const InputPengadaanBarang = () => {
 
   const [warehouses, setWarehouses] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(0);
+
+  const [warehouseItems, setWarehouseItems] = useState([]);
+  const [selectedItem, setSelectedItem] = useState("");
+
+  const [suppliers, setSuppliers] = useState([]);
+  const [selectedSupplier, setSelectedSupplier] = useState("");
+
+  const [quantity, setQuantity] = useState("");
 
   const [ok, setOk] = useState("");
   const [retak, setRetak] = useState("");
@@ -40,11 +53,61 @@ const InputPengadaanBarang = () => {
     }
   };
 
+  const fetchWarehouseItems = async () => {
+    try {
+      const itemsResponse = await getWarehouseItems();
+      console.log("itemsResponse: ", itemsResponse);
+      if (itemsResponse.status == 200) {
+        const filteredItems = itemsResponse.data.data.filter(
+          (item) => item.category !== "Telur"
+        );
+        setWarehouseItems(filteredItems);
+        setSelectedItem(itemsResponse.data.data[0]);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const fetchSuppliers = async () => {
+    try {
+      const supplierResponse = await getSuppliers();
+      console.log("supplierResponse: ", supplierResponse);
+      if (supplierResponse.status == 200) {
+        setSuppliers(supplierResponse.data.data);
+        setSelectedSupplier(supplierResponse.data.data[0].id);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
   useEffect(() => {
+    fetchWarehouseItems();
     fetchWarehouses();
+    fetchSuppliers();
   }, []);
 
-  const handleSubmit = async () => {};
+  const handleSubmit = async () => {
+    const payload = {
+      warehouseItemId: parseInt(selectedItem.id),
+      warehouseId: parseInt(selectedWarehouse),
+      supplierId: parseInt(selectedSupplier),
+      quantity: parseInt(quantity),
+    };
+
+    // console.log("payload: ", payload);
+
+    try {
+      const createResponse = await createWarehouseOrderItem(payload);
+      // console.log("createResponse: ", createResponse);
+      if (createResponse.status == 201) {
+        navigate(-1, { state: { refetch: true } });
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
 
   const getDisplayValue = (val) => (val === 0 ? "" : val);
 
@@ -62,8 +125,7 @@ const InputPengadaanBarang = () => {
           className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-6"
           value={selectedWarehouse}
           onChange={(e) => {
-            const id = Number(e.target.value);
-            setSelectedWarehouse(id);
+            setSelectedWarehouse(e.target.value);
           }}
         >
           {warehouses.map((warehouse) => (
@@ -73,79 +135,55 @@ const InputPengadaanBarang = () => {
           ))}
         </select>
 
-        {/* Pilih kandang */}
-        <label className="block font-medium mb-1">Pilih kandang</label>
+        {/* Pilih barang */}
+        <label className="block font-medium mb-1">Nama Barang</label>
         <select
           className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-6"
-          value={selectedCage}
+          value={selectedItem.id}
           onChange={(e) => {
-            const id = Number(e.target.value);
-            setSelectedCage(id);
+            const selected = warehouseItems.find(
+              (item) => item.id == e.target.value
+            );
+            setSelectedItem(selected);
           }}
         >
-          {cages.map((cage) => (
-            <option key={cage.id} value={cage.id}>
-              {cage.name}
+          {warehouseItems.map((item) => (
+            <option key={item.id} value={item.id}>
+              {item.name}
             </option>
           ))}
         </select>
 
-        {/* Form Telur */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div>
-            <label className="block font-medium mb-1">Telur OK</label>
+        <div className="flex gap-4"></div>
+        <div>
+          <label className="block font-medium mb-1">Jumlah Pesanan</label>
+          <div className="flex gap-4 items-center mb-6">
             <input
               type="number"
-              className="w-full border rounded p-2 bg-black-4"
-              placeholder="Masukkan jumlah telur..."
-              value={getDisplayValue(ok)}
-              onChange={(e) => setOk(e.target.value)}
+              className="w-1/6 border rounded py-2 px-2 bg-black-4"
+              placeholder="Masukkan jumlah barang..."
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
             />
-          </div>
-          <div>
-            <label className="block font-medium mb-1">Telur Retak</label>
-            <input
-              type="number"
-              className="w-full border rounded p-2 bg-black-4"
-              placeholder="Masukkan jumlah telur..."
-              value={getDisplayValue(retak)}
-              onChange={(e) => setRetak(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block font-medium mb-1">Telur Pecah</label>
-            <input
-              type="number"
-              className="w-full border rounded p-2 bg-black-4"
-              placeholder="Masukkan jumlah telur..."
-              value={getDisplayValue(pecah)}
-              onChange={(e) => setPecah(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block font-medium mb-1">Telur Reject</label>
-            <input
-              type="number"
-              className="w-full border rounded p-2 bg-black-4"
-              placeholder="Masukkan jumlah telur..."
-              value={getDisplayValue(reject)}
-              onChange={(e) => setReject(e.target.value)}
-            />
+            <p className="text-lg font-bold">{selectedItem.unit}</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block font-medium mb-1">Berat Telur (Kg)</label>
-            <input
-              type="number"
-              className="w-full border rounded p-2 bg-black-4"
-              placeholder="Masukkan jumlah telur..."
-              value={getDisplayValue(weight)}
-              onChange={(e) => setWeight(e.target.value)}
-            />
-          </div>
-        </div>
+        {/* Pilih supplier */}
+        <label className="block font-medium mb-1">Suplier</label>
+        <select
+          className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-6"
+          value={selectedSupplier}
+          onChange={(e) => {
+            setSelectedSupplier(e.target.value);
+          }}
+        >
+          {suppliers.map((supplier) => (
+            <option key={supplier.id} value={supplier.id}>
+              {supplier.name}
+            </option>
+          ))}
+        </select>
 
         <div className="mt-6 text-right">
           <button
@@ -160,19 +198,15 @@ const InputPengadaanBarang = () => {
         </div>
       </div>
       {/* <button
-          onClick={() => {
-            console.log("Selected Cage ID:", selectedCage);
-            console.log("Selected Warehouse ID:", selectedWarehouse);
-            console.log("OK:", ok);
-            console.log("Retak:", retak);
-            console.log("Pecah:", pecah);
-            console.log("Reject:", reject);
-            console.log("Weight:", weight);
-            console.log("Route Param ID:", id);
-          }}
-        >
-          Check
-        </button> */}
+        onClick={() => {
+          console.log("selectedWarehouse: ", selectedWarehouse);
+          console.log("selectedItem: ", selectedItem);
+          console.log("quantity: ", quantity);
+          console.log("selectedSupplier: ", selectedSupplier);
+        }}
+      >
+        Check
+      </button> */}
     </div>
   );
 };

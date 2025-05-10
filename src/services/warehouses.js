@@ -29,3 +29,31 @@ export const createWarehouseItems = (payload) => {
     },
   });
 };
+
+export const getWarehouseOrderItems = () => {
+  return api.get("/warehouses/order-items", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const takeWarehouseOrderItem = (id) => {
+  return api.patch(
+    `/warehouses/order-items/${id}/takes`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};
+
+export const createWarehouseOrderItem = (payload) => {
+  return api.post("/warehouses/order-items", payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

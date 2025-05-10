@@ -7,40 +7,17 @@ import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getChickenMonitoring } from "../services/chickenMonitorings";
 import { deleteChickenData } from "../services/chickenMonitorings";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
-
-const daftarBarangData = [
-  {
-    namaBarang: "Jagung",
-    satuan: "Ikat",
-    kuantitas: 12,
-    suplier: "Super Jagung",
-    keterangan: "Sedang Dikirim",
-    aksi: "Barang Sampai",
-  },
-  {
-    namaBarang: "Telur retak",
-    satuan: "Karpet",
-    kuantitas: 12,
-    suplier: "Dagang Dedak",
-    keterangan: "Sedang Dikirim",
-    aksi: "Barang Sampai",
-  },
-  {
-    namaBarang: "Telur pecah",
-    satuan: "Karpet",
-    kuantitas: 10,
-    suplier: "Pelet990",
-    keterangan: "Selesai",
-    aksi: "", // no action button
-  },
-];
+import {
+  getWarehouseOrderItems,
+  takeWarehouseOrderItem,
+} from "../services/warehouses";
 
 const PengadaanBarang = () => {
   const userRole = localStorage.getItem("role");
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [detailAyamData, setDetailAyamState] = useState([]);
+  const [daftarBarangData, setDaftarBarangData] = useState([]);
 
   const detailPages = ["input-pengadaan-barang"];
 
@@ -56,45 +33,36 @@ const PengadaanBarang = () => {
     navigate(`${location.pathname}/detail-vaksin-obat`);
   };
 
-  const fetchDataAyam = async () => {
+  const fetchBarangData = async () => {
     try {
-      const response = await getChickenMonitoring();
-      if (response.status === 200) {
-        setDetailAyamState(response.data.data);
-        // console.log("response.data.data: ", response.data.data);
-
-        // console.log("DetailAyamData: ", response.data.data);
+      const dataResponse = await getWarehouseOrderItems();
+      console.log("dataResponse: ", dataResponse);
+      if (dataResponse.status == 200) {
+        setDaftarBarangData(dataResponse.data.data);
       }
     } catch (error) {
-      console.error("Gagal memuat data ayam:", error);
+      console.log("error :", error);
+    }
+  };
+
+  const takeOrderHandle = async (id) => {
+    try {
+      const takeResponse = await takeWarehouseOrderItem(id);
+      // console.log("takeResponse: ", takeResponse);
+      if (takeResponse.status == 200) [fetchBarangData()];
+    } catch (error) {
+      console.log("error :", error);
     }
   };
 
   useEffect(() => {
-    fetchDataAyam();
+    fetchBarangData();
 
     if (location.state?.refetch) {
-      fetchDataAyam();
+      fetchBarangData();
       window.history.replaceState({}, document.title);
     }
   }, [location]);
-
-  async function deleteDataHandle(dataId) {
-    try {
-      const response = await deleteChickenData(dataId);
-      console.log("response.status", response.status);
-
-      if (response.status === 204) {
-        alert("✅ Data berhasil dihapus!");
-        await fetchDataAyam();
-      } else {
-        alert("⚠️ Gagal menghapus data. Silakan coba lagi.");
-      }
-    } catch (error) {
-      console.error("Gagal menghapus data ayam:", error);
-      alert("❌ Terjadi kesalahan saat menghapus data.");
-    }
-  }
 
   // Render detail input page only
   if (isDetailPage) {
@@ -147,30 +115,39 @@ const PengadaanBarang = () => {
                   key={index}
                   className="border-t border-gray-200 hover:bg-gray-50 text-center"
                 >
-                  <td className="py-2 px-4">{data.namaBarang}</td>
-                  <td className="py-2 px-4">{data.satuan}</td>
-                  <td className="py-2 px-4">{data.kuantitas}</td>
-                  <td className="py-2 px-4">{data.suplier}</td>
+                  <td className="py-2 px-4">{data.warehouseItem.name}</td>
+                  <td className="py-2 px-4">{data.warehouseItem.unit}</td>
+                  <td className="py-2 px-4">{data.quantity}</td>
+                  <td className="py-2 px-4">{data.supplier.name}</td>
                   <td>
                     <div className="flex justify-center">
                       <span
                         className={`w-38 py-1 flex justify-center rounded text-sm font-semibold ${
-                          data.keterangan === "Selesai"
+                          data.isTaken
                             ? "bg-aman-box-surface-color text-aman-text-color"
                             : "bg-orange-200 text-orange-900"
                         }`}
                       >
-                        {data.keterangan}
+                        {data.isTaken ? "Selesai" : "Sedang Dikirim"}
                       </span>
                     </div>
                   </td>
                   <td>
                     <div className="flex justify-center">
-                      <th className="py-2 px-4 ">
-                        <span className="px-4 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer">
-                          Barang Sampai
-                        </span>
-                      </th>
+                      {!data.isTaken ? (
+                        <div
+                          onClick={() => {
+                            takeOrderHandle(data.id);
+                          }}
+                          className="py-2 px-4 "
+                        >
+                          <span className="px-4 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer">
+                            Barang Sampai
+                          </span>
+                        </div>
+                      ) : (
+                        <></>
+                      )}
                     </div>
                   </td>
                 </tr>
