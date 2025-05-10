@@ -1,6 +1,15 @@
 import api from "./api";
 const token = localStorage.getItem("token");
 
+export const getDailyWorkUser = () => {
+  return api.get("/works/me", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
 export const getListDailyWorks = () => {
   return api.get("/works/dailies", {
     headers: {
@@ -88,6 +97,15 @@ export const createUpdateDailyWorkByRoleId = (payload) => {
 
 export const deleteDailyWorkByRoleId = (id) => {
   return api.delete(`/works/dailies/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const updateDailyWorkStaff = (payload, id) => {
+  return api.put(`/works/dailies/staffs/${id}`, payload, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",

@@ -2,44 +2,45 @@ import React from "react";
 import { FiCheck } from "react-icons/fi";
 import {
   getAdditionalWorks,
+  getDailyWorkUser,
   takeAdditionalWorks,
+  updateDailyWorkStaff,
 } from "../services/dailyWorks";
 import { useState, useEffect } from "react";
 import { translateDateToBahasa } from "../utils/dateFormat";
-// const tugasTambahanData = [
-//   {
-//     tanggal: "27 Maret 2025",
-//     tugas: "Dekorasi kandang untuk 17 Agustus",
-//     lokasi: "Kandang",
-//     slotPekerja: 3,
-//     status: "Belum diproses",
-//   },
-//   {
-//     tanggal: "25 Maret 2025",
-//     tugas: "Dekorasi toko untuk 17 Agustus",
-//     lokasi: "Toko",
-//     slotPekerja: 0,
-//     status: "Dalam Proses",
-//   },
-//   {
-//     tanggal: "19 Maret 2025",
-//     tugas: "Perbaikan pintu gudang",
-//     lokasi: "Gudang",
-//     slotPekerja: 0,
-//     status: "Selesai",
-//   },
-// ];
+import { getCurrentPresence } from "../services/presence";
 
 const Tugas = () => {
   const [tugasTambahanData, setTugasTambahanData] = useState([]);
+  const [dailyWorks, setDailyWorks] = useState([]);
+  const [additionalWorks, setAdditionalWorks] = useState([]);
+
+  const [isPresence, setIsPresence] = useState(false);
 
   const fetchTugasTambahanData = async () => {
     try {
       const response = await getAdditionalWorks();
-      console.log("response fetch tugas tambahan data: ", response);
+      console.log("response.data.data: ", response);
 
       if (response.status == 200) {
         setTugasTambahanData(response.data.data);
+      }
+    } catch (error) {
+      alert("Terjadi kesalahan saat memuat tugas rutin");
+      console.log("Error: ", error);
+    }
+  };
+
+  const fetchAllTugas = async () => {
+    try {
+      const response = await getDailyWorkUser();
+      console.log("response fetch tugas tambahan data: ", response);
+
+      if (response.status == 200) {
+        setDailyWorks(response.data.data.dailyWorks);
+        setAdditionalWorks(response.data.data.additionalWorks);
+
+        // setTugasTambahanData(response.data.data);
       }
     } catch (error) {
       alert("Terjadi kesalahan saat memuat tugas rutin");
@@ -56,15 +57,44 @@ const Tugas = () => {
     }
   };
 
+  const getTodayPresence = async (id) => {
+    try {
+      const presenceResponse = await getCurrentPresence();
+      console.log("presenceResponse: ", presenceResponse);
+      if (presenceResponse.status == 200) {
+        setIsPresence(presenceResponse.data.data.isPresent);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
   useEffect(() => {
-    fetchTugasTambahanData();
+    getTodayPresence();
+    if (isPresence) {
+      fetchTugasTambahanData();
+      fetchAllTugas();
+    }
   }, []);
+
+  const finishAdditionalTask = async (taskId) => {
+    const payload = {
+      isDone: true,
+    };
+
+    try {
+      const updateResponse = await updateDailyWorkStaff(payload, taskId);
+      console.log("updateResponse: ", updateResponse);
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
 
   const getStatusStyle = (status) => {
     switch (status) {
       case "Belum Diproses":
         return "bg-[#FF5E5E] text-[#640404]";
-      case "Dalam Proses":
+      case "Sedang Diproses":
         return "bg-orange-200 text-krisis-text-color";
       case "Selesai":
         return "bg-[#87FF8B] text-[#066000]";
@@ -110,6 +140,14 @@ const Tugas = () => {
     <div className="p-4">
       {/* header */}
       <div className="text-3xl font-bold mb-4">Tugas</div>
+
+      {/* Warning Box */}
+      <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded">
+        <p className="flex items-center">
+          <span className="mr-2 text-lg">⚠️</span>
+          Lakukan presensi harian untuk melihat tugas hari ini
+        </p>
+      </div>
 
       {/* tugas tambahan  */}
       <div className="border p-4 border-black-6 rounded-lg bg-white">
@@ -173,31 +211,42 @@ const Tugas = () => {
         {/* Tugas Tambahan */}
         <div className="pb-2 mb-4">
           <h3 className="text-md font-semibold mb-2">Tugas Tambahan</h3>
-          <div className="bg-gray-100 px-4 py-3 border-1 rounded-md flex justify-between items-center">
-            <p className="font-medium">{tugasHariIni.tambahan.tugas}</p>
-            <button
-              className={`w-8 h-8 rounded-md flex justify-center items-center cursor-pointer ${
-                tugasHariIni.tambahan.selesai
-                  ? "bg-[#87FF8B] text-black hover:bg-[#4d8e4f]"
-                  : "bg-gray-200 hover:bg-gray-400"
-              }`}
-            >
-              {tugasHariIni.tambahan.selesai && <FiCheck />}
-            </button>
-          </div>
+          {additionalWorks.map((item, i) => (
+            <div className="bg-gray-100 px-4 py-3 border-1 rounded-md flex justify-between items-center mb-2">
+              <p className="font-medium">{item.additionalWork.description}</p>
+              <button
+                onClick={() => {
+                  if (!item.isDone) {
+                    finishAdditionalTask(item.additionalWork.id);
+                    console.log(
+                      "item.additionalWork.id: ",
+                      item.additionalWork.id
+                    );
+                  }
+                }}
+                className={`w-8 h-8 rounded-md flex justify-center items-center cursor-pointer ${
+                  item.isDone
+                    ? "bg-[#87FF8B] text-black hover:bg-[#4d8e4f]"
+                    : "bg-gray-200 hover:bg-gray-400"
+                }`}
+              >
+                {item.isDone && <FiCheck />}
+              </button>
+            </div>
+          ))}
         </div>
 
         {/* Tugas Rutin */}
         <div>
           <h3 className="text-md font-semibold mb-2">Tugas Rutin</h3>
           <div className="space-y-2">
-            {tugasHariIni.rutin.map((item, i) => (
+            {dailyWorks.map((item, i) => (
               <div
                 key={i}
                 className="border-1 bg-gray-100 px-4 py-3 rounded-md flex justify-between items-center"
               >
                 <div>
-                  <p className="font-medium">{item.tugas}</p>
+                  <p className="font-medium">{item.dailyWork.description}</p>
                   <p className="text-sm text-gray-600">{item.waktu}</p>
                 </div>
                 <button

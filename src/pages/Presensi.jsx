@@ -1,8 +1,56 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
 import { PiCalendarBlank } from "react-icons/pi";
+import {
+  getCurrentPresence,
+  arrivalPresence,
+  departurePresence,
+} from "../services/presence";
 
 const Presensi = () => {
+  const [presenceId, setPresenceId] = useState(0);
+  const [isPresence, setIsPresence] = useState(false);
+  const [isGoHome, setIsGoHome] = useState(false);
+
+  const getTodayPresence = async (id) => {
+    try {
+      const presenceResponse = await getCurrentPresence();
+      console.log("currentPresenceResponse: ", presenceResponse);
+      if (presenceResponse.status == 200) {
+        setPresenceId(presenceResponse.data.data.id);
+        setIsPresence(presenceResponse.data.data.isPresent);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const arrivalHandlePresence = async () => {
+    try {
+      const presenceResponse = await arrivalPresence(presenceId);
+      console.log("presenceResponse: ", presenceResponse);
+      if (presenceResponse.status == 200) {
+        setIsPresence(presenceResponse.data.data.isPresent);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const departureHandlePresence = async () => {
+    try {
+      const presenceResponse = await departurePresence(presenceId);
+      console.log("presenceResponse: ", presenceResponse);
+      if (presenceResponse.status == 200) {
+        setIsGoHome(true);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+  useEffect(() => {
+    getTodayPresence();
+  }, []);
   const attendanceData = [
     {
       date: "25 Maret 2025",
@@ -44,8 +92,19 @@ const Presensi = () => {
           <h2 className="font-semibold text-lg">Presensi Harian</h2>
           <p className="text-sm">{getTodayDateInBahasa()}</p>
         </div>
-        <div className="bg-aman-box-surface-color hover:bg-[#1D7E20] hover:text-white cursor-pointer text-aman-text-color text-center py-2 rounded text-lg font-semibold">
-          Hadir
+        <div
+          onClick={isPresence ? departureHandlePresence : arrivalHandlePresence}
+          className={`hover:text-white cursor-pointer text-center py-2 rounded text-lg font-semibold ${
+            isPresence
+              ? "bg-kritis-box-surface-color hover:bg-[#C34747] text-kritis-text-color"
+              : "bg-aman-box-surface-color hover:bg-[#1D7E20] text-aman-text-color "
+          }`}
+        >
+          {isGoHome
+            ? "Anda sudah melakukan presensi hari ini"
+            : isPresence
+            ? "Pulang"
+            : "Hadir"}
         </div>
       </div>
 

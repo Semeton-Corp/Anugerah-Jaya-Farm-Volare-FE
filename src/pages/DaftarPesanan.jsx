@@ -30,9 +30,10 @@ const DaftarPesanan = () => {
   const fetchDataAntrianPesanan = async () => {
     try {
       const response = await getListStoreSale();
-      console.log("response: ", response);
+      console.log("response List: ", response);
+      console.log("(response.data.data): ", response.data.data.storeSales);
       if (response.status == 200) {
-        setDataAntrianPesanan(response.data.data);
+        setDataAntrianPesanan(response.data.data.storeSales);
       }
     } catch (error) {
       alert("Gagal memuat data antrian pesanan: ", error);

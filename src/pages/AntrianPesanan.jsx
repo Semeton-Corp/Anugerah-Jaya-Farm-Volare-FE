@@ -68,8 +68,9 @@ const AntrianPesanan = () => {
     try {
       const response = await getListStoreSale();
       console.log("response: ", response);
+      console.log("response.data.data: ", response.data.data);
       if (response.status == 200) {
-        setDataAntrianPesanan(response.data.data);
+        setDataAntrianPesanan(response.data.data.storeSales);
         console.log("dataAntrianpesanan: ", response.data.data);
       }
     } catch (error) {
@@ -89,6 +90,7 @@ const AntrianPesanan = () => {
       sendDate: formatDateToDDMMYYYY(item.sentDate),
       paymentType: item.paymentType,
       storeSalePayment: item.storeSalePayment,
+      price: item.price,
     };
 
     try {
