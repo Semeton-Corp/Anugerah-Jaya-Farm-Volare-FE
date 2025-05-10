@@ -69,6 +69,7 @@ const riwayatGudangData = [
 
 const Gudang = () => {
   const location = useLocation();
+  const userRole = localStorage.getItem("role");
   const detailPages = ["detail-stok-gudang", "riwayat-aktivitas-gudang"];
 
   const isDetailPage = detailPages.some((segment) =>
@@ -98,7 +99,9 @@ const Gudang = () => {
         <div className="flex flex-col px-4 py-3 gap-4 ">
           {/* header section */}
           <div className="flex justify-between mb-2 flex-wrap gap-4">
-            <h1 className="text-3xl font-bold">Gudang</h1>
+            <h1 className="text-3xl font-bold">
+              {userRole == "Pekerja Gudang" ? "Stok Gudang" : "Gudang"}
+            </h1>
             <div className="flex gap-2">
               <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
                 <FaWarehouse size={18} />

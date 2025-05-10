@@ -21,3 +21,11 @@ export const getWarehouseItems = (category, storeId) => {
     },
   });
 };
+
+export const createWarehouseItems = (payload) => {
+  return api.post("/warehouses/items", payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

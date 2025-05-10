@@ -7,24 +7,25 @@ import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getChickenMonitoring } from "../services/chickenMonitorings";
 import { deleteChickenData } from "../services/chickenMonitorings";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
+import { getWarehouseItems } from "../services/warehouses";
 
-const daftarBarangData = [
-  {
-    namaBarang: "Jagung",
-    jenisBarang: "Pakan",
-    satuan: "Kg",
-  },
-  {
-    namaBarang: "Dedak",
-    jenisBarang: "Pakan",
-    satuan: "Kg",
-  },
-  {
-    namaBarang: "Telur OK",
-    jenisBarang: "Telur",
-    satuan: "Liter",
-  },
-];
+// const daftarBarangData = [
+//   {
+//     namaBarang: "Jagung",
+//     jenisBarang: "Pakan",
+//     satuan: "Kg",
+//   },
+//   {
+//     namaBarang: "Dedak",
+//     jenisBarang: "Pakan",
+//     satuan: "Kg",
+//   },
+//   {
+//     namaBarang: "Telur OK",
+//     jenisBarang: "Telur",
+//     satuan: "Liter",
+//   },
+// ];
 
 const DaftarBarang = () => {
   const userRole = localStorage.getItem("role");
@@ -33,18 +34,32 @@ const DaftarBarang = () => {
 
   const [detailAyamData, setDetailAyamState] = useState([]);
 
-  const detailPages = ["input-ayam", "detail-vaksin-obat"];
+  const [daftarBarangData, setDaftarBarangData] = useState([]);
+
+  const detailPages = ["tambah-barang-baru"];
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
 
   const tambahBarangHandle = () => {
-    navigate(`${location.pathname}/tambah-barang`);
+    navigate(`${location.pathname}/tambah-barang-baru`);
   };
 
   const detailVaksinObatHandle = () => {
     navigate(`${location.pathname}/detail-vaksin-obat`);
+  };
+
+  const fetchWarehouseItems = async () => {
+    try {
+      const warehouseItemResponse = await getWarehouseItems();
+      console.log("warehouseItemResponse: ", warehouseItemResponse);
+      if (warehouseItemResponse.status == 200) {
+        setDaftarBarangData(warehouseItemResponse.data.data);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
   };
 
   const fetchDataAyam = async () => {
@@ -62,10 +77,10 @@ const DaftarBarang = () => {
   };
 
   useEffect(() => {
-    fetchDataAyam();
+    fetchWarehouseItems();
 
     if (location.state?.refetch) {
-      fetchDataAyam();
+      fetchWarehouseItems();
       window.history.replaceState({}, document.title);
     }
   }, [location]);
@@ -87,11 +102,14 @@ const DaftarBarang = () => {
     }
   }
 
+
   // Render detail input page only
   if (isDetailPage) {
     return <Outlet />;
   }
-
+  
+  
+  
   // Render main table page
   return (
     <div className="flex flex-col px-4 py-3 gap-4">
@@ -129,9 +147,9 @@ const DaftarBarang = () => {
                   key={index}
                   className="border-t border-gray-200 hover:bg-gray-50 text-center"
                 >
-                  <td className="py-2 px-4">{data.namaBarang}</td>
-                  <td className="py-2 px-4">{data.jenisBarang}</td>
-                  <td className="py-2 px-4">{data.satuan}</td>
+                  <td className="py-2 px-4">{data.name}</td>
+                  <td className="py-2 px-4">{data.category}</td>
+                  <td className="py-2 px-4">{data.unit}</td>
 
                   <td className="py-2 px-4 flex justify-center gap-4">
                     <BiSolidEditAlt
