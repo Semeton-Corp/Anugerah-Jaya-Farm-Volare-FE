@@ -14,6 +14,7 @@ import {
 } from "../utils/dateFormat";
 import { deleteAdditionalWorkById } from "../services/dailyWorks";
 import { updateAdditionalWorkById } from "../services/dailyWorks";
+import { formatRupiah } from "../utils/moneyFormat";
 
 const TambahTugasTambahan = () => {
   const { id } = useParams();
@@ -23,6 +24,7 @@ const TambahTugasTambahan = () => {
 
   const [slot, setSlot] = useState(0);
   const [description, setDescription] = useState("");
+  const [salary, setSalary] = useState("");
 
   const [additionalWorkStaffInformation, setAdditionalWorkStaffInformation] =
     useState([]);
@@ -64,6 +66,7 @@ const TambahTugasTambahan = () => {
         setAdditionalWorkStaffInformation(
           getAdditionalResponse.data.data.additionalWorkStaffInformation
         );
+        setSalary(getAdditionalResponse.data.data.salary);
       }
     } catch (error) {
       console.log("error :", error);
@@ -82,6 +85,7 @@ const TambahTugasTambahan = () => {
       description,
       slot: parseInt(slot),
       location: selectedLocation,
+      salary: salary,
     };
 
     try {
@@ -114,6 +118,7 @@ const TambahTugasTambahan = () => {
       description,
       slot: parseInt(slot),
       location: selectedLocation,
+      salary: salary,
     };
 
     try {
@@ -182,6 +187,24 @@ const TambahTugasTambahan = () => {
               setSlot(e.target.value);
             }}
           />
+        </div>
+        <div className="mt-4">
+          <label className="block font-medium">Gaji Tambahan / Pekerja</label>
+
+          <div className="flex items-center border border-black-6 rounded p-2 bg-black-4">
+            <span className="text-gray-500 mr-2">Rp</span>
+            <input
+              type="number"
+              className="bg-transparent outline-none w-full"
+              placeholder="0"
+              value={salary}
+              onChange={(e) => {
+                const cleaned = e.target.value.replace(/[.,]/g, "");
+                console.log("cleaned: ", cleaned);
+                setSalary(cleaned);
+              }}
+            />
+          </div>
         </div>
 
         {id ? (
@@ -275,18 +298,19 @@ const TambahTugasTambahan = () => {
         </div>
 
         {/* Simpan Button */}
-        <div className="mt-6 text-right ">
+        {/* <div className="mt-6 text-right ">
           <button
             onClick={() => {
               console.log("description:", description);
               console.log("selectedLocation:", selectedLocation);
               console.log("slot: ", slot);
+              console.log("salary: ", salary);
             }}
             className="bg-green-700 text-white py-2 px-6 rounded hover:bg-green-900 cursor-pointer"
           >
             Check
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

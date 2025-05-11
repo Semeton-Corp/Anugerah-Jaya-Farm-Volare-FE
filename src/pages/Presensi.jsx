@@ -5,12 +5,36 @@ import {
   getCurrentPresence,
   arrivalPresence,
   departurePresence,
+  getAllPresence,
 } from "../services/presence";
 
 const Presensi = () => {
   const [presenceId, setPresenceId] = useState(0);
   const [isPresence, setIsPresence] = useState(false);
   const [isGoHome, setIsGoHome] = useState(false);
+  const [attendanceData, setAttendanceData] = useState([]);
+
+  const monthNamesBahasa = [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ];
+
+  const today = new Date();
+  const monthIndex = today.getMonth();
+  const year = today.getFullYear();
+
+  const monthName = monthNamesBahasa[monthIndex];
+  const monthNumber = monthIndex + 1;
 
   const getTodayPresence = async (id) => {
     try {
@@ -22,6 +46,21 @@ const Presensi = () => {
         if (presenceResponse.data.data.endTime != "-") {
           setIsGoHome(true);
         }
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const getAttandanceData = async () => {
+    try {
+      console.log("monthName: ", monthName);
+      console.log("year: ", year);
+
+      const allPresenceResponse = await getAllPresence(monthName, year);
+      console.log("allPresenceResponse: ", allPresenceResponse);
+      if (allPresenceResponse.status == 200) {
+        setAttendanceData();
       }
     } catch (error) {
       console.log("error :", error);
@@ -53,37 +92,38 @@ const Presensi = () => {
   };
   useEffect(() => {
     getTodayPresence();
+    getAttandanceData();
   }, []);
-  const attendanceData = [
-    {
-      date: "25 Maret 2025",
-      in: "07:00",
-      out: "17:00",
-      overtime: "2 Jam",
-      status: "Hadir",
-    },
-    {
-      date: "24 Maret 2025",
-      in: "07:00",
-      out: "12:00",
-      overtime: "-",
-      status: "Hadir",
-    },
-    {
-      date: "23 Maret 2025",
-      in: "-",
-      out: "-",
-      overtime: "-",
-      status: "Tidak Hadir",
-    },
-    {
-      date: "22 Maret 2025",
-      in: "-",
-      out: "-",
-      overtime: "-",
-      status: "Tidak Hadir",
-    },
-  ];
+  // const attendanceData = [
+  //   {
+  //     date: "25 Maret 2025",
+  //     in: "07:00",
+  //     out: "17:00",
+  //     overtime: "2 Jam",
+  //     status: "Hadir",
+  //   },
+  //   {
+  //     date: "24 Maret 2025",
+  //     in: "07:00",
+  //     out: "12:00",
+  //     overtime: "-",
+  //     status: "Hadir",
+  //   },
+  //   {
+  //     date: "23 Maret 2025",
+  //     in: "-",
+  //     out: "-",
+  //     overtime: "-",
+  //     status: "Tidak Hadir",
+  //   },
+  //   {
+  //     date: "22 Maret 2025",
+  //     in: "-",
+  //     out: "-",
+  //     overtime: "-",
+  //     status: "Tidak Hadir",
+  //   },
+  // ];
 
   return (
     <div className="p-4">

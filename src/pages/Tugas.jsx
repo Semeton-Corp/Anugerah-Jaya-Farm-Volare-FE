@@ -54,6 +54,9 @@ const Tugas = () => {
     try {
       const takeResponse = await takeAdditionalWorks(id);
       console.log("takeResponse: ", takeResponse);
+      if (takeResponse.status == 201) {
+        fetchTugasTambahanData();
+      }
     } catch (error) {
       console.log("error :", error);
     }
@@ -256,14 +259,14 @@ const Tugas = () => {
           </div>
         </div>
       </div>
-      <button
+      {/* <button
         onClick={() => {
           console.log("tugasTambahanData: ", tugasTambahanData);
           console.log("additionalWorks: ", additionalWorks);
         }}
       >
         check
-      </button>
+      </button> */}
     </div>
   );
 };

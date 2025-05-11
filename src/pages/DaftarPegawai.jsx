@@ -4,6 +4,8 @@ import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { PiCalendarBlank } from "react-icons/pi";
 import profileAvatar from "../assets/profile_avatar.svg";
+import { useEffect } from "react";
+import { getListStaff } from "../services/staff";
 
 const pegawaiAktif = [
   {
@@ -81,10 +83,28 @@ const pegawaiAktif = [
 const DaftarPegawai = () => {
   const [query, setQuery] = useState("");
 
+  const [pegawaiAktifData, setPegawaiAktifData] = useState([]);
+
+  const fectPegawaiAktifData = async () => {
+    try {
+      const fetchResponse = await getListStaff();
+      console.log("fetchResponse: ", fetchResponse);
+      if (fetchResponse.status == 200) {
+        setPegawaiAktifData(fetchResponse.data.data.staffs);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
   const handleSearch = (e) => {
     setQuery(e.target.value);
     onSearch(e.target.value); // Call parent function with search input
   };
+
+  useEffect(() => {
+    fectPegawaiAktifData();
+  }, []);
 
   return (
     <div className="flex flex-col px-4 py-3 gap-4 ">
@@ -147,27 +167,27 @@ const DaftarPegawai = () => {
               </tr>
             </thead>
             <tbody className="">
-              {pegawaiAktif.map((item, index) => (
+              {pegawaiAktifData.map((item, index) => (
                 <tr key={index} className="border-b border-black-6">
                   <td className="py-3 px-4">
                     <div className="flex gap-6">
                       {/* profile picture */}
                       <div className="h-12 w-12 rounded-full overflow-hidden">
-                        <img src={profileAvatar} alt="Profile Avatar" />
+                        <img src={item.photoProfile} alt="Profile Avatar" />
                       </div>
 
                       {/* user name + role */}
                       <div className="">
                         <p className="text-base font-me leading-tight">
-                          {item.nama}
+                          {item.name}
                         </p>
                         <p className="text-sm text-gray-500">{item.email}</p>
                       </div>
                     </div>
                   </td>
                   <td className="py-2 px-4">{item.id}</td>
-                  <td className="py-2 px-4">{item.jabatan}</td>
-                  <td className="py-2 px-4">{item.gaji}</td>
+                  <td className="py-2 px-4">{item.role.name}</td>
+                  <td className="py-2 px-4">{item.salary}</td>
                   <td className="py-2 px-4 underline text-black hover:text-black-6 cursor-pointer">
                     Detail
                   </td>

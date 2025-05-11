@@ -9,6 +9,18 @@ export const getCurrentPresence = () => {
   });
 };
 
+export const getAllPresence = (month, year) => {
+  return api.get("/presences/", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    params:{
+      month: month,
+      year:year
+    }
+  });
+};
+
 export const arrivalPresence = (id) => {
   return api.patch(
     `/presences/arrival/${id}`,
