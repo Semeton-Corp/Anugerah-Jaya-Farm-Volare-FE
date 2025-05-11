@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import TopBar from "../components/TopBar";
-import SideNavbar from "../components/SideNavBar";
+import SideNavbar from "../components/SideNavbar";
 import { useState } from "react";
 
 const MainLayout = ({ role }) => {
