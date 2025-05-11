@@ -4,6 +4,7 @@ import {
   getAdditionalWorks,
   getDailyWorkUser,
   takeAdditionalWorks,
+  updateAdditionalWorkStaff,
   updateDailyWorkStaff,
 } from "../services/dailyWorks";
 import { useState, useEffect } from "react";
@@ -12,6 +13,7 @@ import { getCurrentPresence } from "../services/presence";
 
 const Tugas = () => {
   const [tugasTambahanData, setTugasTambahanData] = useState([]);
+
   const [dailyWorks, setDailyWorks] = useState([]);
   const [additionalWorks, setAdditionalWorks] = useState([]);
 
@@ -63,6 +65,10 @@ const Tugas = () => {
       console.log("presenceResponse: ", presenceResponse);
       if (presenceResponse.status == 200) {
         setIsPresence(presenceResponse.data.data.isPresent);
+        if (presenceResponse.data.data.isPresent) {
+          fetchTugasTambahanData();
+          fetchAllTugas();
+        }
       }
     } catch (error) {
       console.log("error :", error);
@@ -83,8 +89,27 @@ const Tugas = () => {
     };
 
     try {
+      const updateResponse = await updateAdditionalWorkStaff(payload, taskId);
+      console.log("updateResponse: ", updateResponse);
+      if (updateResponse.status == 200) {
+        fetchAllTugas();
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const finishDailyTask = async (taskId) => {
+    const payload = {
+      isDone: true,
+    };
+
+    try {
       const updateResponse = await updateDailyWorkStaff(payload, taskId);
       console.log("updateResponse: ", updateResponse);
+      if (updateResponse.status == 200) {
+        fetchAllTugas();
+      }
     } catch (error) {
       console.log("error :", error);
     }
@@ -102,52 +127,19 @@ const Tugas = () => {
         return "";
     }
   };
-  const tugasHariIni = {
-    tambahan: {
-      tugas: "Dekorasi toko untuk 17 Agustus",
-      selesai: true,
-    },
-    rutin: [
-      {
-        tugas: "Bersihkan tempat pakan & minum – Beri makan 1",
-        waktu: "07:00 - 10:00",
-        selesai: true,
-      },
-      {
-        tugas: "Pengadukan pakan untuk konsumsi esok hari",
-        waktu: "10:00 - 11:30",
-        selesai: true,
-      },
-      {
-        tugas: "Pengedropan pakan ke tiap kandang",
-        waktu: "11:30 - 12:00",
-        selesai: false,
-      },
-      {
-        tugas: "Bersihkan tempat pakan & minum – Beri makan 2",
-        waktu: "13:30 - 15:00",
-        selesai: false,
-      },
-      {
-        tugas: "Selesaikan pencatatan performa ayam harian",
-        waktu: "15:00 - 15:30",
-        selesai: false,
-      },
-    ],
-  };
 
   return (
     <div className="p-4">
       {/* header */}
       <div className="text-3xl font-bold mb-4">Tugas</div>
-
-      {/* Warning Box */}
-      <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded">
-        <p className="flex items-center">
-          <span className="mr-2 text-lg">⚠️</span>
-          Lakukan presensi harian untuk melihat tugas hari ini
-        </p>
-      </div>
+      {!isPresence && (
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded">
+          <p className="flex items-center">
+            <span className="mr-2 text-lg">⚠️</span>
+            Lakukan presensi harian untuk melihat tugas hari ini
+          </p>
+        </div>
+      )}
 
       {/* tugas tambahan  */}
       <div className="border p-4 border-black-6 rounded-lg bg-white">
@@ -183,15 +175,18 @@ const Tugas = () => {
                   </span>
                 </td>
                 <td className="py-2 px-4 flex gap-2">
-                  <button
-                    onClick={() => {
-                      // console.log("item.id: ", item.id);
-                      takeAdditionalTaskHandle(item.id);
-                    }}
-                    className="cursor-pointer bg-green-700 text-white text-sm font-semibold px-4 py-1 rounded hover:bg-green-900"
-                  >
-                    Ambil
-                  </button>
+                  {!additionalWorks.some(
+                    (aw) => aw.additionalWork.id === item.id
+                  ) && (
+                    <button
+                      onClick={() => {
+                        takeAdditionalTaskHandle(item.id);
+                      }}
+                      className="cursor-pointer bg-green-700 text-white text-sm font-semibold px-4 py-1 rounded hover:bg-green-900"
+                    >
+                      Ambil
+                    </button>
+                  )}
                 </td>
                 <td>
                   <button className=" text-black text-sm underline font-medium cursor-pointer">
@@ -217,11 +212,8 @@ const Tugas = () => {
               <button
                 onClick={() => {
                   if (!item.isDone) {
-                    finishAdditionalTask(item.additionalWork.id);
-                    console.log(
-                      "item.additionalWork.id: ",
-                      item.additionalWork.id
-                    );
+                    finishAdditionalTask(item.id);
+                    // console.log("item: ", item);
                   }
                 }}
                 className={`w-8 h-8 rounded-md flex justify-center items-center cursor-pointer ${
@@ -250,19 +242,28 @@ const Tugas = () => {
                   <p className="text-sm text-gray-600">{item.waktu}</p>
                 </div>
                 <button
+                  onClick={() => finishDailyTask(item.id)}
                   className={`w-8 h-8 rounded-md flex justify-center items-center cursor-pointer  ${
-                    item.selesai
+                    item.isDone
                       ? "bg-[#87FF8B] text-black hover:bg-[#4d8e4f]"
                       : "bg-gray-200 hover:bg-gray-400"
                   }`}
                 >
-                  {item.selesai && <FiCheck />}
+                  {item.isDone && <FiCheck />}
                 </button>
               </div>
             ))}
           </div>
         </div>
       </div>
+      <button
+        onClick={() => {
+          console.log("tugasTambahanData: ", tugasTambahanData);
+          console.log("additionalWorks: ", additionalWorks);
+        }}
+      >
+        check
+      </button>
     </div>
   );
 };

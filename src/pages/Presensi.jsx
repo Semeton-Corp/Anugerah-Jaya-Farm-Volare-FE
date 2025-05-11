@@ -19,6 +19,9 @@ const Presensi = () => {
       if (presenceResponse.status == 200) {
         setPresenceId(presenceResponse.data.data.id);
         setIsPresence(presenceResponse.data.data.isPresent);
+        if (presenceResponse.data.data.endTime != "-") {
+          setIsGoHome(true);
+        }
       }
     } catch (error) {
       console.log("error :", error);
@@ -94,10 +97,12 @@ const Presensi = () => {
         </div>
         <div
           onClick={isPresence ? departureHandlePresence : arrivalHandlePresence}
-          className={`hover:text-white cursor-pointer text-center py-2 rounded text-lg font-semibold ${
-            isPresence
-              ? "bg-kritis-box-surface-color hover:bg-[#C34747] text-kritis-text-color"
-              : "bg-aman-box-surface-color hover:bg-[#1D7E20] text-aman-text-color "
+          className={`text-center py-2 rounded text-lg font-semibold ${
+            isGoHome
+              ? "bg-black-5  text-black-8"
+              : isPresence
+              ? "bg-kritis-box-surface-color hover:bg-[#C34747] text-kritis-text-color cursor-pointer hover:text-white "
+              : "bg-aman-box-surface-color hover:bg-[#1D7E20] text-aman-text-color cursor-pointer hover:text-white "
           }`}
         >
           {isGoHome

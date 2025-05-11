@@ -112,3 +112,12 @@ export const updateDailyWorkStaff = (payload, id) => {
     },
   });
 };
+
+export const updateAdditionalWorkStaff = (payload, taskId) => {
+  return api.put(`/works/additionals/staffs/${taskId}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
