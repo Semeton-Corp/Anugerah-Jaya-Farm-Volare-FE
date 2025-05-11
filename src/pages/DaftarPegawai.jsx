@@ -130,7 +130,7 @@ const DaftarPegawai = () => {
               <IoSearch size={24} className="me-2" />
               <input
                 type="text"
-                placeholder="Cari Pegawai..."
+                placeholder="Cari Pegawai...."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="w-full focus:outline-none"
