@@ -1,7 +1,7 @@
 import React from "react";
 import { PiCalendarBlank } from "react-icons/pi";
 import { BiSolidEditAlt } from "react-icons/bi";
-import { MdDelete } from "react-icons/md";
+import { MdDelete, MdStore } from "react-icons/md";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getChickenMonitoring } from "../services/chickenMonitorings";
@@ -81,10 +81,16 @@ const DetailVaksinObat = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-2 flex-wrap gap-4">
         <h1 className="text-3xl font-bold">Detail Vaksin & Obat</h1>
-        <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-          <PiCalendarBlank size={18} />
-          <div className="text-base font-medium ms-2">
-            {`Hari ini (${getTodayDateInBahasa()})`}
+        <div className="flex gap-4">
+          <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+            <MdStore size={18} />
+            <div className="text-base font-medium ms-2">Semua site</div>
+          </div>
+          <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+            <PiCalendarBlank size={18} />
+            <div className="text-base font-medium ms-2">
+              Hari ini (20 Mar 2025)
+            </div>
           </div>
         </div>
       </div>

@@ -21,6 +21,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const data = [
   { date: "29 Mar", produksi: 25, penjualan: 30 },
@@ -33,6 +34,24 @@ const data = [
 ];
 
 const OverviewOwner = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const detailPages = [
+    "riwayat-aktivitas",
+    "stok-toko",
+    "stok-gudang",
+    "total-ayam",
+  ];
+
+  const isDetailPage = detailPages.some((segment) =>
+    location.pathname.includes(segment)
+  );
+
+  if (isDetailPage) {
+    <Outlet />;
+  }
+  
   return (
     <div className="flex flex-col px-4 py-3 gap-4 ">
       {/* header section */}

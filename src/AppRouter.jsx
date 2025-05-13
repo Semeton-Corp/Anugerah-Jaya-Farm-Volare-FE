@@ -46,6 +46,7 @@ import PengadaanBarang from "./pages/PengadaanBarang";
 import TambahBarangBaru from "./pages/TambahBarangBaru";
 import InputPengadaanBarang from "./pages/InputPengadaanBarang";
 import TambahSupplier from "./pages/TambahSupplier";
+import DataTelurKeGudang from "./pages/DataTelurGudang";
 
 const AppRouter = createBrowserRouter([
   {
@@ -72,15 +73,19 @@ const AppRouter = createBrowserRouter([
           },
           {
             path: "produksi-telur",
-            element: <ProduksiTelur />,
             children: [
-              { path: "detail-produksi", element: <DetailProduksi /> },
+              { path: "overview-produksi", element: <ProduksiTelur /> },
+              { path: "data-produksi-telur", element: <DetailProduksi /> },
+              { path: "data-telur-ke-gudang", element: <DataTelurKeGudang /> },
             ],
           },
           {
             path: "ayam",
-            element: <Ayam />,
-            children: [{ path: "detail-ayam", element: <DetailAyam /> }],
+            children: [
+              { path: "overview-ayam", element: <Ayam /> },
+              { path: "data-ayam", element: <DetailAyam /> },
+              { path: "detail-vaksin-&-obat", element: <DetailVaksinObat /> },
+            ],
           },
           {
             path: "kinerja",

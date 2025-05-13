@@ -1,7 +1,7 @@
 import React from "react";
 import { PiCalendarBlank } from "react-icons/pi";
 import { BiSolidEditAlt } from "react-icons/bi";
-import { MdDelete } from "react-icons/md";
+import { MdDelete, MdStore } from "react-icons/md";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getChickenMonitoring } from "../services/chickenMonitorings";
@@ -150,16 +150,19 @@ const DetailAyam = () => {
         <h1 className="text-3xl font-bold">
           {userRole === "Pekerja Kandang" ? "Data Ayam" : "Detail Ayam"}
         </h1>
-        {(userRole === "Pekerja Kandang" || userRole === "Kepala Kandang") && (
-          <div
-            onClick={inputAyamHandle}
-            className="flex items-center rounded-lg px-4 py-2 bg-green-700 hover:bg-green-900 cursor-pointer"
-          >
-            <div className="text-base font-medium ms-2 text-white">
-              + Input Data Harian
+
+        <div className="flex gap-4">
+          <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+            <MdStore size={18} />
+            <div className="text-base font-medium ms-2">Semua site</div>
+          </div>
+          <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+            <PiCalendarBlank size={18} />
+            <div className="text-base font-medium ms-2">
+              Hari ini (20 Mar 2025)
             </div>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Table Section */}
@@ -171,23 +174,17 @@ const DetailAyam = () => {
               : ""}
           </h2>
 
-          <div className="flex gap-4">
+          {(userRole === "Pekerja Kandang" ||
+            userRole === "Kepala Kandang") && (
             <div
-              onClick={detailVaksinObatHandle}
-              className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
+              onClick={inputAyamHandle}
+              className="flex items-center rounded-lg px-4 py-2 bg-green-700 hover:bg-green-900 cursor-pointer"
             >
-              <div className="text-base font-medium ms-2">
-                Detail Vaksin & Obat
+              <div className="text-base font-medium ms-2 text-white">
+                + Input Data Harian
               </div>
             </div>
-
-            <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-              <PiCalendarBlank size={18} />
-              <div className="text-base font-medium ms-2">
-                {`Hari ini (${getTodayDateInBahasa()})`}
-              </div>
-            </div>
-          </div>
+          )}
         </div>
 
         <div className="overflow-x-auto">
