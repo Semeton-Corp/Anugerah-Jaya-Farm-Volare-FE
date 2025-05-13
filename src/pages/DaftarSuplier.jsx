@@ -33,6 +33,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 //   },
 // ];
 const DaftarSuplier = () => {
+  const userRole = localStorage.getItem("role");
   const location = useLocation();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
@@ -100,18 +101,22 @@ const DaftarSuplier = () => {
       <div className=" rounded-[4px] border border-black-6">
         {/* pegawai table */}
         <div className="px-6 py-6">
-          <div className="flex justify-end items-center mb-4">
-            <div
-              onClick={() => {
-                tambahSupplierHandle();
-              }}
-              className="flex items-center rounded-lg px-4 py-2 bg-green-700 hover:bg-green-900 cursor-pointer"
-            >
-              <div className="text-base font-medium ms-2 text-white">
-                + Tambah Data Supplier
+          {userRole === "Pekerja Gudang" ||
+            (userRole === "Kepala Kandang" && (
+              <div className="flex justify-end items-center mb-4">
+                <div
+                  onClick={() => {
+                    tambahSupplierHandle();
+                  }}
+                  className="flex items-center rounded-lg px-4 py-2 bg-green-700 hover:bg-green-900 cursor-pointer"
+                >
+                  <div className="text-base font-medium ms-2 text-white">
+                    + Tambah Data Supplier
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            ))}
+
           <table className="w-full ">
             <thead className="px-8 rounded-[4px] bg-green-700 text-white text-center">
               <tr className="">

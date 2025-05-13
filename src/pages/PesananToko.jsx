@@ -34,8 +34,10 @@ const pesananTokoData = [
 ];
 
 const PesananToko = () => {
+  const userRole = localStorage.getItem("role");
+
   return (
-    <div className="flex flex-col px-4 py-3 gap-4 ">
+    <div className="flex flex-col px-4 py-3 gap-3 ">
       <div className="flex justify-between mb-2 flex-wrap gap-4">
         <h1 className="text-3xl font-bold">Pesanan Toko</h1>
         <div className="flex gap-2">
@@ -44,6 +46,10 @@ const PesananToko = () => {
             <div className="text-base font-medium ms-2">Semua Gudang</div>
           </div>
         </div>
+      </div>
+
+      <div className="flex  items-center">
+        <h2 className="text-xl font-medium">Stok Telur Tersedia : </h2>
       </div>
 
       <div className="flex md:grid-cols-2 gap-4 justify-between">
@@ -62,36 +68,9 @@ const PesananToko = () => {
               <p className="text-3xl font-bold text-center">50</p>
               <p className="text-xl text-center">Ikat</p>
             </div>
-            {/* item karpet */}
-            <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-              <p className="text-3xl font-bold text-center">100</p>
-              <p className="text-xl text-center">Karpet</p>
-            </div>
-            {/* item butir */}
-            <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-              <p className="text-3xl font-bold text-center">1000</p>
-              <p className="text-xl text-center">Butir</p>
-            </div>
           </div>
         </div>
 
-        {/* telur Retak */}
-        <div className="p-4 w-full rounded-md border-2 border-black-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Telur Retak</h2>
-            <div className="p-2 rounded-xl bg-green-700">
-              <TbEggCrackedFilled size={24} color="white" />
-            </div>
-          </div>
-
-          <div className="flex justify-center flex-wrap gap-4">
-            {/* item butir */}
-            <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-              <p className="text-3xl font-bold text-center">30</p>
-              <p className="text-xl text-center">Butir</p>
-            </div>
-          </div>
-        </div>
         {/* penjualan telur */}
         <div className="p-4 w-full rounded-md border-2 border-black-6">
           <div className="flex justify-between items-center mb-4">
@@ -105,7 +84,7 @@ const PesananToko = () => {
             {/* item butir */}
             <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
               <p className="text-3xl font-bold text-center">80</p>
-              <p className="text-xl text-center">Butir</p>
+              <p className="text-xl text-center">Pack</p>
             </div>
           </div>
         </div>
@@ -126,7 +105,10 @@ const PesananToko = () => {
                 <th className="py-2 px-4">Kuantitas</th>
                 <th className="py-2 px-4">Toko Pemesan</th>
                 <th className="py-2 px-4">Keterangan</th>
-                <th className="py-2 px-4">Aksi</th>
+                {userRole === "Pekerja Gudang" ||
+                  (userRole === "Kepala Kandang" && (
+                    <th className="py-2 px-4">Aksi</th>
+                  ))}
               </tr>
             </thead>
             <tbody>
@@ -152,18 +134,21 @@ const PesananToko = () => {
                       {data.keterangan}
                     </span>
                   </td>
-                  <td className="py-2 px-4 flex justify-center gap-4">
-                    <BiSolidEditAlt
-                      onClick={() => {}}
-                      size={24}
-                      className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                    />
-                    <MdDelete
-                      onClick={() => {}}
-                      size={24}
-                      className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                    />
-                  </td>
+                  {userRole === "Pekerja Gudang" ||
+                    (userRole === "Kepala Kandang" && (
+                      <td className="py-2 px-4 flex justify-center gap-4">
+                        <BiSolidEditAlt
+                          onClick={() => {}}
+                          size={24}
+                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                        />
+                        <MdDelete
+                          onClick={() => {}}
+                          size={24}
+                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                        />
+                      </td>
+                    ))}
                 </tr>
               ))}
             </tbody>

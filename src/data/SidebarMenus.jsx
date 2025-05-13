@@ -50,11 +50,22 @@ export const sidebarMenus = {
       icon: <img src={kinerja} alt="Overview Icon" className="h-4 w-4" />,
       tabName: "Kinerja",
       element: <OverviewOwner />,
+      subTabs: [
+        { tabName: "Overview Kinerja", path: "overview-kinerja" },
+        { tabName: "Detail Kinerja Ayam", path: "detail-kinerja-ayam" },
+      ],
     },
     {
       icon: <img src={gudang} alt="Overview Icon" className="h-4 w-4" />,
       tabName: "Gudang",
-      element: <OverviewOwner />,
+      subTabs: [
+        { tabName: "Stok Gudang", path: "stok-gudang" },
+        { tabName: "Pengadaan Barang", path: "pengadaan-barang" },
+        { tabName: "Daftar Barang", path: "daftar-barang" },
+        { tabName: "Pesanan Toko", path: "pesanan-toko" },
+        { tabName: "Riwayat Gudang", path: "riwayat-gudang"},
+        { tabName: "Daftar Suplier", path: "daftar-suplier"},
+      ],
     },
     {
       icon: <img src={toko} alt="Overview Icon" className="h-4 w-4" />,

@@ -121,16 +121,19 @@ const DaftarBarang = () => {
 
       {/* Table Section */}
       <div className="bg-white p-4 border rounded-lg w-full border-black-6">
-        <div className="flex justify-end items-center mb-4">
-          <div
-            onClick={tambahBarangHandle}
-            className="flex items-center rounded-lg px-4 py-2 bg-green-700 hover:bg-green-900 cursor-pointer"
-          >
-            <div className="text-base font-medium ms-2 text-white">
-              + Tambah Barang Baru
+        {userRole === "Pekerja Gudang" ||
+          (userRole === "Kepala Kandang" && (
+            <div className="flex justify-end items-center mb-4">
+              <div
+                onClick={tambahBarangHandle}
+                className="flex items-center rounded-lg px-4 py-2 bg-green-700 hover:bg-green-900 cursor-pointer"
+              >
+                <div className="text-base font-medium ms-2 text-white">
+                  + Tambah Barang Baru
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          ))}
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left border-collapse">
@@ -139,7 +142,10 @@ const DaftarBarang = () => {
                 <th className="py-2 px-4">Nama Barang</th>
                 <th className="py-2 px-4">Jenis Barang</th>
                 <th className="py-2 px-4">Satuan</th>
-                <th className="py-2 px-4">Aksi</th>
+                {userRole === "Pekerja Gudang" ||
+                  (userRole === "Kepala Kandang" && (
+                    <th className="py-2 px-4">Aksi</th>
+                  ))}
               </tr>
             </thead>
             <tbody>
@@ -151,23 +157,25 @@ const DaftarBarang = () => {
                   <td className="py-2 px-4">{data.name}</td>
                   <td className="py-2 px-4">{data.category}</td>
                   <td className="py-2 px-4">{data.unit}</td>
-
-                  <td className="py-2 px-4 flex justify-center gap-4">
-                    <BiSolidEditAlt
-                      onClick={() => {
-                        editDataHandle(data.id);
-                      }}
-                      size={24}
-                      className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                    />
-                    <MdDelete
-                      onClick={() => {
-                        deleteDataHandle(data.id);
-                      }}
-                      size={24}
-                      className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                    />
-                  </td>
+                  {userRole === "Pekerja Gudang" ||
+                    (userRole === "Kepala Kandang" && (
+                      <td className="py-2 px-4 flex justify-center gap-4">
+                        <BiSolidEditAlt
+                          onClick={() => {
+                            editDataHandle(data.id);
+                          }}
+                          size={24}
+                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                        />
+                        <MdDelete
+                          onClick={() => {
+                            deleteDataHandle(data.id);
+                          }}
+                          size={24}
+                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                        />
+                      </td>
+                    ))}
                 </tr>
               ))}
             </tbody>

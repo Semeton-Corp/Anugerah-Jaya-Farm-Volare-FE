@@ -345,61 +345,6 @@ const Kinerja = () => {
               </ResponsiveContainer>
             </div>
           </div>
-
-          {/* detail penjualan */}
-          <div className="bg-white p-4 rounded-lg border border-gray-300">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Detail kinerja ayam</h2>
-              <div
-                onClick={detailKinerjaAyamHandle}
-                className="p-2 rounded-full hover:bg-black-4 cursor-pointer"
-              >
-                <FiMaximize2 size={24} color="" />
-              </div>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-green-700 text-white text-center">
-                    <th className="py-2 px-4">Kandang</th>
-                    <th className="py-2 px-4">Usia</th>
-                    <th className="py-2 px-4">Jumlah</th>
-                    <th className="py-2 px-4">Produksi (Butir)</th>
-                    <th className="py-2 px-4">Konsumsi (Kg)</th>
-                    <th className="py-2 px-4">Berat telur (gr)</th>
-                    <th className="py-2 px-4">FCR</th>
-                    <th className="py-2 px-4">%HDP</th>
-                    <th className="py-2 px-4">Produktivitas</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {kinerjaAyamData.map((row, index) => (
-                    <tr key={index} className="border-b text-center">
-                      <td className="py-2 px-4">{row.kandang}</td>
-                      <td className="py-2 px-4">{row.usia}</td>
-                      <td className="py-2 px-4">{row.jumlah}</td>
-                      <td className="py-2 px-4">{row.produksi}</td>
-                      <td className="py-2 px-4">{row.konsumsi}</td>
-                      <td className="py-2 px-4">{row.beratTelur}</td>
-                      <td className="py-2 px-4">{row.fcr}</td>
-                      <td className="py-2 px-4">{row.hdp}</td>
-                      <td className="py-2 px-4 flex justify-center">
-                        <div
-                          className={`w-24 py-1 flex justify-center rounded text-sm font-semibold ${
-                            row.produktivitas === "Produktif"
-                              ? "bg-aman-box-surface-color text-aman-text-color"
-                              : "bg-orange-200 text-orange-900"
-                          }`}
-                        >
-                          {row.produktivitas}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
         </div>
       )}
     </>

@@ -198,7 +198,7 @@ const Gudang = () => {
             {/* Chart Section (3/4 width on large screens) */}
             <div className="w-full bg-white px-8 py-6 rounded-lg border border-gray-300">
               <div className="flex justify-between items-start mb-4">
-                <h2 className="text-lg font-semibold">Stok gudang</h2>
+                <h2 className="text-lg font-semibold">Telur</h2>
                 <div
                   onClick={detailStokGudangHandle}
                   className="p-2 rounded-full hover:bg-black-4 cursor-pointer"
@@ -211,11 +211,9 @@ const Gudang = () => {
                   <thead>
                     <tr className="bg-green-700 font-medium text-white text-center">
                       <th className="py-2 px-4">Nama Barang</th>
-                      <th className="py-2 px-4">ID Barang</th>
-                      <th className="py-2 px-4">Jenis barang</th>
                       <th className="py-2 px-4">QTY</th>
+                      <th className="py-2 px-4">Satuan</th>
                       <th className="py-2 px-4">Lokasi simpan</th>
-                      <th className="py-2 px-4">Estimasi Habis</th>
                       <th className="py-2 px-4">Keterangan</th>
                     </tr>
                   </thead>
@@ -223,8 +221,7 @@ const Gudang = () => {
                     {stokGudangData.map((item, index) => (
                       <tr key={index} className="border-b text-center">
                         <td className="py-2 px-4">{item.namaBarang}</td>
-                        <td className="py-2 px-4">{item.id}</td>
-                        <td className="py-2 px-4">{item.jenisBarang}</td>
+
                         <td className="py-2 px-4">{item.qty}</td>
                         <td className="py-2 px-4">{item.lokasiSimpan}</td>
                         <td className="py-2 px-4">{item.estimasiHabis}</td>
@@ -250,9 +247,7 @@ const Gudang = () => {
           {/* detail penjualan */}
           <div className="bg-white p-4 rounded-lg border border-gray-300">
             <div className="flex justify-between items-start mb-4">
-              <h2 className="text-lg font-semibold">
-                Riwayat Aktivitas Gudang
-              </h2>
+              <h2 className="text-lg font-semibold">Barang</h2>
               <div
                 onClick={riwayatAktivitasGudangHandle}
                 className="p-2 rounded-full hover:bg-black-4 cursor-pointer"
@@ -264,12 +259,12 @@ const Gudang = () => {
               <table className="w-full text-base">
                 <thead>
                   <tr className="bg-green-700 text-white font-medium text-center">
-                    <th className="py-2 px-4">Tanggal</th>
                     <th className="py-2 px-4">Nama barang</th>
-                    <th className="py-2 px-4">ID</th>
-                    <th className="py-2 px-4">Jenis barang</th>
+                    <th className="py-2 px-4">Kategori</th>
                     <th className="py-2 px-4">QTY</th>
+                    <th className="py-2 px-4">Satuan</th>
                     <th className="py-2 px-4">Lokasi simpan</th>
+                    <th className="py-2 px-4">Estimasi Habis</th>
                     <th className="py-2 px-4">Keterangan</th>
                   </tr>
                 </thead>
@@ -284,10 +279,10 @@ const Gudang = () => {
                       <td className="py-2 px-4">{item.lokasiSimpan}</td>
                       <td className="py-2 px-4 flex justify-center">
                         <span
-                          className={`w-36 py-1 flex justify-center rounded text-sm font-semibold ${
-                            item.keterangan === "Barang Masuk"
+                          className={`w-24 py-1 flex justify-center rounded text-sm font-semibold ${
+                            item.keterangan === "aman"
                               ? "bg-aman-box-surface-color text-aman-text-color"
-                              : "bg-orange-200 text-kritis-text-color"
+                              : "bg-kritis-box-surface-color text-kritis-text-color"
                           }`}
                         >
                           {item.keterangan}

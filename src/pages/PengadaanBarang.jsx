@@ -86,16 +86,19 @@ const PengadaanBarang = () => {
 
       {/* Table Section */}
       <div className="bg-white p-4 border rounded-lg w-full border-black-6">
-        <div className="flex justify-end items-center mb-4">
-          <div
-            onClick={tambahBarangHandle}
-            className="flex items-center rounded-lg px-4 py-2 bg-green-700 hover:bg-green-900 cursor-pointer"
-          >
-            <div className="text-base font-medium ms-2 text-white">
-              + Tambah Data Pesan Barang
+        {userRole === "Pekerja Gudang" ||
+          (userRole === "Kepala Kandang" && (
+            <div className="flex justify-end items-center mb-4">
+              <div
+                onClick={tambahBarangHandle}
+                className="flex items-center rounded-lg px-4 py-2 bg-green-700 hover:bg-green-900 cursor-pointer"
+              >
+                <div className="text-base font-medium ms-2 text-white">
+                  + Tambah Data Pesan Barang
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          ))}
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left border-collapse">

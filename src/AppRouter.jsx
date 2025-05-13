@@ -89,19 +89,63 @@ const AppRouter = createBrowserRouter([
           },
           {
             path: "kinerja",
-            element: <Kinerja />,
             children: [
+              { path: "overview-kinerja", element: <Kinerja /> },
               { path: "detail-kinerja-ayam", element: <DetailKinerjaAyam /> },
             ],
           },
           {
             path: "gudang",
-            element: <Gudang />,
             children: [
-              { path: "detail-stok-gudang", element: <DetailStokGudang /> },
               {
-                path: "riwayat-aktivitas-gudang",
-                element: <RiwayatAktivitasGudang />,
+                path: "stok-gudang",
+                element: <Gudang />,
+              },
+              {
+                path: "pengadaan-barang",
+                element: <PengadaanBarang />,
+                children: [
+                  {
+                    path: "input-pengadaan-barang",
+                    element: <InputPengadaanBarang />,
+                  },
+                ],
+              },
+              {
+                path: "daftar-barang",
+                element: <DaftarBarang />,
+                children: [
+                  {
+                    path: "tambah-barang-baru",
+                    element: <TambahBarangBaru />,
+                  },
+                  {
+                    path: "tambah-barang-baru/:id",
+                    element: <TambahBarangBaru />,
+                  },
+                ],
+              },
+              {
+                path: "pesanan-toko",
+                element: <PesananToko />,
+              },
+              {
+                path: "riwayat-gudang",
+                element: <RiwayatGudang />,
+              },
+              {
+                path: "daftar-suplier",
+                element: <DaftarSuplier />,
+                children: [
+                  {
+                    path: "tambah-supplier",
+                    element: <TambahSupplier />,
+                  },
+                  {
+                    path: "tambah-supplier/:id",
+                    element: <TambahSupplier />,
+                  },
+                ],
               },
             ],
           },
