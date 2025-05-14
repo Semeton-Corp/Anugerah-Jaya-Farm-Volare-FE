@@ -47,6 +47,7 @@ import TambahBarangBaru from "./pages/TambahBarangBaru";
 import InputPengadaanBarang from "./pages/InputPengadaanBarang";
 import TambahSupplier from "./pages/TambahSupplier";
 import DataTelurKeGudang from "./pages/DataTelurGudang";
+import RequestKeGudang from "./pages/RequestKeGudang";
 
 const AppRouter = createBrowserRouter([
   {
@@ -151,12 +152,22 @@ const AppRouter = createBrowserRouter([
           },
           {
             path: "toko",
-            element: <Toko />,
             children: [
-              { path: "detail-stok-toko", element: <DetailStokToko /> },
               {
-                path: "riwayat-aktivitas-toko",
-                element: <RiwayatAktivitasToko />,
+                path: "overview-toko",
+                element: <Toko />,
+              },
+              {
+                path: "stok-toko",
+                element: <OverviewStok />,
+              },
+              {
+                path: "request-ke-gudang",
+                element: <RequestKeGudang />,
+              },
+              {
+                path: "riwayat-stok",
+                element: <PesananToko />,
               },
             ],
           },
@@ -324,7 +335,7 @@ const AppRouter = createBrowserRouter([
               },
               {
                 path: "dalam-pesanan",
-                element: <DalamPesanan />,
+                element: <RequestKeGudang />,
               },
               {
                 path: "riwayat-stok",

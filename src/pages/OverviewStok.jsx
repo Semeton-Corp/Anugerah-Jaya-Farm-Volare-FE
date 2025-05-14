@@ -131,6 +131,7 @@ const aktivitasTokoData = [
   },
 ];
 const OverviewStok = () => {
+  const userRole = localStorage.getItem("role");
   const location = useLocation();
   const detailPages = ["detail-stok-toko", "riwayat-aktivitas-toko"];
 
@@ -266,7 +267,9 @@ const OverviewStok = () => {
                       <th className="py-2 px-4">Kuantitas</th>
                       <th className="py-2 px-4">Nama Toko</th>
                       <th className="py-2 px-4">Keterangan</th>
-                      <th className="py-2 px-4">Pesan Telur</th>
+                      {userRole !== "Owner" && (
+                        <th className="py-2 px-4">Pesan Telur</th>
+                      )}
                     </tr>
                   </thead>
                   <tbody>
@@ -287,13 +290,14 @@ const OverviewStok = () => {
                             {item.keterangan}
                           </span>
                         </td>
-
-                        <td className="py-2 px-4 flex justify-center">
-                          <FaCartShopping
-                            size={24}
-                            className="hover:text-gray-400 cursor-pointer"
-                          />
-                        </td>
+                        {userRole !== "Owner" && (
+                          <td className="py-2 px-4 flex justify-center">
+                            <FaCartShopping
+                              size={24}
+                              className="hover:text-gray-400 cursor-pointer"
+                            />
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>
@@ -301,61 +305,61 @@ const OverviewStok = () => {
               </div>
             </div>
           </div>
+          {userRole !== "Owner" && (
+            <div className="p-6 border border-black-6 rounded-lg shadow">
+              <h2 className="text-base font-semibold mb-4 pb-2 flex justify-between">
+                <span className="">Barang Dalam Pesanan</span>.
+                <button className="mb-4 px-4 py-2 bg-green-700 text-white rounded hover:bg-green-900 cursor-pointer">
+                  + Tambah Data Pesan Barang
+                </button>
+              </h2>
 
-          {/* detail penjualan */}
-          <div className="p-6 border rounded-lg shadow">
-            <h2 className="text-base font-semibold mb-4 pb-2 flex justify-between">
-              <span className="">Barang Dalam Pesanan</span>.
-              <button className="mb-4 px-4 py-2 bg-green-700 text-white rounded hover:bg-green-900 cursor-pointer">
-                + Tambah Data Pesan Barang
-              </button>
-            </h2>
-
-            <table className="w-full text-sm text-center ">
-              <thead className="bg-green-700 text-white ">
-                <tr>
-                  <th className="px-4 py-2">Tanggal Pesan</th>
-                  <th className="px-4 py-2">Nama barang</th>
-                  <th className="px-4 py-2">Satuan</th>
-                  <th className="px-4 py-2">Kuantitas</th>
-                  <th className="px-4 py-2">Tempat pemesanan</th>
-                  <th className="px-4 py-2">Keterangan</th>
-                  <th className="px-4 py-2">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="text-center">
-                {barangPesananData.map((item) => (
-                  <tr key={item.id} className="border-b">
-                    <td className="px-4 py-2">{item.tanggal}</td>
-                    <td className="px-4 py-2">{item.namaBarang}</td>
-                    <td className="px-4 py-2">{item.satuan}</td>
-                    <td className="px-4 py-2">{item.kuantitas}</td>
-                    <td className="px-4 py-2">{item.tempat}</td>
-                    <td className="px-4 py-2">
-                      <span
-                        className={`py-1 px-5 rounded text-sm font-semibold ${
-                          item.keterangan === "Selesai"
-                            ? "bg-aman-box-surface-color text-aman-text-color"
-                            : item.keterangan === "Pending"
-                            ? "bg-green-200 text-green-900"
-                            : item.keterangan === "Sedang Dikirim"
-                            ? "bg-orange-200 text-orange-900"
-                            : "bg-kritis-box-surface-color text-kritis-text-color"
-                        }`}
-                      >
-                        {item.keterangan}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2 text-sm font-semibold">
-                      <button className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-900 cursor-pointer">
-                        Barang Sampai
-                      </button>
-                    </td>
+              <table className="w-full text-sm text-center ">
+                <thead className="bg-green-700 text-white ">
+                  <tr>
+                    <th className="px-4 py-2">Tanggal Pesan</th>
+                    <th className="px-4 py-2">Nama barang</th>
+                    <th className="px-4 py-2">Satuan</th>
+                    <th className="px-4 py-2">Kuantitas</th>
+                    <th className="px-4 py-2">Tempat pemesanan</th>
+                    <th className="px-4 py-2">Keterangan</th>
+                    <th className="px-4 py-2">Aksi</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="text-center">
+                  {barangPesananData.map((item) => (
+                    <tr key={item.id} className="border-b">
+                      <td className="px-4 py-2">{item.tanggal}</td>
+                      <td className="px-4 py-2">{item.namaBarang}</td>
+                      <td className="px-4 py-2">{item.satuan}</td>
+                      <td className="px-4 py-2">{item.kuantitas}</td>
+                      <td className="px-4 py-2">{item.tempat}</td>
+                      <td className="px-4 py-2">
+                        <span
+                          className={`py-1 px-5 rounded text-sm font-semibold ${
+                            item.keterangan === "Selesai"
+                              ? "bg-aman-box-surface-color text-aman-text-color"
+                              : item.keterangan === "Pending"
+                              ? "bg-green-200 text-green-900"
+                              : item.keterangan === "Sedang Dikirim"
+                              ? "bg-orange-200 text-orange-900"
+                              : "bg-kritis-box-surface-color text-kritis-text-color"
+                          }`}
+                        >
+                          {item.keterangan}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2 text-sm font-semibold">
+                        <button className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-900 cursor-pointer">
+                          Barang Sampai
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
     </>

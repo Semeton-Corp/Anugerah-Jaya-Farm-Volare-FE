@@ -63,14 +63,19 @@ export const sidebarMenus = {
         { tabName: "Pengadaan Barang", path: "pengadaan-barang" },
         { tabName: "Daftar Barang", path: "daftar-barang" },
         { tabName: "Pesanan Toko", path: "pesanan-toko" },
-        { tabName: "Riwayat Gudang", path: "riwayat-gudang"},
-        { tabName: "Daftar Suplier", path: "daftar-suplier"},
+        { tabName: "Riwayat Gudang", path: "riwayat-gudang" },
+        { tabName: "Daftar Suplier", path: "daftar-suplier" },
       ],
     },
     {
       icon: <img src={toko} alt="Overview Icon" className="h-4 w-4" />,
       tabName: "Toko",
-      element: <OverviewOwner />,
+      subTabs: [
+        { tabName: "Overview Toko", path: "stok-gudang" },
+        { tabName: "Stok Toko", path: "pengadaan-barang" },
+        { tabName: "Request ke Gudang", path: "daftar-barang" },
+        { tabName: "Riwayat Stok", path: "pesanan-toko" },
+      ],
     },
     {
       icon: <img src={kelolaPegawai} alt="Overview Icon" className="h-4 w-4" />,

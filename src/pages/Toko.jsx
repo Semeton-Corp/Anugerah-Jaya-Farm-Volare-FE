@@ -1,4 +1,3 @@
-import React from "react";
 import { PiCalendarBlank } from "react-icons/pi";
 import { MdShoppingCart } from "react-icons/md";
 import { PiMoneyWavyFill } from "react-icons/pi";
@@ -7,7 +6,26 @@ import { FiMaximize2 } from "react-icons/fi";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 
 import { FaWarehouse, FaTruck } from "react-icons/fa";
+import React from "react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
+const salesData = [
+  { date: "29 Mar", ok: 24, retak: 4, pecah: 2 },
+  { date: "30 Mar", ok: 13, retak: 5, pecah: 2 },
+  { date: "31 Mar", ok: 30, retak: 6, pecah: 3 },
+  { date: "01 Apr", ok: 20, retak: 7, pecah: 4 },
+  { date: "02 Apr", ok: 14, retak: 9, pecah: 2 },
+  { date: "03 Apr", ok: 25, retak: 7, pecah: 3 },
+  { date: "04 Apr", ok: 44, retak: 5, pecah: 1 },
+];
 
 const stokTokoData = [
   {
@@ -114,7 +132,7 @@ const Toko = () => {
         <div className="flex flex-col px-4 py-3 gap-4 ">
           {/* header section */}
           <div className="flex justify-between mb-2 flex-wrap gap-4">
-            <h1 className="text-3xl font-bold">Toko</h1>
+            <h1 className="text-3xl font-bold">Overview Toko</h1>
             <div className="flex gap-2">
               <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
                 <MdStore size={18} />
@@ -128,7 +146,6 @@ const Toko = () => {
               </div>
             </div>
           </div>
-
           {/* Telur  ok, retak, pecah, reject*/}
           <div className="flex md:grid-cols-2 gap-4 justify-between">
             {/* telur OK */}
@@ -140,10 +157,32 @@ const Toko = () => {
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center">
-                  <p className="text-3xl font-semibold me-3">Rp</p>
-                  <p className="text-3xl font-semibold">25.000</p>
+              <div>
+                <p className="text-lg ">Real: </p>
+                <div className="flex flex-wrap gap-4">
+                  <div className="flex items-center">
+                    <p className="text-3xl font-semibold me-3">Rp</p>
+                    <p className="text-3xl font-semibold">25.000</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 w-full rounded-md bg-green-100">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">Pendapatan</h2>
+                <div className="p-2 rounded-xl bg-green-700">
+                  <PiMoneyWavyFill size={24} color="white" />
+                </div>
+              </div>
+
+              <div>
+                <p className="text-lg ">Real + Cicilan: </p>
+                <div className="flex flex-wrap gap-4">
+                  <div className="flex items-center">
+                    <p className="text-3xl font-semibold me-3">Rp</p>
+                    <p className="text-3xl font-semibold">25.000</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -157,13 +196,14 @@ const Toko = () => {
                 </div>
               </div>
 
-              <div className="flex  flex-wrap gap-4">
-                <div className="flex flex-wrap gap-4">
-                  <div>
-                    {/* popuasl */}
-                    <p className="text-3xl font-semibold">150</p>
-                  </div>
+              <div className="flex mt-10">
+                <div className="flex items-center">
+                  <p className="text-3xl font-semibold me-3">150</p>
+                  <p className="text-lg">Butir</p>
                 </div>
+              </div>
+              <div className="flex  flex-wrap gap-4">
+                <div className="flex flex-wrap gap-4"></div>
               </div>
             </div>
             {/* penjualan telur */}
@@ -175,138 +215,57 @@ const Toko = () => {
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-4">
-                {/* item butir */}
+              <div>
+                <p className="text-lg ">Telur OK: </p>
                 <div className="flex flex-wrap gap-4">
-                  <div>
-                    {/* popuasl */}
-                    <p className="text-3xl font-semibold">2000</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* penjualan telur */}
-            <div className="p-4 w-full rounded-md bg-green-100">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">Sedang dipesan</h2>
-                <div className="p-2 rounded-xl bg-green-700">
-                  <FaTruck size={24} color="white" />
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-4">
-                {/* item butir */}
-                <div className="flex flex-wrap gap-4">
-                  <div className="flex">
-                    {/* popuasl */}
-                    <p className="text-3xl font-semibold pe-2">4</p>
+                  <div className="flex items-center">
+                    <p className="text-2xl font-semibold me-3">200</p>
+                    <p className="text-xl ">Ikat</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-
-          {/* chart, incomes, and history section */}
-          <div className="flex flex-col lg:flex-row h-120 gap-6">
-            {/* Chart Section (3/4 width on large screens) */}
-            <div className="w-full bg-white px-8 py-6 rounded-lg border border-gray-300">
-              <div className="flex justify-between items-start mb-4">
-                <h2 className="text-lg font-semibold">Stok toko</h2>
-                <div
-                  onClick={detailStokTokoHandle}
-                  className="p-2 rounded-full hover:bg-black-4 cursor-pointer"
-                >
-                  <FiMaximize2 size={24} color="" />
-                </div>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-base">
-                  <thead>
-                    <tr className="bg-green-700 font-medium text-white text-center">
-                      <th className="py-2 px-4">Nama Barang</th>
-                      <th className="py-2 px-4">ID Barang</th>
-                      <th className="py-2 px-4">Satuan</th>
-                      <th className="py-2 px-4">Kuantitas</th>
-                      <th className="py-2 px-4">Tempat Pemesanan</th>
-                      <th className="py-2 px-4">Keterangan</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {stokTokoData.map((item, index) => (
-                      <tr key={index} className="border-b text-center">
-                        <td className="py-2 px-4">{item.namaBarang}</td>
-                        <td className="py-2 px-4">{item.idBarang}</td>
-                        <td className="py-2 px-4">{item.satuan}</td>
-                        <td className="py-2 px-4">{item.kuantitas}</td>
-                        <td className="py-2 px-4">{item.tempat}</td>
-                        <td className="py-2 px-4 flex justify-center">
-                          <span
-                            className={`w-24 py-1 flex justify-center rounded text-sm font-semibold ${
-                              item.keterangan === "aman"
-                                ? "bg-aman-box-surface-color text-aman-text-color"
-                                : "bg-kritis-box-surface-color text-kritis-text-color"
-                            }`}
-                          >
-                            {item.keterangan}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          {/* detail penjualan */}
-          <div className="bg-white p-4 rounded-lg border border-gray-300">
-            <div className="flex justify-between items-start mb-4">
-              <h2 className="text-lg font-semibold">Riwayat Aktivitas Toko</h2>
-              <div
-                onClick={riwayatAktivitasTokoHandle}
-                className="p-2 rounded-full hover:bg-black-4 cursor-pointer"
-              >
-                <FiMaximize2 size={24} color="" />
-              </div>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-base">
-                <thead>
-                  <tr className="bg-green-700 text-white font-medium text-center">
-                    <th className="py-2 px-4">Tanggal</th>
-                    <th className="py-2 px-4">Nama barang</th>
-                    <th className="py-2 px-4">ID Barang</th>
-                    <th className="py-2 px-4">Satuan</th>
-                    <th className="py-2 px-4">Kuantitas</th>
-                    <th className="py-2 px-4">Tempat Pemesanan</th>
-                    <th className="py-2 px-4">Keterangan</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {aktivitasTokoData.map((item, index) => (
-                    <tr key={index} className="border-b text-center">
-                      <td className="py-2 px-4">{item.tanggal}</td>
-                      <td className="py-2 px-4">{item.namaBarang}</td>
-                      <td className="py-2 px-4">{item.idBarang}</td>
-                      <td className="py-2 px-4">{item.satuan}</td>
-                      <td className="py-2 px-4">{item.kuantitas}</td>
-                      <td className="py-2 px-4">{item.tempat}</td>
-                      <td className="py-2 px-4 flex justify-center">
-                        <span
-                          className={`w-36 py-1 flex justify-center rounded text-sm font-semibold ${
-                            item.keterangan === "Barang Masuk"
-                              ? "bg-aman-box-surface-color text-aman-text-color"
-                              : "bg-orange-200 text-kritis-text-color"
-                          }`}
-                        >
-                          {item.keterangan}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <div className="p-6 rounded-lg border border-black-6 bg-white">
+            <h2 className="text-xl font-semibold mb-4">
+              Rekapitulasi Penjualan
+            </h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={salesData}>
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Legend
+                  layout="horizontal"
+                  verticalAlign="top"
+                  align="center"
+                  formatter={(value) => {
+                    if (value === "ok") return "Telur OK";
+                    if (value === "retak") return "Telur Retak";
+                    if (value === "pecah") return "Telur Pecah";
+                    return value;
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="ok"
+                  stroke="#00c853"
+                  strokeWidth={2}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="retak"
+                  stroke="#ffd600"
+                  strokeWidth={2}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="pecah"
+                  stroke="#ff9100"
+                  strokeWidth={2}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </div>
       )}
