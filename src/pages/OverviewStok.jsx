@@ -184,7 +184,7 @@ const OverviewStok = () => {
             {/* telur OK */}
             <div className="p-4 w-full rounded-md border-2 border-black-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">Stok Telur OK</h2>
+                <h2 className="text-lg font-semibold">Telur OK Ikat</h2>
                 <div className="p-2 rounded-xl bg-green-700">
                   <MdEgg size={24} color="white" />
                 </div>
@@ -196,15 +196,33 @@ const OverviewStok = () => {
                   <p className="text-3xl font-bold text-center">50</p>
                   <p className="text-xl text-center">Ikat</p>
                 </div>
-                {/* item karpet */}
-                <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                  <p className="text-3xl font-bold text-center">100</p>
-                  <p className="text-xl text-center">Karpet</p>
+              </div>
+            </div>
+
+            {/* telur OK */}
+            <div className="p-4 w-full rounded-md border-2 border-black-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">Telur OK Eceran</h2>
+                <div className="p-2 rounded-xl bg-green-700">
+                  <MdEgg size={24} color="white" />
                 </div>
-                {/* item butir */}
-                <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                  <p className="text-3xl font-bold text-center">1000</p>
-                  <p className="text-xl text-center">Butir</p>
+              </div>
+
+              <div className="flex gap-4 justify-center">
+                <div className="flex justify-center flex-wrap gap-4">
+                  {/* item ikat */}
+                  <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+                    <p className="text-3xl font-bold text-center">50</p>
+                    <p className="text-xl text-center">Karpet</p>
+                  </div>
+                </div>
+
+                <div className="flex justify-center flex-wrap gap-4">
+                  {/* item ikat */}
+                  <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+                    <p className="text-3xl font-bold text-center">1000</p>
+                    <p className="text-xl text-center">Butir</p>
+                  </div>
                 </div>
               </div>
             </div>

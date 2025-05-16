@@ -57,7 +57,7 @@ const RiwayatStok = () => {
     <div className="flex flex-col px-4 py-3 gap-4 ">
       {/* header */}
       <div className="flex justify-between mb-2 flex-wrap gap-4">
-        <h1 className="text-3xl font-bold">Riwayat Aktivitas Toko</h1>
+        <h1 className="text-3xl font-bold">Riwayat Stok Toko</h1>
 
         <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
           <PiCalendarBlank size={18} />

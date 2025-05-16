@@ -208,9 +208,9 @@ const ProduksiTelur = () => {
           </div>
 
           {/* Telur  ok, retak, pecah, reject*/}
-          <div className="flex md:grid-cols-2 gap-4 justify-between">
+          <div className="flex gap-4 items-stretch">
             {/* telur OK */}
-            <div className="p-4 w-full rounded-md border-2 border-black-6">
+            <div className="flex-1 p-4 rounded-md border-2 border-black-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Telur OK</h2>
                 <div className="p-2 rounded-xl bg-green-700">
@@ -218,17 +218,7 @@ const ProduksiTelur = () => {
                 </div>
               </div>
 
-              <div className="flex justify-center flex-wrap gap-4">
-                {/* item ikat */}
-                <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                  <p className="text-3xl font-bold text-center">50</p>
-                  <p className="text-xl text-center">Ikat</p>
-                </div>
-                {/* item karpet */}
-                <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                  <p className="text-3xl font-bold text-center">100</p>
-                  <p className="text-xl text-center">Karpet</p>
-                </div>
+              <div className="flex justify-center gap-4">
                 {/* item butir */}
                 <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
                   <p className="text-3xl font-bold text-center">1000</p>
@@ -238,7 +228,7 @@ const ProduksiTelur = () => {
             </div>
 
             {/* telur Retak */}
-            <div className="p-4 w-full rounded-md border-2 border-black-6">
+            <div className="flex-1 p-4 rounded-md border-2 border-black-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Telur Retak</h2>
                 <div className="p-2 rounded-xl bg-green-700">
@@ -255,7 +245,7 @@ const ProduksiTelur = () => {
               </div>
             </div>
             {/* penjualan telur */}
-            <div className="p-4 w-full rounded-md border-2 border-black-6">
+            <div className="flex-1 p-4 rounded-md border-2 border-black-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Telur Pecah</h2>
                 <div className="p-2 rounded-xl bg-green-700">
@@ -272,7 +262,7 @@ const ProduksiTelur = () => {
               </div>
             </div>
             {/* penjualan telur */}
-            <div className="p-4 w-full rounded-md border-2 border-black-6">
+            <div className="flex-1 p-4 rounded-md border-2 border-black-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Telur Reject</h2>
                 <div className="p-2 rounded-xl bg-green-700">
@@ -358,7 +348,7 @@ const ProduksiTelur = () => {
           </div>
 
           {/* detail penjualan */}
-          <div className=" flex gap-4 h-65">
+          {/* <div className=" flex gap-4 h-65">
             <div className=" w-full bg-white px-8 py-6 rounded-lg border border-black-6">
               <div className="flex justify-between items-start mb-4">
                 <h2 className="text-lg font-semibold">Detail Produksi</h2>
@@ -409,7 +399,7 @@ const ProduksiTelur = () => {
                 </tbody>
               </table>
             </div>
-          </div>
+          </div> */}
         </div>
       )}
     </>

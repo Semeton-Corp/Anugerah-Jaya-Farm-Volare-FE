@@ -51,7 +51,7 @@ const OverviewOwner = () => {
   if (isDetailPage) {
     <Outlet />;
   }
-  
+
   return (
     <div className="flex flex-col px-4 py-3 gap-4 ">
       {/* header section */}
@@ -67,11 +67,29 @@ const OverviewOwner = () => {
       </div>
 
       {/* produksi & penjualan section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* produksi telur */}
         <div className="p-4 w-full rounded-md border-2 border-black-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Produksi telur</h2>
+            <h2 className="text-lg font-semibold">Produksi Telur OK</h2>
+            <div className="p-2 rounded-xl bg-green-700">
+              <MdEgg size={24} color="white" />
+            </div>
+          </div>
+
+          <div className="flex justify-center flex-wrap gap-4">
+            {/* item butir */}
+            <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+              <p className="text-3xl font-bold text-center">1000</p>
+              <p className="text-xl text-center">Butir</p>
+            </div>
+          </div>
+        </div>
+
+        {/* penjualan telur */}
+        <div className="p-4 w-full rounded-md border-2 border-black-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold">Penjualan Telur Ikat</h2>
             <div className="p-2 rounded-xl bg-green-700">
               <MdEgg size={24} color="white" />
             </div>
@@ -84,36 +102,21 @@ const OverviewOwner = () => {
               <p className="text-xl text-center">Ikat</p>
             </div>
             {/* item karpet */}
-            <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-              <p className="text-3xl font-bold text-center">100</p>
-              <p className="text-xl text-center">Karpet</p>
-            </div>
-            {/* item butir */}
-            <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-              <p className="text-3xl font-bold text-center">1000</p>
-              <p className="text-xl text-center">Butir</p>
-            </div>
           </div>
         </div>
 
-        {/* penjualan telur */}
         <div className="p-4 w-full rounded-md border-2 border-black-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Penjualan telur</h2>
+            <h2 className="text-lg font-semibold">Penjualan Telur Eceran</h2>
             <div className="p-2 rounded-xl bg-green-700">
-              <MdShoppingCart size={24} color="white" />
+              <MdEgg size={24} color="white" />
             </div>
           </div>
 
           <div className="flex justify-center flex-wrap gap-4">
-            {/* item ikat */}
+            {/* item butir */}
             <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
               <p className="text-3xl font-bold text-center">50</p>
-              <p className="text-xl text-center">Ikat</p>
-            </div>
-            {/* item karpet */}
-            <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-              <p className="text-3xl font-bold text-center">100</p>
               <p className="text-xl text-center">Karpet</p>
             </div>
             {/* item butir */}
@@ -126,7 +129,7 @@ const OverviewOwner = () => {
       </div>
 
       {/* chart, incomes, and history section */}
-      <div className="flex flex-col lg:flex-row h-120 gap-6">
+      <div className="flex flex-col lg:flex-row h-120 items-stretch gap-6">
         {/* Chart Section (3/4 width on large screens) */}
         <div className="w-full lg:w-6/8 bg-white rounded-lg p-4 border border-black-6">
           <h2 className="text-xl font-semibold mb-4">Produksi & Penjualan</h2>
@@ -167,14 +170,27 @@ const OverviewOwner = () => {
                 <PiMoneyWavyFill size={24} color="white" />
               </div>
             </div>
-            <p className="text-[36px] font-semibold mb-2">Rp 12.500.000</p>
+            <div className="mt-6 mb-2">
+              <div className="flex gap-8 ">
+                <div>
+                  <p className="text-lg">Real:</p>
+                  <p className="text-xl font-semibold">Rp 123.500.000</p>
+                </div>
+
+                <div>
+                  <p className="text-lg">Real + Cicilan:</p>
+                  <p className="text-xl font-semibold">Rp 122.500.000</p>
+                </div>
+              </div>
+            </div>
+
             {/* profit dynamics notification */}
-            <div className="flex items-center">
+            {/* <div className="flex items-center">
               <FaArrowDownLong color="#F41C1C" />
               <p className="text-[16px] text-[#F41C1C]">
                 10% dibanding kemarin
               </p>
-            </div>
+            </div> */}
           </div>
 
           {/* History */}

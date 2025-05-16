@@ -119,16 +119,35 @@ const Penjualan = () => {
           </div>
 
           {/* penjualan, pendapatan, keuntungan*/}
-          <div className="flex justify-between gap-4 h-45">
+          <div className="flex justify-between gap-4 items-stretch">
             {/* produksi telur */}
-            <div className="flex w-1/2 justify-center p-4 rounded-md border-2 border-black-6">
-              <div className="w-120">
+            <div className="flex-1 justify-center p-4 rounded-md border-2 border-black-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">Penjualan Telur Ikat</h2>
+                <div className="p-2 rounded-xl bg-green-700">
+                  <MdEgg size={24} color="white" />
+                </div>
+              </div>
+              <div className="">
                 <div className="flex justify-center flex-wrap gap-4">
                   {/* item ikat */}
                   <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
                     <p className="text-3xl font-bold text-center">50</p>
                     <p className="text-xl text-center">Ikat</p>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-1 justify-center p-4 rounded-md border-2 border-black-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">Telur OK Eceran</h2>
+                <div className="p-2 rounded-xl bg-green-700">
+                  <MdEgg size={24} color="white" />
+                </div>
+              </div>
+              <div className="">
+                <div className="flex justify-center flex-wrap gap-4">
                   {/* item karpet */}
                   <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
                     <p className="text-3xl font-bold text-center">100</p>
@@ -140,21 +159,21 @@ const Penjualan = () => {
                     <p className="text-xl text-center">Butir</p>
                   </div>
                 </div>
-                <div>
+                {/* <div>
                   <div className="flex items-center px-6 py-2">
                     <FaArrowDownLong color="#F41C1C" />
                     <p className="text-[16px] text-[#F41C1C]">
                       10% dibanding kemarin
                     </p>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
 
             {/* pendapatan */}
-            <div className="w-1/4 h-full">
+            <div className="flex-1 ">
               {/* Pendapatan */}
-              <div className="bg-white w-full h-full p-4 flex flex-col justify-center border border-black-6 rounded-lg">
+              <div className="bg-white w-full h-full p-4 flex flex-col  border border-black-6 rounded-lg">
                 <div className="flex justify-between items-center mb-3">
                   <h2 className="text-lg font-semibold">Pendapatan</h2>
                   <div className="p-2 rounded-xl bg-green-700">
@@ -173,9 +192,9 @@ const Penjualan = () => {
             </div>
 
             {/* keuntungan */}
-            <div className="w-1/4 h-full">
+            <div className="flex-1 ">
               {/* Pendapatan */}
-              <div className="bg-white w-full h-full p-4 flex flex-col justify-center border border-black-6 rounded-lg">
+              <div className="bg-white w-full h-full p-4 flex flex-col  border border-black-6 rounded-lg">
                 <div className="flex justify-between items-center mb-3">
                   <h2 className="text-lg font-semibold">Keuntungan</h2>
                   <div className="p-2 rounded-xl bg-green-700">

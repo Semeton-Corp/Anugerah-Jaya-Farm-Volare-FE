@@ -167,7 +167,7 @@ const AppRouter = createBrowserRouter([
               },
               {
                 path: "riwayat-stok",
-                element: <PesananToko />,
+                element: <RiwayatStok />,
               },
             ],
           },
