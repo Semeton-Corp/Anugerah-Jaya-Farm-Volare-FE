@@ -6,6 +6,7 @@ import { BiSolidBox } from "react-icons/bi";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { FiMaximize2 } from "react-icons/fi";
 import { FaPercentage, FaWarehouse, FaTruck } from "react-icons/fa";
+import { FaCheck } from "react-icons/fa6";
 
 const stokGudangData = [
   {
@@ -138,9 +139,9 @@ const Gudang = () => {
             {/* ayam sakit */}
             <div className="p-4 w-full rounded-md bg-green-100">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">Stok kritis</h2>
+                <h2 className="text-lg font-semibold">Stok Aman</h2>
                 <div className="p-2 rounded-xl bg-green-700">
-                  <HiMiniExclamationTriangle size={24} color="white" />
+                  <FaCheck size={24} color="white" />
                 </div>
               </div>
 
@@ -156,9 +157,9 @@ const Gudang = () => {
             {/* penjualan telur */}
             <div className="p-4 w-full rounded-md bg-green-100">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">Perlu dipesan</h2>
+                <h2 className="text-lg font-semibold">Stok Kritis</h2>
                 <div className="p-2 rounded-xl bg-green-700">
-                  <FaClock size={24} color="white" />
+                  <HiMiniExclamationTriangle size={24} color="white" />
                 </div>
               </div>
 
@@ -175,7 +176,7 @@ const Gudang = () => {
             {/* penjualan telur */}
             <div className="p-4 w-full rounded-md bg-green-100">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">Sedang dipesan</h2>
+                <h2 className="text-lg font-semibold">Dalam Pesanan</h2>
                 <div className="p-2 rounded-xl bg-green-700">
                   <FaTruck size={24} color="white" />
                 </div>
@@ -221,7 +222,6 @@ const Gudang = () => {
                     {stokGudangData.map((item, index) => (
                       <tr key={index} className="border-b text-center">
                         <td className="py-2 px-4">{item.namaBarang}</td>
-
                         <td className="py-2 px-4">{item.qty}</td>
                         <td className="py-2 px-4">{item.lokasiSimpan}</td>
                         <td className="py-2 px-4">{item.estimasiHabis}</td>

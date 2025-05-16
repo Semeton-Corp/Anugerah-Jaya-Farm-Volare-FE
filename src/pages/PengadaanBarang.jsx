@@ -109,7 +109,10 @@ const PengadaanBarang = () => {
                 <th className="py-2 px-4">Kuantitas</th>
                 <th className="py-2 px-4">Suplier</th>
                 <th className="py-2 px-4">Keterangan</th>
-                <th className="py-2 px-4">Aksi</th>
+                {userRole === "Pekerja Gudang" ||
+                  (userRole === "Kepala Kandang" && (
+                    <th className="py-2 px-4">Aksi</th>
+                  ))}
               </tr>
             </thead>
             <tbody>

@@ -6,6 +6,7 @@ import { PiCalendarBlank } from "react-icons/pi";
 import profileAvatar from "../assets/profile_avatar.svg";
 import { useEffect } from "react";
 import { getListStaff } from "../services/staff";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const pegawaiAktif = [
   {
@@ -81,7 +82,16 @@ const pegawaiAktif = [
 ];
 
 const DaftarPegawai = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const userRole = localStorage.getItem("role");
   const [query, setQuery] = useState("");
+
+  const detailPages = ["tambah-pegawai"];
+
+  const isDetailPage = detailPages.some((segment) =>
+    location.pathname.includes(segment)
+  );
 
   const [pegawaiAktifData, setPegawaiAktifData] = useState([]);
 
@@ -102,10 +112,17 @@ const DaftarPegawai = () => {
     onSearch(e.target.value); // Call parent function with search input
   };
 
+  const tambahPegawaiHandle = () => {
+    navigate(`${location.pathname}/tambah-pegawai`);
+  };
+
   useEffect(() => {
     fectPegawaiAktifData();
   }, []);
 
+  if (isDetailPage) {
+    return <Outlet />;
+  }
   return (
     <div className="flex flex-col px-4 py-3 gap-4 ">
       {/* header */}
@@ -117,7 +134,10 @@ const DaftarPegawai = () => {
       <div className=" rounded-[4px] border border-black-6">
         <div className="px-6 pt-8 pb-4 flex items-center justify-between border-b ">
           <p className="text-lg font-bold">Pegawai Aktif</p>
-          <div className="rounded-[4px] py-2 px-6 bg-green-700 flex items-center justify-center text-white text-base font-medium hover:bg-green-900 cursor-pointer">
+          <div
+            onClick={tambahPegawaiHandle}
+            className="rounded-[4px] py-2 px-6 bg-green-700 flex items-center justify-center text-white text-base font-medium hover:bg-green-900 cursor-pointer"
+          >
             + Tambah pegawai
           </div>
         </div>

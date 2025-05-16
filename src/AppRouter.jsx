@@ -48,6 +48,7 @@ import InputPengadaanBarang from "./pages/InputPengadaanBarang";
 import TambahSupplier from "./pages/TambahSupplier";
 import DataTelurKeGudang from "./pages/DataTelurGudang";
 import RequestKeGudang from "./pages/RequestKeGudang";
+import TambahPegawai from "./pages/TambahPegawai";
 
 const AppRouter = createBrowserRouter([
   {
@@ -181,6 +182,7 @@ const AppRouter = createBrowserRouter([
               {
                 path: "daftar-pegawai",
                 element: <DaftarPegawai />,
+                children: [{ path: "tambah-pegawai", element: <TambahPegawai /> }],
               },
               {
                 path: "tugas-pegawai",

@@ -272,7 +272,7 @@ const OverviewKelolaPegawai = () => {
       </div>
 
       {/* detail penjualan */}
-      <div className="bg-white p-4 rounded-lg border border-gray-300">
+      {/* <div className="bg-white p-4 rounded-lg border border-gray-300">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">Daftar pegawai hari ini</h2>
           <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
@@ -296,12 +296,10 @@ const OverviewKelolaPegawai = () => {
                 <tr key={index} className="border-b ">
                   <td className="py-2 px-4 ">
                     <div className="flex w-72 gap-6">
-                      {/* profile picture */}
                       <div className="h-12 w-12 rounded-full overflow-hidden">
                         <img src={profileAvatar} alt="Profile Avatar" />
                       </div>
 
-                      {/* user name + role */}
                       <div className="w-52">
                         <p className="text-base font-me leading-tight">
                           {item.pegawai.nama}
@@ -344,7 +342,7 @@ const OverviewKelolaPegawai = () => {
             </tbody>
           </table>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
