@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { IoMdAdd } from "react-icons/io";
+import { generatePassword } from "../utils/passwordUtils";
+import { copyToClipboard } from "../utils/copy";
+import { MdContentCopy } from "react-icons/md";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getStores } from "../services/stores";
 import { getWarehouses } from "../services/warehouses";
@@ -30,6 +33,9 @@ const TambahPegawai = () => {
   const [address, setAddress] = useState("");
   const [salary, setSalary] = useState(0);
 
+  const [showPopup, setShowPopup] = useState(false);
+  const [password, setPassword] = useState("");
+
   const getDisplay = (value) => (value === 0 ? "" : value);
 
   const fetchRoles = async () => {
@@ -47,6 +53,12 @@ const TambahPegawai = () => {
   useEffect(() => {
     fetchRoles();
   }, []);
+
+  const handleSave = () => {
+    const generatedPassword = generatePassword();
+    setPassword(generatedPassword);
+    setShowPopup(true);
+  };
   return (
     <div className="flex flex-col px-4 py-3 gap-4 ">
       <div className="flex justify-between mb-2 flex-wrap gap-4">
@@ -98,6 +110,7 @@ const TambahPegawai = () => {
           salary={salary}
           setSalary={setSalary}
           getDisplay={getDisplay}
+          onSave={handleSave}
         />
       )}
       <button
@@ -107,11 +120,68 @@ const TambahPegawai = () => {
           console.log("Email:", email);
           console.log("Phone:", phone);
           console.log("Address:", address);
+          console.log("salary:", salary);
         }}
         className="bg-green-700"
       >
         CHECK
       </button>
+      {showPopup && (
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full relative shadow-lg">
+            <div className="flex justify-center mb-4">
+              <div className="bg-green-100 w-28 h-28 rounded-full flex items-center justify-center">
+                <span className="text-green-700 text-[64px]">✔</span>
+              </div>
+            </div>
+            <h2 className="text-center text-xl font-bold mb-2">
+              Tambah Pegawai Berhasil!
+            </h2>
+            <p className="text-center mb-4 text-gray-600">
+              Pegawai dapat masuk menggunakan email dan password default di
+              bawah ini. Jangan lupa untuk segera mengubah password.
+            </p>
+            <div className="mb-2">
+              <div className="flex items-center gap-3">
+                <label className="w-32">Email:</label>
+                <div className="flex items-center border border-[#606060] rounded px-3 py-2 w-full">
+                  <span className="flex-grow break-all text-sm leading-none text-[#606060]">
+                    {email}
+                  </span>
+                  <button
+                    className="text-blue-600 text-xl p-1"
+                    onClick={() => copyToClipboard(email)}
+                  >
+                    <MdContentCopy />
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="mb-4">
+              <div className="flex items-center gap-3">
+                <label className="w-32">Password:</label>
+                <div className="flex items-center border border-[#606060] rounded px-3 py-2 w-full">
+                  <span className="flex-grow break-all text-sm leading-none text-[#606060]">
+                    {password}
+                  </span>
+                  <button
+                    className="text-blue-600 text-xl p-1"
+                    onClick={() => copyToClipboard(email)}
+                  >
+                    <MdContentCopy />
+                  </button>
+                </div>
+              </div>
+            </div>
+            <button
+              className="bg-green-700 text-white w-full py-2 rounded"
+              onClick={() => setShowPopup(false)}
+            >
+              Selesai
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -205,7 +275,7 @@ function ProfilPegawaiForm({
   );
 }
 
-function GajiPokokForm({ salary, setSalary, getDisplay }) {
+function GajiPokokForm({ salary, setSalary, getDisplay, onSave }) {
   return (
     <div className="flex flex-col border p-6 rounded-md shadow-sm">
       <label className="mb-1">Gaji Pegawai</label>
@@ -220,7 +290,7 @@ function GajiPokokForm({ salary, setSalary, getDisplay }) {
       <div className="flex justify-end">
         <button
           className="w-24 items-center bg-green-700 hover:bg-green-900 cursor-pointer text-white px-4 py-2 rounded"
-          onClick={() => setTab("gaji")}
+          onClick={onSave}
         >
           Simpan
         </button>
