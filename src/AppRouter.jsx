@@ -182,7 +182,9 @@ const AppRouter = createBrowserRouter([
               {
                 path: "daftar-pegawai",
                 element: <DaftarPegawai />,
-                children: [{ path: "tambah-pegawai", element: <TambahPegawai /> }],
+                children: [
+                  { path: "tambah-pegawai", element: <TambahPegawai /> },
+                ],
               },
               {
                 path: "tugas-pegawai",
@@ -226,8 +228,9 @@ const AppRouter = createBrowserRouter([
           { path: "overview", element: <Ayam /> },
           {
             path: "ayam",
-            element: <DetailAyam />,
             children: [
+              { path: "data-ayam", element: <DetailAyam /> },
+              { path: "detail-vaksin-&-obat", element: <DetailVaksinObat /> },
               {
                 path: "input-ayam",
                 element: <InputAyam />,

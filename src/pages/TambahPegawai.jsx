@@ -3,6 +3,7 @@ import { IoMdAdd } from "react-icons/io";
 import { generatePassword } from "../utils/passwordUtils";
 import { copyToClipboard } from "../utils/copy";
 import { MdContentCopy } from "react-icons/md";
+import { signUp } from "../services/authServices";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getStores } from "../services/stores";
 import { getWarehouses } from "../services/warehouses";
@@ -22,6 +23,8 @@ import { formatRupiah } from "../utils/moneyFormat";
 import { getRoles } from "../services/roles";
 
 const TambahPegawai = () => {
+  const navigate = useNavigate();
+
   const [tab, setTab] = useState("profil");
 
   const [roles, setRoles] = useState([]);
@@ -54,10 +57,28 @@ const TambahPegawai = () => {
     fetchRoles();
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const generatedPassword = generatePassword();
     setPassword(generatedPassword);
-    setShowPopup(true);
+    const payload = {
+      email: email,
+      name: name,
+      password: generatedPassword,
+      roleId: selectedRole,
+      address: address,
+      phoneNumber: phone,
+      salary: salary,
+    };
+    try {
+      const signUpResponse = await signUp(payload);
+      // console.log("signUpResponse: ", signUpResponse);
+      if (signUpResponse.status == 201) {
+        setShowPopup(true);
+      }
+    } catch (error) {
+      alert("Terjadi kesalahan dalam membuat akun!");
+      console.log("error :", error);
+    }
   };
   return (
     <div className="flex flex-col px-4 py-3 gap-4 ">
@@ -166,7 +187,7 @@ const TambahPegawai = () => {
                   </span>
                   <button
                     className="text-blue-600 text-xl p-1"
-                    onClick={() => copyToClipboard(email)}
+                    onClick={() => copyToClipboard(password)}
                   >
                     <MdContentCopy />
                   </button>
@@ -175,7 +196,10 @@ const TambahPegawai = () => {
             </div>
             <button
               className="bg-green-700 text-white w-full py-2 rounded"
-              onClick={() => setShowPopup(false)}
+              onClick={() => {
+                setShowPopup(false);
+                navigate(-1, { state: { refetch: true } });
+              }}
             >
               Selesai
             </button>

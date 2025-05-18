@@ -118,7 +118,11 @@ const DaftarPegawai = () => {
 
   useEffect(() => {
     fectPegawaiAktifData();
-  }, []);
+    if (location.state?.refetch) {
+      fectPegawaiAktifData();
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   if (isDetailPage) {
     return <Outlet />;

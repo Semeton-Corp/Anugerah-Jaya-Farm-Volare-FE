@@ -363,7 +363,7 @@ const TambahTugasRutin = () => {
         )}
 
         {/* Simpan Button */}
-        <div className="mt-6 text-right ">
+        {/* <div className="mt-6 text-right ">
           <button
             onClick={() => {
               console.log("tasks: ", tasks);
@@ -375,7 +375,7 @@ const TambahTugasRutin = () => {
           >
             Check
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

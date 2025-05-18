@@ -60,7 +60,7 @@ const Presensi = () => {
       const allPresenceResponse = await getAllPresence(monthName, year);
       console.log("allPresenceResponse: ", allPresenceResponse);
       if (allPresenceResponse.status == 200) {
-        setAttendanceData();
+        setAttendanceData(allPresenceResponse.data.data.presences);
       }
     } catch (error) {
       console.log("error :", error);
@@ -179,18 +179,18 @@ const Presensi = () => {
             {attendanceData.map((row, i) => (
               <tr key={i} className="border-b">
                 <td className="p-2">{row.date}</td>
-                <td className="p-2">{row.in}</td>
-                <td className="p-2">{row.out}</td>
-                <td className="p-2">{row.overtime}</td>
+                <td className="p-2">{row.startTime}</td>
+                <td className="p-2">{row.endTime}</td>
+                <td className="p-2">{row.overTime}</td>
                 <td className="p-2">
                   <span
                     className={`px-3 py-1 rounded ${
-                      row.status === "Hadir"
+                      row.startTime !== ""
                         ? "bg-aman-box-surface-color text-aman-text-color"
                         : "bg-kritis-box-surface-color text-kritis-text-color"
                     }`}
                   >
-                    {row.status}
+                    {row.startTime !== "" ? "Hadir" : "Tidak hadir"}
                   </span>
                 </td>
               </tr>

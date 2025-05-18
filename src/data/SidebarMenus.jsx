@@ -102,7 +102,10 @@ export const sidebarMenus = {
     {
       icon: <img src={ayam} alt="Overview Icon" className="h-4 w-4" />,
       tabName: "Ayam",
-      element: <OverviewOwner />,
+      subTabs: [
+        { tabName: "Data Ayam", path: "data-ayam" },
+        { tabName: "Detail Vaksin & Obat", path: "detail-vaksin-&-obat" },
+      ],
     },
     {
       icon: <GrNotes size={20} />,
