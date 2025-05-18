@@ -49,6 +49,7 @@ import TambahSupplier from "./pages/TambahSupplier";
 import DataTelurKeGudang from "./pages/DataTelurGudang";
 import RequestKeGudang from "./pages/RequestKeGudang";
 import TambahPegawai from "./pages/TambahPegawai";
+import Profile from "./pages/Profile";
 
 const AppRouter = createBrowserRouter([
   {
@@ -65,6 +66,7 @@ const AppRouter = createBrowserRouter([
         element: <MainLayout role="Owner" />,
         children: [
           { path: "", element: <Navigate to="overview" replace /> },
+          { path: "profile", element: <Profile /> },
           { path: "overview", element: <OverviewOwner /> },
           {
             path: "penjualan",
@@ -225,6 +227,7 @@ const AppRouter = createBrowserRouter([
         element: <MainLayout role="Pekerja Kandang" />,
         children: [
           { path: "", element: <Navigate to="overview" replace /> },
+          { path: "profile", element: <Profile /> },
           { path: "overview", element: <Ayam /> },
           {
             path: "ayam",
@@ -269,6 +272,7 @@ const AppRouter = createBrowserRouter([
         element: <MainLayout role="Pekerja Telur" />,
         children: [
           { path: "", element: <Navigate to="overview" replace /> },
+          { path: "profile", element: <Profile /> },
           { path: "overview", element: <ProduksiTelur /> },
           {
             path: "produksi-telur",
@@ -301,6 +305,7 @@ const AppRouter = createBrowserRouter([
         element: <MainLayout role="Pekerja Toko" />,
         children: [
           { path: "", element: <Navigate to="overview" replace /> },
+          { path: "profile", element: <Profile /> },
           { path: "overview", element: <Toko /> },
           {
             path: "kasir",
@@ -364,6 +369,7 @@ const AppRouter = createBrowserRouter([
         element: <MainLayout role="Kepala Kandang" />,
         children: [
           { path: "", element: <Navigate to="overview" replace /> },
+          { path: "profile", element: <Profile /> },
           { path: "overview", element: <OverviewKepalaKandang /> },
           {
             path: "produksi-telur",
@@ -463,6 +469,7 @@ const AppRouter = createBrowserRouter([
         element: <MainLayout role="Pekerja Gudang" />,
         children: [
           { path: "", element: <Navigate to="produksi-telur" replace /> },
+          { path: "profile", element: <Profile /> },
           {
             path: "produksi-telur",
             element: <DetailProduksi />,

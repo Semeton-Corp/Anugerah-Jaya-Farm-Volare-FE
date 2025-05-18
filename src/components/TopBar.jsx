@@ -22,6 +22,11 @@ export default function TopBar() {
     navigate("/auth/login", { replace: true });
   };
 
+  const onProfile = () => {
+    const rolePath = role.toLowerCase().replace(/\s+/g, "-");
+    navigate(`/${rolePath}/profile`);
+  };
+
   return (
     <div>
       <nav className="bg-white p-4 shadow-sm">
@@ -89,8 +94,8 @@ export default function TopBar() {
             {/* Profil */}
             <button
               onClick={() => {
+                setIsOptionExpanded(false);
                 onProfile?.();
-                setIsOpen(false);
               }}
               className="w-full flex items-center gap-2 px-4 py-2 mb-2 border rounded-md hover:bg-gray-100 font-semibold cursor-pointer"
             >
