@@ -93,7 +93,7 @@ const Presensi = () => {
   useEffect(() => {
     getTodayPresence();
     getAttandanceData();
-  }, []);
+  }, [isPresence, isGoHome]);
   // const attendanceData = [
   //   {
   //     date: "25 Maret 2025",
