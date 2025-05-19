@@ -23,6 +23,7 @@ import {
 } from "recharts";
 import { FiMaximize2 } from "react-icons/fi";
 import { formatRupiah } from "../utils/moneyFormat";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const data = [
   { date: "29 Mar", red: 300, yellow: 20 },
@@ -42,9 +43,18 @@ const salaryDetails = {
 };
 
 const Profile = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const photoProfile = localStorage.getItem("photoProfile");
   const userName = localStorage.getItem("userName");
   const userRole = localStorage.getItem("role");
+
+  const detailPages = ["detail-absensi", "detail-penyelesaian-pekerjaan"];
+
+  const isDetailPage = detailPages.some((segment) =>
+    location.pathname.includes(segment)
+  );
 
   const [myData, setMyData] = useState([]);
 
@@ -72,6 +82,19 @@ const Profile = () => {
   useEffect(() => {
     fetchMyData();
   }, []);
+
+  const detailAbsensiHandle = () => {
+    navigate(`${location.pathname}/detail-absensi`);
+  };
+
+  const detailPenyelesaianPekerjaan = () => {
+    navigate(`${location.pathname}/detail-penyelesaian-pekerjaan`);
+  };
+
+  if (isDetailPage) {
+    return <Outlet />;
+  }
+
   return (
     <div className="flex flex-col px-4 py-3 gap-4">
       <h1 className="text-3xl font-bold">Profile</h1>
@@ -234,7 +257,10 @@ const Profile = () => {
               <div className="bg-white flex-1 p-4 border border-black-6 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <h2 className="text-lg font-semibold">Total Presensi</h2>
-                  <button className="px-4 py-2 rounded-[4px] bg-orange-400 hover:bg-orange-600 cursor-pointer">
+                  <button
+                    onClick={detailAbsensiHandle}
+                    className="px-4 py-2 rounded-[4px] bg-orange-400 hover:bg-orange-600 cursor-pointer"
+                  >
                     Detail
                   </button>
                 </div>
@@ -272,7 +298,10 @@ const Profile = () => {
               <div className="bg-white flex-1 p-4 border border-black-6 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <h2 className="text-lg font-semibold">Penyelesaian Tugas</h2>
-                  <button className="px-4 py-2 rounded-[4px] bg-orange-400 hover:bg-orange-600 cursor-pointer">
+                  <button
+                    onClick={detailPenyelesaianPekerjaan}
+                    className="px-4 py-2 rounded-[4px] bg-orange-400 hover:bg-orange-600 cursor-pointer"
+                  >
                     Detail
                   </button>
                 </div>

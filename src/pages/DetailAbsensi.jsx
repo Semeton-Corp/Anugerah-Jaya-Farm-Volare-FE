@@ -7,8 +7,7 @@ import {
   departurePresence,
   getAllPresence,
 } from "../services/presence";
-
-const Presensi = () => {
+const DetailAbsensi = () => {
   const [presenceId, setPresenceId] = useState(0);
   const [isPresence, setIsPresence] = useState(false);
   const [isGoHome, setIsGoHome] = useState(false);
@@ -97,44 +96,15 @@ const Presensi = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Presensi</h1>
-
-      {/* Presensi Harian */}
-      <div className="bg-white rounded border border-black-6 p-6 mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="font-semibold text-lg">Presensi Harian</h2>
-          <p className="text-sm">{getTodayDateInBahasa()}</p>
-        </div>
-        <div
-          onClick={isPresence ? departureHandlePresence : arrivalHandlePresence}
-          className={`text-center py-2 rounded text-lg font-semibold ${
-            isGoHome
-              ? "bg-black-5  text-black-8"
-              : isPresence
-              ? "bg-kritis-box-surface-color hover:bg-[#C34747] text-kritis-text-color cursor-pointer hover:text-white "
-              : "bg-aman-box-surface-color hover:bg-[#1D7E20] text-aman-text-color cursor-pointer hover:text-white "
-          }`}
-        >
-          {isGoHome
-            ? "Anda sudah melakukan presensi hari ini"
-            : isPresence
-            ? "Pulang"
-            : "Hadir"}
+      <div className="flex justify-between items-center mb-2 flex-wrap gap-4">
+        <h1 className="text-2xl font-bold mb-4">Detail Absensi</h1>
+        <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+          <PiCalendarBlank size={18} />
+          <div className="text-base font-medium ms-2">Bulan Ini</div>
         </div>
       </div>
-
       {/* Tabel Presensi */}
       <div className="bg-white rounded border border-black-6 p-6">
-        <div className="flex justify-between items-center mb-2 flex-wrap gap-4">
-          <div></div>
-          <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-            <PiCalendarBlank size={18} />
-            <div className="text-base font-medium ms-2">
-              Hari ini ({getTodayDateInBahasa()})
-            </div>
-          </div>
-        </div>
-
         <table className="w-full border-collapse ">
           <thead className="bg-green-700 text-white text-sm">
             <tr>
@@ -167,9 +137,22 @@ const Presensi = () => {
             ))}
           </tbody>
         </table>
+
+        {/* footer */}
+        <div className="flex justify-between mt-16 px-6">
+          <p className="text-sm text-[#CCCCCC]">Menampilkan 1-7 data</p>
+          <div className="flex gap-3">
+            <div className="rounded-[4px] py-2 px-6 bg-green-100 flex items-center justify-center text-black text-base font-medium hover:bg-green-200 cursor-pointer">
+              <p>Previous </p>
+            </div>
+            <div className="rounded-[4px] py-2 px-6 bg-green-700 flex items-center justify-center text-white text-base font-medium hover:bg-green-800 cursor-pointer">
+              <p>Next</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-export default Presensi;
+export default DetailAbsensi;
