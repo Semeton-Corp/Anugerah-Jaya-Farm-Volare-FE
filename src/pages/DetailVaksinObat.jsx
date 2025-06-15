@@ -1,175 +1,180 @@
+import { AlertTriangle } from "lucide-react";
 import React from "react";
-import { PiCalendarBlank } from "react-icons/pi";
-import { BiSolidEditAlt } from "react-icons/bi";
-import { MdDelete, MdStore } from "react-icons/md";
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate, Outlet } from "react-router-dom";
-import { getChickenMonitoring } from "../services/chickenMonitorings";
-import { deleteChickenData } from "../services/chickenMonitorings";
-import { getTodayDateInBahasa } from "../utils/dateFormat";
-
-const data = [
-  { date: "29 Mar", produksi: 25, penjualan: 30 },
-  { date: "30 Mar", produksi: 14, penjualan: 40 },
-  { date: "31 Mar", produksi: 30, penjualan: 33 },
-  { date: "01 Apr", produksi: 22, penjualan: 40 },
-  { date: "02 Apr", produksi: 16, penjualan: 8 },
-  { date: "03 Apr", produksi: 25, penjualan: 20 },
-  { date: "04 Apr", produksi: 43, penjualan: 32 },
-];
+import { useState } from "react";
+import { MdDelete, MdEdit } from "react-icons/md";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const DetailVaksinObat = () => {
-  const userRole = localStorage.getItem("role");
-  const location = useLocation();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [detailAyamData, setDetailAyamState] = useState([]);
-
-  const detailPages = ["input-ayam"];
+  const detailPages = ["input-vaksin-&-obat"];
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
 
-  async function editDataHandle(dataId) {
-    const currectPath = location.pathname;
-    navigate(`${currectPath}/input-ayam/${dataId}`);
-  }
-
-  const fetchDataAyam = async () => {
-    try {
-      const response = await getChickenMonitoring();
-      if (response.status === 200) {
-        setDetailAyamState(response.data.data);
-        console.log("DetailAyamData: ", response.data.data);
-      }
-    } catch (error) {
-      console.error("Gagal memuat data ayam:", error);
-    }
+  const inputHandle = () => {
+    navigate(`${location.pathname}/input-vaksin-&-obat`);
   };
 
-  useEffect(() => {
-    fetchDataAyam();
+  const [data, setData] = useState([
+    {
+      tanggal: "20 Mar 2025",
+      kategori: "DOC",
+      usia: 49,
+      jenis: "Vaksin Rutin",
+      nama: "Vaksin DOC",
+      dosis: "5ml",
+      penyakit: "-",
+    },
+    {
+      tanggal: "20 Mar 2025",
+      kategori: "Grower",
+      usia: 49,
+      jenis: "Obat",
+      nama: "Obat A",
+      dosis: "5ml",
+      penyakit: "Penyakit B",
+    },
+    {
+      tanggal: "20 Mar 2025",
+      kategori: "Pre Layer",
+      usia: 49,
+      jenis: "Vaksin Kondisional",
+      nama: "Vaksin AB",
+      dosis: "5ml",
+      penyakit: "-",
+    },
+    {
+      tanggal: "20 Mar 2025",
+      kategori: "Layer",
+      usia: 49,
+      jenis: "Vaksin Rutin",
+      nama: "Vaksin B",
+      dosis: "5ml",
+      penyakit: "-",
+    },
+    {
+      tanggal: "20 Mar 2025",
+      kategori: "Afkir",
+      usia: 49,
+      jenis: "Vaksin Rutin",
+      nama: "Vaksin C",
+      dosis: "5ml",
+      penyakit: "-",
+    },
+  ]);
 
-    if (location.state?.refetch) {
-      fetchDataAyam();
-      window.history.replaceState({}, document.title);
-    }
-  }, [location]);
-
-  //   async function deleteDataHandle(dataId) {
-  //     try {
-  //       const response = await deleteChickenData(dataId);
-  //       await fetchDataAyam(); // langsung reload data
-  //     } catch (error) {
-  //       console.error("Gagal menghapus data ayam:", error);
-  //     }
-  //   }
-
-  //   async function editDataHandle(dataId) {
-  //     const currectPath = location.pathname;
-  //     navigate(`${currectPath}/input-ayam/${dataId}`);
-  //   }
-
-  // Render detail input page only
   if (isDetailPage) {
     return <Outlet />;
   }
 
   return (
-    <div className="flex flex-col px-4 py-3 gap-4">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-2 flex-wrap gap-4">
-        <h1 className="text-3xl font-bold">Detail Vaksin & Obat</h1>
-        <div className="flex gap-4">
-          <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-            <MdStore size={18} />
-            <div className="text-base font-medium ms-2">Semua site</div>
+    <div className="p-6 space-y-6">
+      {/* Informasi Ayam */}
+      <div className="border border-black-6 rounded p-4 bg-white">
+        <h2 className="text-xl font-bold mb-4">Informasi ayam saat ini</h2>
+        <div className="grid grid-cols-2 gap-4 text-sm md:text-base">
+          <div>
+            <p className="text-gray-600">ID Ayam</p>
+            <p className="font-bold">0611202500001</p>
           </div>
-          <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-            <PiCalendarBlank size={18} />
-            <div className="text-base font-medium ms-2">
-              Hari ini (20 Mar 2025)
-            </div>
+          <div>
+            <p className="text-gray-600">Usia ayam (Minggu)</p>
+            <p className="font-bold">1</p>
+          </div>
+          <div>
+            <p className="text-gray-600">Kategori ayam</p>
+            <p className="font-bold">DOC</p>
+          </div>
+          <div>
+            <p className="text-gray-600">Lokasi Kandang</p>
+            <p className="font-bold">Sidodadi DOC</p>
           </div>
         </div>
       </div>
 
-      {/* Table Section */}
-      <div className="bg-white p-5 border rounded-lg w-full border-black-6">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left border-collapse">
+      {/* Alert */}
+      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 text-yellow-800 flex items-center rounded">
+        <AlertTriangle className="w-5 h-5 mr-2" />
+        <span>
+          Lakukan vaksin DOC, umur ayam sudah mencapai ketentuan vaksin
+        </span>
+      </div>
+
+      {/* Riwayat Vaksin & Obat */}
+      <div className="bg-white border border-black-6 rounded">
+        <div className="flex justify-between items-center px-6 pt-6">
+          <h3 className="text-xl font-bold">Riwayat Vaksin & Obat</h3>
+          <button
+            onClick={inputHandle}
+            className="bg-orange-400 hover:bg-orange-500 text-black text-sm font-semibold py-2 px-4 rounded cursor-pointer"
+          >
+            + Input Data Vaksin/obat
+          </button>
+        </div>
+        <div className="overflow-x-auto px-6 py-4">
+          <table className="min-w-full text-sm text-left">
             <thead>
-              <tr className="bg-green-700 text-white text-center">
-                <th className="py-2 px-4">Kandang</th>
-                <th className="py-2 px-4">Kategori</th>
+              <tr className="bg-green-700 text-white">
+                <th className="py-2 px-4">Tanggal</th>
+                <th className="py-2 px-4">Kategori ayam</th>
                 <th className="py-2 px-4">Usia (minggu)</th>
-                <th className="py-2 px-4">Vaksin</th>
-                <th className="py-2 px-4">Obat</th>
+                <th className="py-2 px-4">Jenis</th>
+                <th className="py-2 px-4">Nama Vaksin / Obat</th>
+                <th className="py-2 px-4">Dosis</th>
                 <th className="py-2 px-4">Penyakit</th>
-                <th className="py-2 px-4"></th>
+                <th className="py-2 px-4">Aksi</th>
               </tr>
             </thead>
             <tbody>
-              {detailAyamData.map((row, index) => (
+              {data.map((row, index) => (
                 <tr
                   key={index}
-                  className="border-t border-gray-200 hover:bg-gray-50 text-center"
+                  className="border-t hover:bg-black-3 transition-all"
                 >
-                  <td className="py-2 px-4">{row.cage.name}</td>
-                  <td className="py-2 px-4">{row.chickenCategory}</td>
-                  <td className="py-2 px-4">{row.age}</td>
-                  <td className="py-2 px-4">
-                    {row.chickenVaccines && row.chickenVaccines.length > 0 ? (
-                      row.chickenVaccines.map((vaccine, index) => (
-                        <p
-                          key={index}
-                        >{`${vaccine.vaccine} (${vaccine.dose} ${vaccine.unit})`}</p>
-                      ))
-                    ) : (
-                      <p>-</p>
-                    )}
-                  </td>
-                  <td className="py-2 px-4">
-                    <div className="flex gap-2 justify-center">
-                      {row.chickenDiseases && row.chickenDiseases.length > 0 ? (
-                        row.chickenDiseases.map((vaccine, index) => (
-                          <p
-                            key={index}
-                          >{`${vaccine.medicine} (${vaccine.dose} ${vaccine.unit})`}</p>
-                        ))
-                      ) : (
-                        <p>-</p>
-                      )}
-                    </div>
-                  </td>
-                  <td className="py-2 px-4">
-                    <div className="flex gap-2 justify-center">
-                      {row.chickenDiseases && row.chickenDiseases.length > 0 ? (
-                        row.chickenDiseases.map((vaccine, index) => (
-                          <p key={index}>{`${vaccine.disease}`}</p>
-                        ))
-                      ) : (
-                        <p>-</p>
-                      )}
-                    </div>
-                  </td>
-                  {(userRole === "Pekerja Kandang" ||
-                    userRole === "Kepala Kandang") && (
-                    <td className="py-2 px-4 flex justify-center gap-4">
-                      <BiSolidEditAlt
-                        onClick={() => {
-                          editDataHandle(row.id);
-                        }}
-                        size={24}
-                        className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                  <td className="py-2 px-4">{row.tanggal}</td>
+                  <td className="py-2 px-4">{row.kategori}</td>
+                  <td className="py-2 px-4">{row.usia}</td>
+                  <td className="py-2 px-4">{row.jenis}</td>
+                  <td className="py-2 px-4">{row.nama}</td>
+                  <td className="py-2 px-4">{row.dosis}</td>
+                  <td className="py-2 px-4">{row.penyakit}</td>
+                  <td className="py-2 px-4 flex items-center space-x-2">
+                    <button>
+                      <MdEdit
+                        size={18}
+                        className="text-gray-700 hover:text-black"
                       />
-                    </td>
-                  )}
+                    </button>
+                    <button>
+                      <MdDelete
+                        size={18}
+                        className="text-red-500 hover:text-red-700"
+                      />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+
+          {/* Footer Pagination Dummy */}
+          <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
+            <p>Menampilkan 1–5 dari 10 riwayat</p>
+            <div className="space-x-2">
+              <button
+                disabled
+                className="bg-gray-200 text-gray-400 px-4 py-3 rounded cursor-not-allowed"
+              >
+                Sebelumnya
+              </button>
+              <button className="bg-green-700 text-white px-4 py-3 rounded hover:bg-green-900 cursor-pointer">
+                Selanjutnya
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

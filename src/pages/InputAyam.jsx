@@ -23,14 +23,13 @@ const InputAyam = () => {
   const [selectedCage, setSelectedCage] = useState(0);
   const selectedCageName = cages.find((cage) => cage.id === selectedCage);
 
-  const [selectedChikenCategory, setSelectedChikenCategory] = useState(
-    kategoriAyam[0]
-  );
+  const [selectedChikenCategory, setSelectedChikenCategory] = useState("");
   const [ageChiken, setAgeChiken] = useState(0);
   const [totalLiveChicken, setTotalLiveChicken] = useState(0);
   const [totalSickChicken, setTotalSickChicken] = useState(0);
   const [totalDeathChicken, setTotalDeathChicken] = useState(0);
   const [totalFeed, setTotalFeed] = useState(0);
+  const [note, setNote] = useState("");
 
   const userRole = localStorage.getItem("role");
   const location = useLocation();
@@ -126,7 +125,7 @@ const InputAyam = () => {
           setObatList(chickenDiseasesGet || []);
         } else {
           if (data.length > 0) {
-            setSelectedCage(data[0].id);
+            // setSelectedCage(data[0].id);
           }
         }
       } catch (error) {
@@ -296,19 +295,24 @@ const InputAyam = () => {
 
       {/* Table Section */}
       <div className="w-full mx-auto p-6 bg-white shadow rounded border border-black-6">
-        <h2 className="text-lg font-semibold mb-1">Input data harian</h2>
-        <p className="text-sm mb-6">{getTodayDateInBahasa()}</p>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold mb-1">Input data harian</h2>
+          <p className="text-lg ">{getTodayDateInBahasa()}</p>
+        </div>
 
         {/* Pilih kandang */}
         <label className="block font-medium  mb-1">Pilih kandang</label>
         <select
           className="w-full border border-black-6 bg-black-4 cursor-pointer rounded p-2 mb-4"
-          value={selectedCage}
+          value={selectedCage === 0 ? "" : selectedCage}
           onChange={(e) => {
             const id = Number(e.target.value);
             setSelectedCage(id);
           }}
         >
+          <option value="" disabled hidden>
+            Pilih kandang...
+          </option>
           {cages.map((cage) => (
             <option key={cage.id} value={cage.id}>
               {cage.name}
@@ -317,10 +321,15 @@ const InputAyam = () => {
         </select>
 
         {/* Kategori dan Usia Ayam */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block font-medium mb-1">Kategori ayam</label>
-            <select
+            <label className="block font-medium mb-1">ID Ayam</label>
+            <div className="flex items-center py-3">
+              <p className="text-lg font-bold">
+                {ageChiken ? `${ageChiken}` : `-`}
+              </p>
+            </div>
+            {/* <select
               className="w-full border border-black-6 cursor-pointer  bg-black-4 rounded p-2"
               value={selectedChikenCategory}
               onChange={(e) => setSelectedChikenCategory(e.target.value)}
@@ -328,18 +337,41 @@ const InputAyam = () => {
               {kategoriAyam.map((kategori, index) => {
                 return <option key={index}>{kategori}</option>;
               })}
-            </select>
+            </select> */}
+          </div>
+          <div>
+            <label className="block font-medium mb-1">Kategori ayam</label>
+            <div className="flex items-center py-3">
+              <p className="text-lg font-bold">
+                {selectedChikenCategory ? `${selectedChikenCategory}` : `-`}
+              </p>
+            </div>
+
+            {/* <select
+              className="w-full border border-black-6 cursor-pointer  bg-black-4 rounded p-2"
+              value={selectedChikenCategory}
+              onChange={(e) => setSelectedChikenCategory(e.target.value)}
+            >
+              {kategoriAyam.map((kategori, index) => {
+                return <option key={index}>{kategori}</option>;
+              })}
+            </select> */}
           </div>
           <div>
             <label className="block font-medium mb-1">Usia ayam</label>
-            <input
+            <div className="flex items-center py-3">
+              <p className="text-lg font-bold">
+                {ageChiken ? `${ageChiken}` : `-`}
+              </p>
+            </div>
+            {/* <input
               type="number"
               value={getDisplayValue(ageChiken)}
               className="bg-black-4 w-full border border-black-6 rounded p-2"
               onChange={(e) => {
                 setAgeChiken(e.target.value);
               }}
-            />
+            /> */}
           </div>
         </div>
 
@@ -347,21 +379,30 @@ const InputAyam = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
           <div>
             <label className="block font-medium mb-1">Jumlah ayam hidup</label>
-            <input
+            <div className="flex items-center py-3">
+              <p className="text-lg font-bold">
+                {selectedChikenCategory ? `${selectedChikenCategory}` : `-`}
+              </p>
+            </div>
+            {/* <input
               type="number"
               value={getDisplayValue(totalLiveChicken)}
               className="w-full bg-black-4 border border-black-6 rounded p-2"
               onChange={(e) => {
                 setTotalLiveChicken(e.target.value);
               }}
-            />
+            /> */}
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <div>
             <label className="block font-medium mb-1">Jumlah ayam sakit</label>
             <input
               type="number"
               value={getDisplayValue(totalSickChicken)}
               className="w-full bg-black-4 border border-black-6 rounded p-2"
+              placeholder="Masukkan jumlah ayam sakit"
               onChange={(e) => {
                 setTotalSickChicken(e.target.value);
               }}
@@ -373,6 +414,7 @@ const InputAyam = () => {
               type="number"
               value={getDisplayValue(totalDeathChicken)}
               className="w-full border border-black-6  bg-black-4 rounded p-2"
+              placeholder="Masukkan jumlah ayam mati"
               onChange={(e) => {
                 setTotalDeathChicken(e.target.value);
               }}
@@ -387,14 +429,29 @@ const InputAyam = () => {
             type="number"
             value={getDisplayValue(totalFeed)}
             className="w-full border border-black-6 rounded p-2 bg-black-4"
+            placeholder="Masukkan jumlah pakan"
             onChange={(e) => {
               setTotalFeed(e.target.value);
             }}
           />
         </div>
 
+        {/* Catatan pekerja */}
+        <div className="mt-4">
+          <label className="block font-medium mb-1">Catatan Pekerja</label>
+          <textarea
+            type="text"
+            value={note}
+            className="w-full border border-black-6 rounded p-2 bg-black-4"
+            placeholder="Masukkan catatan jika terdapat catatan untuk kondisi kandang"
+            onChange={(e) => {
+              setNote(e.target.value);
+            }}
+          />
+        </div>
+
         {/* Vaksin Section */}
-        <div className="mt-6 border border-black-6 rounded p-4 ">
+        {/* <div className="mt-6 border border-black-6 rounded p-4 ">
           <div
             className="flex items-center cursor-pointer mb-3"
             onClick={() => setVaksinExpanded(!vaksinExpanded)}
@@ -484,10 +541,10 @@ const InputAyam = () => {
           >
             Tambah vaksin
           </button>
-        </div>
+        </div> */}
 
         {/* Obat Section */}
-        <div className="mt-6 border border-black-6 rounded p-4">
+        {/* <div className="mt-6 border border-black-6 rounded p-4">
           <div
             className="flex items-center cursor-pointer mb-3"
             onClick={() => setObatExpanded(!obatExpanded)}
@@ -589,7 +646,7 @@ const InputAyam = () => {
           >
             Tambah Obat
           </button>
-        </div>
+        </div> */}
 
         {/* Simpan Button */}
         <div className="mt-6 text-right ">
@@ -615,6 +672,7 @@ const InputAyam = () => {
               console.log("🌾 totalFeed:", totalFeed);
               console.log("💉 vaksinList:", vaksinList);
               console.log("💊 obatList:", obatList);
+              console.log("selectedCage: ", selectedCage);
             }}
             className="bg-emerald-700 text-white py-2 px-6 rounded hover:bg-emerald-600 cursor-pointer"
           >

@@ -36,7 +36,6 @@ import DalamPesanan from "./pages/DalamPesanan";
 import RiwayatStok from "./pages/RiwayatStok";
 import RiwayatGudang from "./pages/RiwayatGudang";
 import InputDataPesanan from "./pages/InputDataPesanan";
-import DetailVaksinObat from "./pages/DetailVaksinObat";
 import DaftarSuplier from "./pages/DaftarSuplier";
 import PesananToko from "./pages/PesananToko";
 import DaftarBarang from "./pages/DaftarBarang";
@@ -52,6 +51,10 @@ import TambahPegawai from "./pages/TambahPegawai";
 import Profile from "./pages/Profile";
 import DetailAbsensi from "./pages/DetailAbsensi";
 import DetailPenyelesaianPekerjaan from "./pages/DetailPenyelesaianPekerjaan";
+import VaksinObat from "./pages/VaksinObat";
+import DetailVaksinObat from "./pages/DetailVaksinObat";
+import InputVaksinObat from "./pages/InputVaksinObat";
+import Kandang from "./pages/Kandang";
 
 const AppRouter = createBrowserRouter([
   {
@@ -93,7 +96,7 @@ const AppRouter = createBrowserRouter([
             children: [
               { path: "overview-ayam", element: <Ayam /> },
               { path: "data-ayam", element: <DetailAyam /> },
-              { path: "detail-vaksin-&-obat", element: <DetailVaksinObat /> },
+              { path: "detail-vaksin-&-obat", element: <VaksinObat /> },
             ],
           },
           {
@@ -257,8 +260,23 @@ const AppRouter = createBrowserRouter([
                   },
                 ],
               },
-              { path: "vaksin-&-obat", element: <DetailVaksinObat /> },
-              { path: "kandang", element: <DetailVaksinObat /> },
+              {
+                path: "vaksin-&-obat",
+                element: <VaksinObat />,
+                children: [
+                  {
+                    path: "detail-vaksin-&-obat",
+                    element: <DetailVaksinObat />,
+                    children: [
+                      {
+                        path: "input-vaksin-&-obat",
+                        element: <InputVaksinObat />,
+                      },
+                    ],
+                  },
+                ],
+              },
+              { path: "kandang", element: <Kandang /> },
 
               {
                 path: "input-ayam",
@@ -271,7 +289,7 @@ const AppRouter = createBrowserRouter([
               },
               {
                 path: "detail-vaksin-obat",
-                element: <DetailVaksinObat />,
+                element: <VaksinObat />,
                 children: [
                   {
                     path: "input-ayam/:id",

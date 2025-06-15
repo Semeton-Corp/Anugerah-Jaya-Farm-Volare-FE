@@ -21,7 +21,7 @@ export const breadcrumbMap = {
   ayam: "Ayam",
   "data-ayam": "Data Ayam",
   "input-ayam": "Input Ayam",
-  "detail-vaksin-&-obat": "Vaksin & Obat",
+  "detail-vaksin-&-obat": "Detail vaksin/obat kandang",
   "vaksin-&-obat": "Vaksin & Obat",
   kandang: "Kandang",
   gudang: "Gudang",
