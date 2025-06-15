@@ -96,7 +96,7 @@ export const sidebarMenus = {
   "Pekerja Kandang": [
     {
       icon: <img src={overview} alt="Overview Icon" className="h-4 w-4" />,
-      tabName: "Overview",
+      tabName: "Ringkasan",
       element: <OverviewOwner />,
     },
     {
@@ -104,7 +104,8 @@ export const sidebarMenus = {
       tabName: "Ayam",
       subTabs: [
         { tabName: "Data Ayam", path: "data-ayam" },
-        { tabName: "Detail Vaksin & Obat", path: "detail-vaksin-&-obat" },
+        { tabName: "Vaksin & Obat", path: "vaksin-&-obat" },
+        { tabName: "Kandang", path: "kandang" },
       ],
     },
     {

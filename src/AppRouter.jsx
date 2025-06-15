@@ -231,7 +231,7 @@ const AppRouter = createBrowserRouter([
         path: "",
         element: <MainLayout role="Pekerja Kandang" />,
         children: [
-          { path: "", element: <Navigate to="overview" replace /> },
+          { path: "", element: <Navigate to="ringkasan" replace /> },
           {
             path: "profile",
             element: <Profile />,
@@ -243,12 +243,23 @@ const AppRouter = createBrowserRouter([
               },
             ],
           },
-          { path: "overview", element: <Ayam /> },
+          { path: "ringkasan", element: <Ayam /> },
           {
             path: "ayam",
             children: [
-              { path: "data-ayam", element: <DetailAyam /> },
-              { path: "detail-vaksin-&-obat", element: <DetailVaksinObat /> },
+              {
+                path: "data-ayam",
+                element: <DetailAyam />,
+                children: [
+                  {
+                    path: "input-ayam",
+                    element: <InputAyam />,
+                  },
+                ],
+              },
+              { path: "vaksin-&-obat", element: <DetailVaksinObat /> },
+              { path: "kandang", element: <DetailVaksinObat /> },
+
               {
                 path: "input-ayam",
                 element: <InputAyam />,

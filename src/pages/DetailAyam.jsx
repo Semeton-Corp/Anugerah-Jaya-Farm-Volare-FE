@@ -7,6 +7,7 @@ import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getChickenMonitoring } from "../services/chickenMonitorings";
 import { deleteChickenData } from "../services/chickenMonitorings";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
+import { AlertTriangle } from "lucide-react";
 
 // const detailAyamData = [
 //   {
@@ -146,7 +147,7 @@ const DetailAyam = () => {
   return (
     <div className="flex flex-col px-4 py-3 gap-4">
       {/* Header */}
-      <div className="flex justify-between items-center mb-2 flex-wrap gap-4">
+      <div className="flex justify-between items-center mb-2 flex-wrap gap-6">
         <h1 className="text-3xl font-bold">
           {userRole === "Pekerja Kandang" ? "Data Ayam" : "Detail Ayam"}
         </h1>
@@ -163,6 +164,13 @@ const DetailAyam = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="flex items-center bg-yellow-50 text-yellow-800 p-4 rounded-md border-l-4 border-yellow-400">
+        <AlertTriangle className="w-5 h-5 mr-3 text-yellow-600" />
+        <span className="font-medium">
+          Periksa kandang A1 nilai mortalitas 5%
+        </span>
       </div>
 
       {/* Table Section */}
@@ -192,6 +200,7 @@ const DetailAyam = () => {
             <thead>
               <tr className="bg-green-700 text-white text-center">
                 <th className="py-2 px-4">Kandang</th>
+                <th className="py-2 px-4">ID Ayam</th>
                 <th className="py-2 px-4">Kategori</th>
                 <th className="py-2 px-4">Usia (minggu)</th>
                 <th className="py-2 px-4">Hidup</th>

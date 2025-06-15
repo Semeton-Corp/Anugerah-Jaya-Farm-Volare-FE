@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import TopBar from "../components/TopBar";
 import SideNavbar from "../components/SideNavbar";
 import { useState } from "react";
+import Breadcrumbs from "../components/Breadcrumbs";
 
 const MainLayout = ({ role }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -33,6 +34,7 @@ const MainLayout = ({ role }) => {
             isExpanded ? "ml-[17rem]" : "ml-[7rem]"
           }`}
         >
+          <Breadcrumbs />
           <Outlet />
         </main>
       </div>
