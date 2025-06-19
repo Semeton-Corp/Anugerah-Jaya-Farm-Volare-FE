@@ -6,7 +6,7 @@ const isTokenExpired = (token) => {
     const currentTime = Math.floor(Date.now() / 1000);
     return payload.exp < currentTime;
   } catch (e) {
-    return true; // Treat invalid token as expired
+    return true;
   }
 };
 
@@ -14,7 +14,11 @@ const ProtectedRoute = ({ allowedRoles }) => {
   const token = localStorage.getItem("token");
   const userRole = localStorage.getItem("role");
 
+  console.log("isTokenExpired(token): ", isTokenExpired(token));
+
   if (!token || isTokenExpired(token)) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
     return <Navigate to="/auth/login" replace />;
   }
 

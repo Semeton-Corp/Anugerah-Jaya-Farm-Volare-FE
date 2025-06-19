@@ -8,6 +8,7 @@ import { login } from "../services/authServices";
 const Login = () => {
   const navigate = useNavigate();
 
+  const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,17 +26,17 @@ const Login = () => {
       console.log("email", email);
       console.log("password", email);
 
-      const response = await login(email, password);
-      const { accessToken, role, photoProfile, name } = response.data.data;
+      const response = await login(userName, password);
 
       console.log("response", response);
 
-      localStorage.setItem("token", accessToken);
-      localStorage.setItem("role", role.name);
-      localStorage.setItem("userName", name);
-      localStorage.setItem("photoProfile", photoProfile);
-
       if (response.status === 200) {
+        const { accessToken, role, photoProfile, name } = response.data.data;
+        localStorage.setItem("token", accessToken);
+        localStorage.setItem("role", role.name);
+        localStorage.setItem("userName", name);
+        localStorage.setItem("photoProfile", photoProfile);
+
         const rolePath = role.name.toLowerCase().replace(/\s+/g, "-");
         navigate(`/${rolePath}`);
       }
@@ -88,14 +89,13 @@ const Login = () => {
         >
           {/* email field */}
           <div className="mb-4">
-            <p className="text-base md:text-lg font-medium">Email</p>
+            <p className="text-base md:text-lg font-medium">Username</p>
             <input
-              type="email"
-              id="email"
-              placeholder="Masukkan email anda"
+              type="text"
+              placeholder="Masukkan username anda"
               className="w-full p-3 border-2 bg-green-50 border-green-200 placeholder-normal rounded-lg focus:outline-none focus:ring-2 focus:green-400"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
             />
           </div>
 

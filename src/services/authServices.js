@@ -2,8 +2,8 @@ import api from "./api";
 const token = localStorage.getItem("token");
 
 // Named export
-export const login = (email, password) => {
-  return api.post("/authentication/signin", { email, password });
+export const login = (username, password) => {
+  return api.post("/authentication/signin", { username, password });
 };
 
 export const signUp = (payload) => {
