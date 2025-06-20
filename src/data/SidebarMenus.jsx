@@ -13,6 +13,7 @@ import OverviewOwner from "../pages/OverviewOwner";
 import Penjualan from "../pages/Penjualan";
 import ProduksiTelur from "../pages/ProduksiTelur";
 import { BsPersonSquare } from "react-icons/bs";
+import { GiTempleDoor } from "react-icons/gi";
 
 export const sidebarMenus = {
   Owner: [
@@ -75,6 +76,15 @@ export const sidebarMenus = {
         { tabName: "Stok Toko", path: "pengadaan-barang" },
         { tabName: "Request ke Gudang", path: "daftar-barang" },
         { tabName: "Riwayat Stok", path: "pesanan-toko" },
+      ],
+    },
+    {
+      icon: <GiTempleDoor className="h-4 w-4" />,
+      tabName: "Fasilitas",
+      subTabs: [
+        { tabName: "Daftar Kandang", path: "daftar-kandang" },
+        { tabName: "Daftar Toko", path: "daftar-toko" },
+        { tabName: "Daftar Gudang", path: "daftar-gudang" },
       ],
     },
     {

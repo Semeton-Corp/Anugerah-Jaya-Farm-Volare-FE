@@ -55,6 +55,12 @@ import VaksinObat from "./pages/VaksinObat";
 import DetailVaksinObat from "./pages/DetailVaksinObat";
 import InputVaksinObat from "./pages/InputVaksinObat";
 import Kandang from "./pages/Kandang";
+import DaftarKandang from "./pages/DaftarKandang";
+import DaftarToko from "./pages/DaftarToko";
+import DaftarGudang from "./pages/DaftarGudang";
+import TambahKandang from "./pages/TambahKandang";
+import DetailKandang from "./pages/DetailKandang";
+import EditPic from "./pages/EditPic";
 
 const AppRouter = createBrowserRouter([
   {
@@ -179,6 +185,31 @@ const AppRouter = createBrowserRouter([
               {
                 path: "riwayat-stok",
                 element: <RiwayatStok />,
+              },
+            ],
+          },
+          {
+            path: "fasilitas",
+            children: [
+              {
+                path: "daftar-kandang",
+                element: <DaftarKandang />,
+                children: [
+                  { path: "tambah-kandang", element: <TambahKandang /> },
+                  {
+                    path: "detail-kandang",
+                    element: <DetailKandang />,
+                    children: [{ path: "edit-pic", element: <EditPic /> }],
+                  },
+                ],
+              },
+              {
+                path: "daftar-toko",
+                element: <DaftarToko />,
+              },
+              {
+                path: "daftar-gudang",
+                element: <DaftarGudang />,
               },
             ],
           },
