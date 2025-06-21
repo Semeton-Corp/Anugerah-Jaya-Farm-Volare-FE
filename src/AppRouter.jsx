@@ -61,6 +61,7 @@ import DaftarGudang from "./pages/DaftarGudang";
 import TambahKandang from "./pages/TambahKandang";
 import DetailKandang from "./pages/DetailKandang";
 import EditPic from "./pages/EditPic";
+import PindahAyam from "./pages/PindahAyam";
 
 const AppRouter = createBrowserRouter([
   {
@@ -195,6 +196,8 @@ const AppRouter = createBrowserRouter([
                 path: "daftar-kandang",
                 element: <DaftarKandang />,
                 children: [
+                  { path: "pindah-ayam", element: <PindahAyam /> },
+
                   { path: "tambah-kandang", element: <TambahKandang /> },
                   {
                     path: "detail-kandang",

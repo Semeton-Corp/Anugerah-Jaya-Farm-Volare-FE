@@ -54,7 +54,7 @@ const DaftarKandang = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const detailPages = ["tambah-kandang", "detail-kandang"];
+  const detailPages = ["tambah-kandang", "detail-kandang", "pindah-ayam"];
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
@@ -66,6 +66,10 @@ const DaftarKandang = () => {
 
   const detailKandangHandle = () => {
     navigate(`${location.pathname}/detail-kandang`);
+  };
+
+  const pindahAyamHandle = () => {
+    navigate(`${location.pathname}/pindah-ayam`);
   };
 
   if (isDetailPage) {
@@ -84,7 +88,10 @@ const DaftarKandang = () => {
 
       <div className="bg-white rounded-lg shadow p-8">
         <div className="flex justify-end mb-4 space-x-2">
-          <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+          <div
+            onClick={pindahAyamHandle}
+            className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
+          >
             <div className="text-base font-medium ms-2">Pindah Ayam</div>
           </div>
           <div
