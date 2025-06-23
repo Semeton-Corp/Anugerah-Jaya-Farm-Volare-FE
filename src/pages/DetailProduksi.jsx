@@ -101,9 +101,9 @@ const DetailProduksi = () => {
             {userRole === "Pekerja Telur" && (
               <div
                 onClick={inputTelurHandle}
-                className="flex items-center rounded-lg px-4 py-2 bg-green-700 hover:bg-green-900 cursor-pointer"
+                className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
               >
-                <div className="text-base font-medium ms-2 text-white">
+                <div className="text-base font-medium ms-2 text-black">
                   + Input Data Harian
                 </div>
               </div>

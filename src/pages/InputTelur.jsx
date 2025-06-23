@@ -6,10 +6,15 @@ import { getEggMonitoringById } from "../services/eggs";
 import { useParams } from "react-router-dom";
 import { updateEggMonitoring } from "../services/eggs";
 import { getWarehouses } from "../services/warehouses";
+import CalculatorInput from "../components/CalculatorInput";
 
 const InputTelur = () => {
   const [cages, setCages] = useState([]);
   const [selectedCage, setSelectedCage] = useState(0);
+
+  const [idBatch, setIdBatch] = useState("");
+  const [chickenCategory, setChickenCategory] = useState("");
+  const [chickenAge, setChickenAge] = useState("");
 
   const [warehouses, setWarehouses] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(0);
@@ -166,11 +171,48 @@ const InputTelur = () => {
   return (
     <div className="flex flex-col px-4 py-3 gap-4">
       <div className="w-full mx-auto p-6 bg-white shadow rounded border">
-        <h2 className="text-lg font-semibold mb-1">Input data harian</h2>
-        <p className="text-sm mb-6">20 Maret 2025</p>
+        <div className="flex justify-between">
+          <h2 className="text-lg font-semibold mb-1">Input data harian</h2>
+          <p className="text-sm mb-6">20 Maret 2025</p>
+        </div>
+        {/* Pilih kandang */}
+        <label className="block font-medium mb-1">Kandang</label>
+        <select
+          className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-6"
+          value={selectedCage || ""}
+          onChange={(e) => {
+            const id = Number(e.target.value);
+            setSelectedCage(id);
+          }}
+        >
+          <option value="" disabled hidden>
+            Pilih kandang...
+          </option>
+          {cages.map((cage) => (
+            <option key={cage.id} value={cage.id}>
+              {cage.name}
+            </option>
+          ))}
+        </select>
 
+        <div className="flex justify-between pr-16">
+          <div>
+            <label className="block font-medium mb-1">ID Batch</label>
+            <p className="text-lg font-bold">{idBatch ? idBatch : "-"}</p>
+          </div>
+          <div>
+            <label className="block font-medium mb-1">Kategori ayam</label>
+            <p className="text-lg font-bold">
+              {chickenCategory ? chickenCategory : "-"}
+            </p>
+          </div>
+          <div>
+            <label className="block font-medium mb-1">Usia ayam (Minggu)</label>
+            <p className="text-lg font-bold">{chickenAge ? chickenAge : "-"}</p>
+          </div>
+        </div>
         {/* Pilih gudang */}
-        <label className="block font-medium mb-1">Pilih gudang</label>
+        <label className="block font-medium mb-1">Gudang Penyimpanan</label>
         <select
           className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-6"
           value={selectedWarehouse}
@@ -186,33 +228,21 @@ const InputTelur = () => {
           ))}
         </select>
 
-        {/* Pilih kandang */}
-        <label className="block font-medium mb-1">Pilih kandang</label>
-        <select
-          className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-6"
-          value={selectedCage}
-          onChange={(e) => {
-            const id = Number(e.target.value);
-            setSelectedCage(id);
-          }}
-        >
-          {cages.map((cage) => (
-            <option key={cage.id} value={cage.id}>
-              {cage.name}
-            </option>
-          ))}
-        </select>
-
         {/* Form Telur */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div>
-            <label className="block font-medium mb-1">Telur OK</label>
+            {/* <label className="block font-medium mb-1">Telur OK</label>
             <input
               type="number"
               className="w-full border rounded p-2 bg-black-4"
               placeholder="Masukkan jumlah telur..."
               value={getDisplayValue(ok)}
               onChange={(e) => setOk(e.target.value)}
+            /> */}
+            <CalculatorInput
+              label="Telur OK"
+              value={ok}
+              onChange={(val) => setOk(val)}
             />
           </div>
           <div>
