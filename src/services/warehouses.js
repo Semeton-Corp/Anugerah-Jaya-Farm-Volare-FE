@@ -10,6 +10,17 @@ export const getWarehouses = () => {
   });
 };
 
+export const getWarehousesByLocation = () => {
+  const locationId = localStorage.getItem("locationId");
+
+  return api.get(`/warehouses?locationId=${locationId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
 export const getWarehouseItems = (category, storeId) => {
   return api.get("/warehouses/items", {
     headers: {

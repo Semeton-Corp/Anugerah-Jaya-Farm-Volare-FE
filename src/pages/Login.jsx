@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { login } from "../services/authServices";
+import LoadingScreen from "../components/LoadingScreen";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -31,11 +32,13 @@ const Login = () => {
       console.log("response", response);
 
       if (response.status === 200) {
-        const { accessToken, role, photoProfile, name } = response.data.data;
+        const { accessToken, role, photoProfile, name, location } =
+          response.data.data;
         localStorage.setItem("token", accessToken);
         localStorage.setItem("role", role.name);
         localStorage.setItem("userName", name);
         localStorage.setItem("photoProfile", photoProfile);
+        localStorage.setItem("locationId", location.id);
 
         const rolePath = role.name.toLowerCase().replace(/\s+/g, "-");
         navigate(`/${rolePath}`);
@@ -60,6 +63,7 @@ const Login = () => {
 
   return (
     <div className="relative md:h-screen w-screen">
+      {loading && <LoadingScreen />}
       {/* left login item */}
       <div className="absolute left-0 w-full md:w-1/2 h-full flex flex-col  md:justify-center md:p-16 pt-8 px-8 z-10 mt-36 md:mt-0 rounded-t-[56px] bg-white">
         {/* logo & company name */}

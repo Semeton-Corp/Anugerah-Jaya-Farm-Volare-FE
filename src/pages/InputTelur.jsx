@@ -1,23 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCage } from "../services/cages";
+import { getCage, getChickenCage } from "../services/cages";
 import { inputTelur } from "../services/eggs";
 import { getEggMonitoringById } from "../services/eggs";
 import { useParams } from "react-router-dom";
 import { updateEggMonitoring } from "../services/eggs";
-import { getWarehouses } from "../services/warehouses";
+import { getWarehouses, getWarehousesByLocation } from "../services/warehouses";
 import CalculatorInput from "../components/CalculatorInput";
 
 const InputTelur = () => {
-  const [cages, setCages] = useState([]);
-  const [selectedCage, setSelectedCage] = useState(0);
-
+  const [chickenCages, setChickenCages] = useState([]);
+  const [selectedChickenCage, setSelectedChickenCage] = useState(0);
   const [idBatch, setIdBatch] = useState("");
   const [chickenCategory, setChickenCategory] = useState("");
-  const [chickenAge, setChickenAge] = useState("");
+  const [chickenAge, setChickenAge] = useState(0);
 
   const [warehouses, setWarehouses] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(0);
+
+  const [totalKarpetGoodEgg, setTotalKarpetGoodEgg] = useState(0);
+  const [totalRemainingGoodEgg, setTotalRemainingGoodEgg] = useState(0);
+  const [totalWeightGoodEgg, setTotalWeightGoodEgg] = useState(0);
+
+  const [totalKarpetCrackedEgg, setTotalKarpetCrackedEgg] = useState(0);
+  const [totalRemainingCrackedEgg, setTotalRemainingCrackedEgg] = useState(0);
+  const [totalWeightCrackedEgg, setTotalWeightCrackedEgg] = useState(0);
+
+  const [totalKarpetRejectEgg, setTotalKarpetRejectEgg] = useState(0);
+  const [totalRemainingRejectEgg, setTotalRemainingRejectEgg] = useState(0);
 
   // const [selectedCageName, setSelectedCageName] = useState("");
   const [ok, setOk] = useState("");
@@ -31,12 +41,13 @@ const InputTelur = () => {
   const { id } = useParams();
 
   useEffect(() => {
-    const fetchCages = async () => {
+    const fetchChickenCages = async () => {
       try {
-        const response = await getCage();
+        const response = await getChickenCage();
         const data = response.data.data;
-        setCages(data);
-        setSelectedCage(data[0].id);
+
+        setChickenCages(data);
+        setSelectedChickenCage(data[0].id);
         // console.log("data: ", data[0].id);
 
         // console.log("Kandang: ", data);
@@ -47,7 +58,7 @@ const InputTelur = () => {
 
           const data = updateResponse.data.data;
           if (updateResponse.status == 200) {
-            setSelectedCage(data.cage.id);
+            setSelectedChickenCage(data.cage.id);
             setSelectedWarehouse(data.warehouse.id);
             setOk(data.totalGoodEggs);
             setRetak(data.totalCrackedEggs);
@@ -71,7 +82,7 @@ const InputTelur = () => {
 
     const fetchWarehouses = async () => {
       try {
-        const response = await getWarehouses();
+        const response = await getWarehousesByLocation();
         if (response.status == 200) {
           setWarehouses(response.data.data);
           console.log("list warehouse: ", response.data.data);
@@ -84,29 +95,31 @@ const InputTelur = () => {
       }
     };
 
-    fetchCages();
+    fetchChickenCages();
     fetchWarehouses();
   }, []);
 
   const handleSubmit = async () => {
-    const cageId = Number(selectedCage);
+    const cageId = Number(selectedChickenCage);
     const warehouseId = Number(selectedWarehouse);
 
     if (
       !cageId ||
       !warehouseId ||
-      !ok ||
-      !retak ||
-      !pecah ||
-      !reject ||
-      !weight
+      !totalKarpetGoodEgg ||
+      !totalRemainingGoodEgg ||
+      !totalWeightGoodEgg ||
+      !totalKarpetCrackedEgg ||
+      !totalWeightCrackedEgg ||
+      !totalKarpetRejectEgg ||
+      !totalRemainingRejectEgg
     ) {
       alert("Semua field harus diisi terlebih dahulu!");
       return;
     }
 
     if (!Number.isInteger(cageId)) {
-      console.error("Invalid cageId:", selectedCage);
+      console.error("Invalid cageId:", selectedChickenCage);
       return;
     }
 
@@ -177,25 +190,29 @@ const InputTelur = () => {
         </div>
         {/* Pilih kandang */}
         <label className="block font-medium mb-1">Kandang</label>
+
         <select
-          className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-6"
-          value={selectedCage || ""}
+          className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-8"
+          value={selectedChickenCage ? JSON.stringify(selectedChickenCage) : ""}
           onChange={(e) => {
-            const id = Number(e.target.value);
-            setSelectedCage(id);
+            const cageObj = JSON.parse(e.target.value);
+            setSelectedChickenCage(cageObj);
+            setIdBatch(cageObj.batchId);
+            setChickenCategory(cageObj.chickenCategory);
+            setChickenAge(cageObj.chickenAge);
           }}
         >
           <option value="" disabled hidden>
             Pilih kandang...
           </option>
-          {cages.map((cage) => (
-            <option key={cage.id} value={cage.id}>
-              {cage.name}
+          {chickenCages.map((cage) => (
+            <option key={cage.id} value={JSON.stringify(cage)}>
+              {cage.cage.name || "Tanpa Nama"}
             </option>
           ))}
         </select>
 
-        <div className="flex justify-between pr-16">
+        <div className="flex justify-between pr-16 mb-6">
           <div>
             <label className="block font-medium mb-1">ID Batch</label>
             <p className="text-lg font-bold">{idBatch ? idBatch : "-"}</p>
@@ -208,13 +225,17 @@ const InputTelur = () => {
           </div>
           <div>
             <label className="block font-medium mb-1">Usia ayam (Minggu)</label>
-            <p className="text-lg font-bold">{chickenAge ? chickenAge : "-"}</p>
+            <p className="text-lg font-bold">
+              {chickenAge !== null && chickenAge !== undefined
+                ? chickenAge
+                : "-"}
+            </p>
           </div>
         </div>
-        {/* Pilih gudang */}
+
         <label className="block font-medium mb-1">Gudang Penyimpanan</label>
         <select
-          className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-6"
+          className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-8"
           value={selectedWarehouse}
           onChange={(e) => {
             const id = Number(e.target.value);
@@ -228,64 +249,80 @@ const InputTelur = () => {
           ))}
         </select>
 
-        {/* Form Telur */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <h2 className="text-lg font-semibold mb-1">Telur OK</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div>
-            {/* <label className="block font-medium mb-1">Telur OK</label>
-            <input
-              type="number"
-              className="w-full border rounded p-2 bg-black-4"
-              placeholder="Masukkan jumlah telur..."
-              value={getDisplayValue(ok)}
-              onChange={(e) => setOk(e.target.value)}
-            /> */}
             <CalculatorInput
-              label="Telur OK"
-              value={ok}
-              onChange={(val) => setOk(val)}
+              label="Jumlah Karpet"
+              value={totalKarpetGoodEgg}
+              onChange={(val) => setTotalKarpetGoodEgg(val)}
             />
           </div>
           <div>
-            <label className="block font-medium mb-1">Telur Retak</label>
-            <input
-              type="number"
-              className="w-full border rounded p-2 bg-black-4"
-              placeholder="Masukkan jumlah telur..."
-              value={getDisplayValue(retak)}
-              onChange={(e) => setRetak(e.target.value)}
+            <CalculatorInput
+              label="Jumlah Telur Butir Sisa (Butir)"
+              value={totalRemainingGoodEgg}
+              onChange={(val) => setTotalRemainingGoodEgg(val)}
             />
           </div>
           <div>
-            <label className="block font-medium mb-1">Telur Pecah</label>
-            <input
-              type="number"
-              className="w-full border rounded p-2 bg-black-4"
-              placeholder="Masukkan jumlah telur..."
-              value={getDisplayValue(pecah)}
-              onChange={(e) => setPecah(e.target.value)}
+            <CalculatorInput
+              label="Berat Telur (Kg)"
+              value={totalWeightGoodEgg}
+              onChange={(val) => setTotalWeightGoodEgg(val)}
             />
           </div>
           <div>
-            <label className="block font-medium mb-1">Telur Reject</label>
-            <input
-              type="number"
-              className="w-full border rounded p-2 bg-black-4"
-              placeholder="Masukkan jumlah telur..."
-              value={getDisplayValue(reject)}
-              onChange={(e) => setReject(e.target.value)}
+            <label className="block font-medium mb-1">Berat Total (Kg)</label>
+            <p className="text-lg font-bold">{idBatch ? idBatch : "-"}</p>
+          </div>
+          <div>
+            <label className="block font-medium mb-1">
+              Berat rata-rata (Gr/Butir)
+            </label>
+            <p className="text-lg font-bold">{idBatch ? idBatch : "-"}</p>
+          </div>
+        </div>
+
+        <h2 className="text-lg font-semibold mb-1">Telur Retak</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div>
+            <CalculatorInput
+              label="Jumlah Karpet"
+              value={totalKarpetCrackedEgg}
+              onChange={(val) => setTotalKarpetCrackedEgg(val)}
+            />
+          </div>
+          <div>
+            <CalculatorInput
+              label="Jumlah Telur Butir Sisa"
+              value={totalRemainingCrackedEgg}
+              onChange={(val) => setTotalRemainingCrackedEgg(val)}
+            />
+          </div>
+          <div>
+            <CalculatorInput
+              label="Berat Telur (Kg)"
+              value={totalWeightCrackedEgg}
+              onChange={(val) => setTotalWeightCrackedEgg(val)}
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <h2 className="text-lg font-semibold mb-1">Telur Reject</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div>
-            <label className="block font-medium mb-1">Berat Telur (Kg)</label>
-            <input
-              type="number"
-              className="w-full border rounded p-2 bg-black-4"
-              placeholder="Masukkan jumlah telur..."
-              value={getDisplayValue(weight)}
-              onChange={(e) => setWeight(e.target.value)}
+            <CalculatorInput
+              label="Jumlah Karpet"
+              value={totalKarpetRejectEgg}
+              onChange={(val) => setTotalKarpetRejectEgg(val)}
+            />
+          </div>
+          <div>
+            <CalculatorInput
+              label="Jumlah Telur Butir"
+              value={totalRemainingRejectEgg}
+              onChange={(val) => setTotalRemainingRejectEgg(val)}
             />
           </div>
         </div>
@@ -294,7 +331,7 @@ const InputTelur = () => {
           <button
             onClick={() => {
               handleSubmit();
-              console.log("selectedCage: ", selectedCage);
+              console.log("selectedCage: ", selectedChickenCage);
             }}
             className="bg-green-700 text-white py-2 px-6 rounded hover:bg-green-900 cursor-pointer"
           >
@@ -302,20 +339,14 @@ const InputTelur = () => {
           </button>
         </div>
       </div>
-      {/* <button
+      <button
         onClick={() => {
-          console.log("Selected Cage ID:", selectedCage);
-          console.log("Selected Warehouse ID:", selectedWarehouse);
-          console.log("OK:", ok);
-          console.log("Retak:", retak);
-          console.log("Pecah:", pecah);
-          console.log("Reject:", reject);
-          console.log("Weight:", weight);
-          console.log("Route Param ID:", id);
+          console.log("chickenCages: ", chickenCages);
+          console.log("selectedChickenCage: ", selectedChickenCage);
         }}
       >
         Check
-      </button> */}
+      </button>
     </div>
   );
 };
