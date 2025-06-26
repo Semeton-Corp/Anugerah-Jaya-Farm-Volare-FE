@@ -323,7 +323,7 @@ const InputAyam = () => {
         {/* Kategori dan Usia Ayam */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block font-medium mb-1">ID Ayam</label>
+            <label className="block font-medium mb-1">ID Batch</label>
             <div className="flex items-center py-3">
               <p className="text-lg font-bold">
                 {ageChiken ? `${ageChiken}` : `-`}
@@ -358,7 +358,7 @@ const InputAyam = () => {
             </select> */}
           </div>
           <div>
-            <label className="block font-medium mb-1">Usia ayam</label>
+            <label className="block font-medium mb-1">Usia ayam (Minggu)</label>
             <div className="flex items-center py-3">
               <p className="text-lg font-bold">
                 {ageChiken ? `${ageChiken}` : `-`}
@@ -422,19 +422,33 @@ const InputAyam = () => {
           </div>
         </div>
 
-        {/* Jumlah pakan */}
-        <div className="mt-4">
-          <label className="block font-medium mb-1">Jumlah pakan (Kg)</label>
-          <input
-            type="number"
-            value={getDisplayValue(totalFeed)}
-            className="w-full border border-black-6 rounded p-2 bg-black-4"
-            placeholder="Masukkan jumlah pakan"
-            onChange={(e) => {
-              setTotalFeed(e.target.value);
-            }}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div className="mt-4">
+            <label className="block font-medium mb-1">Jumlah pakan (Kg)</label>
+            <input
+              type="number"
+              value={getDisplayValue(totalFeed)}
+              className="w-full border border-black-6 rounded p-2 bg-black-4"
+              placeholder="Masukkan jumlah pakan"
+              onChange={(e) => {
+                setTotalFeed(e.target.value);
+              }}
+            />
+          </div>
+
+          <div className="mt-4">
+            <label className="block font-medium mb-1">
+              Jumlah pakan (Gr/Ekor)
+            </label>
+            <div className="flex items-center py-3">
+              <p className="text-lg font-bold">
+                {ageChiken ? `${ageChiken}` : `-`}
+              </p>
+            </div>
+          </div>
         </div>
+
+        {/* Jumlah pakan */}
 
         {/* Catatan pekerja */}
         <div className="mt-4">
