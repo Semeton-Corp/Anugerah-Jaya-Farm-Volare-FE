@@ -47,7 +47,7 @@ const InputTelur = () => {
         const data = response.data.data;
 
         setChickenCages(data);
-        setSelectedChickenCage(data[0].id);
+        setSelectedChickenCage(data[0]);
         // console.log("data: ", data[0].id);
 
         // console.log("Kandang: ", data);
@@ -85,10 +85,10 @@ const InputTelur = () => {
         const response = await getWarehousesByLocation();
         if (response.status == 200) {
           setWarehouses(response.data.data);
-          console.log("list warehouse: ", response.data.data);
+          // console.log("list warehouse: ", response.data.data);
 
           setSelectedWarehouse(response.data.data[0].id);
-          console.log("selected warehouse: ", response.data.data[0].id);
+          // console.log("selected warehouse: ", response.data.data[0].id);
         }
       } catch (error) {
         console.error("Gagal memuat data gudang:", error);
@@ -100,40 +100,38 @@ const InputTelur = () => {
   }, []);
 
   const handleSubmit = async () => {
-    const cageId = Number(selectedChickenCage);
     const warehouseId = Number(selectedWarehouse);
 
-    if (
-      !cageId ||
-      !warehouseId ||
-      !totalKarpetGoodEgg ||
-      !totalRemainingGoodEgg ||
-      !totalWeightGoodEgg ||
-      !totalKarpetCrackedEgg ||
-      !totalWeightCrackedEgg ||
-      !totalKarpetRejectEgg ||
-      !totalRemainingRejectEgg
-    ) {
-      alert("Semua field harus diisi terlebih dahulu!");
-      return;
-    }
+    // if (
+    //   !totalKarpetGoodEgg ||
+    //   !totalRemainingGoodEgg ||
+    //   !totalWeightGoodEgg ||
+    //   !totalRemainingCrackedEgg ||
+    //   !totalKarpetCrackedEgg ||
+    //   !totalWeightCrackedEgg ||
+    //   !totalKarpetRejectEgg ||
+    //   !totalRemainingRejectEgg
+    // ) {
+    //   alert("Semua field harus diisi terlebih dahulu!");
+    //   return;
+    // }
 
-    if (!Number.isInteger(cageId)) {
-      console.error("Invalid cageId:", selectedChickenCage);
-      return;
-    }
+    // if (!Number.isInteger(cageId)) {
+    //   console.error("Invalid cageId:", selectedChickenCage);
+    //   return;
+    // }
 
     const payload = {
-      chickenCageId: selectedChickenCage,
+      chickenCageId: selectedChickenCage.cage.id,
       warehouseId: selectedWarehouse,
-      totalKarpetGoodEgg,
-      totalRemainingGoodEgg,
-      totalWeightGoodEgg,
-      totalKarpetCrackedEgg,
-      totalRemainingCrackedEgg,
-      totalWeightCrackedEgg,
-      totalKarpetRejectEgg,
-      totalRemainingRejectEgg,
+      totalKarpetGoodEgg: parseInt(totalKarpetGoodEgg),
+      totalRemainingGoodEgg: parseInt(totalRemainingGoodEgg),
+      totalWeightGoodEgg: parseInt(totalWeightGoodEgg),
+      totalKarpetCrackedEgg: parseInt(totalKarpetCrackedEgg),
+      totalRemainingCrackedEgg: parseInt(totalRemainingCrackedEgg),
+      totalWeightCrackedEgg: parseInt(totalWeightCrackedEgg),
+      totalKarpetRejectEgg: parseInt(totalKarpetRejectEgg),
+      totalRemainingRejectEgg: parseInt(totalRemainingRejectEgg),
     };
 
     console.log("payload: ", payload);
@@ -165,14 +163,12 @@ const InputTelur = () => {
         }
       } catch (error) {
         const errorMessage =
-          error?.response?.data?.message ||
-          error.message ||
-          "Terjadi kesalahan";
+          error?.response || error.message || "Terjadi kesalahan";
 
         if (errorMessage === "egg monitoring already exists for today") {
           alert("Sudah terdapat data untuk kandang yang dipilih hari ini!");
         } else {
-          alert("Gagal menyimpan data: " + errorMessage);
+          alert("Gagal menyimpan data: " + errorMessage.data.message);
         }
 
         console.error(
@@ -219,7 +215,9 @@ const InputTelur = () => {
         <div className="flex justify-between pr-16 mb-6">
           <div>
             <label className="block font-medium mb-1">ID Batch</label>
-            <p className="text-lg font-bold">{idBatch ? idBatch : "-"}</p>
+            <p className="text-lg font-bold">
+              {selectedChickenCage ? selectedChickenCage.batchId : "-"}
+            </p>
           </div>
           <div>
             <label className="block font-medium mb-1">Kategori ayam</label>
@@ -254,7 +252,7 @@ const InputTelur = () => {
         </select>
 
         <h2 className="text-lg font-semibold mb-1">Telur OK</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
             <CalculatorInput
               label="Jumlah Karpet"
@@ -277,14 +275,17 @@ const InputTelur = () => {
             />
           </div>
           <div>
-            <label className="block font-medium mb-1">Berat Total (Kg)</label>
-            <p className="text-lg font-bold">{idBatch ? idBatch : "-"}</p>
-          </div>
-          <div>
             <label className="block font-medium mb-1">
               Berat rata-rata (Gr/Butir)
             </label>
-            <p className="text-lg font-bold">{idBatch ? idBatch : "-"}</p>
+            <p className="text-lg font-bold">
+              {totalKarpetGoodEgg && totalRemainingGoodEgg && totalWeightGoodEgg
+                ? `${
+                    (totalWeightGoodEgg * 1000) /
+                    (totalKarpetGoodEgg * 30 + totalRemainingGoodEgg)
+                  }`
+                : "-"}
+            </p>
           </div>
         </div>
 
@@ -335,7 +336,7 @@ const InputTelur = () => {
           <button
             onClick={() => {
               handleSubmit();
-              console.log("selectedCage: ", selectedChickenCage);
+              // console.log("selectedCage: ", selectedChickenCage);
             }}
             className="bg-green-700 text-white py-2 px-6 rounded hover:bg-green-900 cursor-pointer"
           >
@@ -345,10 +346,26 @@ const InputTelur = () => {
       </div>
       <button
         onClick={() => {
-          console.log("id: ", id);
-          console.log("chickenCages: ", chickenCages);
-          console.log("selectedChickenCage: ", selectedChickenCage);
-          console.log("selectedWarehouse: ", selectedWarehouse);
+          const payload = {
+            chickenCageId: selectedChickenCage.cage.id,
+            warehouseId: selectedWarehouse,
+            totalKarpetGoodEgg: parseInt(totalKarpetGoodEgg),
+            totalRemainingGoodEgg: parseInt(totalRemainingGoodEgg),
+            totalWeightGoodEgg: parseInt(totalWeightGoodEgg),
+            totalKarpetCrackedEgg: parseInt(totalKarpetCrackedEgg),
+            totalRemainingCrackedEgg: parseInt(totalRemainingCrackedEgg),
+            totalWeightCrackedEgg: parseInt(totalWeightCrackedEgg),
+            totalKarpetRejectEgg: parseInt(totalKarpetRejectEgg),
+            totalRemainingRejectEgg: parseInt(totalRemainingRejectEgg),
+          };
+
+          console.log("batchId: ", selectedChickenCage.batchId);
+          console.log("chickenCageId: ", selectedChickenCage);
+          console.log("payload: ", payload);
+          // console.log("id: ", id);
+          // console.log("chickenCages: ", chickenCages);
+          // console.log("selectedChickenCage: ", selectedChickenCage);
+          // console.log("selectedWarehouse: ", selectedWarehouse);
         }}
       >
         Check
