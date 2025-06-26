@@ -216,20 +216,23 @@ const InputTelur = () => {
           <div>
             <label className="block font-medium mb-1">ID Batch</label>
             <p className="text-lg font-bold">
-              {selectedChickenCage ? selectedChickenCage.batchId : "-"}
+              {selectedChickenCage.batchId ? selectedChickenCage.batchId : "-"}
             </p>
           </div>
           <div>
             <label className="block font-medium mb-1">Kategori ayam</label>
             <p className="text-lg font-bold">
-              {chickenCategory ? chickenCategory : "-"}
+              {selectedChickenCage.chickenCategory
+                ? selectedChickenCage.chickenCategory
+                : "-"}
             </p>
           </div>
           <div>
             <label className="block font-medium mb-1">Usia ayam (Minggu)</label>
             <p className="text-lg font-bold">
-              {chickenAge !== null && chickenAge !== undefined
-                ? chickenAge
+              {selectedChickenCage.chickenAge !== null &&
+              selectedChickenCage.chickenAge !== undefined
+                ? selectedChickenCage.chickenAge
                 : "-"}
             </p>
           </div>
@@ -280,10 +283,10 @@ const InputTelur = () => {
             </label>
             <p className="text-lg font-bold">
               {totalKarpetGoodEgg && totalRemainingGoodEgg && totalWeightGoodEgg
-                ? `${
+                ? `${parseFloat(
                     (totalWeightGoodEgg * 1000) /
-                    (totalKarpetGoodEgg * 30 + totalRemainingGoodEgg)
-                  }`
+                      (totalKarpetGoodEgg * 30 + totalRemainingGoodEgg)
+                  ).toFixed(2)}`
                 : "-"}
             </p>
           </div>
@@ -344,7 +347,7 @@ const InputTelur = () => {
           </button>
         </div>
       </div>
-      <button
+      {/* <button
         onClick={() => {
           const payload = {
             chickenCageId: selectedChickenCage.cage.id,
@@ -369,7 +372,7 @@ const InputTelur = () => {
         }}
       >
         Check
-      </button>
+      </button> */}
     </div>
   );
 };
