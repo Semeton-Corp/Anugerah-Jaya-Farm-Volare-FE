@@ -8,25 +8,25 @@ const CalculatorInput = ({ label, value, onChange }) => {
 
   const handleCalculatorResult = (result) => {
     console.log("[Calculator Result]", result);
-    onChange(result.toString());
+    onChange(result);
     setIsOpen(false);
   };
 
   return (
     <div className="mb-4">
       <label className="block font-medium mb-1">{label}</label>
-      <div
-        className="flex items-center border rounded p-2 bg-black-4 cursor-pointer"
-        onClick={() => setIsOpen(true)}
-      >
+      <div className="flex items-center border rounded p-2 bg-black-4 cursor-pointer">
         <input
-          type="text"
-          readOnly
+          type="number"
           value={value}
           className="flex-grow bg-transparent focus:outline-none"
           placeholder={`Masukkan ${label}`}
+          onChange={(e) => {
+            onChange(e.target.value);
+          }}
         />
         <PiCalculator
+          onClick={() => setIsOpen(true)}
           size={20}
           className="ml-2 text-black hover:text-gray-500"
         />

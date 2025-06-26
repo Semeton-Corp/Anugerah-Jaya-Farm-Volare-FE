@@ -124,13 +124,16 @@ const InputTelur = () => {
     }
 
     const payload = {
-      cageId,
-      warehouseId,
-      totalGoodEgg: parseInt(ok),
-      totalCrackedEgg: parseInt(retak),
-      totalBrokeEgg: parseInt(pecah),
-      totalRejectEgg: parseInt(reject),
-      weight: parseInt(weight),
+      chickenCageId: selectedChickenCage,
+      warehouseId: selectedWarehouse,
+      totalKarpetGoodEgg,
+      totalRemainingGoodEgg,
+      totalWeightGoodEgg,
+      totalKarpetCrackedEgg,
+      totalRemainingCrackedEgg,
+      totalWeightCrackedEgg,
+      totalKarpetRejectEgg,
+      totalRemainingRejectEgg,
     };
 
     console.log("payload: ", payload);
@@ -153,6 +156,7 @@ const InputTelur = () => {
     } else {
       try {
         const response = await inputTelur(payload);
+        console.log("response: ", response);
         if (response.status === 201) {
           console.log("Data berhasil dikirim:", response.data);
           navigate(-1);
@@ -341,8 +345,10 @@ const InputTelur = () => {
       </div>
       <button
         onClick={() => {
+          console.log("id: ", id);
           console.log("chickenCages: ", chickenCages);
           console.log("selectedChickenCage: ", selectedChickenCage);
+          console.log("selectedWarehouse: ", selectedWarehouse);
         }}
       >
         Check
