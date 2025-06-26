@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCage, getChickenCage } from "../services/cages";
-import { inputTelur } from "../services/eggs";
+import { deleteEggData, inputTelur } from "../services/eggs";
 import { getEggMonitoringById } from "../services/eggs";
 import { useParams } from "react-router-dom";
 import { updateEggMonitoring } from "../services/eggs";
 import { getWarehouses, getWarehousesByLocation } from "../services/warehouses";
 import CalculatorInput from "../components/CalculatorInput";
 import { Joystick } from "lucide-react";
+import DeleteModal from "../components/DeleteModal";
 
 const InputTelur = () => {
   const [chickenCages, setChickenCages] = useState([]);
@@ -31,6 +32,8 @@ const InputTelur = () => {
   const [totalRemainingRejectEgg, setTotalRemainingRejectEgg] = useState(0);
 
   const [isEditMode, setIsEditMode] = useState(true);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // const [selectedCageName, setSelectedCageName] = useState("");
   const [ok, setOk] = useState("");
@@ -178,6 +181,18 @@ const InputTelur = () => {
       }
     }
   };
+
+  async function deleteDataHandle() {
+    try {
+      const response = await deleteEggData(id);
+      if (response.status == 204) {
+        navigate(-1);
+      }
+      console.log("response: ", response);
+    } catch (error) {
+      console.error("Gagal menghapus data ayam:", error);
+    }
+  }
 
   const getDisplayValue = (val) => (val === 0 ? "" : val);
 
@@ -460,7 +475,7 @@ const InputTelur = () => {
             {id && !isEditMode && (
               <div className="text-right">
                 <button
-                  onClick={() => setIsEditMode(!isEditMode)}
+                  onClick={() => setShowDeleteModal(true)}
                   className="bg-red-600 text-white py-3 px-8 rounded hover:bg-red-800 cursor-pointer"
                 >
                   Hapus
@@ -470,20 +485,21 @@ const InputTelur = () => {
           </div>
         </div>
       </div>
+
       {/* <button
         onClick={() => {
-          // const payload = {
-          //   chickenCageId: selectedChickenCage.cage.id,
-          //   warehouseId: selectedWarehouse,
-          //   totalKarpetGoodEgg: parseInt(totalKarpetGoodEgg),
-          //   totalRemainingGoodEgg: parseInt(totalRemainingGoodEgg),
-          //   totalWeightGoodEgg: parseInt(totalWeightGoodEgg),
-          //   totalKarpetCrackedEgg: parseInt(totalKarpetCrackedEgg),
-          //   totalRemainingCrackedEgg: parseInt(totalRemainingCrackedEgg),
-          //   totalWeightCrackedEgg: parseInt(totalWeightCrackedEgg),
-          //   totalKarpetRejectEgg: parseInt(totalKarpetRejectEgg),
-          //   totalRemainingRejectEgg: parseInt(totalRemainingRejectEgg),
-          // };
+          const payload = {
+            chickenCageId: selectedChickenCage.cage.id,
+            warehouseId: selectedWarehouse,
+            totalKarpetGoodEgg: parseInt(totalKarpetGoodEgg),
+            totalRemainingGoodEgg: parseInt(totalRemainingGoodEgg),
+            totalWeightGoodEgg: parseInt(totalWeightGoodEgg),
+            totalKarpetCrackedEgg: parseInt(totalKarpetCrackedEgg),
+            totalRemainingCrackedEgg: parseInt(totalRemainingCrackedEgg),
+            totalWeightCrackedEgg: parseInt(totalWeightCrackedEgg),
+            totalKarpetRejectEgg: parseInt(totalKarpetRejectEgg),
+            totalRemainingRejectEgg: parseInt(totalRemainingRejectEgg),
+          };
           console.log("selectedWarehouse: ", selectedWarehouse);
 
           console.log("isEditMode: ", isEditMode);
@@ -497,6 +513,12 @@ const InputTelur = () => {
       >
         Check
       </button> */}
+
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onCancel={() => setShowDeleteModal(false)}
+        onConfirm={deleteDataHandle}
+      />
     </div>
   );
 };

@@ -47,6 +47,7 @@ const DetailProduksi = () => {
   const fetchDataTelur = async () => {
     try {
       const response = await getEggMonitoring();
+      // console.log("response: ", response);
       if (response.status === 200) {
         setProduksiDetail(response.data.data);
       }
@@ -122,7 +123,7 @@ const DetailProduksi = () => {
                 {userRole == "Pekerja Telur" || userRole == "Owner" ? (
                   <>
                     <th className="py-2 px-4">%Abnormality</th>
-                    <th className="py-2 px-4">Berat Telur (Kg)</th>
+                    <th className="py-2 px-4">Berat Telur Ok (Gr/butir)</th>
                     <th className="py-2 px-4">Gudang Simpan</th>
                   </>
                 ) : (
@@ -136,9 +137,6 @@ const DetailProduksi = () => {
                 {userRole === "Pekerja Telur" && (
                   <th className="py-2 px-4">Aksi</th>
                 )}
-                {userRole === "Pekerja Telur" && (
-                  <th className="py-2 px-4"></th>
-                )}
               </tr>
             </thead>
             <tbody className="text-center">
@@ -148,7 +146,7 @@ const DetailProduksi = () => {
                   <td className="py-2 px-4">{item.totalAllEgg}</td>
                   <td className="py-2 px-4">{item.totalGoodEgg}</td>
                   <td className="py-2 px-4">{item.totalCrackedEgg}</td>
-                  <td className="py-2 px-4">{item.totalBrokeEgg}</td>
+                  <td className="py-2 px-4">{item.totalCrackedEgg}</td>
                   <td className="py-2 px-4">{item.totalRejectEgg}</td>
                   {userRole == "Pekerja Telur" || userRole == "Owner" ? (
                     <>
@@ -158,7 +156,7 @@ const DetailProduksi = () => {
                           <p>%</p>
                         </div>
                       </td>
-                      <td className="py-2 px-4">{item.weight}</td>
+                      <td className="py-2 px-4">{item.averageWeight}</td>
                       <td className="py-2 px-4">{item.warehouse.name}</td>
                     </>
                   ) : (
@@ -168,12 +166,14 @@ const DetailProduksi = () => {
                   <td className="py-2 px-4 flex justify-center">
                     <span
                       className={`w-24 py-1 flex justify-center rounded text-sm font-semibold ${
-                        item.description === "Aman"
+                        item.status === "Aman"
                           ? "bg-aman-box-surface-color text-aman-text-color"
+                          : item.status === "Periksa"
+                          ? "bg-update-icon-color text-orange-900"
                           : "bg-kritis-box-surface-color text-kritis-text-color"
                       }`}
                     >
-                      {item.description}
+                      {item.status}
                     </span>
                   </td>
                   {userRole === "Pekerja Gudang" && (
@@ -185,7 +185,13 @@ const DetailProduksi = () => {
                   )}
                   {userRole === "Pekerja Telur" && (
                     <td className="py-2 px-4 text-center">
-                      <div className="inline-flex gap-4 justify-center items-center">
+                      <span
+                        onClick={() => editDataHandle(item.id)}
+                        className="py-2 px-5 rounded-[4px] bg-green-700 hover:bg-green-900 cursor-pointer  text-white"
+                      >
+                        Lihat Detail
+                      </span>
+                      {/* <div className="inline-flex gap-4 justify-center items-center">
                         <BiSolidEditAlt
                           onClick={() => editDataHandle(item.id)}
                           size={24}
@@ -198,7 +204,7 @@ const DetailProduksi = () => {
                           size={24}
                           className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
                         />
-                      </div>
+                      </div> */}
                     </td>
                   )}
                 </tr>
