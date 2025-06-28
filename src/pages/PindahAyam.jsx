@@ -1,6 +1,7 @@
 // PindahAyam.jsx
 import React, { useState } from "react";
 import { GoAlertFill } from "react-icons/go";
+import PindahAyamModal from "../components/PindahAyamModal";
 
 const kandangList = [
   {
@@ -49,9 +50,10 @@ const PindahAyam = () => {
   const [asal, setAsal] = useState(null);
   const [tujuan, setTujuan] = useState([]);
   const [jumlahDipindah, setJumlahDipindah] = useState(0);
-  const [showModal, setShowModal] = useState(false);
+  const [showAsalModal, setShowAsalModal] = useState(false);
   const [showTujuanModal, setShowTujuanModal] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
+  const [showPindahModal, setShowPindahModal] = useState(false);
 
   const sisaAyam = asal
     ? jumlahDipindah -
@@ -60,7 +62,7 @@ const PindahAyam = () => {
 
   const handlePilihAsal = (kandang) => {
     setAsal(kandang);
-    setShowModal(false);
+    setShowAsalModal(false);
   };
 
   const handlePilihTujuan = (kandang) => {
@@ -94,6 +96,12 @@ const PindahAyam = () => {
     });
   };
 
+  const handleConfirmPindah = () => {
+    console.log("Ayam dipindahkan!");
+    setShowPindahModal(false);
+    // Lakukan proses pindah ayam di sini, misalnya panggil API
+  };
+
   const tujuanOptions = kandangList.filter(
     (k) =>
       (!asal || k.nama !== asal.nama) && !tujuan.some((t) => t.nama === k.nama)
@@ -119,7 +127,7 @@ const PindahAyam = () => {
           {!asal ? (
             <button
               className="bg-green-700 hover:bg-green-900 cursor-pointer text-white px-4 py-2 rounded"
-              onClick={() => setShowModal(true)}
+              onClick={() => setShowAsalModal(true)}
             >
               Pilih Kandang
             </button>
@@ -170,12 +178,12 @@ const PindahAyam = () => {
               onClick={() => {
                 if (!asal || sisaAyam < 1) {
                   setShowAlert(true);
-                  console.log("sisaAyam: ", sisaAyam);
-                  console.log("asal: ", asal);
+                  // console.log("sisaAyam: ", sisaAyam);
+                  // console.log("asal: ", asal);
                 } else {
                   setShowTujuanModal(true);
-                  console.log("sisaAyam: ", sisaAyam);
-                  console.log("asal: ", asal);
+                  // console.log("sisaAyam: ", sisaAyam);
+                  // console.log("asal: ", asal);
                 }
               }}
             >
@@ -187,7 +195,7 @@ const PindahAyam = () => {
               <div className="flex justify-between items-center">
                 <h4 className="font-bold">Kandang tujuan {i + 1}</h4>
                 <button
-                  className="bg-orange-300 hover:bg-orange-500 text-black px-3 py-1 rounded"
+                  className="bg-orange-300 hover:bg-orange-500 text-black px-3 py-1 rounded cursor-pointer"
                   onClick={() => handleUlang("tujuan", i)}
                 >
                   Pilih Ulang ✕
@@ -221,17 +229,27 @@ const PindahAyam = () => {
               Alokasi melebihi kapasitas maksimum kandang
             </div>
           )}
+          {tujuan.length !== 0 && sisaAyam > 0 && (
+            <div className="flex justify-end">
+              <button
+                className="bg-green-700 hover:bg-green-900 cursor-pointer text-white px-4 py-2 rounded"
+                onClick={() => setShowPindahModal(true)}
+              >
+                Kofirmasi pemindahan ayam
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Modals */}
-      {showModal && (
+      {showAsalModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg w-3/4 p-6">
             <div className="flex justify-between mb-4">
               <h3 className="text-lg font-bold">Daftar Kandang</h3>
               <button
-                onClick={() => setShowModal(false)}
+                onClick={() => setShowAsalModal(false)}
                 className="text-lg font-bold"
               >
                 ✕
@@ -338,6 +356,12 @@ const PindahAyam = () => {
           </div>
         </div>
       )}
+
+      <PindahAyamModal
+        isOpen={showPindahModal}
+        onClose={() => setShowPindahModal(false)}
+        onConfirm={handleConfirmPindah}
+      />
     </div>
   );
 };

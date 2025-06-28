@@ -66,6 +66,7 @@ import EditStok from "./pages/EditStok";
 import PesanBarang from "./pages/PesanBarang";
 import DetailPesanBarangGudang from "./pages/DetailPesanBarangGudang";
 import EditKandang from "./pages/EditKandang";
+import TambahToko from "./pages/TambahToko";
 
 const AppRouter = createBrowserRouter([
   {
@@ -201,7 +202,6 @@ const AppRouter = createBrowserRouter([
                 element: <DaftarKandang />,
                 children: [
                   { path: "pindah-ayam", element: <PindahAyam /> },
-
                   { path: "tambah-kandang", element: <TambahKandang /> },
                   {
                     path: "detail-kandang",
@@ -216,6 +216,7 @@ const AppRouter = createBrowserRouter([
               {
                 path: "daftar-toko",
                 element: <DaftarToko />,
+                children: [{ path: "tambah-toko", element: <TambahToko /> }],
               },
               {
                 path: "daftar-gudang",
