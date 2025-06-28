@@ -1,5 +1,7 @@
 import React from "react";
+import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import HapusKandangModal from "./HapusKandangModal";
 
 const DetailKandang = () => {
   const data = {
@@ -18,14 +20,26 @@ const DetailKandang = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const detailPages = ["edit-pic"];
+  const detailPages = ["edit-pic", "edit-kandang"];
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
 
-  const detailKandangHandle = () => {
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const handleEditPic = () => {
     navigate(`${location.pathname}/edit-pic`);
+  };
+
+  const handleEditKandang = () => {
+    navigate(`${location.pathname}/edit-kandang`);
+  };
+
+  const handleDelete = () => {
+    console.log("Kandang dihapus!");
+    setShowDeleteModal(false);
+    // Call API untuk delete kandang di sini
   };
 
   if (isDetailPage) {
@@ -79,10 +93,18 @@ const DetailKandang = () => {
           </div>
         </div>
         <div className="flex justify-end space-x-2 mt-4">
-          <button className="bg-green-700 hover:bg-green-900 hover:cursor-pointer text-white px-4 py-2 rounded">
+          <button
+            onClick={handleEditKandang}
+            className="bg-green-700 hover:bg-green-900 hover:cursor-pointer text-white px-4 py-2 rounded"
+          >
             Edit Kandang
           </button>
-          <button className="bg-red-500 hover:bg-red-700 cursor-pointer text-white px-4 py-2 rounded">
+          <button
+            onClick={() => {
+              setShowDeleteModal(true);
+            }}
+            className="bg-red-500 hover:bg-red-700 cursor-pointer text-white px-4 py-2 rounded"
+          >
             Hapus Kandang
           </button>
         </div>
@@ -103,13 +125,19 @@ const DetailKandang = () => {
         </div>
         <div className="flex justify-end mt-4">
           <button
-            onClick={detailKandangHandle}
+            onClick={handleEditPic}
             className="bg-green-700 hover:bg-green-900 hover:cursor-pointer text-white px-4 py-2 rounded"
           >
             Edit PIC
           </button>
         </div>
       </div>
+
+      <HapusKandangModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowMDeleteodal(false)}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 };

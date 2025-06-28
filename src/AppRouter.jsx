@@ -65,6 +65,7 @@ import PindahAyam from "./pages/PindahAyam";
 import EditStok from "./pages/EditStok";
 import PesanBarang from "./pages/PesanBarang";
 import DetailPesanBarangGudang from "./pages/DetailPesanBarangGudang";
+import EditKandang from "./pages/EditKandang";
 
 const AppRouter = createBrowserRouter([
   {
@@ -206,6 +207,9 @@ const AppRouter = createBrowserRouter([
                     path: "detail-kandang",
                     element: <DetailKandang />,
                     children: [{ path: "edit-pic", element: <EditPic /> }],
+                    children: [
+                      { path: "edit-kandang", element: <EditKandang /> },
+                    ],
                   },
                 ],
               },
