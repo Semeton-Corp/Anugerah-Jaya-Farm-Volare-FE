@@ -12,10 +12,9 @@ import { getListStoreSale } from "../services/stores";
 const DaftarPesanan = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const detailPages = ["input-data-pesanan"];
-
   const [dataAntrianPesanan, setDataAntrianPesanan] = useState([]);
 
+  const detailPages = ["input-data-pesanan"];
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
