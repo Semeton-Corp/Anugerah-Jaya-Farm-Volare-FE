@@ -199,7 +199,7 @@ const AntrianPesanan = () => {
           {/* detail penjualan */}
           <div className=" flex gap-4 ">
             <div className=" w-full bg-white px-8 py-6 rounded-lg border border-black-6">
-              <div className="flex justify-between items-start mb-4">
+              {/* <div className="flex justify-between items-start mb-4">
                 <h2 className="text-lg font-semibold">Antrian Pesanan</h2>
                 <button
                   onClick={inputDataPesananHandle}
@@ -207,7 +207,7 @@ const AntrianPesanan = () => {
                 >
                   + Input Data Pesanan
                 </button>
-              </div>
+              </div> */}
 
               <table className="w-full text-sm">
                 <thead>

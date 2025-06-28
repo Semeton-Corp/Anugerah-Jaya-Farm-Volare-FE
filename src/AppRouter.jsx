@@ -62,6 +62,7 @@ import TambahKandang from "./pages/TambahKandang";
 import DetailKandang from "./pages/DetailKandang";
 import EditPic from "./pages/EditPic";
 import PindahAyam from "./pages/PindahAyam";
+import EditStok from "./pages/EditStok";
 
 const AppRouter = createBrowserRouter([
   {
@@ -427,6 +428,10 @@ const AppRouter = createBrowserRouter([
                 element: <DaftarPesanan />,
                 children: [
                   {
+                    path: "input-data-pesanan",
+                    element: <InputDataPesanan />,
+                  },
+                  {
                     path: "input-data-pesanan/:id",
                     element: <InputDataPesanan />,
                   },
@@ -440,6 +445,12 @@ const AppRouter = createBrowserRouter([
               {
                 path: "overview-stok",
                 element: <OverviewStok />,
+                children: [
+                  {
+                    path: "edit-stok",
+                    element: <EditStok />,
+                  },
+                ],
               },
               {
                 path: "dalam-pesanan",
@@ -552,6 +563,10 @@ const AppRouter = createBrowserRouter([
                 path: "daftar-pesanan",
                 element: <DaftarPesanan />,
                 children: [
+                  {
+                    path: "input-data-pesanan",
+                    element: <InputDataPesanan />,
+                  },
                   {
                     path: "input-data-pesanan/:id",
                     element: <InputDataPesanan />,

@@ -56,3 +56,4 @@ export const updateStoreSalePayment = (storeSaleId, id, payload) => {
     },
   });
 };
+

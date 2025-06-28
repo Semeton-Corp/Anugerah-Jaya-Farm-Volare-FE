@@ -40,6 +40,13 @@ const DaftarPesanan = () => {
     }
   };
 
+  const inputDataPesananHandle = () => {
+    const currentPath = location.pathname;
+    const inputPath = currentPath + "/input-data-pesanan";
+
+    navigate(inputPath);
+  };
+
   useState(() => {
     fetchDataAntrianPesanan();
   }, []);
@@ -61,15 +68,26 @@ const DaftarPesanan = () => {
           {/* detail penjualan */}
           <div className=" flex gap-4 ">
             <div className=" w-full bg-white px-8 py-6 rounded-lg border border-black-6">
+              <div className="flex justify-end">
+                <button
+                  onClick={inputDataPesananHandle}
+                  className="px-5 py-3 bg-orange-300 rounded-[4px] text-black hover:bg-orange-500 cursor-pointer font-medium mb-3"
+                >
+                  Pesan Barang
+                </button>
+              </div>
+
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-green-700 text-white text-center">
+                    <th className="py-2 px-4">Tanggal Pesan</th>
                     <th className="py-2 px-4">Nama Barang</th>
-                    <th className="py-2 px-4">QTY</th>
+                    <th className="py-2 px-4">Satuan</th>
+                    <th className="py-2 px-4">Jumlah</th>
                     <th className="py-2 px-4">Pelanggan</th>
-                    <th className="py-2 px-4">Pembayaran</th>
-                    <th className="py-2 px-4">Status</th>
+                    <th className="py-2 px-4">Tanggal Kirim</th>
                     <th className="py-2 px-4">Pengiriman</th>
+                    <th className="py-2 px-4">Aksi</th>
                     <th className="py-2 px-4"></th>
                   </tr>
                 </thead>

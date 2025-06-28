@@ -133,7 +133,11 @@ const aktivitasTokoData = [
 const OverviewStok = () => {
   const userRole = localStorage.getItem("role");
   const location = useLocation();
-  const detailPages = ["detail-stok-toko", "riwayat-aktivitas-toko"];
+  const detailPages = [
+    "detail-stok-toko",
+    "riwayat-aktivitas-toko",
+    "edit-stok",
+  ];
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
@@ -150,6 +154,13 @@ const OverviewStok = () => {
   const riwayatAktivitasTokoHandle = () => {
     const currentPath = location.pathname;
     const detailPath = currentPath + "/riwayat-aktivitas-toko";
+
+    navigate(detailPath);
+  };
+
+  const editStokHandle = () => {
+    const currentPath = location.pathname;
+    const detailPath = currentPath + "/edit-stok";
 
     navigate(detailPath);
   };
@@ -190,11 +201,19 @@ const OverviewStok = () => {
                 </div>
               </div>
 
-              <div className="flex justify-center flex-wrap gap-4">
-                {/* item ikat */}
-                <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                  <p className="text-3xl font-bold text-center">50</p>
-                  <p className="text-xl text-center">Ikat</p>
+              <div className="flex justify-center gap-4">
+                <div className="flex justify-center flex-wrap gap-4">
+                  <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+                    <p className="text-3xl font-bold text-center">50</p>
+                    <p className="text-xl text-center">Ikat</p>
+                  </div>
+                </div>
+
+                <div className="flex justify-center flex-wrap gap-4">
+                  <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+                    <p className="text-3xl font-bold text-center">750</p>
+                    <p className="text-xl text-center">Kg</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -202,7 +221,7 @@ const OverviewStok = () => {
             {/* telur OK */}
             <div className="p-4 w-full rounded-md border-2 border-black-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">Telur OK Eceran</h2>
+                <h2 className="text-lg font-semibold">Telur Retak</h2>
                 <div className="p-2 rounded-xl bg-green-700">
                   <MdEgg size={24} color="white" />
                 </div>
@@ -212,16 +231,16 @@ const OverviewStok = () => {
                 <div className="flex justify-center flex-wrap gap-4">
                   {/* item ikat */}
                   <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                    <p className="text-3xl font-bold text-center">50</p>
-                    <p className="text-xl text-center">Karpet</p>
+                    <p className="text-3xl font-bold text-center">3</p>
+                    <p className="text-xl text-center">Ikat</p>
                   </div>
                 </div>
 
                 <div className="flex justify-center flex-wrap gap-4">
                   {/* item ikat */}
                   <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                    <p className="text-3xl font-bold text-center">1000</p>
-                    <p className="text-xl text-center">Butir</p>
+                    <p className="text-3xl font-bold text-center">45</p>
+                    <p className="text-xl text-center">kg</p>
                   </div>
                 </div>
               </div>
@@ -230,7 +249,7 @@ const OverviewStok = () => {
             {/* telur Retak */}
             <div className="p-4 w-full rounded-md border-2 border-black-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">Stok Telur Retak</h2>
+                <h2 className="text-lg font-semibold">Telur Bonyok</h2>
                 <div className="p-2 rounded-xl bg-green-700">
                   <TbEggCrackedFilled size={24} color="white" />
                 </div>
@@ -239,13 +258,13 @@ const OverviewStok = () => {
               <div className="flex justify-center flex-wrap gap-4">
                 {/* item butir */}
                 <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                  <p className="text-3xl font-bold text-center">30</p>
-                  <p className="text-xl text-center">Butir</p>
+                  <p className="text-3xl font-bold text-center">15</p>
+                  <p className="text-xl text-center">Plastik</p>
                 </div>
               </div>
             </div>
             {/* penjualan telur */}
-            <div className="p-4 w-full rounded-md border-2 border-black-6">
+            {/* <div className="p-4 w-full rounded-md border-2 border-black-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Stok Telur Pecah</h2>
                 <div className="p-2 rounded-xl bg-green-700">
@@ -254,20 +273,19 @@ const OverviewStok = () => {
               </div>
 
               <div className="flex justify-center flex-wrap gap-4">
-                {/* item butir */}
                 <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
                   <p className="text-3xl font-bold text-center">80</p>
                   <p className="text-xl text-center">Butir</p>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* chart, incomes, and history section */}
           <div className="flex flex-col lg:flex-row h-120 gap-6">
             {/* Chart Section (3/4 width on large screens) */}
             <div className="w-full bg-white px-8 py-6 rounded-lg border border-gray-300">
-              <div className="flex justify-between items-start mb-4">
+              {/* <div className="flex justify-between items-start mb-4">
                 <h2 className="text-lg font-semibold">Stok toko</h2>
                 <div
                   onClick={detailStokTokoHandle}
@@ -275,18 +293,18 @@ const OverviewStok = () => {
                 >
                   <FiMaximize2 size={24} color="" />
                 </div>
-              </div>
+              </div> */}
               <div className="overflow-x-auto">
                 <table className="w-full text-base">
                   <thead>
                     <tr className="bg-green-700 font-medium text-white text-center">
                       <th className="py-2 px-4">Nama Barang</th>
                       <th className="py-2 px-4">Satuan</th>
-                      <th className="py-2 px-4">Kuantitas</th>
-                      <th className="py-2 px-4">Nama Toko</th>
+                      <th className="py-2 px-4">Jumlah</th>
+                      {/* <th className="py-2 px-4">Nama Toko</th> */}
                       <th className="py-2 px-4">Keterangan</th>
                       {userRole !== "Owner" && (
-                        <th className="py-2 px-4">Pesan Telur</th>
+                        <th className="py-2 px-4">Aksi</th>
                       )}
                     </tr>
                   </thead>
@@ -296,7 +314,7 @@ const OverviewStok = () => {
                         <td className="py-2 px-4">{item.namaBarang}</td>
                         <td className="py-2 px-4">{item.satuan}</td>
                         <td className="py-2 px-4">{item.kuantitas}</td>
-                        <td className="py-2 px-4">{item.tempat}</td>
+                        {/* <td className="py-2 px-4">{item.tempat}</td> */}
                         <td className="py-2 px-4 ">
                           <span
                             className={`w-24 py-1 px-5 rounded text-sm font-semibold ${
@@ -310,10 +328,12 @@ const OverviewStok = () => {
                         </td>
                         {userRole !== "Owner" && (
                           <td className="py-2 px-4 flex justify-center">
-                            <FaCartShopping
-                              size={24}
-                              className="hover:text-gray-400 cursor-pointer"
-                            />
+                            <button
+                              onClick={editStokHandle}
+                              className="px-3 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer font-medium mb-3"
+                            >
+                              Edit Stok
+                            </button>
                           </td>
                         )}
                       </tr>
@@ -323,7 +343,7 @@ const OverviewStok = () => {
               </div>
             </div>
           </div>
-          {userRole !== "Owner" && (
+          {/* {userRole !== "Owner"  && (
             <div className="p-6 border border-black-6 rounded-lg shadow">
               <h2 className="text-base font-semibold mb-4 pb-2 flex justify-between">
                 <span className="">Barang Dalam Pesanan</span>.
@@ -377,7 +397,7 @@ const OverviewStok = () => {
                 </tbody>
               </table>
             </div>
-          )}
+          )} */}
         </div>
       )}
     </>

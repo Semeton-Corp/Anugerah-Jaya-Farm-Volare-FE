@@ -21,10 +21,13 @@ import { convertToInputDateFormat } from "../utils/dateFormat";
 import { createStoreSalePayment } from "../services/stores";
 import { updateStoreSalePayment } from "../services/stores";
 import { updateStoreSale } from "../services/stores";
+import InformasiPembeli from "../components/InformasiPembeli";
 
 const InputDataPesanan = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const userRole = localStorage.getItem("role");
+
   const detailPages = ["input-data-pesanan"];
   const dateInputRef = useRef(null);
 
@@ -384,24 +387,35 @@ const InputDataPesanan = () => {
           {id ? "Detail Data Pesanan" : "Input Data Pesanan"}
         </h1>
 
+        {userRole !== "Pekerja Toko" && (
+          <>
+            <label className="block font-medium  mt-4">Pilih Toko</label>
+            <select
+              className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
+              value={selectedStore}
+              onChange={(e) => {
+                setSelectedStore(e.target.value);
+              }}
+            >
+              {stores.map((store) => (
+                <option value={store.id} key={store.id}>
+                  {store.name}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
         {/* Pilih Toko/Gudang */}
-        <label className="block font-medium  mt-4">Pilih Toko</label>
-        <select
-          className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
-          value={selectedStore}
-          onChange={(e) => {
-            setSelectedStore(e.target.value);
-          }}
-        >
-          {stores.map((store) => (
-            <option value={store.id} key={store.id}>
-              {store.name}
-            </option>
-          ))}
-        </select>
+
+        <InformasiPembeli
+          phone={phone}
+          setPhone={setPhone}
+          name={customer}
+          setName={setCustomer}
+        />
 
         {/* nama pelanggan & nomor telpon */}
-        <div className="flex justify-between gap-4">
+        {/* <div className="flex justify-between gap-4">
           <div className="w-full">
             <label className="block font-medium  mt-4">Nama Pelanggan</label>
             <input
@@ -427,7 +441,7 @@ const InputDataPesanan = () => {
               }}
             />
           </div>
-        </div>
+        </div> */}
 
         {/* nama barang & jumlah barang */}
         <div className="flex justify-between gap-4">
@@ -447,7 +461,9 @@ const InputDataPesanan = () => {
               ))}
             </select>
           </div>
+        </div>
 
+        <div>
           <div className="w-full">
             <label className="block font-medium  mt-4">Jumlah Barang</label>
             <div className="flex justify-between gap-4">
@@ -485,7 +501,7 @@ const InputDataPesanan = () => {
 
         {/* harga (butir) & tanggal kirim */}
         <div className="flex justify-between gap-4">
-          <div className="w-full">
+          {/* <div className="w-full">
             <label className="block font-medium  mt-4">{`Harga (per ${unit})`}</label>
             <input
               className="w-full border bg-black-4 cursor-text rounded p-2 mb-4"
@@ -496,7 +512,7 @@ const InputDataPesanan = () => {
                 setPrice(e.target.value);
               }}
             />
-          </div>
+          </div> */}
 
           <div className="w-full">
             <label className="block font-medium mt-4">Tanggal Kirim</label>
