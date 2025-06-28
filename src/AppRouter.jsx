@@ -64,6 +64,7 @@ import EditPic from "./pages/EditPic";
 import PindahAyam from "./pages/PindahAyam";
 import EditStok from "./pages/EditStok";
 import PesanBarang from "./pages/PesanBarang";
+import DetailPesanBarangGudang from "./pages/DetailPesanBarangGudang";
 
 const AppRouter = createBrowserRouter([
   {
@@ -454,12 +455,16 @@ const AppRouter = createBrowserRouter([
                 ],
               },
               {
-                path: "dalam-pesanan",
+                path: "pesan-ke-gudang",
                 element: <RequestKeGudang />,
                 children: [
                   {
                     path: "pesan-barang",
                     element: <PesanBarang />,
+                  },
+                  {
+                    path: "detail-pesan-barang-gudang",
+                    element: <DetailPesanBarangGudang />,
                   },
                 ],
               },
