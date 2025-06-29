@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
-import { getCage } from "../services/cages";
+import { getCage, getChickenCage } from "../services/cages";
 import { kategoriAyam } from "../data/KategoriAyam";
 import { inputAyam } from "../services/chickenMonitorings";
 import { getChickenMonitoringById } from "../services/chickenMonitorings";
@@ -16,12 +16,15 @@ import {
 const InputAyam = () => {
   const [obatExpanded, setObatExpanded] = useState(false);
 
-  const [cages, setCages] = useState([]);
+  const [chickenCages, setChickenCages] = useState([]);
+  const [selectedChickenCage, setSelectedChickenCage] = useState("");
+
   const [loading, setLoading] = useState(true);
   const { id } = useParams();
 
-  const [selectedCage, setSelectedCage] = useState(0);
-  const selectedCageName = cages.find((cage) => cage.id === selectedCage);
+  const selectedCageName = chickenCages.find(
+    (cage) => cage.id === selectedChickenCage
+  );
 
   const [selectedChikenCategory, setSelectedChikenCategory] = useState("");
   const [ageChiken, setAgeChiken] = useState(0);
@@ -77,9 +80,11 @@ const InputAyam = () => {
   useEffect(() => {
     const fetchCages = async () => {
       try {
-        const response = await getCage();
-        const data = response.data.data;
-        setCages(data);
+        const response = await getChickenCage();
+        const dataChickenCage = response.data.data;
+
+        setChickenCages(dataChickenCage);
+        setSelectedChickenCage(dataChickenCage[0]);
 
         if (id) {
           console.log("THERE IS AN ID: ", id);
@@ -87,7 +92,7 @@ const InputAyam = () => {
           const data = updateResponse.data.data;
           console.log("THERE IS DATA: ", data);
 
-          setSelectedCage(data.cage.id);
+          setSelectedChickenCage(data.cage.id);
 
           setSelectedChikenCategory(data.chickenCategory);
           setAgeChiken(data.age);
@@ -186,10 +191,7 @@ const InputAyam = () => {
 
     // Check required main fields
     if (
-      !selectedCage ||
-      !selectedChikenCategory ||
-      !ageChiken ||
-      !totalLiveChicken ||
+      !selectedChickenCage ||
       !totalSickChicken ||
       !totalDeathChicken ||
       !totalFeed
@@ -200,15 +202,16 @@ const InputAyam = () => {
     }
 
     const payload = {
-      cageId: parseInt(selectedCage),
-      chickenCategory: selectedChikenCategory,
-      age: parseInt(ageChiken),
-      totalLiveChicken: parseInt(totalLiveChicken),
+      chickenCageId: parseInt(selectedChickenCage.cage.id),
+      // chickenCategory: selectedChikenCategory,
+      // age: parseInt(ageChiken),
+      // totalLiveChicken: parseInt(totalLiveChicken),
       totalSickChicken: parseInt(totalSickChicken),
       totalDeathChicken: parseInt(totalDeathChicken),
       totalFeed: parseFloat(totalFeed),
-      chickenDiseases,
-      chickenVaccines,
+      note: note,
+      // chickenDiseases,
+      // chickenVaccines,
     };
 
     console.log("Payload ready to send: ", payload);
@@ -303,19 +306,19 @@ const InputAyam = () => {
         {/* Pilih kandang */}
         <label className="block font-medium  mb-1">Pilih kandang</label>
         <select
-          className="w-full border border-black-6 bg-black-4 cursor-pointer rounded p-2 mb-4"
-          value={selectedCage === 0 ? "" : selectedCage}
+          className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-8"
+          value={selectedChickenCage ? JSON.stringify(selectedChickenCage) : ""}
           onChange={(e) => {
-            const id = Number(e.target.value);
-            setSelectedCage(id);
+            const cageObj = JSON.parse(e.target.value);
+            setSelectedChickenCage(cageObj);
           }}
         >
           <option value="" disabled hidden>
             Pilih kandang...
           </option>
-          {cages.map((cage) => (
-            <option key={cage.id} value={cage.id}>
-              {cage.name}
+          {chickenCages.map((cage) => (
+            <option key={cage.id} value={JSON.stringify(cage)}>
+              {cage.cage.name || "Tanpa Nama"}
             </option>
           ))}
         </select>
@@ -326,7 +329,9 @@ const InputAyam = () => {
             <label className="block font-medium mb-1">ID Batch</label>
             <div className="flex items-center py-3">
               <p className="text-lg font-bold">
-                {ageChiken ? `${ageChiken}` : `-`}
+                {selectedChickenCage?.batchId
+                  ? `${selectedChickenCage?.batchId}`
+                  : `-`}
               </p>
             </div>
             {/* <select
@@ -343,7 +348,9 @@ const InputAyam = () => {
             <label className="block font-medium mb-1">Kategori ayam</label>
             <div className="flex items-center py-3">
               <p className="text-lg font-bold">
-                {selectedChikenCategory ? `${selectedChikenCategory}` : `-`}
+                {selectedChickenCage?.chickenCategory
+                  ? `${selectedChickenCage?.chickenCategory}`
+                  : `-`}
               </p>
             </div>
 
@@ -361,7 +368,9 @@ const InputAyam = () => {
             <label className="block font-medium mb-1">Usia ayam (Minggu)</label>
             <div className="flex items-center py-3">
               <p className="text-lg font-bold">
-                {ageChiken ? `${ageChiken}` : `-`}
+                {selectedChickenCage?.chickenAge
+                  ? `${selectedChickenCage?.chickenAge}`
+                  : `0`}
               </p>
             </div>
             {/* <input
@@ -381,7 +390,9 @@ const InputAyam = () => {
             <label className="block font-medium mb-1">Jumlah ayam hidup</label>
             <div className="flex items-center py-3">
               <p className="text-lg font-bold">
-                {selectedChikenCategory ? `${selectedChikenCategory}` : `-`}
+                {selectedChickenCage?.totalChicken
+                  ? `${selectedChickenCage?.totalChicken}`
+                  : `-`}
               </p>
             </div>
             {/* <input
@@ -675,24 +686,25 @@ const InputAyam = () => {
         </div>
 
         {/* Simpan Button */}
-        {/* <div className="mt-6 text-right ">
+        <div className="mt-6 text-right ">
           <button
             onClick={() => {
-              console.log("✅ selectedChikenCategory:", selectedChikenCategory);
-              console.log("📅 ageChiken:", ageChiken);
-              console.log("🐔 totalLiveChicken:", totalLiveChicken);
-              console.log("🤒 totalSickChicken:", totalSickChicken);
-              console.log("💀 totalDeathChicken:", totalDeathChicken);
-              console.log("🌾 totalFeed:", totalFeed);
-              console.log("💉 vaksinList:", vaksinList);
-              console.log("💊 obatList:", obatList);
-              console.log("selectedCage: ", selectedCage);
+              const payload = {
+                chickenCageId: parseInt(selectedChickenCage.cage.id),
+                totalSickChicken: parseInt(totalSickChicken),
+                totalDeathChicken: parseInt(totalDeathChicken),
+                totalFeed: parseFloat(totalFeed),
+                note: note,
+              };
+              console.log("payload: ", payload);
+              console.log("cages: ", chickenCages);
+              console.log("selectedChickenCage: ", selectedChickenCage);
             }}
             className="bg-emerald-700 text-white py-2 px-6 rounded hover:bg-emerald-600 cursor-pointer"
           >
             Check
           </button>
-        </div> */}
+        </div>
       </div>
     </div>
   );

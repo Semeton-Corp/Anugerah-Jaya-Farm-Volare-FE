@@ -98,7 +98,7 @@ const DetailAyam = () => {
       const response = await getChickenMonitoring();
       if (response.status === 200) {
         setDetailAyamState(response.data.data);
-        // console.log("response.data.data: ", response.data.data);
+        console.log("response.data.data: ", response.data.data);
 
         // console.log("DetailAyamData: ", response.data.data);
       }
@@ -220,9 +220,12 @@ const DetailAyam = () => {
                   key={index}
                   className="border-t border-gray-200 hover:bg-gray-50 text-center"
                 >
-                  <td className="py-2 px-4">{row.cage.name}</td>
-                  <td className="py-2 px-4">{row.chickenCategory}</td>
-                  <td className="py-2 px-4">{row.age}</td>
+                  <td className="py-2 px-4">{row.chickenCage.cage.name}</td>
+                  <td className="py-2 px-4">{row.chickenCage.batchId}</td>
+                  <td className="py-2 px-4">
+                    {row.chickenCage.cage.chickenCategory}
+                  </td>
+                  <td className="py-2 px-4">{row.chickenCage.chickenAge}</td>
                   <td className="py-2 px-4">{row.totalLiveChicken}</td>
                   <td className="py-2 px-4">{row.totalSickChicken}</td>
                   <td className="py-2 px-4">{row.totalDeathChicken}</td>
