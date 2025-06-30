@@ -2,9 +2,11 @@ import { AlertTriangle } from "lucide-react";
 import React from "react";
 import { useState } from "react";
 import { MdDelete, MdEdit } from "react-icons/md";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 
 const DetailVaksinObat = () => {
+  const { id } = useParams();
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -18,6 +20,12 @@ const DetailVaksinObat = () => {
     navigate(`${location.pathname}/input-vaksin-&-obat`);
   };
 
+  const fetchDetailVaksinObat = async () => {
+    try {
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
   const [data, setData] = useState([
     {
       tanggal: "20 Mar 2025",

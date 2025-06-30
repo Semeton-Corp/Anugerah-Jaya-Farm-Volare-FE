@@ -33,7 +33,7 @@ const VaksinObat = () => {
 
   async function editDataHandle(dataId) {
     const currectPath = location.pathname;
-    navigate(`${currectPath}/input-ayam/${dataId}`);
+    navigate(`${currectPath}/detail-vaksin-&-obat/${dataId}`);
   }
 
   const fetchDataAyam = async () => {
@@ -105,6 +105,7 @@ const VaksinObat = () => {
                 <th className="py-2 px-4">Kategori</th>
                 <th className="py-2 px-4">Usia (minggu)</th>
                 <th className="py-2 px-4">Kandang</th>
+                <th className="py-2 px-4">Status</th>
                 <th className="py-2 px-4">Aksi</th>
               </tr>
             </thead>
@@ -114,54 +115,32 @@ const VaksinObat = () => {
                   key={index}
                   className="border-t border-gray-200 hover:bg-gray-50 text-center"
                 >
-                  <td className="py-2 px-4">{row.cage.name}</td>
-                  <td className="py-2 px-4">{row.chickenCategory}</td>
-                  <td className="py-2 px-4">{row.age}</td>
+                  <td className="py-2 px-4">{row.chickenCage.batchId}</td>
                   <td className="py-2 px-4">
-                    {row.chickenVaccines && row.chickenVaccines.length > 0 ? (
-                      row.chickenVaccines.map((vaccine, index) => (
-                        <p
-                          key={index}
-                        >{`${vaccine.vaccine} (${vaccine.dose} ${vaccine.unit})`}</p>
-                      ))
-                    ) : (
-                      <p>-</p>
-                    )}
+                    {row.chickenCage.cage.chickenCategory}
                   </td>
+                  <td className="py-2 px-4">{row.chickenCage.chickenAge}</td>
+                  <td className="py-2 px-4">{row.chickenCage.cage.name}</td>
                   <td className="py-2 px-4">
                     <div className="flex gap-2 justify-center">
-                      {row.chickenDiseases && row.chickenDiseases.length > 0 ? (
-                        row.chickenDiseases.map((vaccine, index) => (
-                          <p
-                            key={index}
-                          >{`${vaccine.medicine} (${vaccine.dose} ${vaccine.unit})`}</p>
-                        ))
-                      ) : (
-                        <p>-</p>
-                      )}
-                    </div>
-                  </td>
-                  <td className="py-2 px-4">
-                    <div className="flex gap-2 justify-center">
-                      {row.chickenDiseases && row.chickenDiseases.length > 0 ? (
-                        row.chickenDiseases.map((vaccine, index) => (
-                          <p key={index}>{`${vaccine.disease}`}</p>
-                        ))
-                      ) : (
-                        <p>-</p>
-                      )}
+                      <span className="px-3 py-1 bg-orange-200 text-orange-800 rounded">
+                        Perlu Vaksin //NANTI GANTI
+                      </span>
                     </div>
                   </td>
                   {(userRole === "Pekerja Kandang" ||
                     userRole === "Kepala Kandang") && (
-                    <td className="py-2 px-4 flex justify-center gap-4">
-                      <BiSolidEditAlt
-                        onClick={() => {
-                          editDataHandle(row.id);
-                        }}
-                        size={24}
-                        className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                      />
+                    <td className="py-2 px-4">
+                      <div className="flex gap-2 justify-center">
+                        <span
+                          onClick={() => {
+                            editDataHandle(row.id);
+                          }}
+                          className="px-3 py-1 bg-green-700 hover:bg-green-900 text-white cursor-pointer rounded"
+                        >
+                          Detail & input
+                        </span>
+                      </div>
                     </td>
                   )}
                 </tr>

@@ -307,7 +307,7 @@ const AppRouter = createBrowserRouter([
                 element: <VaksinObat />,
                 children: [
                   {
-                    path: "detail-vaksin-&-obat",
+                    path: "detail-vaksin-&-obat/:id",
                     element: <DetailVaksinObat />,
                     children: [
                       {
