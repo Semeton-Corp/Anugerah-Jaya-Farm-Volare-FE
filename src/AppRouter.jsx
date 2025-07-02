@@ -509,7 +509,17 @@ const AppRouter = createBrowserRouter([
           { path: "overview", element: <OverviewKepalaKandang /> },
           {
             path: "produksi-telur",
-            element: <ProduksiTelur />,
+            children: [
+              {
+                path: "ringkasan-produksi-telur",
+                element: <ProduksiTelur />,
+              },
+              {
+                path: "data-produksi-telur",
+                element: <DetailProduksi />,
+                children: [{ path: "input-telur", element: <InputTelur /> }],
+              },
+            ],
           },
           {
             path: "ayam",

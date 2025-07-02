@@ -99,25 +99,23 @@ const DetailProduksi = () => {
       <div className=" flex gap-4">
         <div className=" w-full bg-white px-8 py-6 rounded-lg border border-black-6">
           <div className="flex justify-end items-start mb-4">
-            {userRole === "Pekerja Telur" && (
-              <div
-                onClick={inputTelurHandle}
-                className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
-              >
-                <div className="text-base font-medium ms-2 text-black">
-                  + Input Data Harian
-                </div>
+            <div
+              onClick={inputTelurHandle}
+              className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
+            >
+              <div className="text-base font-medium ms-2 text-black">
+                + Input Data Harian
               </div>
-            )}
+            </div>
           </div>
 
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-green-700 text-white text-center">
                 <th className="py-2 px-4">Kandang</th>
-                <th className="py-2 px-4">QTY Total</th>
-                <th className="py-2 px-4">OK</th>
-                <th className="py-2 px-4">Retak</th>
+                <th className="py-2 px-4">Total (butir)</th>
+                <th className="py-2 px-4">OK (butir)</th>
+                <th className="py-2 px-4">Retak (butir)</th>
                 <th className="py-2 px-4">Pecah</th>
                 <th className="py-2 px-4">Reject</th>
                 {userRole == "Pekerja Telur" || userRole == "Owner" ? (
@@ -183,30 +181,15 @@ const DetailProduksi = () => {
                       </span>
                     </th>
                   )}
-                  {userRole === "Pekerja Telur" && (
-                    <td className="py-2 px-4 text-center">
-                      <span
-                        onClick={() => editDataHandle(item.id)}
-                        className="py-2 px-5 rounded-[4px] bg-green-700 hover:bg-green-900 cursor-pointer  text-white"
-                      >
-                        Lihat Detail
-                      </span>
-                      {/* <div className="inline-flex gap-4 justify-center items-center">
-                        <BiSolidEditAlt
-                          onClick={() => editDataHandle(item.id)}
-                          size={24}
-                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                        />
-                        <MdDelete
-                          onClick={() => {
-                            deleteDataHandle(item.id);
-                          }}
-                          size={24}
-                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                        />
-                      </div> */}
-                    </td>
-                  )}
+
+                  <td className="py-2 px-4 text-center">
+                    <span
+                      onClick={() => editDataHandle(item.id)}
+                      className="py-2 px-5 rounded-[4px] bg-green-700 hover:bg-green-900 cursor-pointer  text-white"
+                    >
+                      Lihat Detail
+                    </span>
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -35,6 +35,43 @@ import {
   CartesianGrid,
 } from "recharts";
 
+const ayamChartData = [
+  {
+    date: "29 Mar",
+    ayamMati: 12,
+    ayamSakit: 3,
+  },
+  {
+    date: "30 Mar",
+    ayamMati: 7,
+    ayamSakit: 5,
+  },
+  {
+    date: "31 Mar",
+    ayamMati: 18,
+    ayamSakit: 4,
+  },
+  {
+    date: "01 Apr",
+    ayamMati: 14,
+    ayamSakit: 2,
+  },
+  {
+    date: "02 Apr",
+    ayamMati: 9,
+    ayamSakit: 1,
+  },
+  {
+    date: "03 Apr",
+    ayamMati: 15,
+    ayamSakit: 2,
+  },
+  {
+    date: "04 Apr",
+    ayamMati: 25,
+    ayamSakit: 3,
+  },
+];
 const kinerjaData = [
   { day: "Minggu", value: 44 },
   { day: "Senin", value: 52 },
@@ -286,82 +323,34 @@ const OverviewKepalaKandang = () => {
 
           {/* chart, incomes, and history section */}
           <div className="flex flex-col lg:flex-row h-80 gap-6">
-            <div className="bg-white flex-1 p-4 border border-black-6 rounded-lg">
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="text-lg font-semibold">Total ayam</h2>
-                <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
-                  <FiMaximize2 size={24} color="" />
-                </div>
-              </div>
-
-              {/* items */}
-              <div className="h-5/8 flex flex-col justify-between my-8">
-                {/* Ayam Hidup */}
-                <div className="flex justify-between px-4">
-                  <div className="flex gap-2">
-                    <p className="text-xl font-bold">5000</p>
-                    <p className="text-xl">Ekor</p>
-                  </div>
-                  <p className="text-xl font-bold">Ayam Hidup</p>
-                </div>
-
-                {/* Ayam Sakit */}
-                <div className="flex justify-between px-4">
-                  <div className="flex gap-2">
-                    <p className="text-xl font-bold">100</p>
-                    <p className="text-xl">Ekor</p>
-                  </div>
-                  <p className="text-xl font-bold">Ayam Sakit</p>
-                </div>
-
-                {/* Ayam Mati */}
-                <div className="flex  justify-between px-4">
-                  <div className="flex gap-2">
-                    <p className="text-xl font-bold">30</p>
-                    <p className="text-xl">Ekor</p>
-                  </div>
-                  <p className="text-xl font-bold">Ayam Mati</p>
-                </div>
-              </div>
+            <div className="w-3/5 bg-white rounded-lg p-4 border border-black-6">
+              <h2 className="text-xl font-semibold mb-4">
+                Ayam Mati & Ayam Sakit
+              </h2>
+              <ResponsiveContainer width="100%" height="90%">
+                <LineChart data={ayamChartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis domain={[0, 50]} />
+                  <Tooltip />
+                  <Legend verticalAlign="top" align="right" />
+                  <Line
+                    type="monotone"
+                    dataKey="ayamMati"
+                    stroke="#ef4444"
+                    name="Ayam Mati"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="ayamSakit"
+                    stroke="#facc15"
+                    name="Ayam Sakit"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
 
             {/* stok gudang */}
-            <div className="bg-white flex-1 p-4 border border-black-6 rounded-lg items-center">
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="text-lg font-semibold">Stok gudang</h2>
-                <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
-                  <FiMaximize2 size={24} color="" />
-                </div>
-              </div>
-
-              {/* the items */}
-              <div className="flex w-full h-60 items-center gap-4 px-4 justify-center">
-                {/* item 1 */}
-                <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
-                  <div className="flex flex-col justify-center gap-2">
-                    <div className="flex flex-col items-center">
-                      <p className="text-[40px] font-bold">20</p>
-                      <p className="text-xl">Barang</p>
-                    </div>
-                    <div className="rounded-[4px] bg-[#87FF8B] flex items-center">
-                      <p className="w-full text-center">aman</p>
-                    </div>
-                  </div>
-                </div>
-                {/* item 2 */}
-                <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
-                  <div className="flex flex-col justify-center gap-2">
-                    <div className="flex flex-col items-center">
-                      <p className="text-[40px] font-bold">5</p>
-                      <p className="text-xl">Barang</p>
-                    </div>
-                    <div className="rounded-[4px] bg-[#FF5E5E] flex items-center">
-                      <p className="w-full text-center">kritis</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
 
             <div className="w-2/5 bg-white rounded-lg p-4 border border-gray-300">
               <h2 className="text-lg font-semibold ">Distribusi Usia Ayam</h2>
@@ -394,58 +383,92 @@ const OverviewKepalaKandang = () => {
             </div>
           </div>
 
-          {/* detail penjualan */}
-          <div className="bg-white p-4 rounded-lg border border-gray-300">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Detail kinerja ayam</h2>
-              <div
-                onClick={detailKinerjaAyamHandle}
-                className="p-2 rounded-full hover:bg-black-4 cursor-pointer"
-              >
-                <FiMaximize2 size={24} color="" />
+          <div className="flex gap-4">
+            <div className="bg-white flex-1 p-4 border border-black-6 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="text-lg font-semibold">Kinerja Ayam</h2>
+                <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
+                  <FiMaximize2 size={24} color="" />
+                </div>
+              </div>
+
+              {/* the items */}
+              <div className="flex w-full gap-4 px-4 justify-center">
+                {/* item 1 */}
+                <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
+                  <div className="flex flex-col justify-center gap-2">
+                    <div className="flex flex-col items-center">
+                      <p className="text-[40px] font-bold">20</p>
+                      <p className="text-xl">Kandang</p>
+                    </div>
+                    <div className="rounded-[4px] bg-[#87FF8B] flex items-center">
+                      <p className="w-full text-center">Produktif</p>
+                    </div>
+                  </div>
+                </div>
+                {/* item 2 */}
+                <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
+                  <div className="flex flex-col justify-center gap-2">
+                    <div className="flex flex-col items-center">
+                      <p className="text-[40px] font-bold">5</p>
+                      <p className="text-xl">Kandang</p>
+                    </div>
+                    <div className="rounded-[4px] bg-orange-200 flex items-center">
+                      <p className="w-full text-center">Periksa</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-green-700 text-white text-center">
-                    <th className="py-2 px-4">Kandang</th>
-                    <th className="py-2 px-4">Usia</th>
-                    <th className="py-2 px-4">Jumlah</th>
-                    <th className="py-2 px-4">Produksi (Butir)</th>
-                    <th className="py-2 px-4">Konsumsi (Kg)</th>
-                    <th className="py-2 px-4">Berat telur (gr)</th>
-                    <th className="py-2 px-4">FCR</th>
-                    <th className="py-2 px-4">%HDP</th>
-                    <th className="py-2 px-4">Produktivitas</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {kinerjaAyamData.map((row, index) => (
-                    <tr key={index} className="border-b text-center">
-                      <td className="py-2 px-4">{row.kandang}</td>
-                      <td className="py-2 px-4">{row.usia}</td>
-                      <td className="py-2 px-4">{row.jumlah}</td>
-                      <td className="py-2 px-4">{row.produksi}</td>
-                      <td className="py-2 px-4">{row.konsumsi}</td>
-                      <td className="py-2 px-4">{row.beratTelur}</td>
-                      <td className="py-2 px-4">{row.fcr}</td>
-                      <td className="py-2 px-4">{row.hdp}</td>
-                      <td className="py-2 px-4 flex justify-center">
-                        <div
-                          className={`w-24 py-1 flex justify-center rounded text-sm font-semibold ${
-                            row.produktivitas === "Produktif"
-                              ? "bg-aman-box-surface-color text-aman-text-color"
-                              : "bg-orange-200 text-orange-900"
-                          }`}
-                        >
-                          {row.produktivitas}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+
+            <div className="bg-white flex-1 p-4 border border-black-6 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="text-lg font-semibold">Stok gudang</h2>
+                <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
+                  <FiMaximize2 size={24} color="" />
+                </div>
+              </div>
+
+              {/* the items */}
+              <div className="flex w-full gap-4 px-4 justify-center">
+                {/* item 1 */}
+                <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
+                  <div className="flex flex-col justify-center gap-2">
+                    <div className="flex flex-col items-center">
+                      <p className="text-[40px] font-bold">20</p>
+                      <p className="text-xl">Barang</p>
+                    </div>
+                    <div className="rounded-[4px] bg-[#87FF8B] flex items-center">
+                      <p className="w-full text-center">aman</p>
+                    </div>
+                  </div>
+                </div>
+                {/* item 2 */}
+                <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
+                  <div className="flex flex-col justify-center gap-2">
+                    <div className="flex flex-col items-center">
+                      <p className="text-[40px] font-bold">5</p>
+                      <p className="text-xl">Barang</p>
+                    </div>
+                    <div className="rounded-[4px] bg-[#FF5E5E] flex items-center">
+                      <p className="w-full text-center">kritis</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* item 3 */}
+                <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
+                  <div className="flex flex-col justify-center gap-2">
+                    <div className="flex flex-col items-center">
+                      <p className="text-[40px] font-bold">5</p>
+                      <p className="text-xl">Kandang</p>
+                    </div>
+                    <div className="rounded-[4px] bg-orange-200 flex items-center">
+                      <p className="w-full text-center">Periksa</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
