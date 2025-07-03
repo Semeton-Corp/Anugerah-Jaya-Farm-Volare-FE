@@ -186,9 +186,9 @@ const DetailAyam = () => {
             userRole === "Kepala Kandang") && (
             <div
               onClick={inputAyamHandle}
-              className="flex items-center rounded-lg px-4 py-2 bg-green-700 hover:bg-green-900 cursor-pointer"
+              className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
             >
-              <div className="text-base font-medium ms-2 text-white">
+              <div className="text-base font-medium ms-2 text-black">
                 + Input Data Harian
               </div>
             </div>
@@ -239,20 +239,14 @@ const DetailAyam = () => {
                   {(userRole === "Pekerja Kandang" ||
                     userRole === "Kepala Kandang") && (
                     <td className="py-2 px-4 flex justify-center gap-4">
-                      <BiSolidEditAlt
+                      <span
                         onClick={() => {
                           editDataHandle(row.id);
                         }}
-                        size={24}
-                        className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                      />
-                      <MdDelete
-                        onClick={() => {
-                          deleteDataHandle(row.id);
-                        }}
-                        size={24}
-                        className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                      />
+                        className="py-1 px-4 rounded bg-green-700 hover:bg-green-900  text-white cursor-pointer"
+                      >
+                        Lihat Detail
+                      </span>
                     </td>
                   )}
                 </tr>

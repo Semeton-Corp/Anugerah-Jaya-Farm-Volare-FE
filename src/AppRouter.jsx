@@ -300,6 +300,10 @@ const AppRouter = createBrowserRouter([
                     path: "input-ayam",
                     element: <InputAyam />,
                   },
+                  {
+                    path: "input-ayam/:id",
+                    element: <InputAyam />,
+                  },
                 ],
               },
               {

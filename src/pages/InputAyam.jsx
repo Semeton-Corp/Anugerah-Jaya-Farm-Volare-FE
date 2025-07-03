@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getCage, getChickenCage } from "../services/cages";
 import { kategoriAyam } from "../data/KategoriAyam";
-import { inputAyam } from "../services/chickenMonitorings";
+import { deleteChickenData, inputAyam } from "../services/chickenMonitorings";
 import { getChickenMonitoringById } from "../services/chickenMonitorings";
 import { useParams } from "react-router-dom";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
@@ -12,6 +12,7 @@ import {
   deleteChickenVaccineMonitoring,
   deleteChickenDiseaseMonitoring,
 } from "../services/chickenMonitorings";
+import DeleteModal from "../components/DeleteModal";
 
 const InputAyam = () => {
   const [obatExpanded, setObatExpanded] = useState(false);
@@ -33,6 +34,9 @@ const InputAyam = () => {
   const [totalDeathChicken, setTotalDeathChicken] = useState(0);
   const [totalFeed, setTotalFeed] = useState(0);
   const [note, setNote] = useState("");
+
+  const [isEditMode, setIsEditMode] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const userRole = localStorage.getItem("role");
   const location = useLocation();
@@ -82,6 +86,7 @@ const InputAyam = () => {
       try {
         const response = await getChickenCage();
         const dataChickenCage = response.data.data;
+        console.log("dataChickenCage: ", dataChickenCage);
 
         setChickenCages(dataChickenCage);
         setSelectedChickenCage(dataChickenCage[0]);
@@ -92,14 +97,13 @@ const InputAyam = () => {
           const data = updateResponse.data.data;
           console.log("THERE IS DATA: ", data);
 
-          setSelectedChickenCage(data.cage.id);
-
-          setSelectedChikenCategory(data.chickenCategory);
-          setAgeChiken(data.age);
-          setTotalLiveChicken(data.totalLiveChicken);
+          setSelectedChickenCage(data.chickenCage);
           setTotalSickChicken(data.totalSickChicken);
           setTotalDeathChicken(data.totalDeathChicken);
           setTotalFeed(data.totalFeed);
+          setIsEditMode(false);
+
+          console.log("data.chickenCage.cage: ", data.chickenCage);
 
           const vaksinListget = data.chickenVaccines.map((v) => ({
             id: v.id,
@@ -142,6 +146,23 @@ const InputAyam = () => {
 
     fetchCages();
   }, []);
+
+  async function deleteDataHandle() {
+    try {
+      const response = await deleteChickenData(id);
+      console.log("response.status", response.status);
+
+      if (response.status === 204) {
+        alert("✅ Data berhasil dihapus!");
+        navigate(-1);
+      } else {
+        alert("⚠️ Gagal menghapus data. Silakan coba lagi.");
+      }
+    } catch (error) {
+      console.error("Gagal menghapus data ayam:", error);
+      alert("❌ Terjadi kesalahan saat menghapus data.");
+    }
+  }
 
   async function simpanAyamHandle() {
     setLoading(true);
@@ -249,42 +270,6 @@ const InputAyam = () => {
     }
   }
 
-  const deleteVaccineHandle = async (chickenMonitoringId, id) => {
-    var isDeleted = false;
-    try {
-      const response = await deleteChickenVaccineMonitoring(
-        chickenMonitoringId,
-        id
-      );
-      console.log("response :", response.status);
-      if (response.status == 204) {
-        isDeleted = true;
-      }
-    } catch (error) {
-      alert("Gagal menghapus data vaksin: ", error);
-    }
-
-    return isDeleted;
-  };
-
-  const deleteDiseaseHandle = async (chickenMonitoringId, id) => {
-    var isDeleted = false;
-    try {
-      const response = await deleteChickenDiseaseMonitoring(
-        chickenMonitoringId,
-        id
-      );
-      console.log("response :", response.status);
-      if (response.status == 204) {
-        isDeleted = true;
-      }
-    } catch (error) {
-      alert("Gagal menghapus data penyakit/obat: ", error);
-    }
-
-    return isDeleted;
-  };
-
   const getDisplayValue = (val) => (val === 0 ? "" : val);
 
   return (
@@ -305,23 +290,33 @@ const InputAyam = () => {
 
         {/* Pilih kandang */}
         <label className="block font-medium  mb-1">Pilih kandang</label>
-        <select
-          className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-8"
-          value={selectedChickenCage ? JSON.stringify(selectedChickenCage) : ""}
-          onChange={(e) => {
-            const cageObj = JSON.parse(e.target.value);
-            setSelectedChickenCage(cageObj);
-          }}
-        >
-          <option value="" disabled hidden>
-            Pilih kandang...
-          </option>
-          {chickenCages.map((cage) => (
-            <option key={cage.id} value={JSON.stringify(cage)}>
-              {cage.cage.name || "Tanpa Nama"}
+        {isEditMode ? (
+          <select
+            className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-8"
+            value={
+              selectedChickenCage ? JSON.stringify(selectedChickenCage) : ""
+            }
+            onChange={(e) => {
+              const cageObj = JSON.parse(e.target.value);
+              setSelectedChickenCage(cageObj);
+            }}
+          >
+            <option value="" disabled hidden>
+              Pilih kandang...
             </option>
-          ))}
-        </select>
+            {chickenCages.map((cage) => (
+              <option key={cage.id} value={JSON.stringify(cage)}>
+                {cage.cage.name || "Tanpa Nama"}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <div>
+            <p className="text-lg font-bold mb-4">
+              {selectedChickenCage.cage.name}
+            </p>
+          </div>
+        )}
 
         {/* Kategori dan Usia Ayam */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -409,42 +404,60 @@ const InputAyam = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <div>
             <label className="block font-medium mb-1">Jumlah ayam sakit</label>
-            <input
-              type="number"
-              value={getDisplayValue(totalSickChicken)}
-              className="w-full bg-black-4 border border-black-6 rounded p-2"
-              placeholder="Masukkan jumlah ayam sakit"
-              onChange={(e) => {
-                setTotalSickChicken(e.target.value);
-              }}
-            />
+            {isEditMode ? (
+              <input
+                type="number"
+                value={getDisplayValue(totalSickChicken)}
+                className="w-full bg-black-4 border border-black-6 rounded p-2"
+                placeholder="Masukkan jumlah ayam sakit"
+                onChange={(e) => {
+                  setTotalSickChicken(e.target.value);
+                }}
+              />
+            ) : (
+              <div>
+                <p className="text-lg font-bold mb-4">{totalSickChicken}</p>
+              </div>
+            )}
           </div>
           <div>
             <label className="block font-medium mb-1">Jumlah ayam mati</label>
-            <input
-              type="number"
-              value={getDisplayValue(totalDeathChicken)}
-              className="w-full border border-black-6  bg-black-4 rounded p-2"
-              placeholder="Masukkan jumlah ayam mati"
-              onChange={(e) => {
-                setTotalDeathChicken(e.target.value);
-              }}
-            />
+            {isEditMode ? (
+              <input
+                type="number"
+                value={getDisplayValue(totalDeathChicken)}
+                className="w-full border border-black-6  bg-black-4 rounded p-2"
+                placeholder="Masukkan jumlah ayam mati"
+                onChange={(e) => {
+                  setTotalDeathChicken(e.target.value);
+                }}
+              />
+            ) : (
+              <div>
+                <p className="text-lg font-bold mb-4">{totalDeathChicken}</p>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <div className="mt-4">
             <label className="block font-medium mb-1">Jumlah pakan (Kg)</label>
-            <input
-              type="number"
-              value={getDisplayValue(totalFeed)}
-              className="w-full border border-black-6 rounded p-2 bg-black-4"
-              placeholder="Masukkan jumlah pakan"
-              onChange={(e) => {
-                setTotalFeed(e.target.value);
-              }}
-            />
+            {isEditMode ? (
+              <input
+                type="number"
+                value={getDisplayValue(totalFeed)}
+                className="w-full border border-black-6 rounded p-2 bg-black-4"
+                placeholder="Masukkan jumlah pakan"
+                onChange={(e) => {
+                  setTotalFeed(e.target.value);
+                }}
+              />
+            ) : (
+              <div>
+                <p className="text-lg font-bold mb-4">{totalFeed}</p>
+              </div>
+            )}
           </div>
 
           <div className="mt-4">
@@ -453,7 +466,14 @@ const InputAyam = () => {
             </label>
             <div className="flex items-center py-3">
               <p className="text-lg font-bold">
-                {ageChiken ? `${ageChiken}` : `-`}
+                {totalFeed &&
+                selectedChickenCage?.totalChicken &&
+                parseInt(selectedChickenCage.totalChicken) !== 0
+                  ? `${(
+                      (totalFeed * 1000) /
+                      parseInt(selectedChickenCage.totalChicken)
+                    ).toFixed(2)}`
+                  : `-`}
               </p>
             </div>
           </div>
@@ -464,15 +484,21 @@ const InputAyam = () => {
         {/* Catatan pekerja */}
         <div className="mt-4">
           <label className="block font-medium mb-1">Catatan Pekerja</label>
-          <textarea
-            type="text"
-            value={note}
-            className="w-full border border-black-6 rounded p-2 bg-black-4"
-            placeholder="Masukkan catatan jika terdapat catatan untuk kondisi kandang"
-            onChange={(e) => {
-              setNote(e.target.value);
-            }}
-          />
+          {isEditMode ? (
+            <textarea
+              type="text"
+              value={note}
+              className="w-full border border-black-6 rounded p-2 bg-black-4"
+              placeholder="Masukkan catatan jika terdapat catatan untuk kondisi kandang"
+              onChange={(e) => {
+                setNote(e.target.value);
+              }}
+            />
+          ) : (
+            <div>
+              <p className="text-lg font-bold mb-4">{note ? note : "-"}</p>
+            </div>
+          )}
         </div>
 
         {/* Vaksin Section */}
@@ -674,15 +700,46 @@ const InputAyam = () => {
         </div> */}
 
         {/* Simpan Button */}
-        <div className="mt-6 text-right ">
-          <button
-            onClick={() => {
-              simpanAyamHandle();
-            }}
-            className="bg-green-700 text-white py-2 px-6 rounded hover:bg-green-900 cursor-pointer"
-          >
-            Simpan
-          </button>
+        <div className="mt-6 flex justify-between text-right">
+          <div></div>
+          <div className="flex gap-3">
+            {id && (
+              <div className="text-right">
+                <button
+                  onClick={() => setIsEditMode(!isEditMode)}
+                  className={`${
+                    isEditMode
+                      ? "bg-red-600 hover:bg-red-800"
+                      : "bg-green-700 hover:bg-green-900 "
+                  } text-white py-3 px-8 rounded cursor-pointer`}
+                >
+                  {isEditMode ? "Batal Edit" : "Edit"}
+                </button>
+              </div>
+            )}
+            {isEditMode && (
+              <button
+                onClick={() => {
+                  simpanAyamHandle();
+                  // console.log("selectedCage: ", selectedChickenCage);
+                }}
+                className="bg-green-700 text-white py-3 px-8 rounded hover:bg-green-900 cursor-pointer"
+              >
+                Simpan
+              </button>
+            )}
+
+            {id && !isEditMode && (
+              <div className="text-right">
+                <button
+                  onClick={() => setShowDeleteModal(true)}
+                  className="bg-red-600 text-white py-3 px-8 rounded hover:bg-red-800 cursor-pointer"
+                >
+                  Hapus
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Simpan Button */}
@@ -690,7 +747,7 @@ const InputAyam = () => {
           <button
             onClick={() => {
               const payload = {
-                chickenCageId: parseInt(selectedChickenCage.cage.id),
+                chickenCageId: parseInt(selectedChickenCage),
                 totalSickChicken: parseInt(totalSickChicken),
                 totalDeathChicken: parseInt(totalDeathChicken),
                 totalFeed: parseFloat(totalFeed),
@@ -699,6 +756,8 @@ const InputAyam = () => {
               console.log("payload: ", payload);
               console.log("cages: ", chickenCages);
               console.log("selectedChickenCage: ", selectedChickenCage);
+              console.log("totalFeed: ", totalFeed);
+              console.log("totalLiveChicken: ", totalLiveChicken);
             }}
             className="bg-emerald-700 text-white py-2 px-6 rounded hover:bg-emerald-600 cursor-pointer"
           >
@@ -706,6 +765,11 @@ const InputAyam = () => {
           </button>
         </div>
       </div>
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onCancel={() => setShowDeleteModal(false)}
+        onConfirm={deleteDataHandle}
+      />
     </div>
   );
 };
