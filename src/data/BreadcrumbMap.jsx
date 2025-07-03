@@ -50,4 +50,6 @@ export const breadcrumbMap = {
   "antrian-pesanan": "Antrian",
   "daftar-pesanan": "Daftar Pesanan",
   "input-data-pesanan": "Input Pesanan",
+  "ringkasan-ayam": "Ringkasan Ayam",
+  "detail-kinerja-ayam": "Detail Kinerja Ayam", 
 };

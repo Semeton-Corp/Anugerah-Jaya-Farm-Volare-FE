@@ -138,7 +138,10 @@ export const sidebarMenus = {
     {
       icon: <img src={produksiTelur} alt="Overview Icon" className="h-4 w-4" />,
       tabName: "Produksi Telur",
-      element: <ProduksiTelur />,
+      subTabs: [
+        { tabName: "Data Produksi Telur", path: "data-ayam" },
+        { tabName: "Kandang", path: "overview-ayam" },
+      ],
     },
     {
       icon: <GrNotes size={20} />,
@@ -206,7 +209,7 @@ export const sidebarMenus = {
       tabName: "Ayam",
       element: <OverviewOwner />,
       subTabs: [
-        { tabName: "Overview Ayam", path: "overview-ayam" },
+        { tabName: "Ringkasan Ayam", path: "overview-ayam" },
         { tabName: "Data Ayam", path: "data-ayam" },
       ],
     },

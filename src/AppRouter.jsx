@@ -106,7 +106,7 @@ const AppRouter = createBrowserRouter([
           {
             path: "ayam",
             children: [
-              { path: "overview-ayam", element: <Ayam /> },
+              { path: "ringkasan-ayam", element: <Ayam /> },
               { path: "data-ayam", element: <DetailAyam /> },
               { path: "detail-vaksin-&-obat", element: <VaksinObat /> },
             ],
@@ -372,15 +372,21 @@ const AppRouter = createBrowserRouter([
           { path: "overview", element: <ProduksiTelur /> },
           {
             path: "produksi-telur",
-            element: <DetailProduksi />,
             children: [
               {
-                path: "input-telur",
-                element: <InputTelur />,
+                path: "data-produksi-telur",
+                element: <DetailProduksi />,
+                children: [
+                  { path: "input-telur", element: <InputTelur /> },
+                  {
+                    path: "input-telur/:id",
+                    element: <InputTelur />,
+                  },
+                ],
               },
               {
-                path: "input-telur/:id",
-                element: <InputTelur />,
+                path: "kandang",
+                element: <Kandang />,
               },
             ],
           },
@@ -517,7 +523,13 @@ const AppRouter = createBrowserRouter([
               {
                 path: "data-produksi-telur",
                 element: <DetailProduksi />,
-                children: [{ path: "input-telur", element: <InputTelur /> }],
+                children: [
+                  { path: "input-telur", element: <InputTelur /> },
+                  {
+                    path: "input-telur/:id",
+                    element: <InputTelur />,
+                  },
+                ],
               },
             ],
           },
@@ -525,7 +537,7 @@ const AppRouter = createBrowserRouter([
             path: "ayam",
             children: [
               {
-                path: "overview-ayam",
+                path: "ringkasan-ayam",
                 element: <Ayam />,
               },
               {

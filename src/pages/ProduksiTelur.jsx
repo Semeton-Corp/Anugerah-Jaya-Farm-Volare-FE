@@ -193,7 +193,7 @@ const ProduksiTelur = () => {
           {/* header section */}
           <div className="flex justify-between mb-2 flex-wrap gap-4">
             <h1 className="text-3xl font-bold">Produksi Telur</h1>
-            <div className="flex gap-2">
+            {/* <div className="flex gap-2">
               <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
                 <MdStore size={18} />
                 <div className="text-base font-medium ms-2">Semua site</div>
@@ -204,7 +204,7 @@ const ProduksiTelur = () => {
                   Hari ini (20 Mar 2025)
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Telur  ok, retak, pecah, reject*/}

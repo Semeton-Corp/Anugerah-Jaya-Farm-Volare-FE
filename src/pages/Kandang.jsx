@@ -2,6 +2,7 @@ import React from "react";
 import { FaWarehouse } from "react-icons/fa";
 
 const Kandang = () => {
+  const userRole = localStorage.getItem("role");
   const data = [
     {
       kandang: "Sidodadi DOC",
@@ -49,7 +50,7 @@ const Kandang = () => {
     <div className="px-4 md:px-8 py-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Kandang</h2>
-        <button className="flex items-center gap-2 bg-amber-400 text-black text-sm px-4 py-2 rounded hover:bg-amber-500 transition">
+        <button className="flex items-center gap-2 bg-orange-300 text-black text-sm px-4 py-2 rounded hover:bg-orange-500 transition cursor-pointer">
           <FaWarehouse />
           Sidodadi
         </button>
@@ -61,10 +62,14 @@ const Kandang = () => {
             <thead>
               <tr className="bg-green-700 text-white">
                 <th className="py-2 px-4">Kandang</th>
-                <th className="py-2 px-4">ID Ayam</th>
-                <th className="py-2 px-4">Kategori</th>
-                <th className="py-2 px-4">Usia (minggu)</th>
-                <th className="py-2 px-4">Kapasitas Maksimum (Ekor)</th>
+                <th className="py-2 px-4">ID Batch</th>
+                {userRole !== "Pekerja Telur" && (
+                  <>
+                    <th className="py-2 px-4">Kategori</th>
+                    <th className="py-2 px-4">Usia (minggu)</th>
+                    <th className="py-2 px-4">Kapasitas Maksimum (Ekor)</th>
+                  </>
+                )}
                 <th className="py-2 px-4">PIC</th>
               </tr>
             </thead>
@@ -73,9 +78,13 @@ const Kandang = () => {
                 <tr key={idx} className="border-t hover:bg-gray-50">
                   <td className="py-2 px-4">{row.kandang}</td>
                   <td className="py-2 px-4">{row.idAyam}</td>
-                  <td className="py-2 px-4">{row.kategori}</td>
-                  <td className="py-2 px-4">{row.usia}</td>
-                  <td className="py-2 px-4">{row.kapasitas}</td>
+                  {userRole !== "Pekerja Telur" && (
+                    <>
+                      <td className="py-2 px-4">{row.kategori}</td>
+                      <td className="py-2 px-4">{row.usia}</td>
+                      <td className="py-2 px-4">{row.kapasitas}</td>
+                    </>
+                  )}
                   <td className="py-2 px-4">{row.pic}</td>
                 </tr>
               ))}

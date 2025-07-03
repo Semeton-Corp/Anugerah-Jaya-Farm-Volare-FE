@@ -238,8 +238,8 @@ const OverviewKepalaKandang = () => {
                 </div>
                 <div className="flex items-center">
                   {/* popuasl */}
-                  <p className="text-3xl font-semibold me-3">25.000</p>
-                  <p className="text-xl font-semibold">Ton</p>
+                  <p className="text-3xl font-semibold me-3">15</p>
+                  <p className="text-xl font-semibold">Kg</p>
                 </div>
               </div>
             </div>

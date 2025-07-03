@@ -50,6 +50,7 @@ const DetailProduksi = () => {
       // console.log("response: ", response);
       if (response.status === 200) {
         setProduksiDetail(response.data.data);
+        console.log("response.data.data: ", response.data.data);
       }
     } catch (error) {}
   };
@@ -115,26 +116,12 @@ const DetailProduksi = () => {
                 <th className="py-2 px-4">Kandang</th>
                 <th className="py-2 px-4">Total (butir)</th>
                 <th className="py-2 px-4">OK (butir)</th>
+                <th className="py-2 px-4">Berat Telur Ok (Gr/butir)</th>
                 <th className="py-2 px-4">Retak (butir)</th>
-                <th className="py-2 px-4">Pecah</th>
-                <th className="py-2 px-4">Reject</th>
-                {userRole == "Pekerja Telur" || userRole == "Owner" ? (
-                  <>
-                    <th className="py-2 px-4">%Abnormality</th>
-                    <th className="py-2 px-4">Berat Telur Ok (Gr/butir)</th>
-                    <th className="py-2 px-4">Gudang Simpan</th>
-                  </>
-                ) : (
-                  <></>
-                )}
-
-                <th className="py-2 px-4">Keterangan</th>
-                {userRole === "Pekerja Gudang" && (
-                  <th className="py-2 px-4">Aksi</th>
-                )}
-                {userRole === "Pekerja Telur" && (
-                  <th className="py-2 px-4">Aksi</th>
-                )}
+                <th className="py-2 px-4">Reject (butir)</th>
+                <th className="py-2 px-4">Abnormality (%)</th>
+                <th className="py-2 px-4">Status</th>
+                <th className="py-2 px-4">Aksi</th>
               </tr>
             </thead>
             <tbody className="text-center">
@@ -143,23 +130,10 @@ const DetailProduksi = () => {
                   <td className="py-2 px-4">{item.cage.name}</td>
                   <td className="py-2 px-4">{item.totalAllEgg}</td>
                   <td className="py-2 px-4">{item.totalGoodEgg}</td>
-                  <td className="py-2 px-4">{item.totalCrackedEgg}</td>
+                  <td className="py-2 px-4">{item.averageWeight}</td>
                   <td className="py-2 px-4">{item.totalCrackedEgg}</td>
                   <td className="py-2 px-4">{item.totalRejectEgg}</td>
-                  {userRole == "Pekerja Telur" || userRole == "Owner" ? (
-                    <>
-                      <td className="py-2 px-4">
-                        <div className="flex justify-center">
-                          <p>{Number(item.abnormalityRate).toFixed(2)} </p>
-                          <p>%</p>
-                        </div>
-                      </td>
-                      <td className="py-2 px-4">{item.averageWeight}</td>
-                      <td className="py-2 px-4">{item.warehouse.name}</td>
-                    </>
-                  ) : (
-                    <></>
-                  )}
+                  <td className="py-2 px-4">{item.abnormalityRate}</td>
 
                   <td className="py-2 px-4 flex justify-center">
                     <span
@@ -175,17 +149,17 @@ const DetailProduksi = () => {
                     </span>
                   </td>
                   {userRole === "Pekerja Gudang" && (
-                    <th className="py-2 px-4 ">
+                    <th className="py-1 px-4 ">
                       <span className="px-4 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer">
                         Barang Sampai
                       </span>
                     </th>
                   )}
 
-                  <td className="py-2 px-4 text-center">
+                  <td className="py-1 px-4 text-center">
                     <span
                       onClick={() => editDataHandle(item.id)}
-                      className="py-2 px-5 rounded-[4px] bg-green-700 hover:bg-green-900 cursor-pointer  text-white"
+                      className="py-1 px-5 rounded-[4px] bg-green-700 hover:bg-green-900 cursor-pointer  text-white"
                     >
                       Lihat Detail
                     </span>
