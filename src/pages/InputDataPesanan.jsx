@@ -326,20 +326,13 @@ const InputDataPesanan = () => {
             </div>
 
             <div className="flex justify-center flex-wrap gap-4">
-              {/* item ikat */}
               <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
                 <p className="text-3xl font-bold text-center">50</p>
                 <p className="text-xl text-center">Ikat</p>
               </div>
-              {/* item karpet */}
               <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                <p className="text-3xl font-bold text-center">100</p>
-                <p className="text-xl text-center">Karpet</p>
-              </div>
-              {/* item butir */}
-              <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                <p className="text-3xl font-bold text-center">1000</p>
-                <p className="text-xl text-center">Butir</p>
+                <p className="text-3xl font-bold text-center">750</p>
+                <p className="text-xl text-center">Kg</p>
               </div>
             </div>
           </div>
@@ -356,15 +349,19 @@ const InputDataPesanan = () => {
             <div className="flex justify-center flex-wrap gap-4">
               {/* item butir */}
               <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                <p className="text-3xl font-bold text-center">30</p>
-                <p className="text-xl text-center">Butir</p>
+                <p className="text-3xl font-bold text-center">3</p>
+                <p className="text-xl text-center">Ikat</p>
+              </div>
+              <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+                <p className="text-3xl font-bold text-center">45</p>
+                <p className="text-xl text-center">Kg</p>
               </div>
             </div>
           </div>
           {/* penjualan telur */}
           <div className="p-4 w-full rounded-md border-2 border-black-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Telur Pecah</h2>
+              <h2 className="text-lg font-semibold">Telur Bonyok</h2>
               <div className="p-2 rounded-xl bg-green-700">
                 <TbEggCrackedFilled size={24} color="white" />
               </div>
@@ -373,8 +370,8 @@ const InputDataPesanan = () => {
             <div className="flex justify-center flex-wrap gap-4">
               {/* item butir */}
               <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                <p className="text-3xl font-bold text-center">80</p>
-                <p className="text-xl text-center">Butir</p>
+                <p className="text-3xl font-bold text-center">15</p>
+                <p className="text-xl text-center">Plastik</p>
               </div>
             </div>
           </div>
@@ -386,7 +383,7 @@ const InputDataPesanan = () => {
         <h1 className="text-lg font-bold">
           {id ? "Detail Data Pesanan" : "Input Data Pesanan"}
         </h1>
-
+        {/* 
         {userRole !== "Pekerja Toko" && (
           <>
             <label className="block font-medium  mt-4">Pilih Toko</label>
@@ -404,7 +401,7 @@ const InputDataPesanan = () => {
               ))}
             </select>
           </>
-        )}
+        )} */}
         {/* Pilih Toko/Gudang */}
 
         <InformasiPembeli
@@ -531,15 +528,21 @@ const InputDataPesanan = () => {
             />
           </div>
         </div>
-
-        <div className="flex w-full justify-end p-4">
-          <div>
-            <div className="text-xl font-semibold">Total</div>
-            <div className="font-semibold text-3xl flex">
-              <p className="me-2">RP</p>
-              <p className="">
-                {total === 0 ? "-" : Intl.NumberFormat("id-ID").format(total)}
-              </p>
+        <div className="flex justify-end">
+          <div className="p-4 max-w-xl">
+            <div className="flex justify-between mb-2">
+              <span className="text-lg">Harga Barang :</span>
+              <span className="font-bold text-lg">Rp {10000}</span>
+            </div>
+            <div></div>
+            <div className="flex justify-between mb-4">
+              <span className="text-lg">Potongan Harga :</span>
+              <span className="font-bold text-lg">Rp -{0}</span>
+            </div>
+            <hr className="my-2" />
+            <div className="flex justify-between mt-4">
+              <span className="font-bold text-xl">Total :</span>
+              <span className="font-bold text-xl">Rp {total}</span>
             </div>
           </div>
         </div>
