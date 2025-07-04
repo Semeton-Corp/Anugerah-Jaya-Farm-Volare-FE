@@ -67,6 +67,8 @@ import PesanBarang from "./pages/PesanBarang";
 import DetailPesanBarangGudang from "./pages/DetailPesanBarangGudang";
 import EditKandang from "./pages/EditKandang";
 import TambahToko from "./pages/TambahToko";
+import EditStokTelur from "./pages/EditStokTelur";
+import EditStokBarang from "./pages/EditStokBarang";
 
 const AppRouter = createBrowserRouter([
   {
@@ -558,14 +560,41 @@ const AppRouter = createBrowserRouter([
                   },
                 ],
               },
+
+              {
+                path: "vaksin-&-obat",
+                element: <VaksinObat />,
+                children: [
+                  {
+                    path: "detail-vaksin-&-obat/:id",
+                    element: <DetailVaksinObat />,
+                    children: [
+                      {
+                        path: "input-vaksin-&-obat",
+                        element: <InputVaksinObat />,
+                      },
+                    ],
+                  },
+                ],
+              },
             ],
           },
           {
             path: "gudang",
             children: [
               {
-                path: "overview-gudang",
+                path: "stok-gudang",
                 element: <Gudang />,
+                children: [
+                  {
+                    path: "edit-stok-telur",
+                    element: <EditStokTelur />,
+                  },
+                  {
+                    path: "edit-stok-barang",
+                    element: <EditStokBarang />,
+                  },
+                ],
               },
               {
                 path: "daftar-barang",

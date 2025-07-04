@@ -71,26 +71,30 @@ const riwayatGudangData = [
 const Gudang = () => {
   const location = useLocation();
   const userRole = localStorage.getItem("role");
-  const detailPages = ["detail-stok-gudang", "riwayat-aktivitas-gudang"];
+  const detailPages = ["edit-stok-telur", "edit-stok-barang"];
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
   const navigate = useNavigate();
 
-  const detailStokGudangHandle = () => {
+  const editStokTelurHandle = () => {
     const currentPath = location.pathname;
-    const detailPath = currentPath + "/detail-stok-gudang";
+    const detailPath = currentPath + "/edit-stok-telur";
 
     navigate(detailPath);
   };
 
-  const riwayatAktivitasGudangHandle = () => {
+  const editStokBarangHandle = () => {
     const currentPath = location.pathname;
-    const detailPath = currentPath + "/riwayat-aktivitas-gudang";
+    const detailPath = currentPath + "/edit-stok-barang";
 
     navigate(detailPath);
   };
+
+  if (isDetailPage) {
+    return <Outlet />;
+  }
 
   return (
     <>
@@ -100,9 +104,7 @@ const Gudang = () => {
         <div className="flex flex-col px-4 py-3 gap-4 ">
           {/* header section */}
           <div className="flex justify-between mb-2 flex-wrap gap-4">
-            <h1 className="text-3xl font-bold">
-              {userRole == "Pekerja Gudang" ? "Stok Gudang" : "Gudang"}
-            </h1>
+            <h1 className="text-3xl font-bold">Stok Gudang</h1>
             <div className="flex gap-2">
               <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
                 <FaWarehouse size={18} />
@@ -120,7 +122,7 @@ const Gudang = () => {
           {/* Telur  ok, retak, pecah, reject*/}
           <div className="flex md:grid-cols-2 gap-4 justify-between">
             {/* telur OK */}
-            <div className="p-4 w-full rounded-md bg-green-100">
+            {/* <div className="p-4 w-full rounded-md bg-green-100">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Total Item</h2>
                 <div className="p-2 rounded-xl bg-green-700">
@@ -134,7 +136,7 @@ const Gudang = () => {
                   <p className="text-3xl font-semibold">25.000</p>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* ayam sakit */}
             <div className="p-4 w-full rounded-md bg-green-100">
@@ -199,9 +201,9 @@ const Gudang = () => {
             {/* Chart Section (3/4 width on large screens) */}
             <div className="w-full bg-white px-8 py-6 rounded-lg border border-gray-300">
               <div className="flex justify-between items-start mb-4">
-                <h2 className="text-lg font-semibold">Telur</h2>
+                <h2 className="text-lg font-semibold">Stok Telur</h2>
                 <div
-                  onClick={detailStokGudangHandle}
+                  onClick={() => {}}
                   className="p-2 rounded-full hover:bg-black-4 cursor-pointer"
                 >
                   <FiMaximize2 size={24} color="" />
@@ -212,10 +214,10 @@ const Gudang = () => {
                   <thead>
                     <tr className="bg-green-700 font-medium text-white text-center">
                       <th className="py-2 px-4">Nama Barang</th>
-                      <th className="py-2 px-4">QTY</th>
+                      <th className="py-2 px-4">Jumlah</th>
                       <th className="py-2 px-4">Satuan</th>
-                      <th className="py-2 px-4">Lokasi simpan</th>
                       <th className="py-2 px-4">Keterangan</th>
+                      <th className="py-2 px-4">Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -223,8 +225,7 @@ const Gudang = () => {
                       <tr key={index} className="border-b text-center">
                         <td className="py-2 px-4">{item.namaBarang}</td>
                         <td className="py-2 px-4">{item.qty}</td>
-                        <td className="py-2 px-4">{item.lokasiSimpan}</td>
-                        <td className="py-2 px-4">{item.estimasiHabis}</td>
+                        <td className="py-2 px-4">Kg</td>
                         <td className="py-2 px-4 flex justify-center">
                           <span
                             className={`w-24 py-1 flex justify-center rounded text-sm font-semibold ${
@@ -234,6 +235,16 @@ const Gudang = () => {
                             }`}
                           >
                             {item.keterangan}
+                          </span>
+                        </td>
+                        <td className="py-2 px-4 justify-center gap-4">
+                          <span
+                            onClick={() => {
+                              editStokTelurHandle();
+                            }}
+                            className="py-1 px-4 rounded bg-green-700 hover:bg-green-900  text-white cursor-pointer"
+                          >
+                            Edit Stok
                           </span>
                         </td>
                       </tr>
@@ -249,7 +260,7 @@ const Gudang = () => {
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-lg font-semibold">Barang</h2>
               <div
-                onClick={riwayatAktivitasGudangHandle}
+                onClick={() => {}}
                 className="p-2 rounded-full hover:bg-black-4 cursor-pointer"
               >
                 <FiMaximize2 size={24} color="" />
@@ -261,22 +272,21 @@ const Gudang = () => {
                   <tr className="bg-green-700 text-white font-medium text-center">
                     <th className="py-2 px-4">Nama barang</th>
                     <th className="py-2 px-4">Kategori</th>
-                    <th className="py-2 px-4">QTY</th>
+                    <th className="py-2 px-4">Jumlah</th>
                     <th className="py-2 px-4">Satuan</th>
-                    <th className="py-2 px-4">Lokasi simpan</th>
                     <th className="py-2 px-4">Estimasi Habis</th>
                     <th className="py-2 px-4">Keterangan</th>
+                    <th className="py-2 px-4">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
                   {riwayatGudangData.map((item, index) => (
                     <tr key={index} className="border-b text-center">
-                      <td className="py-2 px-4">{item.tanggal}</td>
                       <td className="py-2 px-4">{item.namaBarang}</td>
-                      <td className="py-2 px-4">{item.id}</td>
                       <td className="py-2 px-4">{item.jenisBarang}</td>
                       <td className="py-2 px-4">{item.qty}</td>
-                      <td className="py-2 px-4">{item.lokasiSimpan}</td>
+                      <td className="py-2 px-4">Kg</td>
+                      <td className="py-2 px-4">7 hari lagi</td>
                       <td className="py-2 px-4 flex justify-center">
                         <span
                           className={`w-24 py-1 flex justify-center rounded text-sm font-semibold ${
@@ -285,7 +295,17 @@ const Gudang = () => {
                               : "bg-kritis-box-surface-color text-kritis-text-color"
                           }`}
                         >
-                          {item.keterangan}
+                          kritis
+                        </span>
+                      </td>
+                      <td className="py-2 px-4 justify-center gap-4">
+                        <span
+                          onClick={() => {
+                            editStokBarangHandle();
+                          }}
+                          className="py-1 px-4 rounded bg-green-700 hover:bg-green-900  text-white cursor-pointer"
+                        >
+                          Edit Stok
                         </span>
                       </td>
                     </tr>

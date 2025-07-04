@@ -211,6 +211,7 @@ export const sidebarMenus = {
       subTabs: [
         { tabName: "Ringkasan Ayam", path: "overview-ayam" },
         { tabName: "Data Ayam", path: "data-ayam" },
+        { tabName: "Vaksin & Obat", path: "detail-vaksin-&-obat" },
       ],
     },
     {
@@ -218,7 +219,7 @@ export const sidebarMenus = {
       tabName: "Gudang",
       element: <OverviewOwner />,
       subTabs: [
-        { tabName: "Overview Gudang", path: "overview-gudang" },
+        { tabName: "Stok Gudang", path: "overview-gudang" },
         { tabName: "Daftar Barang", path: "daftar-barang" },
         { tabName: "Pesanan Toko", path: "pesanan-toko" },
         { tabName: "Riwayat Gudang", path: "riwayat-gudang" },
