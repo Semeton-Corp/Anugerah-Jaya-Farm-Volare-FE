@@ -126,9 +126,9 @@ const DaftarBarang = () => {
             <div className="flex justify-end items-center mb-4">
               <div
                 onClick={tambahBarangHandle}
-                className="flex items-center rounded-lg px-4 py-2 bg-green-700 hover:bg-green-900 cursor-pointer"
+                className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
               >
-                <div className="text-base font-medium ms-2 text-white">
+                <div className="text-base font-medium ms-2 ">
                   + Tambah Barang Baru
                 </div>
               </div>
@@ -160,20 +160,9 @@ const DaftarBarang = () => {
                   {userRole === "Pekerja Gudang" ||
                     (userRole === "Kepala Kandang" && (
                       <td className="py-2 px-4 flex justify-center gap-4">
-                        <BiSolidEditAlt
-                          onClick={() => {
-                            editDataHandle(data.id);
-                          }}
-                          size={24}
-                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                        />
-                        <MdDelete
-                          onClick={() => {
-                            deleteDataHandle(data.id);
-                          }}
-                          size={24}
-                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                        />
+                        <span className="px-4 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer">
+                          Edit Stok
+                        </span>
                       </td>
                     ))}
                 </tr>

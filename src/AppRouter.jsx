@@ -69,6 +69,7 @@ import EditKandang from "./pages/EditKandang";
 import TambahToko from "./pages/TambahToko";
 import EditStokTelur from "./pages/EditStokTelur";
 import EditStokBarang from "./pages/EditStokBarang";
+import DetailRiwayatGudang from "./pages/DetailRiwayatGudang";
 
 const AppRouter = createBrowserRouter([
   {
@@ -597,20 +598,60 @@ const AppRouter = createBrowserRouter([
                 ],
               },
               {
-                path: "daftar-barang",
-                element: <DaftarBarang />,
+                path: "pengadaan-barang",
+                element: <PengadaanBarang />,
+                children: [
+                  {
+                    path: "input-pengadaan-barang",
+                    element: <InputPengadaanBarang />,
+                  },
+                ],
               },
               {
                 path: "pesanan-toko",
                 element: <PesananToko />,
               },
               {
+                path: "daftar-barang",
+                element: <DaftarBarang />,
+                children: [
+                  {
+                    path: "tambah-barang-baru",
+                    element: <TambahBarangBaru />,
+                  },
+                  {
+                    path: "tambah-barang-baru/:id",
+                    element: <TambahBarangBaru />,
+                  },
+                ],
+              },
+              {
                 path: "riwayat-gudang",
                 element: <RiwayatGudang />,
+                children: [
+                  {
+                    path: "detail-riwayat-gudang",
+                    element: <DetailRiwayatGudang />,
+                  },
+                  {
+                    path: "detail-riwayat-gudang/:id",
+                    element: <DetailRiwayatGudang />,
+                  },
+                ],
               },
               {
                 path: "daftar-suplier",
                 element: <DaftarSuplier />,
+                children: [
+                  {
+                    path: "tambah-supplier",
+                    element: <TambahSupplier />,
+                  },
+                  {
+                    path: "tambah-supplier/:id",
+                    element: <TambahSupplier />,
+                  },
+                ],
               },
             ],
           },
@@ -717,6 +758,16 @@ const AppRouter = createBrowserRouter([
               {
                 path: "riwayat-gudang",
                 element: <RiwayatGudang />,
+                children: [
+                  {
+                    path: "detail-riwayat-gudang",
+                    element: <DetailRiwayatGudang />,
+                  },
+                  {
+                    path: "detail-riwayat-gudang/:id",
+                    element: <DetailRiwayatGudang />,
+                  },
+                ],
               },
               {
                 path: "daftar-suplier",

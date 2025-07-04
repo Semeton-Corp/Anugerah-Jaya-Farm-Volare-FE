@@ -220,10 +220,11 @@ export const sidebarMenus = {
       element: <OverviewOwner />,
       subTabs: [
         { tabName: "Stok Gudang", path: "overview-gudang" },
-        { tabName: "Daftar Barang", path: "daftar-barang" },
+        { tabName: "Pengadaan Barang", path: "overview-gudang" },
         { tabName: "Pesanan Toko", path: "pesanan-toko" },
-        { tabName: "Riwayat Gudang", path: "riwayat-gudang" },
+        { tabName: "Daftar Barang", path: "daftar-barang" },
         { tabName: "Daftar Suplier", path: "daftar-suplier" },
+        { tabName: "Riwayat Gudang", path: "riwayat-gudang" },
       ],
     },
     {

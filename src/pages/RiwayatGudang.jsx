@@ -5,6 +5,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import { PiCalendarBlank } from "react-icons/pi";
 import { BiSolidEditAlt } from "react-icons/bi";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const riwayatGudangData = [
   {
@@ -47,11 +48,24 @@ const riwayatGudangData = [
 
 const RiwayatGudang = () => {
   const [query, setQuery] = useState("");
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const handleSearch = (e) => {
-    setQuery(e.target.value);
-    onSearch(e.target.value); // Call parent function with search input
+  const detailPages = ["detail-riwayat-gudang"];
+  const isDetailPage = detailPages.some((segment) =>
+    location.pathname.includes(segment)
+  );
+
+  const detailRiwayatHandle = () => {
+    const currentPath = location.pathname;
+    const detailPath = currentPath + "/detail-riwayat-gudang";
+
+    navigate(detailPath);
   };
+
+  if (isDetailPage) {
+    return <Outlet />;
+  }
 
   return (
     <div className="flex flex-col px-4 py-3 gap-4 ">
@@ -81,6 +95,7 @@ const RiwayatGudang = () => {
                 <th className="py-2 px-4">Asal Barang</th>
                 <th className="py-2 px-4">Tujuan</th>
                 <th className="py-2 px-4">Keterangan</th>
+                <th className="py-2 px-4"></th>
               </tr>
             </thead>
             <tbody className="text-center">
@@ -99,12 +114,20 @@ const RiwayatGudang = () => {
                           ? "bg-aman-box-surface-color text-aman-text-color"
                           : data.keterangan === "Pending"
                           ? "bg-green-200 text-green-900"
-                          : data.keterangan === "Barang keluar"
+                          : data.keterangan === "Stok diperbaharui"
                           ? "bg-orange-200 text-orange-900"
                           : "bg-kritis-box-surface-color text-kritis-text-color"
                       }`}
                     >
                       {data.keterangan}
+                    </span>
+                  </td>
+                  <td className="py-2 px-4">
+                    <span
+                      onClick={detailRiwayatHandle}
+                      className="underline hover:text-black-5 cursor-pointer"
+                    >
+                      Detail
                     </span>
                   </td>
                 </tr>

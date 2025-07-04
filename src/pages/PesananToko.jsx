@@ -65,8 +65,13 @@ const PesananToko = () => {
           <div className="flex justify-center flex-wrap gap-4">
             {/* item ikat */}
             <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-              <p className="text-3xl font-bold text-center">50</p>
+              <p className="text-3xl font-bold text-center">20</p>
               <p className="text-xl text-center">Ikat</p>
+            </div>
+
+            <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+              <p className="text-3xl font-bold text-center">20</p>
+              <p className="text-xl text-center">Kg</p>
             </div>
           </div>
         </div>
@@ -74,7 +79,7 @@ const PesananToko = () => {
         {/* penjualan telur */}
         <div className="p-4 w-full rounded-md border-2 border-black-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Telur Pecah</h2>
+            <h2 className="text-lg font-semibold">Telur Retak</h2>
             <div className="p-2 rounded-xl bg-green-700">
               <TbEggCrackedFilled size={24} color="white" />
             </div>
@@ -83,8 +88,13 @@ const PesananToko = () => {
           <div className="flex justify-center flex-wrap gap-4">
             {/* item butir */}
             <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-              <p className="text-3xl font-bold text-center">80</p>
-              <p className="text-xl text-center">Pack</p>
+              <p className="text-3xl font-bold text-center">20</p>
+              <p className="text-xl text-center">Ikat</p>
+            </div>
+
+            <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+              <p className="text-3xl font-bold text-center">20</p>
+              <p className="text-xl text-center">Kg</p>
             </div>
           </div>
         </div>
@@ -137,16 +147,12 @@ const PesananToko = () => {
                   {userRole === "Pekerja Gudang" ||
                     (userRole === "Kepala Kandang" && (
                       <td className="py-2 px-4 flex justify-center gap-4">
-                        <BiSolidEditAlt
-                          onClick={() => {}}
-                          size={24}
-                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                        />
-                        <MdDelete
-                          onClick={() => {}}
-                          size={24}
-                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                        />
+                        <span className="px-6 py-1 rounded bg-green-700 hover:bg-green-900 text-white  cursor-pointer flex items-center gap-2">
+                          Kirim Barang
+                        </span>
+                        <span className="px-6 py-1 rounded bg-kritis-box-surface-color hover:bg-kritis-text-color cursor-pointer flex items-center gap-2 text-white">
+                          Tolak
+                        </span>
                       </td>
                     ))}
                 </tr>
