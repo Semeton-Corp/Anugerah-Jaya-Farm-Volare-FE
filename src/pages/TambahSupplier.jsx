@@ -15,6 +15,7 @@ import {
   updateSuppliers,
   deleteSupplier,
 } from "../services/supplier";
+import { MdDelete } from "react-icons/md";
 
 const TambahSupplier = () => {
   const [cages, setCages] = useState([]);
@@ -25,6 +26,7 @@ const TambahSupplier = () => {
 
   const [warehouseItems, setWarehouseItems] = useState([]);
   const [selectedItem, setSelectedItem] = useState("");
+  const [selectedItems, setSelectedItems] = useState([0]);
 
   const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -140,23 +142,6 @@ const TambahSupplier = () => {
           />
         </div>
 
-        {/* Pilih barang */}
-        <label className="block font-medium mb-1">Nama Barang</label>
-        <select
-          className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-6"
-          value={selectedItem}
-          onChange={(e) => {
-            const id = Number(e.target.value);
-            setSelectedItem(id);
-          }}
-        >
-          {warehouseItems.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.name}
-            </option>
-          ))}
-        </select>
-
         <div>
           <label className="block font-medium mb-1">Alamat Supplier</label>
           <input
@@ -179,6 +164,54 @@ const TambahSupplier = () => {
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
           />
+        </div>
+
+        <div className="mt-6 border rounded p-4">
+          <h3 className="font-semibold mb-2">Daftar barang yang disupply</h3>
+
+          {selectedItems.map((itemId, index) => (
+            <div key={index} className="flex gap-2 items-center mb-2">
+              <select
+                className="w-full border bg-black-4 cursor-pointer rounded p-2"
+                value={itemId}
+                onChange={(e) => {
+                  const updatedItems = [...selectedItems];
+                  updatedItems[index] = Number(e.target.value);
+                  setSelectedItems(updatedItems);
+                }}
+              >
+                {warehouseItems.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+              {selectedItems.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedItems(
+                      selectedItems.filter((_, i) => i !== index)
+                    );
+                  }}
+                  className="text-red-500 hover:text-red-300 cursor-pointer"
+                >
+                  <MdDelete size={32} />
+                </button>
+              )}
+            </div>
+          ))}
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() =>
+                setSelectedItems([...selectedItems, warehouseItems[0]?.id || 0])
+              }
+              className="bg-orange-300 hover:bg-orange-500  text-sm px-4 py-2 rounded cursor-pointer"
+            >
+              + Tambah Barang
+            </button>
+          </div>
         </div>
 
         <div className="mt-6 text-right">

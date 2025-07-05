@@ -27,6 +27,7 @@ const InputPengadaanBarang = () => {
   const [selectedSupplier, setSelectedSupplier] = useState("");
 
   const [quantity, setQuantity] = useState("");
+  const [estimasiHabis, setEstimasiHabis] = useState("");
 
   const [ok, setOk] = useState("");
   const [retak, setRetak] = useState("");
@@ -157,11 +158,24 @@ const InputPengadaanBarang = () => {
         <div className="flex gap-4"></div>
         <div>
           <label className="block font-medium mb-1">Jumlah Pesanan</label>
-          <div className="flex gap-4 items-center mb-6">
+          <div className="flex w-fullgap-4 items-center mb-6">
             <input
               type="number"
-              className="w-1/6 border rounded py-2 px-2 bg-black-4"
+              className="w-full border rounded py-2 px-2 bg-black-4"
               placeholder="Masukkan jumlah barang..."
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+            />
+            <p className="text-lg font-bold">{selectedItem.unit}</p>
+          </div>
+        </div>
+        <div>
+          <label className="block font-medium mb-1">Estimasi Habis</label>
+          <div className="flex w-fullgap-4 items-center mb-6">
+            <input
+              type="number"
+              className="w-full border rounded py-2 px-2 bg-black-4"
+              placeholder="Masukkan estimasi habis barang (ex : 7 Hari)"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
             />

@@ -224,6 +224,8 @@ export const sidebarMenus = {
         { tabName: "Pesanan Toko", path: "pesanan-toko" },
         { tabName: "Daftar Barang", path: "daftar-barang" },
         { tabName: "Daftar Suplier", path: "daftar-suplier" },
+        { tabName: "Daftar Vaksin & Obat", path: "daftar-suplier" },
+
         { tabName: "Riwayat Gudang", path: "riwayat-gudang" },
       ],
     },

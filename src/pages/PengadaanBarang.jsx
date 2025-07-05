@@ -11,6 +11,27 @@ import {
   getWarehouseOrderItems,
   takeWarehouseOrderItem,
 } from "../services/warehouses";
+import KonfirmasiBarangSampaiGudangModal from "../components/KonfirmasiBarangSampaiGudangModal";
+import BatalPengadaanBarangModal from "../components/BatalPengadaanBarangModal";
+
+export const pesananDummy = [
+  {
+    tanggal: "20 Mar 2025",
+    namaBarang: "Jagung",
+    jumlah: 12,
+    satuan: "Karung",
+    supplier: "Super Jagung",
+    keterangan: "Belum Konfirmasi",
+  },
+  {
+    tanggal: "20 Mar 2025",
+    namaBarang: "Telur retak",
+    jumlah: 12,
+    satuan: "Karpet",
+    supplier: "Dagang Dedak",
+    keterangan: "Belum Konfirmasi",
+  },
+];
 
 const PengadaanBarang = () => {
   const userRole = localStorage.getItem("role");
@@ -18,6 +39,10 @@ const PengadaanBarang = () => {
   const navigate = useNavigate();
 
   const [daftarBarangData, setDaftarBarangData] = useState([]);
+  const [isShowConfirmModal, setIsShowConfirmModal] = useState(false);
+  const [isShowBatalModal, setIsShowBatalModal] = useState(false);
+
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const detailPages = ["input-pengadaan-barang"];
 
@@ -64,6 +89,15 @@ const PengadaanBarang = () => {
     }
   }, [location]);
 
+  const confirmBatalHandle = () => {
+    console.log("test:");
+    setIsShowBatalModal(false);
+  };
+  const confirmBarangSampaiHandle = () => {
+    console.log("test:");
+    setIsShowConfirmModal(false);
+  };
+
   // Render detail input page only
   if (isDetailPage) {
     return <Outlet />;
@@ -104,6 +138,7 @@ const PengadaanBarang = () => {
           <table className="w-full text-sm text-left border-collapse">
             <thead>
               <tr className="bg-green-700 text-white text-center">
+                <th className="py-2 px-4">Tanggal Pemesanan</th>
                 <th className="py-2 px-4">Nama Barang</th>
                 <th className="py-2 px-4">Satuan</th>
                 <th className="py-2 px-4">Kuantitas</th>
@@ -116,6 +151,44 @@ const PengadaanBarang = () => {
               </tr>
             </thead>
             <tbody>
+              {pesananDummy.map((item, index) => (
+                <tr key={index} className="border-b">
+                  <td className="px-4 py-2">{item.tanggal}</td>
+                  <td className="px-4 py-2">{item.namaBarang}</td>
+                  <td className="px-4 py-2">{item.jumlah}</td>
+                  <td className="px-4 py-2">{item.satuan}</td>
+                  <td className="px-4 py-2">{item.supplier}</td>
+                  <td className="px-4 py-2">
+                    <span className="bg-orange-200 px-2 py-1 rounded">
+                      {item.keterangan}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2 flex gap-2">
+                    <button
+                      onClick={() => {
+                        setSelectedItem(item);
+                        setIsShowConfirmModal(true);
+                        console.log("item: ", item);
+                      }}
+                      className="bg-green-700 hover:bg-green-900 text-white px-2 py-1 rounded text-sm cursor-pointer"
+                    >
+                      Konfirmasi
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedItem(item);
+                        setIsShowBatalModal(true);
+                      }}
+                      className="bg-red-500 hover:bg-red-700 text-white px-2 py-1 rounded text-sm cursor-pointer"
+                    >
+                      Batalkan
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+
+            {/* <tbody>
               {daftarBarangData.map((data, index) => (
                 <tr
                   key={index}
@@ -158,10 +231,26 @@ const PengadaanBarang = () => {
                   </td>
                 </tr>
               ))}
-            </tbody>
+            </tbody> */}
           </table>
         </div>
       </div>
+      {isShowConfirmModal && selectedItem && (
+        <KonfirmasiBarangSampaiGudangModal
+          isOpen={isShowConfirmModal}
+          onClose={() => setIsShowConfirmModal(false)}
+          onConfirm={confirmBarangSampaiHandle}
+          data={selectedItem}
+        />
+      )}
+
+      {isShowBatalModal && selectedItem && (
+        <BatalPengadaanBarangModal
+          isOpen={isShowBatalModal}
+          onCancel={() => setIsShowBatalModal(false)}
+          onConfirm={confirmBatalHandle}
+        />
+      )}
     </div>
   );
 };

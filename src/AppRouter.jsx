@@ -70,6 +70,7 @@ import TambahToko from "./pages/TambahToko";
 import EditStokTelur from "./pages/EditStokTelur";
 import EditStokBarang from "./pages/EditStokBarang";
 import DetailRiwayatGudang from "./pages/DetailRiwayatGudang";
+import DaftarVaksinObat from "./pages/DaftarVaksinObat";
 
 const AppRouter = createBrowserRouter([
   {
@@ -622,6 +623,16 @@ const AppRouter = createBrowserRouter([
                   {
                     path: "tambah-barang-baru/:id",
                     element: <TambahBarangBaru />,
+                  },
+                ],
+              },
+              {
+                path: "daftar-vaksin-&-obat",
+                element: <DaftarVaksinObat />,
+                children: [
+                  {
+                    path: "tambah-vaksin",
+                    element: <TambahSupplier />,
                   },
                 ],
               },
