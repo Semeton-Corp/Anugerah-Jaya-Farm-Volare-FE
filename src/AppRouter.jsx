@@ -71,6 +71,9 @@ import EditStokTelur from "./pages/EditStokTelur";
 import EditStokBarang from "./pages/EditStokBarang";
 import DetailRiwayatGudang from "./pages/DetailRiwayatGudang";
 import DaftarVaksinObat from "./pages/DaftarVaksinObat";
+import DetailSupplier from "./pages/DetailSuplier";
+import DaftarHargaTelur from "./pages/DaftarHargaTelur";
+import TambahHargaTelur from "./pages/TambahHargaTelur";
 
 const AppRouter = createBrowserRouter([
   {
@@ -659,8 +662,8 @@ const AppRouter = createBrowserRouter([
                     element: <TambahSupplier />,
                   },
                   {
-                    path: "tambah-supplier/:id",
-                    element: <TambahSupplier />,
+                    path: "detail-supplier",
+                    element: <DetailSupplier />,
                   },
                 ],
               },
@@ -690,6 +693,20 @@ const AppRouter = createBrowserRouter([
                   {
                     path: "input-data-pesanan",
                     element: <InputDataPesanan />,
+                  },
+                  {
+                    path: "input-data-pesanan/:id",
+                    element: <InputDataPesanan />,
+                  },
+                ],
+              },
+              {
+                path: "daftar-harga-telur",
+                element: <DaftarHargaTelur />,
+                children: [
+                  {
+                    path: "tambah-kategori-harga",
+                    element: <TambahHargaTelur />,
                   },
                   {
                     path: "input-data-pesanan/:id",

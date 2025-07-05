@@ -8,6 +8,7 @@ import { getChickenMonitoring } from "../services/chickenMonitorings";
 import { deleteChickenData } from "../services/chickenMonitorings";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
 import { getWarehouseItems } from "../services/warehouses";
+import { getItems } from "../services/item";
 
 // const daftarBarangData = [
 //   {
@@ -52,7 +53,7 @@ const DaftarBarang = () => {
 
   const fetchWarehouseItems = async () => {
     try {
-      const warehouseItemResponse = await getWarehouseItems();
+      const warehouseItemResponse = await getItems();
       console.log("warehouseItemResponse: ", warehouseItemResponse);
       if (warehouseItemResponse.status == 200) {
         setDaftarBarangData(warehouseItemResponse.data.data);

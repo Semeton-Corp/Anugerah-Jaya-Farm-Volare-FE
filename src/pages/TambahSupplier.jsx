@@ -16,14 +16,9 @@ import {
   deleteSupplier,
 } from "../services/supplier";
 import { MdDelete } from "react-icons/md";
+import { getItems } from "../services/item";
 
 const TambahSupplier = () => {
-  const [cages, setCages] = useState([]);
-  const [selectedCage, setSelectedCage] = useState(0);
-
-  const [warehouses, setWarehouses] = useState([]);
-  const [selectedWarehouse, setSelectedWarehouse] = useState(0);
-
   const [warehouseItems, setWarehouseItems] = useState([]);
   const [selectedItem, setSelectedItem] = useState("");
   const [selectedItems, setSelectedItems] = useState([0]);
@@ -32,19 +27,13 @@ const TambahSupplier = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [address, setAddress] = useState("");
 
-  const [ok, setOk] = useState("");
-  const [retak, setRetak] = useState("");
-  const [pecah, setPecah] = useState("");
-  const [reject, setReject] = useState("");
-  const [weight, setWeight] = useState("");
-
   const navigate = useNavigate();
 
   const { id } = useParams();
 
   const fetchWarehouseItems = async () => {
     try {
-      const itemsResponse = await getWarehouseItems();
+      const itemsResponse = await getItems();
       //   console.log("itemsResponse: ", itemsResponse);
       if (itemsResponse.status == 200) {
         setWarehouseItems(itemsResponse.data.data);
@@ -220,7 +209,6 @@ const TambahSupplier = () => {
               <button
                 onClick={() => {
                   hapusHandle(id);
-                  console.log("selectedCage: ", selectedCage);
                 }}
                 className="bg-kritis-box-surface-color text-white py-2 px-6 me-4 rounded hover:bg-kritis-text-color cursor-pointer"
               >
@@ -233,7 +221,6 @@ const TambahSupplier = () => {
             <button
               onClick={() => {
                 handleSubmit();
-                console.log("selectedCage: ", selectedCage);
               }}
               className="bg-green-700 text-white py-2 px-6 rounded hover:bg-green-900 cursor-pointer"
             >
@@ -242,7 +229,7 @@ const TambahSupplier = () => {
           </div>
         </div>
       </div>
-      {/* <button
+      <button
         onClick={() => {
           console.log("name: ", name);
           console.log("selectedItem: ", selectedItem);
@@ -251,7 +238,7 @@ const TambahSupplier = () => {
         }}
       >
         Check
-      </button> */}
+      </button>
     </div>
   );
 };

@@ -22,6 +22,7 @@ import { createStoreSalePayment } from "../services/stores";
 import { updateStoreSalePayment } from "../services/stores";
 import { updateStoreSale } from "../services/stores";
 import InformasiPembeli from "../components/InformasiPembeli";
+import { getItems } from "../services/item";
 
 const InputDataPesanan = () => {
   const location = useLocation();
@@ -84,7 +85,9 @@ const InputDataPesanan = () => {
 
   const fetchItemsData = async (storeId) => {
     try {
-      const response = await getWarehouseItems("Telur", storeId);
+      const response = await getItems("Telur", {
+        // storeId
+      });
       console.log("response fetch item data", response);
 
       if (response.status == 200) {

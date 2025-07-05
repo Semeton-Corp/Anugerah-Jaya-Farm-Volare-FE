@@ -12,6 +12,7 @@ import {
 } from "../services/warehouses";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
 import { createWarehouseItems } from "../services/warehouses";
+import { createItem } from "../services/item";
 
 const TambahBarangBaru = () => {
   const [cages, setCages] = useState([]);
@@ -89,8 +90,8 @@ const TambahBarangBaru = () => {
       }
     } else {
       try {
-        const createResponse = await createWarehouseItems(payload);
-        // console.log("createResponse: ", createResponse);
+        const createResponse = await createItem(payload);
+        console.log("createResponse: ", createResponse);
         if (createResponse.status == 201) {
           navigate(-1, { state: { refecth: true } });
         }
@@ -120,6 +121,18 @@ const TambahBarangBaru = () => {
           onChange={(e) => setName(e.target.value)}
         />
 
+        <div className="gap-4 mb-6">
+          <div>
+            <label className="block font-medium mb-1">Satuan Barang</label>
+            <input
+              type="text"
+              className="w-full border rounded p-2 bg-black-4"
+              placeholder="Masukkan satuan barang..."
+              value={getDisplayValue(unit)}
+              onChange={(e) => setUnit(e.target.value)}
+            />
+          </div>
+        </div>
         {/* Pilih kategori */}
         <label className="block font-medium mb-1">Kategori</label>
         <select
@@ -135,19 +148,6 @@ const TambahBarangBaru = () => {
             </option>
           ))}
         </select>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block font-medium mb-1">Satuan Barang</label>
-            <input
-              type="text"
-              className="w-full border rounded p-2 bg-black-4"
-              placeholder="Masukkan satuan barang..."
-              value={getDisplayValue(unit)}
-              onChange={(e) => setUnit(e.target.value)}
-            />
-          </div>
-        </div>
 
         <div className="mt-6 text-right">
           <button

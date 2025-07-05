@@ -9,36 +9,30 @@ import { getSuppliers } from "../services/supplier";
 import { useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
-// const suplierData = [
-//   {
-//     namaSupplier: "Pelet099",
-//     namaBarang: "Pelet",
-//     alamat: "JL. AJF 1",
-//     nomorTelepon: "0812345678",
-//     details: "Details",
-//   },
-//   {
-//     namaSupplier: "Super Jagung",
-//     namaBarang: "Telur Retak",
-//     alamat: "JL. AJF 2",
-//     nomorTelepon: "0812345678",
-//     details: "Details",
-//   },
-//   {
-//     namaSupplier: "Dagang Dedak",
-//     namaBarang: "Dedak",
-//     alamat: "JL. AJF 3",
-//     nomorTelepon: "0812345678",
-//     details: "Details",
-//   },
-// ];
+const suppliersDummy = [
+  {
+    name: "Pelet099",
+    address: "JL. AJF 1",
+    phone: "0812345678",
+  },
+  {
+    name: "Super Jagung",
+    address: "JL. AJF 2",
+    phone: "0812345678",
+  },
+  {
+    name: "Dagang Dedak",
+    address: "JL. AJF 3",
+    phone: "0812345678",
+  },
+];
 const DaftarSuplier = () => {
   const userRole = localStorage.getItem("role");
   const location = useLocation();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
 
-  const detailPage = ["tambah-supplier"];
+  const detailPage = ["tambah-supplier", "detail-supplier"];
 
   const isDetailPage = detailPage.some((segment) =>
     location.pathname.includes(segment)
@@ -62,8 +56,8 @@ const DaftarSuplier = () => {
     navigate(`${location.pathname}/tambah-supplier`);
   };
 
-  const editSupplierHandle = (id) => {
-    navigate(`${location.pathname}/tambah-supplier/${id}`);
+  const lihatDetailHandle = (id) => {
+    navigate(`${location.pathname}/detail-supplier`);
   };
 
   useEffect(() => {
@@ -108,18 +102,18 @@ const DaftarSuplier = () => {
                   onClick={() => {
                     tambahSupplierHandle();
                   }}
-                  className="flex items-center rounded-lg px-4 py-2 bg-green-700 hover:bg-green-900 cursor-pointer"
+                  className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
                 >
-                  <div className="text-base font-medium ms-2 text-white">
-                    + Tambah Data Supplier
+                  <div className="text-base font-medium ms-2 ">
+                    + Tambah Supplier
                   </div>
                 </div>
               </div>
             ))}
 
           <table className="w-full ">
-            <thead className="px-8 rounded-[4px] bg-green-700 text-white text-center">
-              <tr className="">
+            <thead className="rounded-[4px] bg-green-700 text-white">
+              <tr className="text-left">
                 <th className="py-2 px-4">Nama Supplier</th>
                 <th className="py-2 px-4">Nama barang</th>
                 <th className="py-2 px-4">Alamat</th>
@@ -127,7 +121,27 @@ const DaftarSuplier = () => {
                 <th className="py-2 px-4"></th>
               </tr>
             </thead>
-            <tbody className="text-center">
+            <tbody>
+              {suppliersDummy.map((item, index) => (
+                <tr key={index} className="border-b">
+                  <td className="px-4 py-2">{item.name}</td>
+                  <td className="px-4 py-2">{item.itemName}</td>{" "}
+                  {/* fix: previously missing */}
+                  <td className="px-4 py-2">{item.address}</td>
+                  <td className="px-4 py-2">{item.phone}</td>
+                  <td className="px-4 py-2">
+                    <button
+                      onClick={lihatDetailHandle}
+                      className="bg-green-700 hover:bg-green-900 text-white px-2 py-1 rounded text-sm"
+                    >
+                      Lihat Detail
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+
+            {/* <tbody className="text-center">
               {supplierData.map((item, index) => (
                 <tr key={index} className="border-b border-black-6">
                   <td className="py-2 px-4 ">{item.name}</td>
@@ -146,7 +160,7 @@ const DaftarSuplier = () => {
                   </td>
                 </tr>
               ))}
-            </tbody>
+            </tbody> */}
           </table>
 
           {/* footer */}

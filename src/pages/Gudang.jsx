@@ -70,13 +70,13 @@ const riwayatGudangData = [
 
 const Gudang = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const userRole = localStorage.getItem("role");
   const detailPages = ["edit-stok-telur", "edit-stok-barang"];
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
-  const navigate = useNavigate();
 
   const editStokTelurHandle = () => {
     const currentPath = location.pathname;
