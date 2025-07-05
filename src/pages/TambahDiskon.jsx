@@ -47,8 +47,6 @@ const TambahDiskon = () => {
         console.log("error :", error);
       }
     }
-
-    // TODO: send to API
   };
 
   const fetchDetailData = async () => {
