@@ -43,6 +43,24 @@ export const getItemPrices = () => {
   });
 };
 
+export const getItemPricesById = (id) => {
+  return api.get(`/items/prices/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const updateItemPrice = (payload, id) => {
+  return api.put(`/items/prices/${id}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
 //Price Discount
 export const createItemPriceDiscount = (payload) => {
   return api.post("/items/prices/discounts", payload, {
@@ -55,6 +73,24 @@ export const createItemPriceDiscount = (payload) => {
 
 export const getItemPricesDiscount = () => {
   return api.get("/items/prices/discounts", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const getItemPricesDiscountById = (id) => {
+  return api.get(`/items/prices/discounts/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const updateItemPricesDiscount = (payload, id) => {
+  return api.put(`/items/prices/discounts/${id}`, payload, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",

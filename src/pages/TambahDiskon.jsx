@@ -1,6 +1,11 @@
 import React, { useState } from "react";
-import { createItemPriceDiscount } from "../services/item";
-import { useNavigate } from "react-router-dom";
+import {
+  createItemPriceDiscount,
+  getItemPricesDiscountById,
+  updateItemPricesDiscount,
+} from "../services/item";
+import { useNavigate, useParams } from "react-router-dom";
+import { useEffect } from "react";
 
 const TambahDiskon = () => {
   const navigate = useNavigate();
@@ -10,8 +15,7 @@ const TambahDiskon = () => {
   const [satuan, setSatuan] = useState("");
   const [besarDiskon, setBesarDiskon] = useState("");
 
-  const minTransaksiOptions = ["1 Kali", "5 Kali", "10 Kali"];
-  const satuanOptions = ["%", "Rp"];
+  const { id } = useParams();
 
   const handleSubmit = async () => {
     const payload = {
@@ -19,20 +23,54 @@ const TambahDiskon = () => {
       minimumTransactionUser: parseInt(minTransaksi),
       totalDiscount: parseFloat(besarDiskon),
     };
-    console.log("payload: ", payload);
-    try {
-      const tambahResponse = await createItemPriceDiscount(payload);
-      console.log("tambahResponse: ", tambahResponse);
+    // console.log("payload: ", payload);
 
-      if (tambahResponse.status == 201) {
-        navigate(-1, { state: { refetch: true } });
+    if (id) {
+      try {
+        const updateResponse = await updateItemPricesDiscount(payload, id);
+        console.log("updateResponse: ", updateResponse);
+        if (updateResponse.status == 200) {
+          navigate(-1, { state: { refetch: true } });
+        }
+      } catch (error) {
+        console.log("error :", error);
+      }
+    } else {
+      try {
+        const tambahResponse = await createItemPriceDiscount(payload);
+        console.log("tambahResponse: ", tambahResponse);
+
+        if (tambahResponse.status == 201) {
+          navigate(-1, { state: { refetch: true } });
+        }
+      } catch (error) {
+        console.log("error :", error);
+      }
+    }
+
+    // TODO: send to API
+  };
+
+  const fetchDetailData = async () => {
+    try {
+      const detailResponse = await getItemPricesDiscountById(id);
+      console.log("detailResponse: ", detailResponse);
+      if (detailResponse.status == 200) {
+        const data = detailResponse.data.data;
+        setNamaDiskon(data.name);
+        setMinTransaksi(data.minimumTransactionUser);
+        setBesarDiskon(data.totalDiscount);
       }
     } catch (error) {
       console.log("error :", error);
     }
-    console.log("Submitted:", payload);
-    // TODO: send to API
   };
+
+  useEffect(() => {
+    if (id) {
+      fetchDetailData();
+    }
+  }, []);
 
   return (
     <div className="flex flex-col px-4 py-3 gap-4">

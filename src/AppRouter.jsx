@@ -710,7 +710,15 @@ const AppRouter = createBrowserRouter([
                     element: <TambahHargaTelur />,
                   },
                   {
+                    path: "tambah-kategori-harga/:id",
+                    element: <TambahHargaTelur />,
+                  },
+                  {
                     path: "tambah-diskon",
+                    element: <TambahDiskon />,
+                  },
+                  {
+                    path: "tambah-diskon/:id",
                     element: <TambahDiskon />,
                   },
                 ],

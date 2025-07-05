@@ -1,39 +1,55 @@
 import React, { useEffect, useState } from "react";
-import { createItemPrice, getItemPrices, getItems } from "../services/item";
-import { useNavigate } from "react-router-dom";
+import {
+  createItemPrice,
+  getItemPrices,
+  getItemPricesById,
+  getItems,
+  updateItemPrice,
+} from "../services/item";
+import { useNavigate, useParams } from "react-router-dom";
 
 const TambahHargaTelur = () => {
   const navigate = useNavigate();
 
   const [kategori, setKategori] = useState("");
   const [barang, setBarang] = useState("");
-  const [satuan, setSatuan] = useState("");
   const [harga, setHarga] = useState("");
 
   const [items, setItems] = useState([]);
-  const [selectedItem, setSelectedItem] = useState("");
 
-  const satuanOptions = ["Ikat", "Butir", "Plastik"];
+  const { id } = useParams();
 
   const handleSubmit = async () => {
     const payload = {
-      itemId: selectedItem,
+      itemId: parseInt(barang),
       category: kategori,
       price: harga,
     };
 
-    try {
-      const tambahResponse = await getItemPrices(payload);
-      console.log("tambahResponse: ", tambahResponse);
-
-      if (tambahResponse.status == 201) {
-        navigate(-1, { state: { refetch: true } });
+    if (id) {
+      try {
+        const updateResponse = await updateItemPrice(payload, id);
+        console.log("updateResponse: ", updateResponse);
+        if (updateResponse.status == 200) {
+          navigate(-1, { state: { refetch: true } });
+        }
+      } catch (error) {
+        console.log("error :", error);
       }
-    } catch (error) {
-      console.log("error :", error);
+    } else {
+      try {
+        const tambahResponse = await getItemPrices(payload);
+        console.log("tambahResponse: ", tambahResponse);
+
+        if (tambahResponse.status == 201) {
+          navigate(-1, { state: { refetch: true } });
+        }
+      } catch (error) {
+        console.alert("error :", error);
+      }
+      console.log("Submitted:", payload);
+      // TODO: send payload to API
     }
-    console.log("Submitted:", payload);
-    // TODO: send payload to API
   };
 
   const fetchItemsData = async (storeId) => {
@@ -50,7 +66,25 @@ const TambahHargaTelur = () => {
     } catch (error) {}
   };
 
+  const fetchDetailData = async () => {
+    try {
+      const detailResponse = await getItemPricesById(id);
+      console.log("detailResponse: ", detailResponse);
+      if (detailResponse.status == 200) {
+        const data = detailResponse.data.data;
+        setKategori(data.category);
+        setBarang(data.item.id);
+        setHarga(data.price);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
   useEffect(() => {
+    if (id) {
+      fetchDetailData();
+    }
     fetchItemsData();
   }, []);
 
@@ -117,7 +151,7 @@ const TambahHargaTelur = () => {
           <button
             onClick={() => {
               console.log("kategori: ", kategori);
-              console.log("selectedItem: ", selectedItem);
+              console.log("barang: ", barang);
               console.log("harga: ", harga);
             }}
             className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-900 cursor-pointer"

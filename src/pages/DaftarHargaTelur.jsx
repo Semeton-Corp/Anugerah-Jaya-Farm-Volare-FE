@@ -5,38 +5,6 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { getItemPrices, getItemPricesDiscount } from "../services/item";
 
 const DaftarHargaTelur = () => {
-  const hargaTelur = [
-    {
-      kategori: "Harga Grosir",
-      barang: "Telur OK",
-      satuan: "ikat",
-      harga: "Rp 10.000",
-    },
-    {
-      kategori: "Harga Eceran",
-      barang: "Telur OK",
-      satuan: "Butir",
-      harga: "Rp 20.000",
-    },
-    {
-      kategori: "Harga Telur Retak",
-      barang: "Telur Retak",
-      satuan: "Butir",
-      harga: "Rp 30.000",
-    },
-    {
-      kategori: "Harga Telur Kemasan",
-      barang: "Telur Bonyok",
-      satuan: "Pack",
-      harga: "Rp 30.000",
-    },
-  ];
-
-  const diskon = [
-    { nama: "Diskon Pelanggan", minimum: "5 Kali", besar: "10 %" },
-    { nama: "Diskon Pelanggan", minimum: "5 Kali", besar: "10 %" },
-  ];
-
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -56,6 +24,13 @@ const DaftarHargaTelur = () => {
     navigate(detailPath);
   };
 
+  const editKategoriHargaHandle = (id) => {
+    const currentPath = location.pathname;
+    const detailPath = currentPath + `/tambah-kategori-harga/${id}`;
+
+    navigate(detailPath);
+  };
+
   const tambahDiskonHandle = () => {
     const currentPath = location.pathname;
     const detailPath = currentPath + "/tambah-diskon";
@@ -63,6 +38,13 @@ const DaftarHargaTelur = () => {
     navigate(detailPath);
   };
 
+  const editDiskonHandle = (id) => {
+    const currentPath = location.pathname;
+    const detailPath = currentPath + `/tambah-diskon/${id}`;
+
+    navigate(detailPath);
+  };
+  
   const fetchHargaTelur = async () => {
     try {
       const hargaResponse = await getItemPrices();
@@ -89,10 +71,17 @@ const DaftarHargaTelur = () => {
       console.log("error :", error);
     }
   };
+
   useEffect(() => {
     fetchHargaTelur();
     fetchDiskon();
-  }, []);
+
+    if (location.state?.refetch) {
+      fetchHargaTelur();
+      fetchDiskon();
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   if (isDetailPage) {
     return <Outlet />;
@@ -131,7 +120,12 @@ const DaftarHargaTelur = () => {
                 <td className="px-3 py-2">{row.item.name}</td>
                 <td className="px-3 py-2">{`Rp ${row.price}`}</td>
                 <td className="px-3 py-2">
-                  <button className="bg-green-700 hover:bg-green-900 text-white px-3 py-1 rounded text-sm cursor-pointer">
+                  <button
+                    onClick={() => {
+                      editKategoriHargaHandle(row.id);
+                    }}
+                    className="bg-green-700 hover:bg-green-900 text-white px-3 py-1 rounded text-sm cursor-pointer"
+                  >
                     Edit Harga
                   </button>
                 </td>
@@ -168,7 +162,12 @@ const DaftarHargaTelur = () => {
                 <td className="px-3 py-2">{`${row.minimumTransactionUser} Kali`}</td>
                 <td className="px-3 py-2">{`${row.totalDiscount} %`}</td>
                 <td className="px-3 py-2">
-                  <button className="bg-green-700 hover:bg-green-900 text-white px-3 py-1 rounded text-sm">
+                  <button
+                    onClick={() => {
+                      editDiskonHandle(row.id);
+                    }}
+                    className="bg-green-700 hover:bg-green-900 text-white px-3 py-1 rounded text-sm"
+                  >
                     Edit Diskon
                   </button>
                 </td>
