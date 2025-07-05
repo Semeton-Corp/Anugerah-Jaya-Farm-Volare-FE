@@ -2,7 +2,7 @@ import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { getItemPrices } from "../services/item";
+import { getItemPrices, getItemPricesDiscount } from "../services/item";
 
 const DaftarHargaTelur = () => {
   const hargaTelur = [
@@ -41,6 +41,7 @@ const DaftarHargaTelur = () => {
   const navigate = useNavigate();
 
   const [hargaList, setHargaList] = useState([]);
+  const [diskonList, setDiskonList] = useState([]);
 
   const detailPages = ["tambah-kategori-harga", "tambah-diskon"];
 
@@ -55,23 +56,42 @@ const DaftarHargaTelur = () => {
     navigate(detailPath);
   };
 
+  const tambahDiskonHandle = () => {
+    const currentPath = location.pathname;
+    const detailPath = currentPath + "/tambah-diskon";
+
+    navigate(detailPath);
+  };
+
   const fetchHargaTelur = async () => {
     try {
-      const tambahResponse = await getItemPrices();
-      console.log("tambahResponse: ", tambahResponse);
+      const hargaResponse = await getItemPrices();
+      //   console.log("hargaResponse: ", hargaResponse);
 
-      if (tambahResponse.status == 200) {
-        setHargaList(tambahResponse.data.data);
+      if (hargaResponse.status == 200) {
+        setHargaList(hargaResponse.data.data);
       }
     } catch (error) {
       console.log("error :", error);
     }
-    console.log("Submitted:", payload);
     // TODO: send payload to API
   };
 
+  const fetchDiskon = async () => {
+    try {
+      const discountResponse = await getItemPricesDiscount();
+      console.log("discountResponse: ", discountResponse);
+
+      if (discountResponse.status == 200) {
+        setDiskonList(discountResponse.data.data);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
   useEffect(() => {
     fetchHargaTelur();
+    fetchDiskon();
   }, []);
 
   if (isDetailPage) {
@@ -125,7 +145,10 @@ const DaftarHargaTelur = () => {
       <div className="bg-white border shadow rounded p-6">
         <div className="flex justify-between mb-3">
           <h2 className="font-semibold text-lg">Diskon</h2>
-          <button className="bg-orange-300  px-4 py-1 rounded hover:bg-orange-500 cursor-pointer">
+          <button
+            onClick={tambahDiskonHandle}
+            className="bg-orange-300  px-4 py-1 rounded hover:bg-orange-500 cursor-pointer"
+          >
             + Tambah Diskon
           </button>
         </div>
@@ -139,11 +162,11 @@ const DaftarHargaTelur = () => {
             </tr>
           </thead>
           <tbody>
-            {diskon.map((row, idx) => (
+            {diskonList.map((row, idx) => (
               <tr key={idx} className="border-b">
-                <td className="px-3 py-2">{row.nama}</td>
-                <td className="px-3 py-2">{row.minimum}</td>
-                <td className="px-3 py-2">{row.besar}</td>
+                <td className="px-3 py-2">{row.name}</td>
+                <td className="px-3 py-2">{`${row.minimumTransactionUser} Kali`}</td>
+                <td className="px-3 py-2">{`${row.totalDiscount} %`}</td>
                 <td className="px-3 py-2">
                   <button className="bg-green-700 hover:bg-green-900 text-white px-3 py-1 rounded text-sm">
                     Edit Diskon

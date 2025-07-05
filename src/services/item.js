@@ -42,3 +42,22 @@ export const getItemPrices = () => {
     },
   });
 };
+
+//Price Discount
+export const createItemPriceDiscount = (payload) => {
+  return api.post("/items/prices/discounts", payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const getItemPricesDiscount = () => {
+  return api.get("/items/prices/discounts", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};

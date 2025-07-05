@@ -74,6 +74,7 @@ import DaftarVaksinObat from "./pages/DaftarVaksinObat";
 import DetailSupplier from "./pages/DetailSuplier";
 import DaftarHargaTelur from "./pages/DaftarHargaTelur";
 import TambahHargaTelur from "./pages/TambahHargaTelur";
+import TambahDiskon from "./pages/TambahDiskon";
 
 const AppRouter = createBrowserRouter([
   {
@@ -709,8 +710,8 @@ const AppRouter = createBrowserRouter([
                     element: <TambahHargaTelur />,
                   },
                   {
-                    path: "input-data-pesanan/:id",
-                    element: <InputDataPesanan />,
+                    path: "tambah-diskon",
+                    element: <TambahDiskon />,
                   },
                 ],
               },
