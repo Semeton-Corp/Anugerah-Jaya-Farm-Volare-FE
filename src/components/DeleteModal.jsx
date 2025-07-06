@@ -9,7 +9,7 @@ const DeleteModal = ({ isOpen, onCancel, onConfirm }) => {
       <div className="bg-white rounded-lg shadow-md p-6 w-[320px] text-center">
         <FaTrashAlt className="text-3xl text-black mx-auto mb-4" />
         <p className="text-lg font-semibold mb-6">
-          Apakah anda yakin untuk menghapus data harian ini?
+          Apakah anda yakin untuk menghapus data ini?
         </p>
         <div className="flex justify-center gap-4">
           <button

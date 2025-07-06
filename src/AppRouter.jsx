@@ -75,6 +75,8 @@ import DetailSupplier from "./pages/DetailSuplier";
 import DaftarHargaTelur from "./pages/DaftarHargaTelur";
 import TambahHargaTelur from "./pages/TambahHargaTelur";
 import TambahDiskon from "./pages/TambahDiskon";
+import TambahVaksinObat from "./pages/TambahVaksinObat";
+import DetailVaksinObatItem from "./pages/DetailVaksinObatItem";
 
 const AppRouter = createBrowserRouter([
   {
@@ -636,7 +638,15 @@ const AppRouter = createBrowserRouter([
                 children: [
                   {
                     path: "tambah-vaksin",
-                    element: <TambahSupplier />,
+                    element: <TambahVaksinObat />,
+                  },
+                  {
+                    path: "tambah-vaksin/:id",
+                    element: <TambahVaksinObat />,
+                  },
+                  {
+                    path: "detail-vaksin-obat/:id",
+                    element: <DetailVaksinObatItem />,
                   },
                 ],
               },

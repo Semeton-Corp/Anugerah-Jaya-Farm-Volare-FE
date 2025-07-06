@@ -69,3 +69,49 @@ export const deleteChickenDiseaseMonitoring = (chickenMonitoringId, id) => {
     }
   );
 };
+
+///HEALTH ITEMS
+export const createChickenHealthItem = (payload) => {
+  return api.post(`/chickens/healths/items`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const getChickenHealthItems = () => {
+  return api.get(`/chickens/healths/items`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const getChickenHealthItemById = (id) => {
+  return api.get(`/chickens/healths/items/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const deleteChickenHealthItem = (id) => {
+  return api.delete(`/chickens/healths/items/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const updateChickenHealthItem = (payload, id) => {
+  return api.put(`/chickens/healths/items/${id}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
