@@ -44,15 +44,17 @@ const TambahSupplier = () => {
     }
   };
 
-  const fetchSupplierById = async (id) => {
+  const fetchSupplierById = async () => {
     try {
       const supplierDetailResponse = await getSupplierById(id);
       console.log("supplierDetailResponse: ", supplierDetailResponse);
       if (supplierDetailResponse.status == 200) {
+        const items = supplierDetailResponse.data.data.items || [];
+
         setName(supplierDetailResponse.data.data.name);
-        setSelectedItem(supplierDetailResponse.data.data.warehouseItem.id);
         setAddress(supplierDetailResponse.data.data.address);
         setPhoneNumber(supplierDetailResponse.data.data.phoneNumber);
+        setSelectedItems(items.map((item) => item.id));
       }
       //   console.log("itemsResponse: ", itemsResponse);
     } catch (error) {
@@ -64,7 +66,7 @@ const TambahSupplier = () => {
     fetchWarehouseItems();
 
     if (id) {
-      fetchSupplierById(id);
+      fetchSupplierById();
     }
   }, []);
 
@@ -239,11 +241,11 @@ const TambahSupplier = () => {
             address: address,
           };
           console.log("payload: ", payload);
-          // console.log("name: ", name);
-          // console.log("selectedItems: ", selectedItems);
-          // console.log("address: ", address);
-          // console.log("phoneNumber: ", phoneNumber);
-          // console.log("warehouseItems: ", warehouseItems);
+          console.log("name: ", name);
+          console.log("selectedItems: ", selectedItems);
+          console.log("address: ", address);
+          console.log("phoneNumber: ", phoneNumber);
+          console.log("warehouseItems: ", warehouseItems);
         }}
       >
         Check

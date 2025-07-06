@@ -673,7 +673,11 @@ const AppRouter = createBrowserRouter([
                     element: <TambahSupplier />,
                   },
                   {
-                    path: "detail-supplier",
+                    path: "tambah-supplier/:id",
+                    element: <TambahSupplier />,
+                  },
+                  {
+                    path: "detail-supplier/:id",
                     element: <DetailSupplier />,
                   },
                 ],

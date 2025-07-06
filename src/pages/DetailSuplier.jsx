@@ -1,19 +1,54 @@
 import React, { useState } from "react";
+import { useEffect } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { deleteSupplier, getSupplierById } from "../services/supplier";
 
 const DetailSupplier = () => {
   const [showModal, setShowModal] = useState(false);
 
-  const supplier = {
-    name: "Super Jagung",
-    address: "JL. AJF 2",
-    phone: "0812345678",
-    items: ["Jagung"],
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { id } = useParams();
+
+  const [supplierData, setSupplierData] = useState({});
+
+  const fetchSupplierData = async () => {
+    try {
+      const detailResponse = await getSupplierById(id);
+      console.log("detailResponse: ", detailResponse);
+      if (detailResponse.status === 200) {
+        setSupplierData(detailResponse.data.data);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
   };
 
-  const handleDelete = () => {
-    console.log("Supplier deleted!");
+  const handleDelete = async () => {
+    try {
+      const deleteResponse = await deleteSupplier(id);
+      console.log("deleteResponse: ", deleteResponse);
+      if (deleteResponse.status === 204) {
+        setShowModal(false);
+        navigate(-1, { state: { refetch: true } });
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
     setShowModal(false);
   };
+
+  const handleEdit = () => {
+    const newPath = location.pathname.replace(
+      "detail-supplier",
+      "tambah-supplier"
+    );
+    navigate(newPath);
+  };
+
+  useEffect(() => {
+    fetchSupplierData();
+  }, []);
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -21,31 +56,41 @@ const DetailSupplier = () => {
 
       <div className="bg-white border rounded p-4">
         <p className="text-sm text-gray-600">Nama Supplier</p>
-        <p className="font-bold">{supplier.name}</p>
+        <p className="font-bold">{supplierData?.name}</p>
 
         <p className="text-sm text-gray-600 mt-4">Alamat Supplier</p>
-        <p className="font-bold">{supplier.address}</p>
+        <p className="font-bold">{supplierData?.address}</p>
 
         <p className="text-sm text-gray-600 mt-4">Nomor Telepon Supplier</p>
-        <p className="font-bold">{supplier.phone}</p>
+        <p className="font-bold">{supplierData?.phoneNumber}</p>
       </div>
 
       <div className="bg-white border rounded p-4">
-        <p className="text-sm font-semibold">Daftar barang yang disupply</p>
-        {supplier.items.map((item, index) => (
-          <p key={index} className="font-bold">
-            {item}
-          </p>
+        <p className="text-sm font-semibold mb-4">
+          Daftar barang yang disupply
+        </p>
+        {supplierData?.items?.map((item, index) => (
+          <div className="mb-2" key={index}>
+            <p className="text-sm text-gray-600">
+              {`Nama Barang ${index + 1}`}.
+            </p>
+            <p key={index} className="font-bold">
+              {item.name}
+            </p>
+          </div>
         ))}
       </div>
 
-      <div className="flex gap-2">
-        <button className="bg-teal-700 hover:bg-teal-900 text-white px-4 py-2 rounded">
+      <div className="flex gap-2 justify-end">
+        <button
+          onClick={handleEdit}
+          className="bg-green-700 hover:bg-green-900 text-white px-4 py-2 rounded cursor-pointer"
+        >
           Edit Supplier
         </button>
         <button
           onClick={() => setShowModal(true)}
-          className="bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded"
+          className="bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded cursor-pointer"
         >
           Hapus Supplier
         </button>
@@ -61,13 +106,13 @@ const DetailSupplier = () => {
             <div className="flex justify-center gap-4">
               <button
                 onClick={() => setShowModal(false)}
-                className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded font-semibold"
+                className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded font-semibold cursor-pointer"
               >
                 Tidak
               </button>
               <button
                 onClick={handleDelete}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded font-semibold"
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded font-semibold cursor-pointer"
               >
                 Ya, Lanjutkan
               </button>

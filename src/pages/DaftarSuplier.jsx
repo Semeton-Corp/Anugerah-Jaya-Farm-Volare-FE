@@ -57,7 +57,7 @@ const DaftarSuplier = () => {
   };
 
   const lihatDetailHandle = (id) => {
-    navigate(`${location.pathname}/detail-supplier`);
+    navigate(`${location.pathname}/detail-supplier/${id}`);
   };
 
   useEffect(() => {
@@ -95,43 +95,39 @@ const DaftarSuplier = () => {
       <div className=" rounded-[4px] border border-black-6">
         {/* pegawai table */}
         <div className="px-6 py-6">
-          {userRole === "Pekerja Gudang" ||
-            (userRole === "Kepala Kandang" && (
-              <div className="flex justify-end items-center mb-4">
-                <div
-                  onClick={() => {
-                    tambahSupplierHandle();
-                  }}
-                  className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
-                >
-                  <div className="text-base font-medium ms-2 ">
-                    + Tambah Supplier
-                  </div>
-                </div>
+          <div className="flex justify-end items-center mb-4">
+            <div
+              onClick={() => {
+                tambahSupplierHandle();
+              }}
+              className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
+            >
+              <div className="text-base font-medium ms-2 ">
+                + Tambah Supplier
               </div>
-            ))}
+            </div>
+          </div>
 
           <table className="w-full ">
             <thead className="rounded-[4px] bg-green-700 text-white">
               <tr className="text-left">
                 <th className="py-2 px-4">Nama Supplier</th>
-                <th className="py-2 px-4">Nama barang</th>
                 <th className="py-2 px-4">Alamat</th>
                 <th className="py-2 px-4">Nomor Telepon</th>
                 <th className="py-2 px-4"></th>
               </tr>
             </thead>
             <tbody>
-              {suppliersDummy.map((item, index) => (
+              {supplierData.map((item, index) => (
                 <tr key={index} className="border-b">
                   <td className="px-4 py-2">{item.name}</td>
-                  <td className="px-4 py-2">{item.itemName}</td>{" "}
-                  {/* fix: previously missing */}
                   <td className="px-4 py-2">{item.address}</td>
-                  <td className="px-4 py-2">{item.phone}</td>
+                  <td className="px-4 py-2">{item.phoneNumber}</td>
                   <td className="px-4 py-2">
                     <button
-                      onClick={lihatDetailHandle}
+                      onClick={() => {
+                        lihatDetailHandle(item.id);
+                      }}
                       className="bg-green-700 hover:bg-green-900 text-white px-2 py-1 rounded text-sm"
                     >
                       Lihat Detail

@@ -117,7 +117,7 @@ const DaftarKandang = () => {
                   <button
                     onClick={() => {
                       detailKandangHandle(row.id);
-                    }}
+                  }}
                     className="bg-green-700 hover:bg-green-900 hover:cursor-pointer text-white px-3 py-1 rounded"
                   >
                     Lihat Detail
