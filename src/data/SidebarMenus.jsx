@@ -240,6 +240,14 @@ export const sidebarMenus = {
       ],
     },
     {
+      icon: <GiTempleDoor className="h-4 w-4" />,
+      tabName: "Fasilitas",
+      subTabs: [
+        { tabName: "Daftar Kandang", path: "daftar-kandang" },
+        { tabName: "Daftar Gudang", path: "daftar-gudang" },
+      ],
+    },
+    {
       icon: <GrNotes size={20} />,
       tabName: "Tugas",
       element: <OverviewOwner />,

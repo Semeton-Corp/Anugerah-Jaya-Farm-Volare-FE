@@ -66,7 +66,11 @@ const DetailProduksi = () => {
 
   useEffect(() => {
     fetchDataTelur();
-  });
+
+    if (location.state?.refetch) {
+      fetchDataTelur();
+    }
+  }, [location]);
 
   async function editDataHandle(dataId) {
     const currectPath = location.pathname;

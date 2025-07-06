@@ -1,55 +1,12 @@
 import React from "react";
+import { useEffect } from "react";
+import { useState } from "react";
 import { MdStore } from "react-icons/md";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { getChickenCage } from "../services/cages";
 
 const DaftarKandang = () => {
-  const kandangData = [
-    {
-      kandang: "Sidodadi DOC",
-      idBatch: "06112025000001",
-      kategori: "DOC",
-      usia: "1",
-      kapasitas: "11000",
-      picAyam: "Siti Rahayu",
-      picTelur: "Siti Rahayu",
-    },
-    {
-      kandang: "Sidodadi Grower",
-      idBatch: "06102025000001",
-      kategori: "Grower",
-      usia: "10",
-      kapasitas: "11000",
-      picAyam: "Siti Rahayu",
-      picTelur: "Siti Rahayu",
-    },
-    {
-      kandang: "Sidodadi 01",
-      idBatch: "06092025000001",
-      kategori: "Pre Layer",
-      usia: "16",
-      kapasitas: "4000",
-      picAyam: "Yono",
-      picTelur: "Yono",
-    },
-    {
-      kandang: "Sidodadi 02",
-      idBatch: "06082025000001",
-      kategori: "Layer",
-      usia: "19",
-      kapasitas: "4000",
-      picAyam: "Yono",
-      picTelur: "Yono",
-    },
-    {
-      kandang: "Sidodadi 03",
-      idBatch: "06072025000001",
-      kategori: "Afkir",
-      usia: "30",
-      kapasitas: "4000",
-      picAyam: "Abdi",
-      picTelur: "Abdi",
-    },
-  ];
+  const [kandangData, setKandangData] = useState([]);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -64,13 +21,44 @@ const DaftarKandang = () => {
     navigate(`${location.pathname}/tambah-kandang`);
   };
 
-  const detailKandangHandle = () => {
-    navigate(`${location.pathname}/detail-kandang`);
+  const detailKandangHandle = (id) => {
+    navigate(`${location.pathname}/detail-kandang/${id}`);
   };
 
   const pindahAyamHandle = () => {
     navigate(`${location.pathname}/pindah-ayam`);
   };
+
+  const fetchKandangData = async () => {
+    try {
+      const kandangResponse = await getChickenCage();
+
+      if (kandangResponse.status === 200) {
+        const allKandang = kandangResponse.data.data;
+        const role = localStorage.getItem("role");
+        const locationId = parseInt(localStorage.getItem("locationId"), 10);
+
+        let filteredKandang = allKandang;
+
+        console.log("allKandang: ", allKandang);
+        if (role !== "Owner") {
+          filteredKandang = allKandang.filter(
+            (item) => item.cage.location.id === locationId
+          );
+        }
+
+        console.log("Filtered Kandang:", filteredKandang);
+        // Do something with filteredKandang, e.g., set state
+        setKandangData(filteredKandang);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchKandangData();
+  }, []);
 
   if (isDetailPage) {
     return <Outlet />;
@@ -118,16 +106,18 @@ const DaftarKandang = () => {
           <tbody>
             {kandangData.map((row, index) => (
               <tr key={index} className="border-t">
-                <td className="px-4 py-2">{row.kandang}</td>
-                <td className="px-4 py-2">{row.idBatch}</td>
-                <td className="px-4 py-2">{row.kategori}</td>
-                <td className="px-4 py-2">{row.usia}</td>
-                <td className="px-4 py-2">{row.kapasitas}</td>
-                <td className="px-4 py-2">{row.picAyam}</td>
-                <td className="px-4 py-2">{row.picTelur}</td>
+                <td className="px-4 py-2">{row.cage.name}</td>
+                <td className="px-4 py-2">{row.batchId}</td>
+                <td className="px-4 py-2">{row.cage.chickenCategory}</td>
+                <td className="px-4 py-2">{row.chickenAge}</td>
+                <td className="px-4 py-2">{row.cage.capacity}</td>
+                <td className="px-4 py-2">{row.chickenPic}</td>
+                <td className="px-4 py-2">{row.eggPic}</td>
                 <td className="px-4 py-2">
                   <button
-                    onClick={detailKandangHandle}
+                    onClick={() => {
+                      detailKandangHandle(row.id);
+                    }}
                     className="bg-green-700 hover:bg-green-900 hover:cursor-pointer text-white px-3 py-1 rounded"
                   >
                     Lihat Detail

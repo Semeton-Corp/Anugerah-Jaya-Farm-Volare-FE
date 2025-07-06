@@ -147,7 +147,7 @@ const InputTelur = () => {
 
         if (response.status === 200) {
           console.log("Data berhasil Diupdate:", response.data);
-          navigate(-1);
+          navigate(-1, { state: { refetch: true } });
         } else {
           console.log("status bukan 200:", response.data);
         }
@@ -160,7 +160,7 @@ const InputTelur = () => {
         console.log("response: ", response);
         if (response.status === 201) {
           console.log("Data berhasil dikirim:", response.data);
-          navigate(-1);
+          navigate(-1, { state: { refetch: true } });
         } else {
           console.log("status bukan 200:", response.data);
         }
@@ -186,7 +186,7 @@ const InputTelur = () => {
     try {
       const response = await deleteEggData(id);
       if (response.status == 204) {
-        navigate(-1);
+        navigate(-1, { state: { refetch: true } });
       }
       console.log("response: ", response);
     } catch (error) {

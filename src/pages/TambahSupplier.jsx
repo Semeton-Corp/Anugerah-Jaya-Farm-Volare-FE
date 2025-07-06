@@ -71,6 +71,7 @@ const TambahSupplier = () => {
   const handleSubmit = async () => {
     const payload = {
       warehouseItemId: selectedItem,
+      itemIds: selectedItems,
       name: name,
       phoneNumber: phoneNumber,
       address: address,
@@ -231,10 +232,18 @@ const TambahSupplier = () => {
       </div>
       <button
         onClick={() => {
-          console.log("name: ", name);
-          console.log("selectedItem: ", selectedItem);
-          console.log("address: ", address);
-          console.log("phoneNumber: ", phoneNumber);
+          const payload = {
+            itemIds: selectedItems,
+            name: name,
+            phoneNumber: phoneNumber,
+            address: address,
+          };
+          console.log("payload: ", payload);
+          // console.log("name: ", name);
+          // console.log("selectedItems: ", selectedItems);
+          // console.log("address: ", address);
+          // console.log("phoneNumber: ", phoneNumber);
+          // console.log("warehouseItems: ", warehouseItems);
         }}
       >
         Check

@@ -1,8 +1,8 @@
 import api from "./api";
+const token = localStorage.getItem("token");
+const locationId = localStorage.getItem("locationId");
 
 export const getCage = () => {
-  const token = localStorage.getItem("token");
-
   return api.get("/cages", {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -12,10 +12,25 @@ export const getCage = () => {
 };
 
 export const getChickenCage = () => {
-  const token = localStorage.getItem("token");
-  const locationId = localStorage.getItem("locationId");
-
   return api.get(`/cages/chickens?locationId=${locationId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const getChickenCageById = (id) => {
+  return api.get(`/cages/chickens/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const createCage = (payload) => {
+  return api.post("/cages", payload, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",

@@ -212,7 +212,7 @@ const AppRouter = createBrowserRouter([
                   { path: "pindah-ayam", element: <PindahAyam /> },
                   { path: "tambah-kandang", element: <TambahKandang /> },
                   {
-                    path: "detail-kandang",
+                    path: "detail-kandang/:id",
                     element: <DetailKandang />,
                     children: [{ path: "edit-pic", element: <EditPic /> }],
                     children: [
@@ -722,6 +722,31 @@ const AppRouter = createBrowserRouter([
                     element: <TambahDiskon />,
                   },
                 ],
+              },
+            ],
+          },
+          {
+            path: "fasilitas",
+            children: [
+              {
+                path: "daftar-kandang",
+                element: <DaftarKandang />,
+                children: [
+                  { path: "pindah-ayam", element: <PindahAyam /> },
+                  { path: "tambah-kandang", element: <TambahKandang /> },
+                  {
+                    path: "detail-kandang/:id",
+                    element: <DetailKandang />,
+                    children: [
+                      { path: "edit-pic", element: <EditPic /> },
+                      { path: "edit-kandang", element: <EditKandang /> },
+                    ],
+                  },
+                ],
+              },
+              {
+                path: "daftar-gudang",
+                element: <DaftarGudang />,
               },
             ],
           },

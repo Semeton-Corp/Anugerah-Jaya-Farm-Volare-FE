@@ -1,30 +1,22 @@
 import React from "react";
 import { useState } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import HapusKandangModal from "./HapusKandangModal";
+import { useEffect } from "react";
+import { getChickenCageById } from "../services/cages";
 
 const DetailKandang = () => {
-  const data = {
-    idBatch: "06112025000001",
-    kategoriAyam: "DOC",
-    usiaAyam: "1 Minggu",
-    jumlahAyam: "11000 Ekor",
-    namaKandang: "Sidodadi DOC",
-    lokasiKandang: "Sidodadi",
-    jenisKandang: "Kandang Anakan",
-    kapasitas: "11000 Ekor",
-    picAyam: "Siti Rahayu",
-    picTelur: "Budi Santoso",
-  };
+  const [data, setData] = useState({});
 
   const location = useLocation();
   const navigate = useNavigate();
 
   const detailPages = ["edit-pic", "edit-kandang"];
-
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
+
+  const { id } = useParams();
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -42,6 +34,22 @@ const DetailKandang = () => {
     // Call API untuk delete kandang di sini
   };
 
+  const fetchDetailKandang = async () => {
+    try {
+      const detailResponse = await getChickenCageById(id);
+      // console.log("detailResponse: ", detailResponse);
+      if (detailResponse.status === 200) {
+        setData(detailResponse.data.data);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDetailKandang();
+  }, []);
+
   if (isDetailPage) {
     return <Outlet />;
   }
@@ -54,19 +62,21 @@ const DetailKandang = () => {
         <div className="grid grid-cols-2 gap-y-2">
           <div>
             <p className="text-sm text-gray-500">ID Batch</p>
-            <p className="font-semibold">{data.idBatch}</p>
+            <p className="font-semibold">{data.batchId ? data.batchId : "-"}</p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Kategori ayam</p>
-            <p className="font-bold">{data.kategoriAyam}</p>
+            <p className="font-bold">
+              {data.chickenCategory ? data.chickenCategory : "-"}
+            </p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Usia ayam (Minggu)</p>
-            <p className="font-bold">{data.usiaAyam}</p>
+            <p className="font-bold">{data.chickenAge}</p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Jumlah ayam dalam kandang</p>
-            <p className="font-bold">{data.jumlahAyam}</p>
+            <p className="font-bold">{data.totalChicken}</p>
           </div>
         </div>
       </div>
@@ -77,19 +87,27 @@ const DetailKandang = () => {
         <div className="grid grid-cols-2 gap-y-2">
           <div>
             <p className="text-sm text-gray-500">Nama Kandang</p>
-            <p className="font-bold">{data.namaKandang}</p>
+            <p className="font-bold">
+              {data?.cage?.name ? data?.cage?.name : "-"}
+            </p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Jenis Kandang</p>
-            <p className="font-bold">{data.jenisKandang}</p>
+            <p className="font-bold">{`Kandang ${
+              data?.cage?.chickenCategory ? data?.cage?.chickenCategory : "-"
+            }`}</p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Lokasi Kandang</p>
-            <p className="font-bold">{data.lokasiKandang}</p>
+            <p className="font-bold">
+              {data?.cage?.location?.name ? data?.cage?.location?.name : "-"}
+            </p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Kapasitas Maksimum</p>
-            <p className="font-bold">{data.kapasitas}</p>
+            <p className="font-bold">
+              {data?.cage?.capacity ? data?.cage?.capacity : "-"}
+            </p>
           </div>
         </div>
         <div className="flex justify-end space-x-2 mt-4">
@@ -116,11 +134,13 @@ const DetailKandang = () => {
         <div className="grid grid-cols-2 gap-y-2">
           <div>
             <p className="text-sm text-gray-500">PIC Ayam</p>
-            <p className="font-bold">{data.picAyam}</p>
+            <p className="font-bold">
+              {data.chickenPic ? data.chickenPic : "-"}
+            </p>
           </div>
           <div>
             <p className="text-sm text-gray-500">PIC Telur</p>
-            <p className="font-bold">{data.picTelur}</p>
+            <p className="font-bold">{data.eggPic ? data.eggPic : "-"}</p>
           </div>
         </div>
         <div className="flex justify-end mt-4">
@@ -138,6 +158,13 @@ const DetailKandang = () => {
         onClose={() => setShowMDeleteodal(false)}
         onConfirm={handleDelete}
       />
+      {/* <button
+        onClick={() => {
+          console.log("data: ", data.cage);
+        }}
+      >
+        Check
+      </button> */}
     </div>
   );
 };
