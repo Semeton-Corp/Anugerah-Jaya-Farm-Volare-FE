@@ -52,7 +52,7 @@ const TambahKandang = () => {
   const fetchLocationOptions = async () => {
     try {
       const locationsResponse = await getLocations();
-      console.log("locationsResponse: ", locationsResponse);
+      // console.log("locationsResponse: ", locationsResponse);
 
       if (locationsResponse.status === 200) {
         const allLocations = locationsResponse.data.data;

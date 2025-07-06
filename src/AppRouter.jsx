@@ -77,6 +77,7 @@ import TambahHargaTelur from "./pages/TambahHargaTelur";
 import TambahDiskon from "./pages/TambahDiskon";
 import TambahVaksinObat from "./pages/TambahVaksinObat";
 import DetailVaksinObatItem from "./pages/DetailVaksinObatItem";
+import TambahGudang from "./pages/TambahGudang";
 
 const AppRouter = createBrowserRouter([
   {
@@ -761,6 +762,9 @@ const AppRouter = createBrowserRouter([
               {
                 path: "daftar-gudang",
                 element: <DaftarGudang />,
+                children: [
+                  { path: "tambah-gudang", element: <TambahGudang /> },
+                ],
               },
             ],
           },

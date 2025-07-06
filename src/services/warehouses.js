@@ -10,6 +10,15 @@ export const getWarehouses = () => {
   });
 };
 
+export const createWarehouses = (payload) => {
+  return api.post("/warehouses", payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
 export const getWarehousesByLocation = () => {
   const locationId = localStorage.getItem("locationId");
 
