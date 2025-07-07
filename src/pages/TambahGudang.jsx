@@ -1,11 +1,18 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getLocations } from "../services/location";
-import { createWarehouses } from "../services/warehouses";
+import {
+  createWarehouses,
+  getWarehousesDetail,
+  updateWarehouseItem,
+  updateWarehouses,
+} from "../services/warehouses";
 
 const TambahGudang = () => {
   const navigate = useNavigate();
+
+  const { id } = useParams();
 
   const [namaGudang, setNamaGudang] = useState("");
   const [lokasiGudang, setLokasiGudang] = useState("");
@@ -25,19 +32,47 @@ const TambahGudang = () => {
       locationId: parseInt(lokasiGudang),
     };
 
-    try {
-      const createResponse = await createWarehouses(data);
-      //   console.log("createResponse: ", createResponse);
-      if (createResponse.status === 201) {
-        navigate(-1, { state: { refetch: true } });
+    if (id) {
+      try {
+        const updateResponse = await updateWarehouses(data, id);
+        // console.log("updateResponse: ", updateResponse);
+        if (updateResponse.status === 201) {
+          navigate(-1, { state: { refetch: true } });
+        }
+      } catch (error) {
+        console.log("error :", error);
       }
-    } catch (error) {
-      console.log("error :", error);
+    } else {
+      try {
+        const createResponse = await createWarehouses(data);
+        //   console.log("createResponse: ", createResponse);
+        if (createResponse.status === 201) {
+          navigate(-1, { state: { refetch: true } });
+        }
+      } catch (error) {
+        console.log("error :", error);
+      }
     }
 
     console.log("Gudang data:", data);
 
     // TODO: send data to backend here
+  };
+
+  const fetchDetailData = async () => {
+    try {
+      const detailResponse = await getWarehousesDetail(id);
+      //   console.log("detailResponse: ", detailResponse);
+      if (detailResponse.status === 200) {
+        // SetGudang(detailResponse.data.data);3
+        setNamaGudang(detailResponse.data.data.name);
+        setLokasiGudang(detailResponse.data.data.location.id);
+
+        // console.log("detailResponse.data.data: ", detailResponse.data.data);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
   };
 
   const fetchLocationOptions = async () => {
@@ -66,6 +101,10 @@ const TambahGudang = () => {
 
   useEffect(() => {
     fetchLocationOptions();
+
+    if (id) {
+      fetchDetailData();
+    }
   }, []);
 
   return (

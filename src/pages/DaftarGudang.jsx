@@ -9,7 +9,7 @@ const DaftarGudang = () => {
 
   const [gudangList, setGudangList] = useState([]);
 
-  const detailPage = ["tambah-gudang"];
+  const detailPage = ["tambah-gudang", "detail-gudang"];
 
   const isDetailPage = detailPage.some((segment) =>
     location.pathname.includes(segment)
@@ -20,7 +20,7 @@ const DaftarGudang = () => {
   };
 
   const handleLihatDetail = (id) => {
-    navigate(`/gudang/${id}`);
+    navigate(`${location.pathname}/detail-gudang/${id}`);
   };
 
   const fetchGudangList = async () => {
@@ -28,17 +28,22 @@ const DaftarGudang = () => {
       const gudangResponse = await getWarehouses();
       console.log("gudangResponse: ", gudangResponse);
 
-      const locationId = parseInt(localStorage.getItem("locationId"), 10);
+      if (userRole != "Owner") {
+        const locationId = parseInt(localStorage.getItem("locationId"), 10);
 
-      const allGudang = gudangResponse.data.data;
+        const allGudang = gudangResponse.data.data;
 
-      const filteredGudang = allGudang.filter(
-        (gudang) => gudang.location?.id === locationId
-      );
-      // console.log("allGudang: ", allGudang);
-      // console.log("Filtered Gudang: ", filteredGudang);
-      // Do something with filteredGudang, e.g.,
-      setGudangList(filteredGudang);
+        const filteredGudang = allGudang.filter(
+          (gudang) => gudang.location?.id === locationId
+        );
+        // console.log("allGudang: ", allGudang);
+        // console.log("Filtered Gudang: ", filteredGudang);
+        // Do something with filteredGudang, e.g.,
+        setGudangList(filteredGudang);
+      } else {
+        const allGudang = gudangResponse.data.data;
+        setGudangList(allGudang);
+      }
     } catch (error) {
       console.log("error :", error);
     }
@@ -46,6 +51,7 @@ const DaftarGudang = () => {
 
   useEffect(() => {
     fetchGudangList();
+
     if (location.state?.refetch) {
       fetchGudangList();
       window.history.replaceState({}, document.title);

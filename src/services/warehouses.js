@@ -19,6 +19,24 @@ export const createWarehouses = (payload) => {
   });
 };
 
+export const getWarehousesDetail = (id) => {
+  return api.get(`/warehouses/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const updateWarehouses = (payload, id) => {
+  return api.put(`/warehouses/${id}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
 export const getWarehousesByLocation = () => {
   const locationId = localStorage.getItem("locationId");
 
