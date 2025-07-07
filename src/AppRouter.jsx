@@ -79,6 +79,7 @@ import TambahVaksinObat from "./pages/TambahVaksinObat";
 import DetailVaksinObatItem from "./pages/DetailVaksinObatItem";
 import TambahGudang from "./pages/TambahGudang";
 import DetailGudang from "./pages/DetailGudang";
+import DetailToko from "./pages/DetailToko";
 
 const AppRouter = createBrowserRouter([
   {
@@ -228,7 +229,10 @@ const AppRouter = createBrowserRouter([
               {
                 path: "daftar-toko",
                 element: <DaftarToko />,
-                children: [{ path: "tambah-toko", element: <TambahToko /> }],
+                children: [
+                  { path: "tambah-toko", element: <TambahToko /> },
+                  { path: "detail-toko/:id", element: <DetailToko /> },
+                ],
               },
               {
                 path: "daftar-gudang",
@@ -236,6 +240,7 @@ const AppRouter = createBrowserRouter([
                 children: [
                   { path: "tambah-gudang", element: <TambahGudang /> },
                   { path: "tambah-gudang/:id", element: <TambahGudang /> },
+                  { path: "detail-gudang/:id", element: <DetailGudang /> },
                 ],
               },
             ],

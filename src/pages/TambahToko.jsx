@@ -35,6 +35,8 @@ const TambahToko = () => {
     // Redirect / feedback
     // navigate("/toko");
   };
+
+  
   const fetchLocationOptions = async () => {
     try {
       const locationsResponse = await getLocations();

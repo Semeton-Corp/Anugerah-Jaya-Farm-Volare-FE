@@ -1,7 +1,11 @@
 import React from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { getStores } from "../services/stores";
+import { useEffect } from "react";
 
 const DaftarToko = () => {
+  const location = useLocation();
   const navigate = useNavigate();
 
   const dummyToko = [
@@ -9,19 +13,42 @@ const DaftarToko = () => {
     { id: 2, nama: "Toko B", lokasi: "Sukamaju", jumlahPekerja: 6 },
   ];
 
-  const detailPages = ["tambah-toko"];
+  const [stores, setStores] = useState([]);
+
+  const detailPages = ["tambah-toko", "detail-toko"];
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
 
   const handleLihatDetail = (id) => {
-    navigate(`/toko/${id}`);
+    navigate(`${location.pathname}/detail-toko/${id}`);
   };
 
   const handleTambahToko = (id) => {
     navigate(`${location.pathname}/tambah-toko`);
   };
+
+  const fetchStores = async () => {
+    try {
+      const storeResponse = await getStores();
+      // console.log("storeResponse: ", storeResponse);
+      if (storeResponse.status === 200) {
+        setStores(storeResponse.data.data);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchStores();
+
+    if (location?.state?.refetch) {
+      fetchStores();
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   if (isDetailPage) {
     return <Outlet />;
@@ -51,11 +78,11 @@ const DaftarToko = () => {
             </tr>
           </thead>
           <tbody>
-            {dummyToko.map((toko) => (
+            {stores?.map((toko) => (
               <tr key={toko.id} className="border-t">
-                <td className="px-4 py-2">{toko.nama}</td>
-                <td className="px-4 py-2">{toko.lokasi}</td>
-                <td className="px-4 py-2">{toko.jumlahPekerja}</td>
+                <td className="px-4 py-2">{toko?.name}</td>
+                <td className="px-4 py-2">{toko?.location?.name}</td>
+                <td className="px-4 py-2">{toko?.totalEmployee}</td>
                 <td className="px-4 py-2">
                   <button
                     onClick={() => handleLihatDetail(toko.id)}
