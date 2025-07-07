@@ -23,9 +23,11 @@ const VaksinObat = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const locationId = localStorage.getItem("locationId");
+
   const [detailAyamData, setDetailAyamState] = useState([]);
 
-  const detailPages = ["detail-vaksin-&-obat"];
+  const detailPages = ["detail-vaksin-&-obat", "input-vaksin-&-obat"];
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
@@ -38,10 +40,10 @@ const VaksinObat = () => {
 
   const fetchDataAyam = async () => {
     try {
-      const response = await getChickenMonitoring();
+      const response = await getChickenMonitoring(locationId);
       if (response.status === 200) {
         setDetailAyamState(response.data.data);
-        console.log("DetailAyamData: ", response.data.data);
+        // console.log("DetailAyamData: ", response.data.data);
       }
     } catch (error) {
       console.error("Gagal memuat data ayam:", error);
@@ -122,27 +124,29 @@ const VaksinObat = () => {
                   <td className="py-2 px-4">{row.chickenCage.chickenAge}</td>
                   <td className="py-2 px-4">{row.chickenCage.cage.name}</td>
                   <td className="py-2 px-4">
+                    {row.chickenCage.isNeedRoutineVaccine ? (
+                      <span className="px-3 py-1 bg-kritis-box-surface-color text-kritis-text-color rounded shadow-sm">
+                        Perlu Vaksin
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1 bg-aman-box-surface-color text-aman-text-color font-semibold rounded shadow-sm">
+                        Tidak Perlu Vaksin
+                      </span>
+                    )}
+                  </td>
+
+                  <td className="py-2 px-4">
                     <div className="flex gap-2 justify-center">
-                      <span className="px-3 py-1 bg-orange-200 text-orange-800 rounded">
-                        Perlu Vaksin //NANTI GANTI
+                      <span
+                        onClick={() => {
+                          editDataHandle(row.id);
+                        }}
+                        className="px-3 py-1 bg-green-700 hover:bg-green-900 text-white cursor-pointer rounded"
+                      >
+                        Detail & input
                       </span>
                     </div>
                   </td>
-                  {(userRole === "Pekerja Kandang" ||
-                    userRole === "Kepala Kandang") && (
-                    <td className="py-2 px-4">
-                      <div className="flex gap-2 justify-center">
-                        <span
-                          onClick={() => {
-                            editDataHandle(row.id);
-                          }}
-                          className="px-3 py-1 bg-green-700 hover:bg-green-900 text-white cursor-pointer rounded"
-                        >
-                          Detail & input
-                        </span>
-                      </div>
-                    </td>
-                  )}
                 </tr>
               ))}
             </tbody>

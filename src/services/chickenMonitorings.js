@@ -10,11 +10,14 @@ export const inputAyam = (payload) => {
   });
 };
 
-export const getChickenMonitoring = () => {
+export const getChickenMonitoring = (locationId) => {
   return api.get("chickens/monitorings", {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
+    },
+    params: {
+      locationId: locationId,
     },
   });
 };
@@ -109,6 +112,26 @@ export const deleteChickenHealthItem = (id) => {
 
 export const updateChickenHealthItem = (payload, id) => {
   return api.put(`/chickens/healths/items/${id}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+//HEALTH MONITORING
+
+export const createChickenHealthMonitoring = (payload) => {
+  return api.post(`/chickens/healths/monitorings`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const getChickenHealthMonitoringsDetails = (id) => {
+  return api.get(`/chickens/healths/monitorings/details/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",

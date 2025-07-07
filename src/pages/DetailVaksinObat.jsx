@@ -3,6 +3,8 @@ import React from "react";
 import { useState } from "react";
 import { MdDelete, MdEdit } from "react-icons/md";
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
+import { getChickenHealthMonitoringsDetails } from "../services/chickenMonitorings";
+import { useEffect } from "react";
 
 const DetailVaksinObat = () => {
   const { id } = useParams();
@@ -16,12 +18,27 @@ const DetailVaksinObat = () => {
     location.pathname.includes(segment)
   );
 
+  const [chickenCage, setChickenCage] = useState();
+  const [chickenHealthMonitorings, setChickenHealthMonitorings] = useState();
+
   const inputHandle = () => {
-    navigate(`${location.pathname}/input-vaksin-&-obat`);
+    const newPath = location.pathname.replace(
+      "detail-vaksin-&-obat",
+      "input-vaksin-&-obat"
+    );
+    navigate(newPath);
   };
 
   const fetchDetailVaksinObat = async () => {
     try {
+      const detailResponse = await getChickenHealthMonitoringsDetails(id);
+      console.log("detailResponse: ", detailResponse);
+      if (detailResponse.status === 200) {
+        setChickenCage(detailResponse.data.data.chickenCage);
+        setChickenHealthMonitorings(
+          detailResponse.data.data.chickenHealthMonitorings
+        );
+      }
     } catch (error) {
       console.log("error :", error);
     }
@@ -73,6 +90,14 @@ const DetailVaksinObat = () => {
       penyakit: "-",
     },
   ]);
+  useEffect(() => {
+    fetchDetailVaksinObat();
+
+    if (location?.state?.refetch) {
+      fetchDetailVaksinObat();
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   if (isDetailPage) {
     return <Outlet />;
@@ -86,19 +111,19 @@ const DetailVaksinObat = () => {
         <div className="grid grid-cols-2 gap-4 text-sm md:text-base">
           <div>
             <p className="text-gray-600">ID Ayam</p>
-            <p className="font-bold">0611202500001</p>
+            <p className="font-bold">{chickenCage?.batchId}</p>
           </div>
           <div>
             <p className="text-gray-600">Usia ayam (Minggu)</p>
-            <p className="font-bold">1</p>
+            <p className="font-bold">{chickenCage?.chickenAge}</p>
           </div>
           <div>
             <p className="text-gray-600">Kategori ayam</p>
-            <p className="font-bold">DOC</p>
+            <p className="font-bold">{chickenCage?.chickenCategory}</p>
           </div>
           <div>
             <p className="text-gray-600">Lokasi Kandang</p>
-            <p className="font-bold">Sidodadi DOC</p>
+            <p className="font-bold">{chickenCage?.cage?.location?.name}</p>
           </div>
         </div>
       </div>
@@ -137,7 +162,7 @@ const DetailVaksinObat = () => {
               </tr>
             </thead>
             <tbody>
-              {data.map((row, index) => (
+              {chickenHealthMonitorings?.map((row, index) => (
                 <tr
                   key={index}
                   className="border-t hover:bg-black-3 transition-all"
@@ -145,10 +170,10 @@ const DetailVaksinObat = () => {
                   <td className="py-2 px-4">{row.tanggal}</td>
                   <td className="py-2 px-4">{row.kategori}</td>
                   <td className="py-2 px-4">{row.usia}</td>
-                  <td className="py-2 px-4">{row.jenis}</td>
-                  <td className="py-2 px-4">{row.nama}</td>
-                  <td className="py-2 px-4">{row.dosis}</td>
-                  <td className="py-2 px-4">{row.penyakit}</td>
+                  <td className="py-2 px-4">{row.type}</td>
+                  <td className="py-2 px-4">{row.healthItemName}</td>
+                  <td className="py-2 px-4">{row.dose}</td>
+                  <td className="py-2 px-4">{row.disease}</td>
                   <td className="py-2 px-4 flex items-center space-x-2">
                     <button>
                       <MdEdit

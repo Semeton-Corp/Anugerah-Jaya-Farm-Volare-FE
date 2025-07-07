@@ -121,7 +121,26 @@ const AppRouter = createBrowserRouter([
             children: [
               { path: "ringkasan-ayam", element: <Ayam /> },
               { path: "data-ayam", element: <DetailAyam /> },
-              { path: "detail-vaksin-&-obat", element: <VaksinObat /> },
+              {
+                path: "vaksin-&-obat",
+                element: <VaksinObat />,
+                children: [
+                  {
+                    path: "detail-vaksin-&-obat/:id",
+                    element: <DetailVaksinObat />,
+                    children: [
+                      {
+                        path: "input-vaksin-&-obat",
+                        element: <InputVaksinObat />,
+                      },
+                    ],
+                  },
+                  {
+                    path: "input-vaksin-&-obat/:id",
+                    element: <InputVaksinObat />,
+                  },
+                ],
+              },
             ],
           },
           {
@@ -216,6 +235,8 @@ const AppRouter = createBrowserRouter([
                 children: [
                   { path: "pindah-ayam", element: <PindahAyam /> },
                   { path: "tambah-kandang", element: <TambahKandang /> },
+                  { path: "edit-kandang/:id", element: <EditKandang /> },
+
                   {
                     path: "detail-kandang/:id",
                     element: <DetailKandang />,

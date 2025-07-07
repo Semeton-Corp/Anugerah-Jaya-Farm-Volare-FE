@@ -1,31 +1,71 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import {
+  createChickenHealthMonitoring,
+  getChickenHealthMonitoringsDetails,
+} from "../services/chickenMonitorings";
 
 const InputVaksinObat = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const { id } = useParams();
+
   const [jenis, setJenis] = useState("");
   const [nama, setNama] = useState("");
   const [dosis, setDosis] = useState("");
   const [satuan, setSatuan] = useState("");
   const [penyakit, setPenyakit] = useState("");
 
+  const [chickenCage, setChickenCage] = useState();
+
   // Sample options
   const jenisOptions = ["Vaksin Rutin", "Vaksin Kondisional", "Obat"];
   const namaOptions = ["Vaksin DOC", "Obat A", "Vaksin B"];
   const satuanOptions = ["mililiter", "liter", "gram", "kilogram"];
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const payload = {
-      jenis,
-      nama,
-      dosis: parseFloat(dosis),
-      satuan,
-      penyakit,
+      type: jenis,
+      healthItemName: nama,
+      dose: parseFloat(dosis),
+      unit: satuan,
+      chickenCageId: parseInt(id),
     };
 
-    console.log("Payload to submit:", payload);
-    alert("Data berhasil disiapkan!");
+    // console.log("payload: ", payload);
+
+    // console.log("Payload to submit:", payload);
+    // alert("Data berhasil disiapkan!");
+
+    try {
+      const createResponse = await createChickenHealthMonitoring(payload);
+      // console.log("createResponse: ", createResponse);
+      if (createResponse.status === 201) {
+        navigate(-1, { state: { refetch: true } });
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
   };
+
+  const fetchDetailVaksinObat = async () => {
+    try {
+      const detailResponse = await getChickenHealthMonitoringsDetails(id);
+      // console.log("detailResponse: ", detailResponse);
+      if (detailResponse.status === 200) {
+        setChickenCage(detailResponse.data.data.chickenCage);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDetailVaksinObat();
+  }, []);
 
   return (
     <div className="border border-black-6 rounded p-8 m-4 bg-white w-full  mx-auto">
@@ -41,19 +81,19 @@ const InputVaksinObat = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 text-sm md:text-base">
         <div>
           <p className="text-gray-600">ID Ayam</p>
-          <p className="text-lg font-bold">0611202500001</p>
+          <p className="text-lg font-bold">{chickenCage?.batchId}</p>
         </div>
         <div>
           <p className="text-gray-600">Kategori ayam</p>
-          <p className="text-lg font-bold">DOC</p>
+          <p className="text-lg font-bold">{chickenCage?.chickenCategory}</p>
         </div>
         <div>
           <p className="text-gray-600">Usia ayam</p>
-          <p className="text-lg font-bold">1 Minggu</p>
+          <p className="text-lg font-bold">{chickenCage?.chickenAge}</p>
         </div>
         <div className="col-span-3">
           <p className="text-gray-600">Jumlah ayam hidup</p>
-          <p className="text-lg font-bold ">493 Ekor</p>
+          <p className="text-lg font-bold ">{chickenCage?.totalChicken} Ekor</p>
         </div>
       </div>
 
