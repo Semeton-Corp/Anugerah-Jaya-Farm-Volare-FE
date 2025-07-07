@@ -123,7 +123,8 @@ const DaftarBarang = () => {
       {/* Table Section */}
       <div className="bg-white p-4 border rounded-lg w-full border-black-6">
         {userRole === "Pekerja Gudang" ||
-          (userRole === "Kepala Kandang" && (
+          userRole === "Kepala Kandang" ||
+          (userRole === "Owner" && (
             <div className="flex justify-end items-center mb-4">
               <div
                 onClick={tambahBarangHandle}

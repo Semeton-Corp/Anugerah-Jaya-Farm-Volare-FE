@@ -231,6 +231,7 @@ const AppRouter = createBrowserRouter([
                 element: <DaftarToko />,
                 children: [
                   { path: "tambah-toko", element: <TambahToko /> },
+                  { path: "tambah-toko/:id", element: <TambahToko /> },
                   { path: "detail-toko/:id", element: <DetailToko /> },
                 ],
               },

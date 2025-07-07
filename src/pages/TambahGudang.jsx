@@ -104,7 +104,9 @@ const TambahGudang = () => {
 
   return (
     <div className="mx-6 mt-10 p-6 bg-white rounded border">
-      <h1 className="text-xl font-bold mb-6">Tambah Gudang</h1>
+      <h1 className="text-xl font-bold mb-6">
+        {id ? "Edit Toko" : "Tambah Gudang"}
+      </h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Nama Gudang */}

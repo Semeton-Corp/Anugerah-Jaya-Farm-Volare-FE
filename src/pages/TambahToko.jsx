@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getLocations } from "../services/location";
-import { createStore } from "../services/stores";
+import { createStore, getStoreDetail, updateStore } from "../services/stores";
 
 const TambahToko = () => {
   const navigate = useNavigate();
@@ -11,6 +11,8 @@ const TambahToko = () => {
 
   const [locationOptions, setLocationOptions] = useState([]);
 
+  const { id } = useParams();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -18,25 +20,30 @@ const TambahToko = () => {
       name: namaToko,
       locationId: parseInt(lokasi),
     };
-    console.log("payload: ", payload);
-    try {
-      const createResponse = await createStore(payload);
-      // console.log("createResponse: ", createResponse);
-      if (createResponse.status === 201) {
-        navigate(-1, { state: { refetch: true } });
+    // console.log("payload: ", payload);
+    if (id) {
+      try {
+        const updateResponse = await updateStore(payload, id);
+        // console.log("updateResponse: ", updateResponse);
+        if (updateResponse.status === 200) {
+          navigate(-1, { state: { refetch: true } });
+        }
+      } catch (error) {
+        console.log("error :", error);
       }
-    } catch (error) {
-      console.log("error :", error);
+    } else {
+      try {
+        const createResponse = await createStore(payload);
+        // console.log("createResponse: ", createResponse);
+        if (createResponse.status === 201) {
+          navigate(-1, { state: { refetch: true } });
+        }
+      } catch (error) {
+        console.log("error :", error);
+      }
     }
-    // console.log("Data disimpan:", payload);
-
-    // TODO: fetch/axios ke backend jika sudah ada API
-
-    // Redirect / feedback
-    // navigate("/toko");
   };
 
-  
   const fetchLocationOptions = async () => {
     try {
       const locationsResponse = await getLocations();
@@ -61,14 +68,35 @@ const TambahToko = () => {
     }
   };
 
+  const fetchTokoDetail = async () => {
+    try {
+      const res = await getStoreDetail(id);
+      console.log("res: ", res);
+      if (res.status === 200) {
+        setNamaToko(res.data.data.name);
+        setLokasi(res.data.data.location.id);
+
+        // setToko(res.data.data);
+        // setEmployees(res.data.data.users);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchLocationOptions();
+    if (id) {
+      fetchTokoDetail();
+    }
   }, []);
 
   return (
     <div className="p-6">
       <div className="border rounded p-6 mx-auto">
-        <h1 className="text-xl font-bold mb-6">Tambah Toko</h1>
+        <h1 className="text-xl font-bold mb-6">
+          {id ? "Edit Toko" : "Tambah Toko"}
+        </h1>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {/* Nama toko */}

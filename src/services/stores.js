@@ -25,6 +25,14 @@ export const createStore = (payload) => {
   });
 };
 
+export const updateStore = (payload, id) => {
+  return api.put(`/stores/${id}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export const getListStoreSale = () => {
   return api.get("/stores/sales", {
     headers: {
