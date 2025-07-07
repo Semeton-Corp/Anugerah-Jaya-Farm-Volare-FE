@@ -36,8 +36,8 @@ const TambahGudang = () => {
       try {
         const updateResponse = await updateWarehouses(data, id);
         // console.log("updateResponse: ", updateResponse);
-        if (updateResponse.status === 201) {
-          navigate(-1, { state: { refetch: true } });
+        if(updateResponse.status === 201){
+          navigate(-1, {state:{refetch:true}})
         }
       } catch (error) {
         console.log("error :", error);

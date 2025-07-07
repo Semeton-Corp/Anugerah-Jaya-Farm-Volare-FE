@@ -754,12 +754,14 @@ const AppRouter = createBrowserRouter([
                 children: [
                   { path: "pindah-ayam", element: <PindahAyam /> },
                   { path: "tambah-kandang", element: <TambahKandang /> },
+                  { path: "edit-kandang/:id", element: <EditKandang /> },
+
                   {
                     path: "detail-kandang/:id",
                     element: <DetailKandang />,
                     children: [
                       { path: "edit-pic", element: <EditPic /> },
-                      { path: "edit-kandang", element: <EditKandang /> },
+                      { path: "edit-kandang/:id", element: <EditKandang /> },
                     ],
                   },
                 ],

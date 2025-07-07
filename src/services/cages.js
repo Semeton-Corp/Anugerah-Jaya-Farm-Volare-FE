@@ -37,3 +37,21 @@ export const createCage = (payload) => {
     },
   });
 };
+
+export const updateCage = (payload, id) => {
+  return api.put(`/cages/${id}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const deleteCage = (id) => {
+  return api.delete(`/cages/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};

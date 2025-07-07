@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import HapusKandangModal from "./HapusKandangModal";
 import { useEffect } from "react";
-import { getChickenCageById } from "../services/cages";
+import { deleteCage, getChickenCageById } from "../services/cages";
 
 const DetailKandang = () => {
   const [data, setData] = useState({});
@@ -25,11 +25,18 @@ const DetailKandang = () => {
   };
 
   const handleEditKandang = () => {
-    navigate(`${location.pathname}/edit-kandang`);
+    const newPath = location.pathname.replace("detail-kandang", "edit-kandang");
+    navigate(newPath);
   };
 
-  const handleDelete = () => {
-    console.log("Kandang dihapus!");
+  const handleDelete = async () => {
+    // console.log("Kandang dihapus!");
+    try {
+      const deleteResponse = await deleteCage(id);
+      console.log("deleteResponse: ", deleteResponse);
+    } catch (error) {
+      console.log("error :", error);
+    }
     setShowDeleteModal(false);
     // Call API untuk delete kandang di sini
   };

@@ -37,6 +37,15 @@ export const updateWarehouses = (payload, id) => {
   });
 };
 
+export const deleteWarehouse = (id) => {
+  return api.delete(`/warehouses/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
 export const getWarehousesByLocation = () => {
   const locationId = localStorage.getItem("locationId");
 

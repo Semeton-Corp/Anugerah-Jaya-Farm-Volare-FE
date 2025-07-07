@@ -11,7 +11,12 @@ const DaftarKandang = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const detailPages = ["tambah-kandang", "detail-kandang", "pindah-ayam"];
+  const detailPages = [
+    "tambah-kandang",
+    "detail-kandang",
+    "pindah-ayam",
+    "edit-kandang",
+  ];
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
