@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getLocations } from "../services/location";
+import { createStore } from "../services/stores";
 
 const TambahToko = () => {
   const navigate = useNavigate();
@@ -7,24 +9,59 @@ const TambahToko = () => {
   const [namaToko, setNamaToko] = useState("");
   const [lokasi, setLokasi] = useState("");
 
-  // Dummy list lokasi
-  const lokasiOptions = ["Sidodadi", "Sukamaju", "Sukadana"];
+  const [locationOptions, setLocationOptions] = useState([]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const payload = {
-      namaToko,
-      lokasi,
+      name: namaToko,
+      locationId: parseInt(lokasi),
     };
-
-    console.log("Data disimpan:", payload);
+    console.log("payload: ", payload);
+    try {
+      const createResponse = await createStore(payload);
+      // console.log("createResponse: ", createResponse);
+      if (createResponse.status === 201) {
+        navigate(-1, { state: { refetch: true } });
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+    // console.log("Data disimpan:", payload);
 
     // TODO: fetch/axios ke backend jika sudah ada API
 
     // Redirect / feedback
-    navigate("/toko");
+    // navigate("/toko");
   };
+  const fetchLocationOptions = async () => {
+    try {
+      const locationsResponse = await getLocations();
+      //   console.log("locationsResponse: ", locationsResponse);
+
+      if (locationsResponse.status === 200) {
+        const allLocations = locationsResponse.data.data;
+        const role = localStorage.getItem("role");
+        const locationId = parseInt(localStorage.getItem("locationId"), 10);
+
+        if (role !== "Owner") {
+          const filteredLocations = allLocations.filter(
+            (item) => item.id === locationId
+          );
+          setLocationOptions(filteredLocations);
+        } else {
+          setLocationOptions(allLocations);
+        }
+      }
+    } catch (error) {
+      alert("Terjadi Kesalahan :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchLocationOptions();
+  }, []);
 
   return (
     <div className="p-6">
@@ -57,9 +94,9 @@ const TambahToko = () => {
               <option value="" disabled>
                 Pilih site lokasi kandang
               </option>
-              {lokasiOptions.map((lokasi, index) => (
-                <option key={index} value={lokasi}>
-                  {lokasi}
+              {locationOptions.map((lokasi, index) => (
+                <option key={index} value={lokasi.id}>
+                  {lokasi.name}
                 </option>
               ))}
             </select>

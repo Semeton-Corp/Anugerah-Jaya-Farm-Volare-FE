@@ -9,6 +9,14 @@ export const getStores = () => {
   });
 };
 
+export const createStore = (payload) => {
+  return api.post("/stores", payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export const getListStoreSale = () => {
   return api.get("/stores/sales", {
     headers: {
@@ -56,4 +64,3 @@ export const updateStoreSalePayment = (storeSaleId, id, payload) => {
     },
   });
 };
-
