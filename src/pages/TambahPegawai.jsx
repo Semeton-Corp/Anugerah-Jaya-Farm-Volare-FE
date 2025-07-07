@@ -21,6 +21,7 @@ import { deleteAdditionalWorkById } from "../services/dailyWorks";
 import { updateAdditionalWorkById } from "../services/dailyWorks";
 import { formatRupiah } from "../utils/moneyFormat";
 import { getRoles } from "../services/roles";
+import { getLocations } from "../services/location";
 
 const TambahPegawai = () => {
   const navigate = useNavigate();
@@ -30,14 +31,36 @@ const TambahPegawai = () => {
   const [roles, setRoles] = useState([]);
   const [selectedRole, setSelectedRole] = useState("");
 
+  const [locationOptions, setLocationOptions] = useState([
+    "Sidodadi",
+    "Sukamaju",
+    "Karanganyar",
+    "Ciputat",
+  ]);
+  const [locationId, setLocationId] = useState("");
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [salary, setSalary] = useState(0);
+  const [username, setUsername] = useState("");
 
   const [showPopup, setShowPopup] = useState(false);
   const [password, setPassword] = useState("");
+
+  const [pics, setPics] = useState([]);
+  const [selectedPic, setSelectedPic] = useState("");
+
+  const roleToApiMap = {
+    "Pekerja Telur": getCage,
+    "Pekerja Kandang": getCage,
+    "Kepala Kandang": getWarehouses,
+    "Pekerja Toko": getStores,
+    "Pekerja Gudang": getWarehouses,
+    Owner: getWarehouses,
+    Lainnya: getWarehouses,
+  };
 
   const getDisplay = (value) => (value === 0 ? "" : value);
 
@@ -53,9 +76,75 @@ const TambahPegawai = () => {
       console.log("error :", error);
     }
   };
+
+  const fetchLocationOptions = async () => {
+    try {
+      const locationsResponse = await getLocations();
+      console.log("locationsResponse: ", locationsResponse);
+
+      if (locationsResponse.status === 200) {
+        const allLocations = locationsResponse.data.data;
+        const role = localStorage.getItem("role");
+        const locationId = parseInt(localStorage.getItem("locationId"), 10);
+        console.log("allLocations: ", allLocations);
+        if (role !== "Owner") {
+          const filteredLocations = allLocations.filter(
+            (item) => item.id === locationId
+          );
+          setLocationOptions(filteredLocations);
+        } else {
+          setLocationOptions(allLocations);
+        }
+      }
+    } catch (error) {
+      alert("Terjadi Kesalahan :", error);
+    }
+  };
+
   useEffect(() => {
     fetchRoles();
+    fetchLocationOptions();
   }, []);
+
+  useEffect(() => {
+    const fetchPics = async () => {
+      if (!selectedRole || !locationId) return;
+
+      const roleName = roles.find((r) => r.id === parseInt(selectedRole))?.name;
+
+      const apiFn = roleToApiMap[roleName];
+      if (!apiFn) {
+        setPics([]);
+        setSelectedPic("");
+        return;
+      }
+
+      try {
+        const res = await apiFn(locationId);
+        // console.log("res: ", res);
+
+        if (res.status === 200) {
+          const allData = res.data.data;
+
+          // Manual filter here
+          const filtered = allData.filter(
+            (item) => item.location?.id === parseInt(locationId)
+          );
+
+          console.log("filtered: ", filtered);
+
+          setPics(filtered);
+          setSelectedPic(filtered[0]?.id || "");
+        }
+      } catch (err) {
+        console.error(err);
+        setPics([]);
+        setSelectedPic("");
+      }
+    };
+
+    fetchPics();
+  }, [selectedRole, locationId, roles]);
 
   const handleSave = async () => {
     const generatedPassword = generatePassword();
@@ -63,8 +152,11 @@ const TambahPegawai = () => {
     const payload = {
       email: email,
       name: name,
-      password: generatedPassword,
-      roleId: selectedRole,
+      username: username,
+      password: username,
+      roleId: parseInt(selectedRole),
+      locationId: parseInt(locationId),
+      placementIds: [parseInt(selectedPic)],
       address: address,
       phoneNumber: phone,
       salary: salary,
@@ -125,6 +217,14 @@ const TambahPegawai = () => {
           address={address}
           setAddress={setAddress}
           setTab={setTab}
+          locationId={locationId}
+          setLocationId={setLocationId}
+          locationOptions={locationOptions}
+          pics={pics}
+          selectedPic={selectedPic}
+          setSelectedPic={setSelectedPic}
+          username={username}
+          setUsername={setUsername}
         />
       ) : (
         <GajiPokokForm
@@ -164,14 +264,14 @@ const TambahPegawai = () => {
             </p>
             <div className="mb-2">
               <div className="flex items-center gap-3">
-                <label className="w-32">Email:</label>
+                <label className="w-32">Username:</label>
                 <div className="flex items-center border border-[#606060] rounded px-3 py-2 w-full">
                   <span className="flex-grow break-all text-sm leading-none text-[#606060]">
-                    {email}
+                    {username}
                   </span>
                   <button
-                    className="text-blue-600 text-xl p-1"
-                    onClick={() => copyToClipboard(email)}
+                    className="text-blue-600 hover:text-blue-800 cursor-pointer text-xl p-1"
+                    onClick={() => copyToClipboard(username)}
                   >
                     <MdContentCopy />
                   </button>
@@ -183,11 +283,11 @@ const TambahPegawai = () => {
                 <label className="w-32">Password:</label>
                 <div className="flex items-center border border-[#606060] rounded px-3 py-2 w-full">
                   <span className="flex-grow break-all text-sm leading-none text-[#606060]">
-                    {password}
+                    {username}
                   </span>
                   <button
-                    className="text-blue-600 text-xl p-1"
-                    onClick={() => copyToClipboard(password)}
+                    className="text-blue-600 hover:text-blue-800 cursor-pointer text-xl p-1"
+                    onClick={() => copyToClipboard(username)}
                   >
                     <MdContentCopy />
                   </button>
@@ -223,7 +323,54 @@ function ProfilPegawaiForm({
   address,
   setAddress,
   setTab,
+  locationId,
+  setLocationId,
+  locationOptions,
+  pics,
+  selectedPic,
+  setSelectedPic,
+  username,
+  setUsername,
 }) {
+  const [placeHolderLokasi, setPlaceHolderLokasi] = useState(
+    "Pilih site lokasi gudang"
+  );
+  const [labelLokasi, setLabelLokasi] = useState("Lokasi Bekerja");
+  const [isShowLocationIdField, setIsShowLocationIdField] = useState(true);
+  const [isShowPicField, setIsShowPicField] = useState(true);
+
+  useEffect(() => {
+    const roleName = roles.find((r) => r.id === parseInt(selectedRole))?.name;
+    console.log("roleName: ", roleName);
+
+    if (!roleName) return;
+
+    if (roleName === "Pekerja Gudang" || roleName === "Kepala Kandang") {
+      setLabelLokasi("Lokasi Gudang");
+      setPlaceHolderLokasi("Pilih lokasi gudang");
+      setIsShowLocationIdField(true);
+      setIsShowPicField(true);
+    } else if (roleName === "Pekerja Toko") {
+      setLabelLokasi("Lokasi Toko");
+      setPlaceHolderLokasi("Pilih lokasi toko");
+      setIsShowLocationIdField(true);
+      setIsShowPicField(true);
+    } else if (roleName === "Pekerja Telur" || roleName === "Pekerja Kandang") {
+      setLabelLokasi("Lokasi Kandang");
+      setPlaceHolderLokasi("Pilih kandang");
+      setIsShowLocationIdField(true);
+      setIsShowPicField(true);
+    } else if (roleName === "Owner") {
+      setIsShowLocationIdField(false);
+      setIsShowPicField(false);
+    } else {
+      setIsShowLocationIdField(true);
+      setIsShowPicField(true);
+      setLabelLokasi("Lokasi Bekerja");
+      setPlaceHolderLokasi("Pilih lokasi bekerja");
+    }
+  }, [selectedRole, roles]);
+
   return (
     <div className="border border-black-6 p-6 rounded-md shadow-sm">
       <h2 className="font-bold text-xl mb-4">Profil Pegawai</h2>
@@ -250,6 +397,42 @@ function ProfilPegawaiForm({
             ))}
           </select>
         </div>
+        {isShowLocationIdField && (
+          <>
+            <label className="block font-medium mb-1">{labelLokasi}</label>
+            <select
+              value={locationId}
+              onChange={(e) => setLocationId(e.target.value)}
+              className="w-full border rounded p-4  focus:outline-none focus:ring"
+              required
+            >
+              <option value="text-gray-100">{placeHolderLokasi}</option>
+              {locationOptions.map((lokasi, idx) => (
+                <option key={idx} value={lokasi.id}>
+                  {lokasi.name}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
+
+        {isShowPicField && (
+          <>
+            <label className="mb-1">PIC</label>
+            <select
+              className="border rounded p-4 mb-3"
+              value={selectedPic}
+              onChange={(e) => setSelectedPic(e.target.value)}
+            >
+              <option value="">Pilih akan menjadi PIC dimana pegawai</option>
+              {pics.map((pic) => (
+                <option key={pic.id} value={pic.id}>
+                  {pic.name}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
 
         <label className="mb-1">Nama Pegawai</label>
         <input
@@ -267,6 +450,15 @@ function ProfilPegawaiForm({
           className="border rounded p-4 mb-3"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <label className="mb-1">Username Pegawai</label>
+        <input
+          type="text"
+          placeholder="Masukkan username pegawai"
+          className="border rounded p-4 mb-3"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
         />
 
         <label className="mb-1">Nomor Telepon Pegawai</label>
@@ -303,13 +495,18 @@ function GajiPokokForm({ salary, setSalary, getDisplay, onSave }) {
   return (
     <div className="flex flex-col border p-6 rounded-md shadow-sm">
       <label className="mb-1">Gaji Pegawai</label>
-      <input
-        type="number"
-        placeholder="Masukkan alamat tinggal pegawai"
-        className="border rounded p-4 mb-3"
-        value={getDisplay(salary)}
-        onChange={(e) => setSalary(e.target.value)}
-      />
+      <div className="relative">
+        <span className="absolute inset-y-0 -top-3 left-4 flex items-center  text-gray-500">
+          Rp
+        </span>
+        <input
+          type="number"
+          placeholder="Masukkan gaji pokok"
+          className="border rounded p-4 mb-3 pl-12 w-full"
+          value={getDisplay(salary)}
+          onChange={(e) => setSalary(e.target.value)}
+        />
+      </div>
 
       <div className="flex justify-end">
         <button
