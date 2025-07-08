@@ -4,14 +4,16 @@ import { getTodayDateInBahasa } from "../utils/dateFormat";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   createChickenHealthMonitoring,
+  getChickenHealthMonitoringById,
   getChickenHealthMonitoringsDetails,
+  updateChickenHealthMonitoring,
 } from "../services/chickenMonitorings";
 
 const InputVaksinObat = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { id } = useParams();
+  const { id, monitoringId } = useParams();
 
   const [jenis, setJenis] = useState("");
   const [nama, setNama] = useState("");
@@ -26,6 +28,7 @@ const InputVaksinObat = () => {
   const namaOptions = ["Vaksin DOC", "Obat A", "Vaksin B"];
   const satuanOptions = ["mililiter", "liter", "gram", "kilogram"];
 
+
   const handleSubmit = async () => {
     const payload = {
       type: jenis,
@@ -33,6 +36,7 @@ const InputVaksinObat = () => {
       dose: parseFloat(dosis),
       unit: satuan,
       chickenCageId: parseInt(id),
+      disease: penyakit,
     };
 
     // console.log("payload: ", payload);
@@ -40,14 +44,48 @@ const InputVaksinObat = () => {
     // console.log("Payload to submit:", payload);
     // alert("Data berhasil disiapkan!");
 
-    try {
-      const createResponse = await createChickenHealthMonitoring(payload);
-      // console.log("createResponse: ", createResponse);
-      if (createResponse.status === 201) {
-        navigate(-1, { state: { refetch: true } });
+    if (monitoringId) {
+      updateChickenHealthMonitoring;
+      try {
+        const updateResponse = await updateChickenHealthMonitoring(
+          payload,
+          monitoringId
+        );
+
+        if (updateResponse.status === 200) {
+          navigate(-1, { state: { refetch: true } });
+        }
+
+        console.log("updateResponse: ", updateResponse);
+      } catch (error) {
+        const apiMessage = error?.response?.data?.message;
+
+        if (
+          apiMessage === "disease is required, since you choose medicine type"
+        ) {
+          alert("Data penyakit wajib diisi jika jenis item adalah obat");
+        } else {
+          alert(apiMessage || "Terjadi kesalahan");
+        }
       }
-    } catch (error) {
-      console.log("error :", error);
+    } else {
+      try {
+        const createResponse = await createChickenHealthMonitoring(payload);
+        // console.log("createResponse: ", createResponse);
+        if (createResponse.status === 201) {
+          navigate(-1, { state: { refetch: true } });
+        }
+      } catch (error) {
+        const apiMessage = error?.response?.data?.message;
+
+        if (
+          apiMessage === "disease is required, since you choose medicine type"
+        ) {
+          alert("Data penyakit wajib diisi jika jenis item adalah obat");
+        } else {
+          alert(apiMessage || "Terjadi kesalahan");
+        }
+      }
     }
   };
 
@@ -63,8 +101,29 @@ const InputVaksinObat = () => {
     }
   };
 
+  const fetchMonitoringDetail = async () => {
+    try {
+      const monitoringResponse = await getChickenHealthMonitoringById(
+        monitoringId
+      );
+      console.log("monitoringResponse: ", monitoringResponse);
+      if (monitoringResponse.status === 200) {
+        setNama(monitoringResponse.data.data.healthItemName);
+        setDosis(monitoringResponse.data.data.dose);
+        setJenis(monitoringResponse.data.data.type);
+        setPenyakit(monitoringResponse.data.data.disease);
+        setSatuan(monitoringResponse.data.data.unit);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
   useEffect(() => {
     fetchDetailVaksinObat();
+    if (monitoringId) {
+      fetchMonitoringDetail();
+    }
   }, []);
 
   return (

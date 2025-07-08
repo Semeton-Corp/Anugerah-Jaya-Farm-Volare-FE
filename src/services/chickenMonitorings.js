@@ -138,3 +138,30 @@ export const getChickenHealthMonitoringsDetails = (id) => {
     },
   });
 };
+
+export const getChickenHealthMonitoringById = (id) => {
+  return api.get(`/chickens/healths/monitorings/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const updateChickenHealthMonitoring = (payload, id) => {
+  return api.put(`/chickens/healths/monitorings/${id}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const deleteChickenHealthMonitoring = (payload, id) => {
+  return api.delete(`/chickens/healths/monitorings/${id}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};

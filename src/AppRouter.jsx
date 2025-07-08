@@ -139,6 +139,10 @@ const AppRouter = createBrowserRouter([
                     path: "input-vaksin-&-obat/:id",
                     element: <InputVaksinObat />,
                   },
+                  {
+                    path: "input-vaksin-&-obat/:id/:monitoringId",
+                    element: <InputVaksinObat />,
+                  },
                 ],
               },
             ],

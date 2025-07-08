@@ -3,8 +3,12 @@ import React from "react";
 import { useState } from "react";
 import { MdDelete, MdEdit } from "react-icons/md";
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
-import { getChickenHealthMonitoringsDetails } from "../services/chickenMonitorings";
+import {
+  deleteChickenHealthMonitoring,
+  getChickenHealthMonitoringsDetails,
+} from "../services/chickenMonitorings";
 import { useEffect } from "react";
+import { Trash2 } from "lucide-react";
 
 const DetailVaksinObat = () => {
   const { id } = useParams();
@@ -20,6 +24,9 @@ const DetailVaksinObat = () => {
 
   const [chickenCage, setChickenCage] = useState();
   const [chickenHealthMonitorings, setChickenHealthMonitorings] = useState();
+
+  const [deleteItem, setDeleteItem] = useState();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const inputHandle = () => {
     const newPath = location.pathname.replace(
@@ -43,53 +50,42 @@ const DetailVaksinObat = () => {
       console.log("error :", error);
     }
   };
-  const [data, setData] = useState([
-    {
-      tanggal: "20 Mar 2025",
-      kategori: "DOC",
-      usia: 49,
-      jenis: "Vaksin Rutin",
-      nama: "Vaksin DOC",
-      dosis: "5ml",
-      penyakit: "-",
-    },
-    {
-      tanggal: "20 Mar 2025",
-      kategori: "Grower",
-      usia: 49,
-      jenis: "Obat",
-      nama: "Obat A",
-      dosis: "5ml",
-      penyakit: "Penyakit B",
-    },
-    {
-      tanggal: "20 Mar 2025",
-      kategori: "Pre Layer",
-      usia: 49,
-      jenis: "Vaksin Kondisional",
-      nama: "Vaksin AB",
-      dosis: "5ml",
-      penyakit: "-",
-    },
-    {
-      tanggal: "20 Mar 2025",
-      kategori: "Layer",
-      usia: 49,
-      jenis: "Vaksin Rutin",
-      nama: "Vaksin B",
-      dosis: "5ml",
-      penyakit: "-",
-    },
-    {
-      tanggal: "20 Mar 2025",
-      kategori: "Afkir",
-      usia: 49,
-      jenis: "Vaksin Rutin",
-      nama: "Vaksin C",
-      dosis: "5ml",
-      penyakit: "-",
-    },
-  ]);
+
+  const editHealthHandle = (monitoringId) => {
+    const tempPath = location.pathname.replace(
+      "detail-vaksin-&-obat",
+      "input-vaksin-&-obat"
+    );
+    const newPath = `${tempPath}/${monitoringId}`;
+    navigate(newPath);
+  };
+
+  const deleteHealthHandle = async () => {
+    const payload = {
+      healthItemName: deleteItem.healthItemName,
+      chickenCageId: parseInt(id),
+      type: deleteItem.type,
+      dose: deleteItem.dose,
+      unit: deleteItem.dose,
+    };
+
+    try {
+      const deleteResponse = await deleteChickenHealthMonitoring(
+        payload,
+        deleteItem.id
+      );
+      if (deleteResponse.status == 204) {
+        fetchDetailVaksinObat();
+        setDeleteItem("");
+      }
+    } catch (error) {
+      console.log("error :", error);
+      setDeleteItem("");
+    } finally {
+      setShowDeleteModal(false);
+    }
+  };
+
   useEffect(() => {
     fetchDetailVaksinObat();
 
@@ -177,14 +173,21 @@ const DetailVaksinObat = () => {
                   <td className="py-2 px-4 flex items-center space-x-2">
                     <button>
                       <MdEdit
-                        size={18}
-                        className="text-gray-700 hover:text-black"
+                        onClick={() => {
+                          editHealthHandle(row.id);
+                        }}
+                        size={28}
+                        className="text-gray-700 hover:text-black cursor-pointer"
                       />
                     </button>
                     <button>
                       <MdDelete
-                        size={18}
-                        className="text-red-500 hover:text-red-700"
+                        onClick={() => {
+                          setDeleteItem(row);
+                          setShowDeleteModal(true);
+                        }}
+                        size={28}
+                        className="text-red-500 hover:text-red-700 cursor-pointer"
                       />
                     </button>
                   </td>
@@ -210,6 +213,33 @@ const DetailVaksinObat = () => {
           </div>
         </div>
       </div>
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/15 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-lg relative">
+            <div className="flex flex-col items-center text-center gap-4">
+              <Trash2 size={48} />
+              <h2 className="text-lg font-semibold">
+                Apakah anda yakin untuk menghapus data ini?
+              </h2>
+              <div className="flex gap-4 mt-4">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="bg-gray-300 px-4 py-2 rounded w-full hover:bg-gray-400 text-black cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={deleteHealthHandle}
+                  className="bg-red-500 px-4 py-2 rounded w-full hover:bg-red-600 text-white flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Trash2 size={16} />
+                  Hapus
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
