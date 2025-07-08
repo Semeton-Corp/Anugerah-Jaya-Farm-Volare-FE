@@ -122,20 +122,16 @@ const DaftarBarang = () => {
 
       {/* Table Section */}
       <div className="bg-white p-4 border rounded-lg w-full border-black-6">
-        {userRole === "Pekerja Gudang" ||
-          userRole === "Kepala Kandang" ||
-          (userRole === "Owner" && (
-            <div className="flex justify-end items-center mb-4">
-              <div
-                onClick={tambahBarangHandle}
-                className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
-              >
-                <div className="text-base font-medium ms-2 ">
-                  + Tambah Barang Baru
-                </div>
-              </div>
+        <div className="flex justify-end items-center mb-4">
+          <div
+            onClick={tambahBarangHandle}
+            className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
+          >
+            <div className="text-base font-medium ms-2 ">
+              + Tambah Barang Baru
             </div>
-          ))}
+          </div>
+        </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left border-collapse">
@@ -144,10 +140,7 @@ const DaftarBarang = () => {
                 <th className="py-2 px-4">Nama Barang</th>
                 <th className="py-2 px-4">Jenis Barang</th>
                 <th className="py-2 px-4">Satuan</th>
-                {userRole === "Pekerja Gudang" ||
-                  (userRole === "Kepala Kandang" && (
-                    <th className="py-2 px-4">Aksi</th>
-                  ))}
+                <th className="py-2 px-4">Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -159,14 +152,15 @@ const DaftarBarang = () => {
                   <td className="py-2 px-4">{data.name}</td>
                   <td className="py-2 px-4">{data.category}</td>
                   <td className="py-2 px-4">{data.unit}</td>
-                  {userRole === "Pekerja Gudang" ||
-                    (userRole === "Kepala Kandang" && (
-                      <td className="py-2 px-4 flex justify-center gap-4">
-                        <span className="px-4 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer">
-                          Edit Stok
-                        </span>
-                      </td>
-                    ))}
+
+                  <td className="py-2 px-4 flex justify-center gap-4">
+                    <span
+                      onClick={editDataHandle}
+                      className="px-4 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer"
+                    >
+                      Edit Stok
+                    </span>
+                  </td>
                 </tr>
               ))}
             </tbody>

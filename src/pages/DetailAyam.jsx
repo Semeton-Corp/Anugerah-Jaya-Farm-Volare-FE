@@ -205,10 +205,8 @@ const DetailAyam = () => {
                 <th className="py-2 px-4">Mati</th>
                 <th className="py-2 px-4">Pakan (Kg)</th>
                 <th className="py-2 px-4">Mortalitas</th>
-                {(userRole === "Pekerja Kandang" ||
-                  userRole === "Kepala Kandang") && (
-                  <th className="py-2 px-4">Aksi</th>
-                )}
+
+                <th className="py-2 px-4">Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -233,19 +231,17 @@ const DetailAyam = () => {
                       <p>%</p>
                     </div>
                   </td>
-                  {(userRole === "Pekerja Kandang" ||
-                    userRole === "Kepala Kandang") && (
-                    <td className="py-2 px-4 flex justify-center gap-4">
-                      <span
-                        onClick={() => {
-                          editDataHandle(row.id);
-                        }}
-                        className="py-1 px-4 rounded bg-green-700 hover:bg-green-900  text-white cursor-pointer"
-                      >
-                        Lihat Detail
-                      </span>
-                    </td>
-                  )}
+
+                  <td className="py-2 px-4 flex justify-center gap-4">
+                    <span
+                      onClick={() => {
+                        editDataHandle(row.id);
+                      }}
+                      className="py-1 px-4 rounded bg-green-700 hover:bg-green-900  text-white cursor-pointer"
+                    >
+                      Lihat Detail
+                    </span>
+                  </td>
                 </tr>
               ))}
             </tbody>
