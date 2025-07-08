@@ -92,7 +92,7 @@ const InputAyam = () => {
         setSelectedChickenCage(dataChickenCage[0]);
 
         if (id) {
-          console.log("THERE IS AN ID: ", id);
+          // console.log("THERE IS AN ID: ", id);
           const updateResponse = await getChickenMonitoringById(id);
           const data = updateResponse.data.data;
           console.log("THERE IS DATA: ", data);

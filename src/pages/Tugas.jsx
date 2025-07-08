@@ -67,10 +67,11 @@ const Tugas = () => {
       const presenceResponse = await getCurrentPresence();
       console.log("presenceResponse: ", presenceResponse);
       if (presenceResponse.status == 200) {
-        setIsPresence(presenceResponse.data.data.isPresent);
-        if (presenceResponse.data.data.isPresent) {
+        // setIsPresence(presenceResponse.data.data.isPresent);
+        if (presenceResponse.data.data.currentPresence.status === "Hadir") {
+          setIsPresence(true);
           fetchTugasTambahanData();
-          fetchAllTugas();
+          // fetchAllTugas();
         }
       }
     } catch (error) {

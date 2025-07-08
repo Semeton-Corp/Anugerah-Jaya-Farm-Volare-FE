@@ -28,7 +28,7 @@ export default function TopBar() {
   };
 
   return (
-    <div>
+    <div className="fixed top-0 w-full">
       <nav className="bg-white p-4 shadow-sm">
         <div className="px-6 lg:px-16 flex justify-between items-center flex-wrap gap-4">
           {/* logo & company name */}

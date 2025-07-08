@@ -73,3 +73,21 @@
   --text-2xl: 28px;
   --text-3xl: 32px;
 }
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #a0aec0 #edf2f7;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: #edf2f7;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #a0aec0;
+  border-radius: 4px;
+}

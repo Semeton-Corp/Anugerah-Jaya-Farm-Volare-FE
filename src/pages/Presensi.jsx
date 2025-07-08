@@ -6,6 +6,7 @@ import {
   arrivalPresence,
   departurePresence,
   getAllPresence,
+  updatePresence,
 } from "../services/presence";
 
 const Presensi = () => {
@@ -13,6 +14,7 @@ const Presensi = () => {
   const [isPresence, setIsPresence] = useState(false);
   const [isGoHome, setIsGoHome] = useState(false);
   const [attendanceData, setAttendanceData] = useState([]);
+  const [note, setNote] = useState([]);
 
   const monthNamesBahasa = [
     "Januari",
@@ -36,15 +38,27 @@ const Presensi = () => {
   const monthName = monthNamesBahasa[monthIndex];
   const monthNumber = monthIndex + 1;
 
-  const getTodayPresence = async (id) => {
+  const getTodayPresence = async () => {
     try {
       const presenceResponse = await getCurrentPresence();
-      console.log("currentPresenceResponse: ", presenceResponse);
+      // console.log("currentPresenceResponse: ", presenceResponse);
       if (presenceResponse.status == 200) {
-        setPresenceId(presenceResponse.data.data.id);
-        setIsPresence(presenceResponse.data.data.isPresent);
-        if (presenceResponse.data.data.endTime != "-") {
+        const presenceData = presenceResponse.data.data.currentPresence;
+        setPresenceId(presenceData.id);
+        // console.log("presenceData.id: ", presenceData.id);
+
+        if (presenceData.status === "Alpha" && presenceData.startTime === "-") {
+          setIsGoHome(false);
+          setIsPresence(false);
+        } else if (
+          presenceData.status === "Hadir" &&
+          presenceData.endTime === "-"
+        ) {
+          setIsGoHome(false);
+          setIsPresence(true);
+        } else {
           setIsGoHome(true);
+          setIsPresence(true);
         }
       }
     } catch (error) {
@@ -68,31 +82,160 @@ const Presensi = () => {
   };
 
   const arrivalHandlePresence = async () => {
-    try {
-      const presenceResponse = await arrivalPresence(presenceId);
-      console.log("presenceResponse: ", presenceResponse);
-      if (presenceResponse.status == 200) {
-        setIsPresence(presenceResponse.data.data.isPresent);
+    const now = new Date();
+
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const startTime = `${hours}:${minutes}`;
+    console.log("startTime: ", startTime);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        // const latitude = -8.556790777490797;
+        // const longitude = 115.21758360400582;
+
+        // console.log("latitude: ", latitude);
+        // console.log("longitude: ", longitude);
+        const payload = {
+          status: "Hadir",
+          startTime: startTime,
+          latitude: latitude,
+          longitude: longitude,
+        };
+
+        // console.log("payload: ", payload);
+        // console.log("presenceId: ", presenceId);
+
+        try {
+          const res = await updatePresence(payload, presenceId);
+          if (res.status == 200) {
+            getTodayPresence();
+          }
+          // console.log("Update success:", res.data);
+        } catch (err) {
+          const serverMessage = err?.response?.data?.message;
+
+          let customMessage = "Terjadi kesalahan tak terduga";
+
+          if (serverMessage === "location is not within the allowed radius") {
+            customMessage =
+              "Pastikan Anda berada di lokasi kerja! Presensi hanya bisa dilakukan di tempat kerja.";
+          }
+
+          alert(customMessage);
+        }
+      },
+      (error) => {
+        console.error("Location error:", error);
       }
-    } catch (error) {
-      console.log("error :", error);
-    }
+    );
   };
 
   const departureHandlePresence = async () => {
-    try {
-      const presenceResponse = await departurePresence(presenceId);
-      console.log("presenceResponse: ", presenceResponse);
-      if (presenceResponse.status == 200) {
-        setIsGoHome(true);
+    const now = new Date();
+
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const endTime = `${hours}:${minutes}`;
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        // const latitude = -8.556790777490797;
+        // const longitude = 115.21758360400582;
+
+        const payload = {
+          status: "Hadir",
+          endTime: endTime,
+          latitude: latitude,
+          longitude: longitude,
+        };
+
+        // console.log("payload: ", payload);
+        // console.log("presenceId: ", presenceId);
+
+        try {
+          const res = await updatePresence(payload, presenceId);
+          if (res.status == 200) {
+            getTodayPresence();
+          }
+          // console.log("Update success:", res.data);
+        } catch (err) {
+          const serverMessage = err?.response?.data?.message;
+
+          let customMessage = "Terjadi kesalahan tak terduga";
+
+          if (serverMessage === "location is not within the allowed radius") {
+            customMessage =
+              "Pastikan Anda berada di lokasi kerja! Presensi hanya bisa dilakukan di tempat kerja.";
+          }
+
+          alert(customMessage);
+        }
+      },
+      (error) => {
+        console.error("Location error:", error);
       }
-    } catch (error) {
-      console.log("error :", error);
-    }
+    );
   };
+
+  const handleSakit = async () => {
+    const now = new Date();
+
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const endTime = `${hours}:${minutes}`;
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        // const latitude = -8.556790777490797;
+        // const longitude = 115.21758360400582;
+
+        const payload = {
+          status: "Sakit",
+          evidence: "evidence",
+          note: note,
+          latitude: latitude,
+          longitude: longitude,
+        };
+
+        // console.log("payload: ", payload);
+        // console.log("presenceId: ", presenceId);
+
+        try {
+          const res = await updatePresence(payload, presenceId);
+          if (res.status == 200) {
+            getTodayPresence();
+          }
+          // console.log("Update success:", res.data);
+        } catch (err) {
+          const serverMessage = err?.response?.data?.message;
+
+          let customMessage = "Terjadi kesalahan tak terduga";
+
+          if (serverMessage === "location is not within the allowed radius") {
+            customMessage =
+              "Pastikan Anda berada di lokasi kerja! Presensi hanya bisa dilakukan di tempat kerja.";
+          }
+
+          alert(customMessage);
+        }
+      },
+      (error) => {
+        console.error("Location error:", error);
+      }
+    );
+  };
+  const handleIzin = async () => {};
+
   useEffect(() => {
     getTodayPresence();
-    getAttandanceData();
+    // getAttandanceData();
   }, [isPresence, isGoHome]);
 
   return (
@@ -106,20 +249,46 @@ const Presensi = () => {
           <p className="text-sm">{getTodayDateInBahasa()}</p>
         </div>
         <div
-          onClick={isPresence ? departureHandlePresence : arrivalHandlePresence}
-          className={`text-center py-2 rounded text-lg font-semibold ${
-            isGoHome
-              ? "bg-black-5  text-black-8"
-              : isPresence
-              ? "bg-kritis-box-surface-color hover:bg-[#C34747] text-kritis-text-color cursor-pointer hover:text-white "
-              : "bg-aman-box-surface-color hover:bg-[#1D7E20] text-aman-text-color cursor-pointer hover:text-white "
+          className={`grid gap-6 ${
+            isGoHome || isPresence ? "grid-cols-1" : "grid-cols-3"
           }`}
         >
-          {isGoHome
-            ? "Anda sudah melakukan presensi hari ini"
-            : isPresence
-            ? "Pulang"
-            : "Hadir"}
+          {/* Hadir / Pulang / Info */}
+          <div
+            onClick={
+              isPresence ? departureHandlePresence : arrivalHandlePresence
+            }
+            className={`text-center py-2 rounded text-lg font-semibold ${
+              isGoHome
+                ? "bg-black-5 text-black-8"
+                : isPresence
+                ? "bg-kritis-box-surface-color hover:bg-[#C34747] text-kritis-text-color cursor-pointer hover:text-white"
+                : "bg-aman-box-surface-color hover:bg-[#1D7E20] text-aman-text-color cursor-pointer hover:text-white"
+            }`}
+          >
+            {isGoHome
+              ? "Anda sudah melakukan presensi hari ini"
+              : isPresence
+              ? "Pulang"
+              : "Hadir"}
+          </div>
+
+          {!isPresence && !isGoHome && (
+            <>
+              <div
+                onClick={handleSakit}
+                className="text-center py-2 rounded text-lg font-semibold bg-kritis-box-surface-color hover:bg-[#C34747] text-kritis-text-color cursor-pointer hover:text-white"
+              >
+                Sakit
+              </div>
+              <div
+                onClick={handleIzin}
+                className="text-center py-2 rounded text-lg font-semibold bg-orange-300 hover:bg-orange-500 text-warning-text-color cursor-pointer hover:text-white"
+              >
+                Izin
+              </div>
+            </>
+          )}
         </div>
       </div>
 

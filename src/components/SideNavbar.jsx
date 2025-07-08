@@ -23,102 +23,105 @@ const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
 
   return (
     <div
-      className={`bg-green-700 text-shadow-black-13 h-full transition-all flex flex-col duration-100 justify-between ${
+      className={`fixed left-0 top-0 bg-green-700 text-shadow-black-13 h-full transition-all flex flex-col duration-100 justify-between ${
         isExpanded ? "w-64" : "w-20"
       }`}
     >
-      <nav className="mt-[122px] space-y-[24px]">
-        {menuItems.map((item, idx) => {
-          const rolePath = role.toLowerCase().replace(/\s+/g, "-");
-          const tabPath = item.tabName.toLowerCase().replace(/\s+/g, "-");
-          const fullPath = `/${rolePath}/${tabPath}`;
+      <div className="flex-1 overflow-y-auto mt-[122px] scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 space-y-[24px]">
+        <nav className="space-y-[24px]">
+          {menuItems.map((item, idx) => {
+            const rolePath = role.toLowerCase().replace(/\s+/g, "-");
+            const tabPath = item.tabName.toLowerCase().replace(/\s+/g, "-");
+            const fullPath = `/${rolePath}/${tabPath}`;
 
-          const currentPathStr = Array.isArray(currentPath)
-            ? currentPath[0]
-            : currentPath;
-          const fullPathStr = Array.isArray(fullPath) ? fullPath[0] : fullPath;
+            const currentPathStr = Array.isArray(currentPath)
+              ? currentPath[0]
+              : currentPath;
+            const fullPathStr = Array.isArray(fullPath)
+              ? fullPath[0]
+              : fullPath;
 
-          const hasSubTabs =
-            Array.isArray(item.subTabs) && item.subTabs.length > 0;
-          const isExpandedMenu = expandedMenu === item.tabName;
+            const hasSubTabs =
+              Array.isArray(item.subTabs) && item.subTabs.length > 0;
+            const isExpandedMenu = expandedMenu === item.tabName;
 
-          // Determine if any subTab is selected
-          const isAnySubTabSelected =
-            hasSubTabs &&
-            item.subTabs.some((subTab) => {
-              const subLabel =
-                typeof subTab === "string" ? subTab : subTab?.tabName || "";
-              const subPath = subLabel
-                .toString()
-                .toLowerCase()
-                .replace(/\s+/g, "-");
-              const fullSubPath = `/${rolePath}/${tabPath}/${subPath}`;
-              return currentPath === fullSubPath;
-            });
+            // Determine if any subTab is selected
+            const isAnySubTabSelected =
+              hasSubTabs &&
+              item.subTabs.some((subTab) => {
+                const subLabel =
+                  typeof subTab === "string" ? subTab : subTab?.tabName || "";
+                const subPath = subLabel
+                  .toString()
+                  .toLowerCase()
+                  .replace(/\s+/g, "-");
+                const fullSubPath = `/${rolePath}/${tabPath}/${subPath}`;
+                return currentPath === fullSubPath;
+              });
 
-          const isSelected =
-            currentPathStr === fullPathStr ||
-            currentPathStr.startsWith(fullPathStr + "/") ||
-            isAnySubTabSelected;
+            const isSelected =
+              currentPathStr === fullPathStr ||
+              currentPathStr.startsWith(fullPathStr + "/") ||
+              isAnySubTabSelected;
 
-          return (
-            <div key={idx}>
-              <SidebarItem
-                icon={item.icon}
-                tabName={item.tabName}
-                isExpanded={isExpanded}
-                isSelected={isSelected}
-                onClick={() => {
-                  if (hasSubTabs) {
-                    toggleSubmenu(item.tabName);
-                    if (!isExpanded) {
-                      toggleSidebar();
+            return (
+              <div key={idx}>
+                <SidebarItem
+                  icon={item.icon}
+                  tabName={item.tabName}
+                  isExpanded={isExpanded}
+                  isSelected={isSelected}
+                  onClick={() => {
+                    if (hasSubTabs) {
+                      toggleSubmenu(item.tabName);
+                      if (!isExpanded) {
+                        toggleSidebar();
+                      }
+                    } else {
+                      navigate(fullPath);
                     }
-                  } else {
-                    navigate(fullPath);
-                  }
-                }}
-                showArrow={hasSubTabs}
-                isArrowDown={isExpandedMenu}
-              />
+                  }}
+                  showArrow={hasSubTabs}
+                  isArrowDown={isExpandedMenu}
+                />
 
-              {hasSubTabs && isExpandedMenu && (
-                <div className="ml-8 mt-3 me-4 space-y-3">
-                  {item.subTabs.map((subTab, sIdx) => {
-                    const subLabel =
-                      typeof subTab === "string"
-                        ? subTab
-                        : subTab?.tabName || "";
-                    const subPath = subLabel
-                      .toString()
-                      .toLowerCase()
-                      .replace(/\s+/g, "-");
-                    const fullSubPath = `/${rolePath}/${tabPath}/${subPath}`;
-                    const isSubSelected =
-                      currentPath === fullSubPath ||
-                      currentPath.startsWith(fullSubPath + "/");
+                {hasSubTabs && isExpandedMenu && (
+                  <div className="ml-8 mt-3 me-4 space-y-3">
+                    {item.subTabs.map((subTab, sIdx) => {
+                      const subLabel =
+                        typeof subTab === "string"
+                          ? subTab
+                          : subTab?.tabName || "";
+                      const subPath = subLabel
+                        .toString()
+                        .toLowerCase()
+                        .replace(/\s+/g, "-");
+                      const fullSubPath = `/${rolePath}/${tabPath}/${subPath}`;
+                      const isSubSelected =
+                        currentPath === fullSubPath ||
+                        currentPath.startsWith(fullSubPath + "/");
 
-
-                    return (
-                      <div
-                        key={sIdx}
-                        onClick={() => navigate(fullSubPath)}
-                        className={`text-sm rounded-md py-3 px-3 cursor-pointer font-medium ${
-                          isSubSelected
-                            ? "bg-orange-500"
-                            : "bg-orange-50 hover:bg-green-600"
-                        }`}
-                      >
-                        {subLabel}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </nav>
+                      return (
+                        <div
+                          key={sIdx}
+                          onClick={() => navigate(fullSubPath)}
+                          className={`text-sm rounded-md py-3 px-3 cursor-pointer font-medium ${
+                            isSubSelected
+                              ? "bg-orange-500"
+                              : "bg-orange-50 hover:bg-green-600"
+                          }`}
+                        >
+                          {subLabel}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </nav>
+      </div>
 
       <div className="flex items-center justify-center p-4">
         <button

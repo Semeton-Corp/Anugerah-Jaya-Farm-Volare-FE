@@ -2,7 +2,7 @@ import api from "./api";
 const token = localStorage.getItem("token");
 
 export const getCurrentPresence = () => {
-  return api.get("/presences/current", {
+  return api.get("/presences/current/me", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -14,10 +14,10 @@ export const getAllPresence = (month, year) => {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-    params:{
+    params: {
       month: month,
-      year:year
-    }
+      year: year,
+    },
   });
 };
 
@@ -43,4 +43,12 @@ export const departurePresence = (id) => {
       },
     }
   );
+};
+
+export const updatePresence = (payload, id) => {
+  return api.patch(`/presences/${id}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 };

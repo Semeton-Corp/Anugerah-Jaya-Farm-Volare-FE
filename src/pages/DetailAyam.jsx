@@ -182,17 +182,14 @@ const DetailAyam = () => {
               : ""}
           </h2>
 
-          {(userRole === "Pekerja Kandang" ||
-            userRole === "Kepala Kandang") && (
-            <div
-              onClick={inputAyamHandle}
-              className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
-            >
-              <div className="text-base font-medium ms-2 text-black">
-                + Input Data Harian
-              </div>
+          <div
+            onClick={inputAyamHandle}
+            className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
+          >
+            <div className="text-base font-medium ms-2 text-black">
+              + Input Data Harian
             </div>
-          )}
+          </div>
         </div>
 
         <div className="overflow-x-auto">

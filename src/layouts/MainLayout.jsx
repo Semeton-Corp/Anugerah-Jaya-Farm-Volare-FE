@@ -34,8 +34,10 @@ const MainLayout = ({ role }) => {
             isExpanded ? "ml-[17rem]" : "ml-[7rem]"
           }`}
         >
-          <Breadcrumbs />
-          <Outlet />
+          <div className="pt-24 pb-6">
+            <Breadcrumbs />
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

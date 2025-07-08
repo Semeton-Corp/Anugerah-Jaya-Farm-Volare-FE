@@ -120,7 +120,56 @@ const AppRouter = createBrowserRouter([
             path: "ayam",
             children: [
               { path: "ringkasan-ayam", element: <Ayam /> },
-              { path: "data-ayam", element: <DetailAyam /> },
+              {
+                path: "data-ayam",
+                element: <DetailAyam />,
+                children: [
+                  {
+                    path: "input-ayam",
+                    element: <InputAyam />,
+                  },
+                  {
+                    path: "input-ayam/:id",
+                    element: <InputAyam />,
+                  },
+                ],
+              },
+              {
+                path: "vaksin-&-obat",
+                element: <VaksinObat />,
+                children: [
+                  {
+                    path: "detail-vaksin-&-obat/:id",
+                    element: <DetailVaksinObat />,
+                    children: [
+                      {
+                        path: "input-vaksin-&-obat",
+                        element: <InputVaksinObat />,
+                      },
+                    ],
+                  },
+                ],
+              },
+              { path: "kandang", element: <Kandang /> },
+              {
+                path: "input-ayam",
+                element: <InputAyam />,
+              },
+
+              {
+                path: "input-ayam/:id",
+                element: <InputAyam />,
+              },
+              {
+                path: "detail-vaksin-obat",
+                element: <VaksinObat />,
+                children: [
+                  {
+                    path: "input-ayam/:id",
+                    element: <InputAyam />,
+                  },
+                ],
+              },
               {
                 path: "vaksin-&-obat",
                 element: <VaksinObat />,
