@@ -46,6 +46,15 @@ export const deleteWarehouse = (id) => {
   });
 };
 
+export const getWarehousesOverview = (id) => {
+  return api.get(`/warehouses/overview/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
 export const getWarehousesByLocation = () => {
   const locationId = localStorage.getItem("locationId");
 

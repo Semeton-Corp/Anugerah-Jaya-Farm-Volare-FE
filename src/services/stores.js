@@ -33,6 +33,14 @@ export const updateStore = (payload, id) => {
   });
 };
 
+export const deleteStore = (id) => {
+  return api.delete(`/stores/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export const getListStoreSale = () => {
   return api.get("/stores/sales", {
     headers: {

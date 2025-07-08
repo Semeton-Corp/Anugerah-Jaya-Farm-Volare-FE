@@ -7,6 +7,9 @@ import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { FiMaximize2 } from "react-icons/fi";
 import { FaPercentage, FaWarehouse, FaTruck } from "react-icons/fa";
 import { FaCheck } from "react-icons/fa6";
+import { useState } from "react";
+import { getWarehouses, getWarehousesOverview } from "../services/warehouses";
+import { useEffect } from "react";
 
 const stokGudangData = [
   {
@@ -72,6 +75,18 @@ const Gudang = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const userRole = localStorage.getItem("role");
+
+  const [warehouses, setWarehouses] = useState();
+  const [selectedWarehouse, setSelectedWarehouse] = useState();
+
+  const [totalDangerStock, setTotalDangerStock] = useState();
+  const [totalSafeStock, setTotalSafeStock] = useState();
+  const [totalStoreRequest, setTotalStoreRequest] = useState();
+
+  const [eggStocks, setEggStocks] = useState();
+  const [equipmentStocks, setEquipmentStocks] = useState();
+  const [notifications, setNotifications] = useState();
+
   const detailPages = ["edit-stok-telur", "edit-stok-barang"];
 
   const isDetailPage = detailPages.some((segment) =>
@@ -91,6 +106,46 @@ const Gudang = () => {
 
     navigate(detailPath);
   };
+
+  const fetchWarehouses = async () => {
+    try {
+      const warehouseResponse = await getWarehouses();
+      // console.log("warehouseResponse: ", warehouseResponse);
+      if (warehouseResponse.status === 200) {
+        setWarehouses(warehouseResponse.data.data);
+        setSelectedWarehouse(warehouseResponse.data.data[0].id);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const fetchOverviewData = async () => {
+    try {
+      const overviewResponse = await getWarehousesOverview(selectedWarehouse);
+      console.log("overviewData: ", overviewResponse);
+      if (overviewResponse.status == 200) {
+        setEggStocks(overviewResponse.data.data.eggStocks);
+        setEquipmentStocks(overviewResponse.data.data.equipmentStocks);
+        setNotifications(overviewResponse.data.data.notifications);
+        setTotalDangerStock(overviewResponse.data.data.totalDangerStock);
+        setTotalSafeStock(overviewResponse.data.data.totalSafeStock);
+        setTotalStoreRequest(overviewResponse.data.data.totalStoreRequest);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchWarehouses();
+  }, []);
+
+  useEffect(() => {
+    if (selectedWarehouse) {
+      fetchOverviewData();
+    }
+  }, [selectedWarehouse]);
 
   if (isDetailPage) {
     return <Outlet />;
@@ -151,7 +206,9 @@ const Gudang = () => {
                 <div className="flex flex-wrap gap-4">
                   <div>
                     {/* popuasl */}
-                    <p className="text-3xl font-semibold">150</p>
+                    <p className="text-3xl font-semibold">
+                      {totalSafeStock ?? 0}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -170,7 +227,9 @@ const Gudang = () => {
                 <div className="flex flex-wrap gap-4">
                   <div>
                     {/* popuasl */}
-                    <p className="text-3xl font-semibold">2000</p>
+                    <p className="text-3xl font-semibold">
+                      {totalDangerStock ?? 0}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -189,7 +248,9 @@ const Gudang = () => {
                 <div className="flex flex-wrap gap-4">
                   <div className="flex">
                     {/* popuasl */}
-                    <p className="text-3xl font-semibold pe-2">4</p>
+                    <p className="text-3xl font-semibold pe-2">
+                      {totalStoreRequest ?? 0}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -221,20 +282,20 @@ const Gudang = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {stokGudangData.map((item, index) => (
+                    {eggStocks?.map((item, index) => (
                       <tr key={index} className="border-b text-center">
-                        <td className="py-2 px-4">{item.namaBarang}</td>
-                        <td className="py-2 px-4">{item.qty}</td>
-                        <td className="py-2 px-4">Kg</td>
+                        <td className="py-2 px-4">{item.item.name}</td>
+                        <td className="py-2 px-4">{item.quantity}</td>
+                        <td className="py-2 px-4">{item.item.unit}</td>
                         <td className="py-2 px-4 flex justify-center">
                           <span
                             className={`w-24 py-1 flex justify-center rounded text-sm font-semibold ${
-                              item.keterangan === "aman"
+                              item.description === "Aman"
                                 ? "bg-aman-box-surface-color text-aman-text-color"
                                 : "bg-kritis-box-surface-color text-kritis-text-color"
                             }`}
                           >
-                            {item.keterangan}
+                            {item.description}
                           </span>
                         </td>
                         <td className="py-2 px-4 justify-center gap-4">
@@ -280,22 +341,22 @@ const Gudang = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {riwayatGudangData.map((item, index) => (
+                  {equipmentStocks?.map((item, index) => (
                     <tr key={index} className="border-b text-center">
-                      <td className="py-2 px-4">{item.namaBarang}</td>
-                      <td className="py-2 px-4">{item.jenisBarang}</td>
-                      <td className="py-2 px-4">{item.qty}</td>
-                      <td className="py-2 px-4">Kg</td>
-                      <td className="py-2 px-4">7 hari lagi</td>
+                      <td className="py-2 px-4">{item.item.name}</td>
+                      <td className="py-2 px-4">{item.item.category}</td>
+                      <td className="py-2 px-4">{item.quantity}</td>
+                      <td className="py-2 px-4">{item.item.unit}</td>
+                      <td className="py-2 px-4">{item.estimationRunOut}</td>
                       <td className="py-2 px-4 flex justify-center">
                         <span
                           className={`w-24 py-1 flex justify-center rounded text-sm font-semibold ${
-                            item.keterangan === "aman"
+                            item.description === "Aman"
                               ? "bg-aman-box-surface-color text-aman-text-color"
                               : "bg-kritis-box-surface-color text-kritis-text-color"
                           }`}
                         >
-                          kritis
+                          {item.description}
                         </span>
                       </td>
                       <td className="py-2 px-4 justify-center gap-4">
@@ -314,6 +375,14 @@ const Gudang = () => {
               </table>
             </div>
           </div>
+          <button
+            onClick={() => {
+              console.log("warehouses: ", warehouses);
+              console.log("selectedWarehouse: ", selectedWarehouse);
+            }}
+          >
+            CHECK
+          </button>
         </div>
       )}
     </>

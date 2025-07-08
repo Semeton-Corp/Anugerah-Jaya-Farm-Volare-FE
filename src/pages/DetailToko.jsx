@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import { getStoreDetail } from "../services/stores";
+import { deleteStore, getStoreDetail } from "../services/stores";
 import TambahPekerjaModal from "../components/TambahPekerjaModal";
 import { createStorePlacement } from "../services/placement";
 import { getRoles } from "../services/roles";
@@ -15,6 +15,7 @@ const DetailToko = () => {
   const [employees, setEmployees] = useState([]);
 
   const [showTambahPegawaiModal, setShowTambahPegawaiModal] = useState(false);
+  const [showDeleteGudangModal, setShowDeleteTokoModal] = useState(false);
 
   const [employeeOptions, setEmployeeOptions] = useState();
   const [selectedEmployee, setSelectedEmployee] = useState("");
@@ -25,20 +26,6 @@ const DetailToko = () => {
   const handleEditToko = () => {
     const newPath = location.pathname.replace("detail-toko", "tambah-toko");
     navigate(newPath);
-  };
-
-  const handleDeleteToko = async () => {
-    const confirmed = window.confirm("Yakin ingin menghapus toko ini?");
-    if (confirmed) {
-      try {
-        // const res = await deleteStore(id);
-        // if (res.status === 200) {
-        //   navigate(-1, { state: { refetch: true } });
-        // }
-      } catch (err) {
-        console.error(err);
-      }
-    }
   };
 
   const fetchRoles = async () => {
@@ -56,11 +43,17 @@ const DetailToko = () => {
       console.log("error :", error);
     }
   };
-
-  const handleAddEmployee = () => {
-    // Navigate to add employee modal or page
+  const handleDeleteToko = async () => {
+    try {
+      const deleteResponse = await deleteStore(id);
+      // console.log("deleteResponse: ", deleteResponse);
+      if (deleteResponse.status === 204) {
+        navigate(-1, { state: { refetch: true } });
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
   };
-
   const handleViewProfile = (empId) => {
     alert(`Lihat profil pegawai ID: ${empId}`);
   };
@@ -144,7 +137,9 @@ const DetailToko = () => {
           </button>
           <button
             className="bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded"
-            onClick={handleDeleteToko}
+            onClick={() => {
+              setShowDeleteTokoModal(true);
+            }}
           >
             Hapus Toko
           </button>
@@ -218,6 +213,58 @@ const DetailToko = () => {
         selectedPekerja={selectedEmployee}
         setSelectedPekerja={setSelectedEmployee}
       />
+
+      {showDeleteGudangModal && (
+        <div className="fixed inset-0 bg-black/15 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-lg">
+            <h2 className="text-xl font-bold mb-4">Hapus Toko</h2>
+            <p className="mb-4">
+              Apakah anda yakin menghapus Toko ini dari Daftar Toko?
+            </p>
+
+            <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm">
+              <strong>⚠️ Peringatan</strong>
+              <br />
+              Menghapus toko ini akan menghilangkan dan menghapus data toko dari
+              semua tabel terkait. Tindakan ini tidak dapat dipulihkan.
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setShowDeleteTokoModal(false)}
+                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => {
+                  // Call your delete logic here
+                  //   alert("Deleting gudang…");
+                  handleDeleteToko();
+                  setShowDeleteTokoModal(false);
+                }}
+                className="px-4 py-2 rounded bg-red-500 hover:bg-red-600 text-white flex items-center gap-1 cursor-pointer"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4m-4 0a1 1 0 00-1 1v1h6V4a1 1 0 00-1-1m-4 0h4"
+                  />
+                </svg>
+                Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

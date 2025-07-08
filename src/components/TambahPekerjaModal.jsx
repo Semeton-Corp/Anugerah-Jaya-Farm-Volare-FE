@@ -16,7 +16,10 @@ const TambahPekerjaModal = ({
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
       <div className="bg-white rounded p-6 w-full max-w-md relative shadow-lg">
-        <button className="absolute top-2 right-2 text-xl" onClick={onClose}>
+        <button
+          className="absolute top-2 right-2 text-3xl rounded-full hover:bg-gray-500 cursor-pointer"
+          onClick={onClose}
+        >
           ×
         </button>
 
