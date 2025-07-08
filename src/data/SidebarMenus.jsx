@@ -157,7 +157,7 @@ export const sidebarMenus = {
   "Pekerja Toko": [
     {
       icon: <img src={overview} alt="Overview Icon" className="h-4 w-4" />,
-      tabName: "Overview",
+      tabName: "Ringkasan",
       element: <OverviewOwner />,
     },
     {

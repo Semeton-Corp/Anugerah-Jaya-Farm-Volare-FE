@@ -68,8 +68,8 @@ const Presensi = () => {
 
   const getAttandanceData = async () => {
     try {
-      console.log("monthName: ", monthName);
-      console.log("year: ", year);
+      // console.log("monthName: ", monthName);
+      // console.log("year: ", year);
 
       const allPresenceResponse = await getAllPresence(monthName, year);
       console.log("allPresenceResponse: ", allPresenceResponse);
@@ -235,7 +235,7 @@ const Presensi = () => {
 
   useEffect(() => {
     getTodayPresence();
-    // getAttandanceData();
+    getAttandanceData();
   }, [isPresence, isGoHome]);
 
   return (

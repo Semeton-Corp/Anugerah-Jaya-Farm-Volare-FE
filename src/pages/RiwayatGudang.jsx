@@ -4,8 +4,13 @@ import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { PiCalendarBlank } from "react-icons/pi";
 import { BiSolidEditAlt } from "react-icons/bi";
-import { getTodayDateInBahasa } from "../utils/dateFormat";
+import {
+  formatDateToDDMMYYYY,
+  getTodayDateInBahasa,
+} from "../utils/dateFormat";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { getWarehouseItemHistories } from "../services/warehouses";
 
 const riwayatGudangData = [
   {
@@ -51,6 +56,10 @@ const RiwayatGudang = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const [page, setPage] = useState(1);
+  const [historyData, setHistoryData] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
+
   const detailPages = ["detail-riwayat-gudang"];
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
@@ -62,6 +71,26 @@ const RiwayatGudang = () => {
 
     navigate(detailPath);
   };
+
+  const fetchHistoryData = async (pageNumber = 1) => {
+    try {
+      const tempToday = new Date().toISOString().slice(0, 10);
+      const today = formatDateToDDMMYYYY(tempToday);
+
+      const res = await getWarehouseItemHistories(today, pageNumber);
+      const result = res.data;
+      // console.log("res: ", res);
+
+      setHistoryData(result.data);
+      setTotalPages(result.totalPages || 1);
+    } catch (error) {
+      console.error("Error fetching warehouse history:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchHistoryData();
+  }, []);
 
   if (isDetailPage) {
     return <Outlet />;
@@ -139,10 +168,24 @@ const RiwayatGudang = () => {
           <div className="flex justify-between mt-16 px-6">
             <p className="text-sm text-[#CCCCCC]">Menampilkan 1-7 data</p>
             <div className="flex gap-3">
-              <div className="rounded-[4px] py-2 px-6 bg-green-100 flex items-center justify-center text-black text-base font-medium hover:bg-green-200 cursor-pointer">
-                <p>Previous </p>
+              <div
+                className={`rounded-[4px] py-2 px-6 ${
+                  page === 1
+                    ? "bg-gray-200 cursor-not-allowed"
+                    : "bg-green-100 hover:bg-green-200"
+                } flex items-center justify-center text-black text-base font-medium`}
+                onClick={() => page > 1 && setPage(page - 1)}
+              >
+                <p>Previous</p>
               </div>
-              <div className="rounded-[4px] py-2 px-6 bg-green-700 flex items-center justify-center text-white text-base font-medium hover:bg-green-800 cursor-pointer">
+              <div
+                className={`rounded-[4px] py-2 px-6 ${
+                  page === totalPages
+                    ? "bg-gray-200 cursor-not-allowed"
+                    : "bg-green-700 hover:bg-green-800"
+                } flex items-center justify-center text-white text-base font-medium`}
+                onClick={() => page < totalPages && setPage(page + 1)}
+              >
                 <p>Next</p>
               </div>
             </div>

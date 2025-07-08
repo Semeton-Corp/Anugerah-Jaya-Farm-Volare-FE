@@ -41,6 +41,15 @@ export const deleteStore = (id) => {
   });
 };
 
+export const getStoreOverview = (id) => {
+  return api.get(`/stores/overview/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+
 export const getListStoreSale = () => {
   return api.get("/stores/sales", {
     headers: {

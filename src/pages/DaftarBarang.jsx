@@ -54,7 +54,7 @@ const DaftarBarang = () => {
   const fetchWarehouseItems = async () => {
     try {
       const warehouseItemResponse = await getItems();
-      console.log("warehouseItemResponse: ", warehouseItemResponse);
+      // console.log("warehouseItemResponse: ", warehouseItemResponse);
       if (warehouseItemResponse.status == 200) {
         setDaftarBarangData(warehouseItemResponse.data.data);
       }

@@ -55,14 +55,25 @@ export const getWarehousesOverview = (id) => {
   });
 };
 
-export const getWarehousesByLocation = () => {
-  const locationId = localStorage.getItem("locationId");
+export const getWarehouseItemHistories = (date, page) => {
+  return api.get(`/warehouses/items/histories`, {
+    params: {
+      date,
+      page,
+    },
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
 
-  return api.get(`/warehouses?locationId=${locationId}`, {
+export const getWarehousesByLocation = (locationId) => {
+  return api.get(`/warehouses`, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
     },
+    params: { locationId: locationId },
   });
 };
 

@@ -10,7 +10,7 @@ export const getCurrentPresence = () => {
 };
 
 export const getAllPresence = (month, year) => {
-  return api.get("/presences/", {
+  return api.get("/presences/me", {
     headers: {
       Authorization: `Bearer ${token}`,
     },

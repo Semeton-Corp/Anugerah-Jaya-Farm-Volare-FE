@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { PiCalendarBlank } from "react-icons/pi";
 import { PiMoneyWavyFill } from "react-icons/pi";
 import { TbEggCrackedFilled } from "react-icons/tb";
@@ -9,6 +9,8 @@ import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
 import { MdEgg, MdShoppingCart } from "react-icons/md";
 import { FaCartShopping } from "react-icons/fa6";
+import { useEffect } from "react";
+import { getStoreOverview, getStores } from "../services/stores";
 
 const stokTokoData = [
   {
@@ -133,6 +135,7 @@ const aktivitasTokoData = [
 const OverviewStok = () => {
   const userRole = localStorage.getItem("role");
   const location = useLocation();
+  const navigate = useNavigate();
   const detailPages = [
     "detail-stok-toko",
     "riwayat-aktivitas-toko",
@@ -142,7 +145,9 @@ const OverviewStok = () => {
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
-  const navigate = useNavigate();
+
+  const [stores, setStores] = useState();
+  const [selectedStore, setSelectedStore] = useState();
 
   const detailStokTokoHandle = () => {
     const currentPath = location.pathname;
@@ -165,6 +170,41 @@ const OverviewStok = () => {
     navigate(detailPath);
   };
 
+  const fetchStokData = async () => {
+    try {
+      const stokResponse = await getStoreOverview(selectedStore);
+      console.log("stokResponse: ", stokResponse);
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const fetchStores = async () => {
+    try {
+      const storeResponse = await getStores();
+      // console.log("storeResponse: ", storeResponse);
+      if (storeResponse.status === 200) {
+        setStores(storeResponse.data.data);
+        setSelectedStore(storeResponse.data.data[0].id);
+        console.log(
+          "storeResponse.data.data[0].id: ",
+          storeResponse.data.data[0].id
+        );
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchStores();
+  }, []);
+
+  useEffect(() => {
+    if (selectedStore) {
+      fetchStokData();
+    }
+  }, [selectedStore]);
   return (
     <>
       {isDetailPage ? (

@@ -11,6 +11,11 @@ import { Joystick } from "lucide-react";
 import DeleteModal from "../components/DeleteModal";
 
 const InputTelur = () => {
+  const userRole = localStorage.getItem("role");
+  const [locationId, setLocationId] = useState(
+    localStorage.getItem("locationId")
+  );
+
   const [chickenCages, setChickenCages] = useState([]);
   const [selectedChickenCage, setSelectedChickenCage] = useState(0);
   const [idBatch, setIdBatch] = useState("");
@@ -49,10 +54,16 @@ const InputTelur = () => {
   useEffect(() => {
     const fetchChickenCages = async () => {
       try {
-        const [chickenResponse, warehouseResponse] = await Promise.all([
-          getChickenCage(),
-          getWarehousesByLocation(),
-        ]);
+        let warehouseResponse;
+
+        if (userRole === "Owner") {
+          warehouseResponse = await getWarehousesByLocation();
+        } else {
+          warehouseResponse = await getWarehousesByLocation(locationId);
+        }
+        
+        const chickenResponse = await getChickenCage();
+
         setWarehouses(warehouseResponse.data.data);
         setSelectedWarehouse(warehouseResponse.data.data[0].id);
 
@@ -122,6 +133,12 @@ const InputTelur = () => {
     fetchChickenCages();
     // fetchWarehouses();
   }, []);
+
+  useEffect(() => {
+    if (userRole != "Owner") {
+      setLocationId(localStorage.getItem("locationId"));
+    }
+  }, [userRole]);
 
   const handleSubmit = async () => {
     const payload = {

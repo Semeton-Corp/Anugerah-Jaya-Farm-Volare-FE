@@ -40,10 +40,10 @@ const TambahBarangBaru = () => {
       const response = await getWarehouses();
       if (response.status == 200) {
         setWarehouses(response.data.data);
-        console.log("list warehouse: ", response.data.data);
+        // console.log("list warehouse: ", response.data.data);
 
         setSelectedWarehouse(response.data.data[0].id);
-        console.log("selected warehouse: ", response.data.data[0].id);
+        // console.log("selected warehouse: ", response.data.data[0].id);
       }
     } catch (error) {
       console.error("Gagal memuat data gudang:", error);
@@ -91,7 +91,7 @@ const TambahBarangBaru = () => {
     } else {
       try {
         const createResponse = await createItem(payload);
-        console.log("createResponse: ", createResponse);
+        // console.log("createResponse: ", createResponse);
         if (createResponse.status == 201) {
           navigate(-1, { state: { refecth: true } });
         }

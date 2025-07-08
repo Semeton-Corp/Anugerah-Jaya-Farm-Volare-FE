@@ -112,8 +112,21 @@ const AppRouter = createBrowserRouter([
             path: "produksi-telur",
             children: [
               { path: "overview-produksi", element: <ProduksiTelur /> },
-              { path: "data-produksi-telur", element: <DetailProduksi /> },
-              { path: "data-telur-ke-gudang", element: <DataTelurKeGudang /> },
+              {
+                path: "data-produksi-telur",
+                element: <DetailProduksi />,
+                children: [
+                  { path: "input-telur", element: <InputTelur /> },
+                  {
+                    path: "input-telur/:id",
+                    element: <InputTelur />,
+                  },
+                ],
+              },
+              {
+                path: "kandang",
+                element: <Kandang />,
+              },
             ],
           },
           {
@@ -253,6 +266,10 @@ const AppRouter = createBrowserRouter([
                   {
                     path: "tambah-supplier/:id",
                     element: <TambahSupplier />,
+                  },
+                  {
+                    path: "detail-supplier/:id",
+                    element: <DetailSupplier />,
                   },
                 ],
               },
@@ -518,7 +535,7 @@ const AppRouter = createBrowserRouter([
               },
             ],
           },
-          { path: "overview", element: <Toko /> },
+          { path: "ringkasan", element: <Toko /> },
           {
             path: "kasir",
             children: [

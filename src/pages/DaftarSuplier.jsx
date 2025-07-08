@@ -43,7 +43,7 @@ const DaftarSuplier = () => {
   const fetchSupplierData = async () => {
     try {
       const supplierResponse = await getSuppliers();
-      console.log("supplierResponse: ", supplierResponse);
+      // console.log("supplierResponse: ", supplierResponse);
       if (supplierResponse.status == 200) {
         setSupplierData(supplierResponse.data.data);
       }
