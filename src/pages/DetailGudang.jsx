@@ -5,10 +5,13 @@ import TambahPekerjaModal from "../components/TambahPekerjaModal";
 import { getRoles } from "../services/roles";
 import { getListUser } from "../services/user";
 import { Warehouse } from "lucide-react";
-import { createWarehousePlacement } from "../services/placement";
+import {
+  createWarehousePlacement,
+  deleteWarehousePlacementById,
+} from "../services/placement";
 
 const DetailGudang = () => {
-  const { id } = useParams();
+  const { id, locationId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -50,8 +53,17 @@ const DetailGudang = () => {
     alert(`View profile of employee ID: ${id}`);
   };
 
-  const handleDeleteEmployee = async (id) => {
-    // alert(`Delete employee ID: ${id}`);
+  const handleDeleteEmployee = async (userId) => {
+    try {
+      const deleteEmployeeResponse = await deleteWarehousePlacementById(userId);
+      // console.log("deleteEmployeeResponse: ", deleteEmployeeResponse);
+      if (deleteEmployeeResponse.status === 204) {
+        alert(`✅Pegawai Berhasil dihapus`);
+        fetchDetailData();
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
   };
 
   const fetchDetailData = async () => {
@@ -87,7 +99,10 @@ const DetailGudang = () => {
 
   const fetchEmployees = async () => {
     try {
-      const employeeOptionsResponse = await getListUser(selectedRole);
+      const employeeOptionsResponse = await getListUser(
+        selectedRole,
+        locationId
+      );
       //   console.log("employeeResponse: ", employeeResponse.data.data.users);
       if (employeeOptionsResponse.status) {
         setEmployeeOptions(employeeOptionsResponse.data.data.users);
@@ -120,7 +135,9 @@ const DetailGudang = () => {
   useEffect(() => {
     fetchDetailData();
     fetchRoles();
-    fetchEmployees();
+    if (selectedRole) {
+      fetchEmployees();
+    }
   }, [selectedRole]);
 
   return (
@@ -268,6 +285,13 @@ const DetailGudang = () => {
           </div>
         </div>
       )}
+      <button
+        onClick={() => {
+          console.log("employeeOptions: ", employeeOptions);
+        }}
+      >
+        CHECK
+      </button>
     </div>
   );
 };

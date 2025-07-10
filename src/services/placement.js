@@ -26,6 +26,14 @@ export const createWarehousePlacement = (payload) => {
   });
 };
 
+export const deleteWarehousePlacementById = (payload) => {
+  return api.delete(`/placements/warehouses/${payload}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 //cage
 export const createCagePlacement = (payload) => {
   return api.post("/placements/cages", payload, {

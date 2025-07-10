@@ -343,8 +343,14 @@ const AppRouter = createBrowserRouter([
                 element: <DaftarGudang />,
                 children: [
                   { path: "tambah-gudang", element: <TambahGudang /> },
-                  { path: "tambah-gudang/:id", element: <TambahGudang /> },
-                  { path: "detail-gudang/:id", element: <DetailGudang /> },
+                  {
+                    path: "tambah-gudang/:id/:locationId",
+                    element: <TambahGudang />,
+                  },
+                  {
+                    path: "detail-gudang/:id/:locationId",
+                    element: <DetailGudang />,
+                  },
                 ],
               },
             ],

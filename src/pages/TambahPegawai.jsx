@@ -168,8 +168,13 @@ const TambahPegawai = () => {
         setShowPopup(true);
       }
     } catch (error) {
-      alert("Terjadi kesalahan dalam membuat akun!");
-      console.log("error :", error);
+      var customMessage = "❌Terjadi kesalahan dalam membuat akun!";
+      if (error.response.data.message == "email already exists") {
+        customMessage =
+          "Email sudah terdaftar, coba gunakan alamat email lain!";
+      }
+      console.log("error: ", error);
+      alert(customMessage);
     }
   };
   return (

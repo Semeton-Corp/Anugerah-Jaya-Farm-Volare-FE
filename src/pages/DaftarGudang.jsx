@@ -19,8 +19,8 @@ const DaftarGudang = () => {
     navigate(`${location.pathname}/tambah-gudang`);
   };
 
-  const handleLihatDetail = (id) => {
-    navigate(`${location.pathname}/detail-gudang/${id}`);
+  const handleLihatDetail = (id, locationId) => {
+    navigate(`${location.pathname}/detail-gudang/${id}/${locationId}`);
   };
 
   const fetchGudangList = async () => {
@@ -93,7 +93,9 @@ const DaftarGudang = () => {
                 <td className="px-4 py-2">{gudang?.totalEmployee}</td>
                 <td className="px-4 py-2">
                   <button
-                    onClick={() => handleLihatDetail(gudang.id)}
+                    onClick={() =>
+                      handleLihatDetail(gudang.id, gudang.location.id)
+                    }
                     className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-900 cursor-pointer"
                   >
                     Lihat Detail
@@ -104,6 +106,13 @@ const DaftarGudang = () => {
           </tbody>
         </table>
       </div>
+      <button
+        onClick={() => {
+          console.log("gudangList: ", gudangList);
+        }}
+      >
+        Check
+      </button>
     </div>
   );
 };
