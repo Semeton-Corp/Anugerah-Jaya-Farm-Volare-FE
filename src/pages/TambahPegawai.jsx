@@ -68,7 +68,7 @@ const TambahPegawai = () => {
     try {
       const rolesResponse = await getRoles();
       if (rolesResponse.status == 200) {
-        console.log("rolesResponse.data.data: ", rolesResponse.data.data);
+        // console.log("rolesResponse.data.data: ", rolesResponse.data.data);
         setRoles(rolesResponse.data.data);
         setSelectedRole(rolesResponse.data.data[0].id);
       }
@@ -80,7 +80,7 @@ const TambahPegawai = () => {
   const fetchLocationOptions = async () => {
     try {
       const locationsResponse = await getLocations();
-      console.log("locationsResponse: ", locationsResponse);
+      // console.log("locationsResponse: ", locationsResponse);
 
       if (locationsResponse.status === 200) {
         const allLocations = locationsResponse.data.data;
@@ -295,7 +295,7 @@ const TambahPegawai = () => {
               </div>
             </div>
             <button
-              className="bg-green-700 text-white w-full py-2 rounded"
+              className="bg-green-700 hover:bg-green-900 cursor-pointer text-white w-full py-2 rounded"
               onClick={() => {
                 setShowPopup(false);
                 navigate(-1, { state: { refetch: true } });

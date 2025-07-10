@@ -9,9 +9,12 @@ import { getWarehouses, getWarehousesByLocation } from "../services/warehouses";
 import CalculatorInput from "../components/CalculatorInput";
 import { Joystick } from "lucide-react";
 import DeleteModal from "../components/DeleteModal";
+import { useMemo } from "react";
 
 const InputTelur = () => {
   const userRole = localStorage.getItem("role");
+  const userName = localStorage.getItem("userName");
+
   const [locationId, setLocationId] = useState(
     localStorage.getItem("locationId")
   );
@@ -40,6 +43,12 @@ const InputTelur = () => {
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+  const filteredWarehouses = useMemo(() => {
+    return warehouses.filter(
+      (warehouse) => warehouse.id === selectedChickenCage?.cage?.location?.id
+    );
+  }, [warehouses, selectedChickenCage]);
+
   // const [selectedCageName, setSelectedCageName] = useState("");
   const [ok, setOk] = useState("");
   const [retak, setRetak] = useState("");
@@ -61,16 +70,30 @@ const InputTelur = () => {
         } else {
           warehouseResponse = await getWarehousesByLocation(locationId);
         }
-        
+
         const chickenResponse = await getChickenCage();
 
         setWarehouses(warehouseResponse.data.data);
-        setSelectedWarehouse(warehouseResponse.data.data[0].id);
+        setSelectedWarehouse(warehouseResponse.data.data[0]);
 
         const dataChickenCage = chickenResponse.data.data;
+        const dataWarehouse = warehouseResponse.data.data;
 
-        setChickenCages(dataChickenCage);
-        setSelectedChickenCage(dataChickenCage[0]);
+        console.log("dataWarehouse: ", dataWarehouse);
+        console.log("dataChickenCage: ", dataChickenCage);
+
+        if (userRole != "Owner") {
+          const filterCage = dataChickenCage.filter(
+            (cage) => cage.eggPic == userName
+          );
+          console.log("filterCage: ", filterCage);
+          setChickenCages(filterCage);
+          setSelectedChickenCage(filterCage[0]);
+        } else {
+          setChickenCages(dataChickenCage);
+          setSelectedChickenCage(dataChickenCage[0]);
+        }
+
         // console.log("data: ", data[0].id);
 
         // console.log("Kandang: ", data);
@@ -78,20 +101,27 @@ const InputTelur = () => {
         if (id) {
           setIsEditMode(false);
           const updateResponse = await getEggMonitoringById(id);
-          console.log("updateResponse: ", updateResponse);
+          // console.log("updateResponse: ", updateResponse);
 
           const data = updateResponse.data.data;
+          // console.log("data: ", data);
           if (updateResponse.status == 200) {
             const selectedCage = dataChickenCage.find(
-              (cage) => cage.id === data.cage.id
+              (cage) => cage.cage.id === data.cage.id
             );
 
-            const selectedWarehouse = dataChickenCage.find(
-              (cage) => cage.id === data.cage.id
+            const selectedWarehouse = dataWarehouse.find(
+              (warehouse) => warehouse.id === data.warehouse.id
             );
-            // console.log("selected: ", selected);
+
+            console.log("dataChickenCage: ", dataChickenCage);
+
+            console.log("data: ", data);
+            // console.log("dataChickenCage: ", dataChickenCage);
+            // console.log("selectedWarehouse: ", selectedWarehouse);
+
             setSelectedChickenCage(selectedCage);
-            setSelectedWarehouse(data.warehouse);
+            setSelectedWarehouse(selectedWarehouse);
             setTotalKarpetGoodEgg(data.totalKarpetGoodEgg);
             setTotalRemainingGoodEgg(data.totalRemainingGoodEgg);
             setTotalWeightGoodEgg(data.totalWeightGoodEgg);
@@ -106,8 +136,10 @@ const InputTelur = () => {
 
           // setSelectedCageName(data.cage.name);
         } else {
-          if (data.length > 0) {
-            // setSelectedCageName(cages[0]?.name);
+          if (dataChickenCage.length > 0) {
+            // console.log("dataChickenCage: ", dataChickenCage);
+            // console.log("dataChickenCage[0]?.name: ", dataChickenCage[0]?.name);
+            setSelectedChickenCage(dataChickenCage[0]);
           }
         }
       } catch (error) {
@@ -248,7 +280,7 @@ const InputTelur = () => {
         ) : (
           <div>
             <p className="text-lg font-bold mb-4">
-              {selectedChickenCage.cage.name}
+              {selectedChickenCage?.cage?.name}
             </p>
           </div>
         )}
@@ -257,25 +289,25 @@ const InputTelur = () => {
           <div>
             <label className="block font-medium mb-1">ID Batch</label>
             <p className="text-lg font-bold">
-              {selectedChickenCage.batchId != ""
-                ? selectedChickenCage.batchId
+              {selectedChickenCage?.batchId != ""
+                ? selectedChickenCage?.batchId
                 : "-"}
             </p>
           </div>
           <div>
             <label className="block font-medium mb-1">Kategori ayam</label>
             <p className="text-lg font-bold">
-              {selectedChickenCage.chickenCategory
-                ? selectedChickenCage.chickenCategory
+              {selectedChickenCage?.chickenCategory
+                ? selectedChickenCage?.chickenCategory
                 : "-"}
             </p>
           </div>
           <div>
             <label className="block font-medium mb-1">Usia ayam (Minggu)</label>
             <p className="text-lg font-bold">
-              {selectedChickenCage.chickenAge !== null &&
-              selectedChickenCage.chickenAge !== undefined
-                ? selectedChickenCage.chickenAge
+              {selectedChickenCage?.chickenAge !== null &&
+              selectedChickenCage?.chickenAge !== undefined
+                ? selectedChickenCage?.chickenAge
                 : "-"}
             </p>
           </div>
@@ -299,7 +331,7 @@ const InputTelur = () => {
           </select>
         ) : (
           <div>
-            <p className="text-lg font-bold mb-4">{selectedWarehouse.name}</p>
+            <p className="text-lg font-bold mb-4">{selectedWarehouse?.name}</p>
           </div>
         )}
 
@@ -503,33 +535,38 @@ const InputTelur = () => {
         </div>
       </div>
 
-      {/* <button
+      <button
         onClick={() => {
-          const payload = {
-            chickenCageId: selectedChickenCage.cage.id,
-            warehouseId: selectedWarehouse,
-            totalKarpetGoodEgg: parseInt(totalKarpetGoodEgg),
-            totalRemainingGoodEgg: parseInt(totalRemainingGoodEgg),
-            totalWeightGoodEgg: parseInt(totalWeightGoodEgg),
-            totalKarpetCrackedEgg: parseInt(totalKarpetCrackedEgg),
-            totalRemainingCrackedEgg: parseInt(totalRemainingCrackedEgg),
-            totalWeightCrackedEgg: parseInt(totalWeightCrackedEgg),
-            totalKarpetRejectEgg: parseInt(totalKarpetRejectEgg),
-            totalRemainingRejectEgg: parseInt(totalRemainingRejectEgg),
-          };
-          console.log("selectedWarehouse: ", selectedWarehouse);
-
-          console.log("isEditMode: ", isEditMode);
-          console.log("batchId: ", selectedChickenCage.batchId);
-          console.log("chickenCageId: ", selectedChickenCage);
-          console.log("payload: ", payload);
+          // const payload = {
+          //   chickenCageId: selectedChickenCage.cage.id,
+          //   warehouseId: selectedWarehouse,
+          //   totalKarpetGoodEgg: parseInt(totalKarpetGoodEgg),
+          //   totalRemainingGoodEgg: parseInt(totalRemainingGoodEgg),
+          //   totalWeightGoodEgg: parseInt(totalWeightGoodEgg),
+          //   totalKarpetCrackedEgg: parseInt(totalKarpetCrackedEgg),
+          //   totalRemainingCrackedEgg: parseInt(totalRemainingCrackedEgg),
+          //   totalWeightCrackedEgg: parseInt(totalWeightCrackedEgg),
+          //   totalKarpetRejectEgg: parseInt(totalKarpetRejectEgg),
+          //   totalRemainingRejectEgg: parseInt(totalRemainingRejectEgg),
+          // };
+          // console.log("selectedWarehouse: ", selectedWarehouse);
+          // console.log("isEditMode: ", isEditMode);
+          // console.log("batchId: ", selectedChickenCage.batchId);
+          // console.log("chickenCageId: ", selectedChickenCage);
+          // console.log("payload: ", payload);
           // console.log("id: ", id);
           // console.log("chickenCages: ", chickenCages);
           // console.log("selectedChickenCage: ", selectedChickenCage);
+
+          console.log("filteredWarehouses: ", filteredWarehouses);
+          console.log("selectedWarehouse: ", selectedWarehouse);
+          console.log("selectedChickenCage: ", selectedChickenCage);
+          console.log("chickenCages: ", chickenCages);
+          console.log("warehouses: ", warehouses);
         }}
       >
         Check
-      </button> */}
+      </button>
 
       <DeleteModal
         isOpen={showDeleteModal}

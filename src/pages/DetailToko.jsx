@@ -96,6 +96,10 @@ const DetailToko = () => {
   };
 
   const fetchEmployees = async () => {
+    if (!selectedRole) {
+      setEmployeeOptions([]);
+      return;
+    }
     try {
       const employeeOptionsResponse = await getListUser(selectedRole);
       //   console.log("employeeResponse: ", employeeResponse.data.data.users);

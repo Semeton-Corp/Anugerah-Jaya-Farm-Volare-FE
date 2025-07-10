@@ -34,11 +34,12 @@ const TambahKandang = () => {
   };
 
   const handleSubmit = async (e) => {
-    // e.preventDefault();
+    e.preventDefault();
     // console.log("Data disimpan:", form);
 
     try {
       const createResponse = await createCage(form);
+      console.log("form: ", form);
       console.log("createResponse: ", createResponse);
 
       if (createResponse.status === 201) {

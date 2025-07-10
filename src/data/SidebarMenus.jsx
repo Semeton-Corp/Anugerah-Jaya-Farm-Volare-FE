@@ -34,7 +34,6 @@ export const sidebarMenus = {
       subTabs: [
         { tabName: "Overview Produksi", path: "overview-produksi" },
         { tabName: "Data Produksi Telur", path: "data-produksi-telur" },
-        { tabName: "Data Telur ke Gudang", path: "data-telur-ke-gudang" },
       ],
     },
     {

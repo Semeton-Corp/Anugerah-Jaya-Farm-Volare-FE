@@ -1,50 +1,93 @@
-import React from "react";
+import React, { useState } from "react";
+import { useEffect } from "react";
 import { FaWarehouse } from "react-icons/fa";
+import { useLocation, useNavigate } from "react-router-dom";
+import { getChickenCage } from "../services/cages";
 
 const Kandang = () => {
   const userRole = localStorage.getItem("role");
-  const data = [
-    {
-      kandang: "Sidodadi DOC",
-      idAyam: "0611202500001",
-      kategori: "DOC",
-      usia: 1,
-      kapasitas: 11000,
-      pic: "Siti Rahayu",
-    },
-    {
-      kandang: "Sidodadi Grower",
-      idAyam: "0610202500001",
-      kategori: "Grower",
-      usia: 10,
-      kapasitas: 11000,
-      pic: "Siti Rahayu",
-    },
-    {
-      kandang: "Sidodadi 01",
-      idAyam: "0609202500001",
-      kategori: "Pre Layer",
-      usia: 16,
-      kapasitas: 4000,
-      pic: "Yono",
-    },
-    {
-      kandang: "Sidodadi 02",
-      idAyam: "0608202500001",
-      kategori: "Layer",
-      usia: 19,
-      kapasitas: 4000,
-      pic: "Yono",
-    },
-    {
-      kandang: "Sidodadi 03",
-      idAyam: "0607202500001",
-      kategori: "Afkir",
-      usia: 30,
-      kapasitas: 4000,
-      pic: "Abdi",
-    },
-  ];
+
+  const [kandangData, setKandangData] = useState([]);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // const data = [
+  //   {
+  //     kandang: "Sidodadi DOC",
+  //     idAyam: "0611202500001",
+  //     kategori: "DOC",
+  //     usia: 1,
+  //     kapasitas: 11000,
+  //     pic: "Siti Rahayu",
+  //   },
+  //   {
+  //     kandang: "Sidodadi Grower",
+  //     idAyam: "0610202500001",
+  //     kategori: "Grower",
+  //     usia: 10,
+  //     kapasitas: 11000,
+  //     pic: "Siti Rahayu",
+  //   },
+  //   {
+  //     kandang: "Sidodadi 01",
+  //     idAyam: "0609202500001",
+  //     kategori: "Pre Layer",
+  //     usia: 16,
+  //     kapasitas: 4000,
+  //     pic: "Yono",
+  //   },
+  //   {
+  //     kandang: "Sidodadi 02",
+  //     idAyam: "0608202500001",
+  //     kategori: "Layer",
+  //     usia: 19,
+  //     kapasitas: 4000,
+  //     pic: "Yono",
+  //   },
+  //   {
+  //     kandang: "Sidodadi 03",
+  //     idAyam: "0607202500001",
+  //     kategori: "Afkir",
+  //     usia: 30,
+  //     kapasitas: 4000,
+  //     pic: "Abdi",
+  //   },
+  // ];
+  const fetchKandangData = async () => {
+    try {
+      const kandangResponse = await getChickenCage();
+
+      if (kandangResponse.status === 200) {
+        const allKandang = kandangResponse.data.data;
+        const role = localStorage.getItem("role");
+        const locationId = parseInt(localStorage.getItem("locationId"), 10);
+
+        let filteredKandang = allKandang;
+
+        console.log("allKandang: ", allKandang);
+        if (role !== "Owner") {
+          filteredKandang = allKandang.filter(
+            (item) => item.cage.location.id === locationId
+          );
+        }
+
+        console.log("Filtered Kandang:", filteredKandang);
+        // Do something with filteredKandang, e.g., set state
+        setKandangData(filteredKandang);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchKandangData();
+    if (location?.state?.refetch) {
+      fetchKandangData();
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   return (
     <div className="px-4 md:px-8 py-6">
@@ -63,29 +106,24 @@ const Kandang = () => {
               <tr className="bg-green-700 text-white">
                 <th className="py-2 px-4">Kandang</th>
                 <th className="py-2 px-4">ID Batch</th>
-                {userRole !== "Pekerja Telur" && (
-                  <>
-                    <th className="py-2 px-4">Kategori</th>
-                    <th className="py-2 px-4">Usia (minggu)</th>
-                    <th className="py-2 px-4">Kapasitas Maksimum (Ekor)</th>
-                  </>
-                )}
+
+                <th className="py-2 px-4">Kategori</th>
+                <th className="py-2 px-4">Usia (minggu)</th>
+                <th className="py-2 px-4">Kapasitas Maksimum (Ekor)</th>
+
                 <th className="py-2 px-4">PIC</th>
               </tr>
             </thead>
             <tbody>
-              {data.map((row, idx) => (
+              {kandangData.map((row, idx) => (
                 <tr key={idx} className="border-t hover:bg-gray-50">
-                  <td className="py-2 px-4">{row.kandang}</td>
-                  <td className="py-2 px-4">{row.idAyam}</td>
-                  {userRole !== "Pekerja Telur" && (
-                    <>
-                      <td className="py-2 px-4">{row.kategori}</td>
-                      <td className="py-2 px-4">{row.usia}</td>
-                      <td className="py-2 px-4">{row.kapasitas}</td>
-                    </>
-                  )}
-                  <td className="py-2 px-4">{row.pic}</td>
+                  <td className="py-2 px-4">{row?.cage?.name}</td>
+                  <td className="py-2 px-4">{row.batchId}</td>
+                  <td className="py-2 px-4">{row.cage.chickenCategory}</td>
+                  <td className="py-2 px-4">{row.cage.chickenAge}</td>
+                  <td className="py-2 px-4">{row.cage.capacity}</td>
+
+                  <td className="py-2 px-4">{row.chickenPic}</td>
                 </tr>
               ))}
             </tbody>

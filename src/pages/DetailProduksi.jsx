@@ -33,6 +33,7 @@ import { getTodayDateInBahasa } from "../utils/dateFormat";
 
 const DetailProduksi = () => {
   const userRole = localStorage.getItem("role");
+  const userName = localStorage.getItem("userName");
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -167,6 +168,15 @@ const DetailProduksi = () => {
                     >
                       Lihat Detail
                     </span>
+                    {/* {userName === item.eggPic ||
+                      (userRole === "Owner" && (
+                        <span
+                          onClick={() => editDataHandle(item.id)}
+                          className="py-1 px-5 rounded-[4px] bg-green-700 hover:bg-green-900 cursor-pointer  text-white"
+                        >
+                          Lihat Detail
+                        </span>
+                      ))} */}
                   </td>
                 </tr>
               ))}
@@ -176,7 +186,6 @@ const DetailProduksi = () => {
           {userRole === "Owner" && (
             <div className="border-t-3 border-t-black-6 mt-12">
               <div className="mb-10"></div>
-              {/* footer */}
               <div className="flex justify-between mt-4 px-6">
                 <p className="text-sm text-[#CCCCCC]">Menampilkan 1-7 data</p>
                 <div className="flex gap-3">
@@ -192,6 +201,14 @@ const DetailProduksi = () => {
           )}
         </div>
       </div>
+
+      <button
+        onClick={() => {
+          console.log("produksiDetail: ", produksiDetail);
+        }}
+      >
+        CHECK
+      </button>
     </div>
   );
 };

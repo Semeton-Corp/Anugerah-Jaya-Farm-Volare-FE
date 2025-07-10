@@ -63,7 +63,11 @@ const DaftarKandang = () => {
 
   useEffect(() => {
     fetchKandangData();
-  }, []);
+    if (location?.state?.refetch) {
+      fetchKandangData();
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   if (isDetailPage) {
     return <Outlet />;

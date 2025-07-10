@@ -91,10 +91,10 @@ const Presensi = () => {
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
-        const latitude = position.coords.latitude;
-        const longitude = position.coords.longitude;
-        // const latitude = -8.556790777490797;
-        // const longitude = 115.21758360400582;
+        // const latitude = position.coords.latitude;
+        // const longitude = position.coords.longitude;
+        const latitude = -8.556790777490797;
+        const longitude = 115.21758360400582;
 
         // console.log("latitude: ", latitude);
         // console.log("longitude: ", longitude);
@@ -105,17 +105,19 @@ const Presensi = () => {
           longitude: longitude,
         };
 
-        // console.log("payload: ", payload);
+        console.log("payload: ", payload);
         // console.log("presenceId: ", presenceId);
 
         try {
           const res = await updatePresence(payload, presenceId);
+          console.log("res: ", res);
           if (res.status == 200) {
             getTodayPresence();
           }
           // console.log("Update success:", res.data);
         } catch (err) {
           const serverMessage = err?.response?.data?.message;
+          // console.log("serverMessage: ", serverMessage);
 
           let customMessage = "Terjadi kesalahan tak terduga";
 

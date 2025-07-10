@@ -34,11 +34,13 @@ const DetailKandang = () => {
     try {
       const deleteResponse = await deleteCage(id);
       console.log("deleteResponse: ", deleteResponse);
+      if (deleteResponse.status == 204) {
+        navigate(-1, { state: { refetch: true } });
+      }
     } catch (error) {
       console.log("error :", error);
     }
     setShowDeleteModal(false);
-    // Call API untuk delete kandang di sini
   };
 
   const fetchDetailKandang = async () => {

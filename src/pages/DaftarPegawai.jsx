@@ -7,6 +7,7 @@ import profileAvatar from "../assets/profile_avatar.svg";
 import { useEffect } from "react";
 import { getListStaff } from "../services/staff";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { getListUser } from "../services/user";
 
 const pegawaiAktif = [
   {
@@ -97,10 +98,10 @@ const DaftarPegawai = () => {
 
   const fectPegawaiAktifData = async () => {
     try {
-      const fetchResponse = await getListStaff();
+      const fetchResponse = await getListUser();
       console.log("fetchResponse: ", fetchResponse);
       if (fetchResponse.status == 200) {
-        setPegawaiAktifData(fetchResponse.data.data.staffs);
+        setPegawaiAktifData(fetchResponse.data.data.users);
       }
     } catch (error) {
       console.log("error :", error);
