@@ -44,6 +44,7 @@ const DetailKandang = () => {
   };
 
   const fetchDetailKandang = async () => {
+    
     try {
       const detailResponse = await getChickenCageById(id);
       // console.log("detailResponse: ", detailResponse);
@@ -170,7 +171,7 @@ const DetailKandang = () => {
 
       <HapusKandangModal
         isOpen={showDeleteModal}
-        onClose={() => setShowMDeleteodal(false)}
+        onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
       />
       <button

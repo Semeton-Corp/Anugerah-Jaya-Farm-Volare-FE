@@ -21,8 +21,8 @@ const DaftarToko = () => {
     location.pathname.includes(segment)
   );
 
-  const handleLihatDetail = (id) => {
-    navigate(`${location.pathname}/detail-toko/${id}`);
+  const handleLihatDetail = (id, locationId) => {
+    navigate(`${location.pathname}/detail-toko/${id}/${locationId}`);
   };
 
   const handleTambahToko = (id) => {
@@ -85,7 +85,7 @@ const DaftarToko = () => {
                 <td className="px-4 py-2">{toko?.totalEmployee}</td>
                 <td className="px-4 py-2">
                   <button
-                    onClick={() => handleLihatDetail(toko.id)}
+                    onClick={() => handleLihatDetail(toko.id, toko.location.id)}
                     className="bg-green-700 hover:bg-green-900 cursor-pointer text-white px-3 py-1 rounded"
                   >
                     Lihat Detail
@@ -96,6 +96,13 @@ const DaftarToko = () => {
           </tbody>
         </table>
       </div>
+      <button
+        onClick={() => {
+          console.log("stores: ", stores);
+        }}
+      >
+        CHECK
+      </button>
     </div>
   );
 };

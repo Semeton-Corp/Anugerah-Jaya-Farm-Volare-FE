@@ -2,12 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { deleteStore, getStoreDetail } from "../services/stores";
 import TambahPekerjaModal from "../components/TambahPekerjaModal";
-import { createStorePlacement } from "../services/placement";
+import {
+  createStorePlacement,
+  deleteStorePlacementById,
+} from "../services/placement";
 import { getRoles } from "../services/roles";
 import { getListUser } from "../services/user";
 
 const DetailToko = () => {
-  const { id } = useParams();
+  const { id, locationId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -58,8 +61,17 @@ const DetailToko = () => {
     alert(`Lihat profil pegawai ID: ${empId}`);
   };
 
-  const handleDeleteEmployee = (empId) => {
-    alert(`Hapus pegawai ID: ${empId}`);
+  const handleDeleteEmployee = async (userId) => {
+    try {
+      const deleteEmployeeResponse = await deleteStorePlacementById(userId);
+      // console.log("deleteEmployeeResponse: ", deleteEmployeeResponse);
+      if (deleteEmployeeResponse.status === 204) {
+        alert(`✅Pegawai Berhasil dihapus`);
+        fetchTokoDetail();
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
   };
 
   const fetchTokoDetail = async () => {
@@ -101,7 +113,10 @@ const DetailToko = () => {
       return;
     }
     try {
-      const employeeOptionsResponse = await getListUser(selectedRole);
+      const employeeOptionsResponse = await getListUser(
+        selectedRole,
+        locationId
+      );
       //   console.log("employeeResponse: ", employeeResponse.data.data.users);
       if (employeeOptionsResponse.status) {
         setEmployeeOptions(employeeOptionsResponse.data.data.users);
