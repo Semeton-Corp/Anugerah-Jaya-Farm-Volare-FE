@@ -41,11 +41,10 @@ const Presensi = () => {
   const getTodayPresence = async () => {
     try {
       const presenceResponse = await getCurrentPresence();
-      // console.log("currentPresenceResponse: ", presenceResponse);
+      console.log("currentPresenceResponse: ", presenceResponse);
       if (presenceResponse.status == 200) {
-        const presenceData = presenceResponse.data.data.currentPresence;
+        const presenceData = presenceResponse.data.data;
         setPresenceId(presenceData.id);
-        // console.log("presenceData.id: ", presenceData.id);
 
         if (presenceData.status === "Alpha" && presenceData.startTime === "-") {
           setIsGoHome(false);
@@ -105,7 +104,7 @@ const Presensi = () => {
           longitude: longitude,
         };
 
-        console.log("payload: ", payload);
+        // console.log("payload: ", payload);
         // console.log("presenceId: ", presenceId);
 
         try {
@@ -161,6 +160,7 @@ const Presensi = () => {
 
         try {
           const res = await updatePresence(payload, presenceId);
+          console.log("hadirButton: ", res);
           if (res.status == 200) {
             getTodayPresence();
           }
@@ -339,6 +339,14 @@ const Presensi = () => {
           </tbody>
         </table>
       </div>
+      <button
+        onClick={() => {
+          console.log("isGoHome: ", isGoHome);
+          console.log("isPresence: ", isPresence);
+        }}
+      >
+        CHECK
+      </button>
     </div>
   );
 };
