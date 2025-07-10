@@ -16,6 +16,7 @@ const DaftarKandang = () => {
     "detail-kandang",
     "pindah-ayam",
     "edit-kandang",
+    "edit-pic",
   ];
 
   const isDetailPage = detailPages.some((segment) =>

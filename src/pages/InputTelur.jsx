@@ -133,7 +133,6 @@ const InputTelur = () => {
           }
 
           // console.log("Nama kandang: ", data.cage.name);
-
           // setSelectedCageName(data.cage.name);
         } else {
           if (dataChickenCage.length > 0) {

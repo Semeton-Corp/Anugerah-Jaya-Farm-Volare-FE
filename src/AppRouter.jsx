@@ -305,14 +305,20 @@ const AppRouter = createBrowserRouter([
                 children: [
                   { path: "pindah-ayam", element: <PindahAyam /> },
                   { path: "tambah-kandang", element: <TambahKandang /> },
-                  { path: "edit-kandang/:id", element: <EditKandang /> },
-
+                  {
+                    path: "edit-kandang/:id/:cageId",
+                    element: <EditKandang />,
+                  },
+                  {
+                    path: "edit-pic/:id/:locationId/:cageId",
+                    element: <EditPic />,
+                  },
                   {
                     path: "detail-kandang/:id",
                     element: <DetailKandang />,
-                    children: [{ path: "edit-pic", element: <EditPic /> }],
                     children: [
-                      { path: "edit-kandang", element: <EditKandang /> },
+                      { path: "edit-pic/:id", element: <EditPic /> },
+                      { path: "edit-kandang/:id", element: <EditKandang /> },
                     ],
                   },
                 ],
@@ -858,13 +864,19 @@ const AppRouter = createBrowserRouter([
                 children: [
                   { path: "pindah-ayam", element: <PindahAyam /> },
                   { path: "tambah-kandang", element: <TambahKandang /> },
-                  { path: "edit-kandang/:id", element: <EditKandang /> },
-
+                  {
+                    path: "edit-kandang/:id/:cageId",
+                    element: <EditKandang />,
+                  },
+                  {
+                    path: "edit-pic/:id/:locationId/:cageId",
+                    element: <EditPic />,
+                  },
                   {
                     path: "detail-kandang/:id",
                     element: <DetailKandang />,
                     children: [
-                      { path: "edit-pic", element: <EditPic /> },
+                      { path: "edit-pic/:id", element: <EditPic /> },
                       { path: "edit-kandang/:id", element: <EditKandang /> },
                     ],
                   },

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { getChickenCageById, updateCage } from "../services/cages";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getLocations } from "../services/location";
 
 const EditKandang = () => {
-  // Dummy data
+  const navigate = useNavigate();
   const dummyData = {
     nama: "Sidodadi DOC",
     lokasi: "Sidodadi",
@@ -12,13 +12,15 @@ const EditKandang = () => {
     kapasitas: 11000,
   };
 
-  const { id } = useParams();
+  const { id, cageId } = useParams();
+
   const [locationOptions, setLocationOptions] = useState([
     "Sidodadi",
     "Mojopahit",
     "Gajah Mada",
   ]);
-  const jenisOptions = ["Kandang DOC", "Kandang Petelur", "Kandang Pembesaran"];
+
+  const jenisOptions = ["DOC", "Grower", "Pre Layer", "Layer", "Afkir"];
 
   const [formData, setFormData] = useState({
     name: "",
@@ -37,7 +39,7 @@ const EditKandang = () => {
         setFormData({
           name: chickenCage.cage.name || "",
           locationId: chickenCage.cage.location?.id || "",
-          chickenCategory: chickenCage.chickenCategory || "",
+          chickenCategory: chickenCage.cage.chickenCategory || "",
           capacity: chickenCage.cage.capacity || "",
         });
       }
@@ -93,8 +95,12 @@ const EditKandang = () => {
     console.log("payload: ", payload);
 
     try {
-      const updateResponse = await updateCage(payload, id);
-      console.log("updateResponse: ", updateResponse);
+      // console.log("cageId: ", cageId);
+      const updateResponse = await updateCage(payload, cageId);
+      // console.log("updateResponse: ", updateResponse);
+      if (updateResponse.status == 200) {
+        navigate(-1, { state: { refetch: true } });
+      }
     } catch (error) {
       console.log("error :", error);
     }

@@ -6,8 +6,6 @@ import { useEffect } from "react";
 import { deleteCage, getChickenCageById } from "../services/cages";
 
 const DetailKandang = () => {
-  const [data, setData] = useState({});
-
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -19,20 +17,22 @@ const DetailKandang = () => {
   const { id } = useParams();
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [data, setData] = useState({});
 
-  const handleEditPic = () => {
-    navigate(`${location.pathname}/edit-pic`);
+  const handleEditPic = (locationId, cageId) => {
+    const newPath = location.pathname.replace("detail-kandang", "edit-pic");
+    navigate(`${newPath}/${locationId}/${cageId}`);
   };
 
-  const handleEditKandang = () => {
+  const handleEditKandang = (cageId) => {
     const newPath = location.pathname.replace("detail-kandang", "edit-kandang");
-    navigate(newPath);
+    navigate(`${newPath}/${cageId}`);
   };
 
   const handleDelete = async () => {
     // console.log("Kandang dihapus!");
     try {
-      const deleteResponse = await deleteCage(id);
+      const deleteResponse = await deleteCage(data.cage.id);
       console.log("deleteResponse: ", deleteResponse);
       if (deleteResponse.status == 204) {
         navigate(-1, { state: { refetch: true } });
@@ -49,6 +49,7 @@ const DetailKandang = () => {
       // console.log("detailResponse: ", detailResponse);
       if (detailResponse.status === 200) {
         setData(detailResponse.data.data);
+        // console.log("detailResponse.data.data: ", detailResponse.data.data);
       }
     } catch (error) {
       console.log("error :", error);
@@ -121,7 +122,9 @@ const DetailKandang = () => {
         </div>
         <div className="flex justify-end space-x-2 mt-4">
           <button
-            onClick={handleEditKandang}
+            onClick={() => {
+              handleEditKandang(data.cage.id);
+            }}
             className="bg-green-700 hover:bg-green-900 hover:cursor-pointer text-white px-4 py-2 rounded"
           >
             Edit Kandang
@@ -154,7 +157,10 @@ const DetailKandang = () => {
         </div>
         <div className="flex justify-end mt-4">
           <button
-            onClick={handleEditPic}
+            onClick={() => {
+              handleEditPic(data.cage.location.id, data.cage.id);
+              console.log("data.cage.location.id: ", data.cage.location.id);
+            }}
             className="bg-green-700 hover:bg-green-900 hover:cursor-pointer text-white px-4 py-2 rounded"
           >
             Edit PIC
@@ -167,13 +173,13 @@ const DetailKandang = () => {
         onClose={() => setShowMDeleteodal(false)}
         onConfirm={handleDelete}
       />
-      {/* <button
+      <button
         onClick={() => {
-          console.log("data: ", data.cage);
+          console.log("data: ", data);
         }}
       >
         Check
-      </button> */}
+      </button>
     </div>
   );
 };

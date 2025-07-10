@@ -19,3 +19,10 @@ export const createWarehousePlacement = (payload) => {
 };
 
 //cage
+export const createCagePlacement = (payload) => {
+  return api.post("/placements/cages", payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
