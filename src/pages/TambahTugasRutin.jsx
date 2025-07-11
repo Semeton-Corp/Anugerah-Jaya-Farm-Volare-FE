@@ -194,7 +194,7 @@ const TambahTugasRutin = () => {
                 tambahTugasHarianHandle();
                 setIsEditMode(true);
               }}
-              className="rounded-[4px] py-2 px-6 bg-orange-300 flex items-center justify-center text-white text-base font-medium hover:bg-orange-500 cursor-pointer"
+              className="rounded-[4px] py-2 px-6 bg-orange-300 flex items-center justify-center  text-base font-medium hover:bg-orange-500 cursor-pointer"
             >
               + Tambah tugas
             </div>
@@ -278,7 +278,7 @@ const TambahTugasRutin = () => {
                 isEditMode
                   ? "bg-white border hover:bg-green-200 border-green-700 text-green700"
                   : "bg-green-700 hover:bg-green-900 text-white "
-              } py-2 px-6 rounded  cursor-pointer`}
+              } py-4 px-8 rounded  cursor-pointer`}
             >
               {isEditMode ? "Batal Edit" : "Edit"}
             </button>

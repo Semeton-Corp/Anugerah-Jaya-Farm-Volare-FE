@@ -88,6 +88,8 @@ const DaftarPegawai = () => {
   const userRole = localStorage.getItem("role");
   const [query, setQuery] = useState("");
 
+  const [page, setPage] = useState(1);
+
   const detailPages = ["tambah-pegawai"];
 
   const isDetailPage = detailPages.some((segment) =>
@@ -98,7 +100,8 @@ const DaftarPegawai = () => {
 
   const fectPegawaiAktifData = async () => {
     try {
-      const fetchResponse = await getListUser();
+      console.log("page: ", page);
+      const fetchResponse = await getListUser({ page: page });
       console.log("fetchResponse: ", fetchResponse);
       if (fetchResponse.status == 200) {
         setPegawaiAktifData(fetchResponse.data.data.users);
@@ -180,7 +183,7 @@ const DaftarPegawai = () => {
         </div>
 
         {/* pegawai table */}
-        <div className="px-6 py-2 h-[900px]">
+        <div className="px-6 py-2">
           <table className="w-full ">
             <thead className="px-8 rounded-[4px] bg-green-700 text-white text-left">
               <tr>

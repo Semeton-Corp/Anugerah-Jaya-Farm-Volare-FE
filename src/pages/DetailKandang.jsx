@@ -44,7 +44,6 @@ const DetailKandang = () => {
   };
 
   const fetchDetailKandang = async () => {
-    
     try {
       const detailResponse = await getChickenCageById(id);
       // console.log("detailResponse: ", detailResponse);
