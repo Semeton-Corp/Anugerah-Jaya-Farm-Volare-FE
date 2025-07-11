@@ -36,7 +36,7 @@ const Tugas = () => {
   const fetchAllTugas = async () => {
     try {
       const response = await getDailyWorkUser();
-      console.log("response fetch tugas tambahan data: ", response);
+      console.log("response fetch tugas: ", response);
 
       if (response.status == 200) {
         setDailyWorks(response.data.data.dailyWorks);
@@ -53,7 +53,7 @@ const Tugas = () => {
   const takeAdditionalTaskHandle = async (id) => {
     try {
       const takeResponse = await takeAdditionalWorks(id);
-      console.log("takeResponse: ", takeResponse);
+      // console.log("takeResponse: ", takeResponse);
       if (takeResponse.status == 201) {
         fetchTugasTambahanData();
       }
@@ -65,7 +65,7 @@ const Tugas = () => {
   const getTodayPresence = async (id) => {
     try {
       const presenceResponse = await getCurrentPresence();
-      console.log("presenceResponse: ", presenceResponse);
+      // console.log("presenceResponse: ", presenceResponse);
       if (presenceResponse.status == 200) {
         console.log(
           "presenceResponse.data.data.status: ",
@@ -75,7 +75,7 @@ const Tugas = () => {
         if (presenceResponse.data.data.status === "Hadir") {
           setIsPresence(true);
           fetchTugasTambahanData();
-          // fetchAllTugas();
+          fetchAllTugas();
         }
       }
     } catch (error) {
@@ -98,7 +98,7 @@ const Tugas = () => {
 
     try {
       const updateResponse = await updateAdditionalWorkStaff(payload, taskId);
-      console.log("updateResponse: ", updateResponse);
+      // console.log("updateResponse: ", updateResponse);
       if (updateResponse.status == 200) {
         fetchAllTugas();
       }

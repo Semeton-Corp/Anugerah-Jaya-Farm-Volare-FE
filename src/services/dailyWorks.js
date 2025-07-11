@@ -105,7 +105,7 @@ export const deleteDailyWorkByRoleId = (id) => {
 };
 
 export const updateDailyWorkStaff = (payload, id) => {
-  return api.put(`/works/dailies/staffs/${id}`, payload, {
+  return api.put(`/works/dailies/users/${id}`, payload, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
