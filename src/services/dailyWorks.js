@@ -104,6 +104,15 @@ export const deleteDailyWorkByRoleId = (id) => {
   });
 };
 
+export const deleteDailyWork = (id) => {
+  return api.delete(`/works/dailies/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
 export const updateDailyWorkStaff = (payload, id) => {
   return api.put(`/works/dailies/users/${id}`, payload, {
     headers: {
@@ -115,6 +124,15 @@ export const updateDailyWorkStaff = (payload, id) => {
 
 export const updateAdditionalWorkStaff = (payload, taskId) => {
   return api.put(`/works/additionals/staffs/${taskId}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const getWorkOverview = () => {
+  return api.get(`/works/overview`, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",

@@ -22,7 +22,7 @@ const Tugas = () => {
   const fetchTugasTambahanData = async () => {
     try {
       const response = await getAdditionalWorks();
-      console.log("response.data.data: ", response);
+      // console.log("response.data.data: ", response);
 
       if (response.status == 200) {
         setTugasTambahanData(response.data.data);

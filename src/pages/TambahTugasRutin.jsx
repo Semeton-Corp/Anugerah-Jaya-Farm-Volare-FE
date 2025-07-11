@@ -6,11 +6,12 @@ import { getCage } from "../services/cages";
 import { useParams } from "react-router-dom";
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 import { getRoles } from "../services/roles";
-import { getDailyWorkByRoleId } from "../services/dailyWorks";
+import { deleteDailyWork, getDailyWorkByRoleId } from "../services/dailyWorks";
 import {
   createUpdateDailyWorkByRoleId,
   deleteDailyWorkByRoleId,
 } from "../services/dailyWorks";
+import { RiDeleteBinFill } from "react-icons/ri";
 
 const TambahTugasRutin = () => {
   const userRole = localStorage.getItem("role");
@@ -19,12 +20,13 @@ const TambahTugasRutin = () => {
 
   const { id } = useParams();
 
-  const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [deletedTasks, setDeletedTasks] = useState([]);
 
   const [roles, setRoles] = useState([]);
   const [selectedRole, setSelectedRole] = useState();
   const [tasks, setTasks] = useState([]);
+
+  const [isEditMode, setIsEditMode] = useState(true);
 
   const addTask = () => {
     setTasks([
@@ -51,16 +53,6 @@ const TambahTugasRutin = () => {
     setTasks(newList);
   };
 
-  const switchModeHandle = () => {
-    setIsDeleteMode(!isDeleteMode);
-  };
-
-  useEffect(() => {
-    if (isDeleteMode == false) {
-      setDeletedTasks([]);
-    }
-  }, [isDeleteMode]);
-
   const tambahTugasHarianHandle = () => {
     addTask();
   };
@@ -73,6 +65,7 @@ const TambahTugasRutin = () => {
         setRoles(rolesResponse.data.data);
         fetchDailyWork(rolesResponse.data.data[0].id);
         if (id) {
+          setIsEditMode(false);
           const targetId = id;
           const role = rolesResponse.data.data.find((role) => {
             return role.id == targetId;
@@ -103,20 +96,12 @@ const TambahTugasRutin = () => {
     }
   };
 
-  const deleteTaskHandle = async () => {
+  const deleteTaskHandle = async (id) => {
     try {
-      const deleteResponse = await Promise.all(
-        deletedTasks.map(
-          async (taskId) => await deleteDailyWorkByRoleId(taskId)
-        )
-      );
+      const deleteResponse = await deleteDailyWork(id);
 
-      const allSucceeded = deleteResponse.every(
-        (res) => res.status >= 200 && res.status < 300
-      );
-
-      if (allSucceeded) {
-        navigate(-1, { state: { refetch: true } });
+      if (deleteResponse.status === 204) {
+        fetchDailyWork(selectedRole.id);
         console.log("All deletions succeeded!");
       } else {
         console.warn("Some deletions failed.", deleteResponse);
@@ -133,7 +118,6 @@ const TambahTugasRutin = () => {
     if (selectedRole?.id) {
       fetchDailyWork(selectedRole.id);
     }
-    setIsDeleteMode(false);
   }, [selectedRole]);
 
   const getDisplayValue = (val) => {
@@ -171,196 +155,143 @@ const TambahTugasRutin = () => {
       <div className="w-full mx-auto p-6 bg-white shadow rounded border border-black-6">
         {/* Pilih Lokasi */}
         <label className="block font-medium  mt-4">Jabatan</label>
-        <select
-          className="w-full border border-black-6 bg-black-4 cursor-pointer rounded p-2"
-          value={selectedRole?.name}
-          onChange={(e) => {
-            // const selected = locations.find(
-            //   (location) => location.name == e.target.value
-            // );
-            const selected = roles.find((role) => role.name == e.target.value);
-            console.log("selected: ", selected);
-            setSelectedRole(selected);
-          }}
-        >
-          {roles.map((role) => (
-            <option key={role.id} value={role.name}>
-              {role.name}
-            </option>
-          ))}
-        </select>
+        {isEditMode ? (
+          <>
+            <select
+              className="w-full border border-black-6 bg-black-4 cursor-pointer rounded p-2"
+              value={selectedRole?.name}
+              onChange={(e) => {
+                // const selected = locations.find(
+                //   (location) => location.name == e.target.value
+                // );
+                const selected = roles.find(
+                  (role) => role.name == e.target.value
+                );
+                console.log("selected: ", selected);
+                setSelectedRole(selected);
+              }}
+            >
+              {roles.map((role) => (
+                <option key={role.id} value={role.name}>
+                  {role.name}
+                </option>
+              ))}
+            </select>
+          </>
+        ) : (
+          <>
+            <p className="text-lg font-bold">{selectedRole?.name}</p>
+          </>
+        )}
 
         {/* nama tugas tambahan */}
         <div className="mt-4">
-          <label className="block font-medium mb-4">Daftar Tugas Harian</label>
+          <label className="block font-medium mt-6 ">Daftar Tugas Harian</label>
           <div className="flex gap-4 mb-4">
             {/* tambah tugas button */}
             <div
               onClick={() => {
-                if (!isDeleteMode) {
-                  tambahTugasHarianHandle();
-                }
+                tambahTugasHarianHandle();
+                setIsEditMode(true);
               }}
-              className="rounded-[4px] py-2 px-6 bg-green-700 flex items-center justify-center text-white text-base font-medium hover:bg-green-900 cursor-pointer"
+              className="rounded-[4px] py-2 px-6 bg-orange-300 flex items-center justify-center text-white text-base font-medium hover:bg-orange-500 cursor-pointer"
             >
               + Tambah tugas
-            </div>
-
-            {/* hapus button */}
-            <div
-              onClick={switchModeHandle}
-              className={`rounded-[4px] py-2 px-6 flex items-center justify-center cursor-pointer ${
-                isDeleteMode
-                  ? "bg-white text-warning-icon-color border border-black-7 hover:bg-black-7"
-                  : "bg-kritis-box-surface-color  border text-white text-base font-medium hover:bg-kritis-text-color"
-              }  `}
-            >
-              Hapus Tugas
             </div>
           </div>
 
           {tasks.length > 0 ? (
-            tasks.map((task, index) =>
-              isDeleteMode ? (
-                <div
-                  key={index}
-                  className="p-6 border flex flex-col gap-4 border-black-6 rounded-[4px] bg-black-4 mb-4"
-                >
-                  <div className="flex justify-between items-center text-base font-medium">
-                    <p>{task.description}</p>
-                    <input
-                      type="checkbox"
-                      checked={task.checked}
-                      onChange={() => {
-                        setDeletedTasks((prev) =>
-                          prev.includes(task.id)
-                            ? prev.filter((i) => i !== task.id)
-                            : [...prev, task.id]
-                        );
-                      }}
-                      className="w-10 h-10 cursor-pointer accent-warning-icon-color"
-                    />
-                  </div>
-                </div>
-              ) : task.isExpanded ? (
-                <div
-                  key={index}
-                  className="p-6 border flex flex-col gap-4 border-black-6 rounded-[4px] bg-black-4 mb-4"
-                >
-                  <div className="flex justify-between items-center text-base font-bold">
-                    {task.description && task.id ? (
-                      <p>{`Tugas ${index + 1}`}</p>
-                    ) : (
-                      <p>{`Tambah Tugas ${index + 1}`}</p>
-                    )}
-                    <div
-                      onClick={() => {
-                        changeExpandTaskItem(index);
-                        if (task.description == "") {
-                          const newList = [...tasks];
-                          newList.splice(index, 1);
-                          setTasks(newList);
+            tasks.map((task, index) => (
+              <div
+                key={index}
+                className="p-6 border flex flex-col gap-1 border-black-6 rounded-[4px] bg-black-4 mb-4"
+              >
+                {isEditMode ? (
+                  <>
+                    <div className="flex justify-between items-center">
+                      <input
+                        type="text"
+                        className="w-full border rounded p-2 bg-white"
+                        placeholder={`Nama Tugas ${index + 1}`}
+                        value={task.description || ""}
+                        onChange={(e) =>
+                          handleTasksChange(
+                            index,
+                            "description",
+                            e.target.value
+                          )
                         }
-                      }}
-                      className="p-2 hover:bg-black-6 cursor-pointer"
-                    >
-                      <IoIosArrowUp size={24} />
+                      />
+                      <button
+                        className="ml-2 text-red-600 hover:text-red-800 cursor-pointer"
+                        onClick={() => {
+                          // const newTasks = [...tasks];
+                          // newTasks.splice(index, 1);
+                          // setTasks(newTasks);
+                          deleteTaskHandle(task.id);
+                        }}
+                      >
+                        <RiDeleteBinFill size={32} />
+                      </button>
                     </div>
-                  </div>
-
-                  {/* nama tugas */}
-                  <div>
-                    <label className="block font-medium mb-2">{`Nama Tugas ${
-                      index + 1
-                    }`}</label>
-                    <input
-                      type="text"
-                      className="w-full border rounded p-2 mb-4 bg-white"
-                      placeholder={`Masukkan Nama Tugas ${index + 1}...`}
-                      value={getDisplayValue(task.description)}
-                      onChange={(e) => {
-                        handleTasksChange(index, "description", e.target.value);
-                      }}
-                    />
-                  </div>
-
-                  {/* waktu pelaksanaan */}
-                  <div>
-                    <label className="block font-medium mb-2">
-                      Waktu Pelaksanaan Tugas
-                    </label>
-                    <div className="flex items-center gap-4">
+                    <div className="flex gap-2 mt-2">
                       <input
                         type="time"
-                        className=" border rounded p-2  bg-white"
-                        value={getDisplayValue(task.startTime)}
-                        onChange={(e) => {
-                          handleTasksChange(index, "startTime", e.target.value);
-                        }}
+                        className="border rounded p-2 bg-white"
+                        value={task.startTime || ""}
+                        onChange={(e) =>
+                          handleTasksChange(index, "startTime", e.target.value)
+                        }
                       />
-                      <p className="text-base">Sampai</p>
-
+                      <span>sampai</span>
                       <input
                         type="time"
-                        className=" border rounded p-2  bg-white"
-                        value={getDisplayValue(task.endTime)}
-                        onChange={(e) => {
-                          handleTasksChange(index, "endTime", e.target.value);
-                        }}
+                        className="border rounded p-2 bg-white"
+                        value={task.endTime || ""}
+                        onChange={(e) =>
+                          handleTasksChange(index, "endTime", e.target.value)
+                        }
                       />
                     </div>
-                  </div>
-                </div>
-              ) : (
-                <div
-                  key={index}
-                  className="p-6 border flex flex-col gap-4 border-black-6 rounded-[4px] bg-black-4 mb-4"
-                >
-                  <div className="flex justify-between items-center text-base font-medium">
-                    <p>{task.description}</p>
-                    <div
-                      onClick={() => {
-                        changeExpandTaskItem(index);
-                      }}
-                      className="p-2 hover:bg-black-6 cursor-pointer"
-                    >
-                      <IoIosArrowDown size={24} />
-                    </div>
-                  </div>
-                </div>
-              )
-            )
+                  </>
+                ) : (
+                  <>
+                    <p className="font-medium">{task.description}</p>
+                    <p className="text-sm">
+                      {task.startTime} - {task.endTime}
+                    </p>
+                  </>
+                )}
+              </div>
+            ))
           ) : (
-            <div>
-              <p className="text-lg text-black-6">Belum ada tugas harian</p>
-            </div>
+            <p className="text-lg text-black-6">Belum ada tugas harian</p>
           )}
         </div>
 
         {/* Simpan Button */}
-        {isDeleteMode ? (
-          <div className="mt-6 text-right ">
+        <div className="mt-6 text-right flex gap-2 justify-end">
+          {id && (
             <button
-              onClick={() => {
-                deleteTaskHandle();
-              }}
-              className="py-2 px-6 rounded bg-kritis-box-surface-color  border text-white text-base font-medium hover:bg-kritis-text-color cursor-pointer"
+              onClick={() => setIsEditMode(!isEditMode)}
+              className={`${
+                isEditMode
+                  ? "bg-white border hover:bg-green-200 border-green-700 text-green700"
+                  : "bg-green-700 hover:bg-green-900 text-white "
+              } py-2 px-6 rounded  cursor-pointer`}
             >
-              Hapus Tugas Harian
+              {isEditMode ? "Batal Edit" : "Edit"}
             </button>
-          </div>
-        ) : (
-          <div className="mt-6 text-right ">
+          )}
+          {isEditMode && (
             <button
-              onClick={() => {
-                simpanHandle();
-              }}
+              onClick={simpanHandle}
               className="bg-green-700 text-white py-2 px-6 rounded hover:bg-green-900 cursor-pointer"
             >
               Simpan
             </button>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Simpan Button */}
         {/* <div className="mt-6 text-right ">

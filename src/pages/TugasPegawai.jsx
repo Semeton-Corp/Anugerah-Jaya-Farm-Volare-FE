@@ -1,7 +1,11 @@
 import React from "react";
 import { IoSearch } from "react-icons/io5";
 import { useState, useEffect } from "react";
-import { getListDailyWorks, getAdditionalWorks } from "../services/dailyWorks";
+import {
+  getListDailyWorks,
+  getAdditionalWorks,
+  getWorkOverview,
+} from "../services/dailyWorks";
 import { translateDateToBahasa } from "../utils/dateFormat";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 
@@ -93,12 +97,28 @@ const TugasPegawai = () => {
     }
   };
 
+  const fetchOverviewData = async () => {
+    try {
+      const overviewResponse = await getWorkOverview();
+      console.log("overviewResponse: ", overviewResponse);
+      if (overviewResponse.status === 200) {
+        setTugasRutinData(overviewResponse.data.data.dailyWorkSummaries);
+        setTugasTambahanData(
+          overviewResponse.data.data.additionalWorkSummaries
+        );
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
   useEffect(() => {
-    fetchTugasRutinData();
-    fetchTugasTambahanData();
+    fetchOverviewData();
+    // fetchTugasRutinData();
+    // fetchTugasTambahanData();
     if (location.state?.refetch) {
-      fetchTugasRutinData();
-      fetchTugasTambahanData();
+      // fetchTugasRutinData();
+      // fetchTugasTambahanData();
       window.history.replaceState({}, document.title);
     }
   }, [location]);
@@ -141,7 +161,7 @@ const TugasPegawai = () => {
           <p className="text-lg font-bold">Tugas Tambahan</p>
           <div
             onClick={() => tambahTugasTambahanHandle()}
-            className="rounded-[4px] py-2 px-6 bg-green-700 flex items-center justify-center text-white text-base font-medium hover:bg-green-900 cursor-pointer"
+            className="rounded-[4px] py-2 px-6 bg-orange-300 hover:bg-orange-500 flex items-center justify-center text-black text-base font-medium cursor-pointer"
           >
             + Tambah tugas
           </div>
@@ -214,7 +234,7 @@ const TugasPegawai = () => {
 
           <div
             onClick={tambahTugasRutinHandle}
-            className="rounded-[4px] py-2 px-6 bg-green-700  text-white font-medium hover:bg-green-900 cursor-pointer"
+            className="rounded-[4px] py-2 px-6 bg-orange-300 hover:bg-orange-500  text-black font-medium  cursor-pointer"
           >
             + Tambah tugas
           </div>
@@ -236,7 +256,7 @@ const TugasPegawai = () => {
                 <tr key={index} className="border-b border-black-6 text-center">
                   <td className="py-2 px-4">{item.role.name}</td>
                   <td className="py-2 px-4">{item.totalWork}</td>
-                  <td className="py-2 px-4">{item.totalStaff}</td>
+                  <td className="py-2 px-4">{item.totalUser}</td>
                   <td className="py-2 px-4 flex justify-center">
                     <span
                       onClick={() => {
