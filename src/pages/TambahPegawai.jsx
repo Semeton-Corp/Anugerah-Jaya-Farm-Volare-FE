@@ -39,6 +39,10 @@ const TambahPegawai = () => {
   ]);
   const [locationId, setLocationId] = useState("");
 
+  const [salaryInterval, setSalaryInterval] = useState(["Harian", "Bulanan"]);
+  const [selectedSalaryInterval, setSelectedSalaryInterval] =
+    useState("Harian");
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -50,7 +54,7 @@ const TambahPegawai = () => {
   const [password, setPassword] = useState("");
 
   const [pics, setPics] = useState([]);
-  const [selectedPic, setSelectedPic] = useState("");
+  const [selectedPic, setSelectedPic] = useState([]);
 
   const roleToApiMap = {
     "Pekerja Telur": getCage,
@@ -134,7 +138,7 @@ const TambahPegawai = () => {
           console.log("filtered: ", filtered);
 
           setPics(filtered);
-          setSelectedPic(filtered[0]?.id || "");
+          setSelectedPic(filtered[0]?.id ? [String(filtered[0].id)] : []);
         }
       } catch (err) {
         console.error(err);
@@ -156,10 +160,11 @@ const TambahPegawai = () => {
       password: username,
       roleId: parseInt(selectedRole),
       locationId: parseInt(locationId),
-      placementIds: [parseInt(selectedPic)],
+      placementIds: selectedPic.map((id) => parseInt(id)),
       address: address,
       phoneNumber: phone,
       salary: salary,
+      salaryInterval: selectedSalaryInterval,
     };
     try {
       const signUpResponse = await signUp(payload);
@@ -237,16 +242,28 @@ const TambahPegawai = () => {
           setSalary={setSalary}
           getDisplay={getDisplay}
           onSave={handleSave}
+          salaryInterval={salaryInterval}
+          setSalaryInterval={setSalaryInterval}
+          selectedSalaryInterval={selectedSalaryInterval}
+          setSelectedSalaryInterval={setSelectedSalaryInterval}
         />
       )}
       <button
         onClick={() => {
-          console.log("Selected Role ID:", selectedRole);
-          console.log("Name:", name);
-          console.log("Email:", email);
-          console.log("Phone:", phone);
-          console.log("Address:", address);
-          console.log("salary:", salary);
+          const payload = {
+            email: email,
+            name: name,
+            username: username,
+            password: username,
+            roleId: parseInt(selectedRole),
+            locationId: parseInt(locationId),
+            placementIds: selectedPic,
+            address: address,
+            phoneNumber: phone,
+            salary: salary,
+            salaryInterval: selectedSalaryInterval,
+          };
+          console.log("payload: ", payload);
         }}
         className="bg-green-700"
       >
@@ -424,18 +441,57 @@ function ProfilPegawaiForm({
         {isShowPicField && (
           <>
             <label className="mb-1">PIC</label>
-            <select
-              className="border rounded p-4 mb-3"
-              value={selectedPic}
-              onChange={(e) => setSelectedPic(e.target.value)}
-            >
-              <option value="">Pilih akan menjadi PIC dimana pegawai</option>
-              {pics.map((pic) => (
-                <option key={pic.id} value={pic.id}>
-                  {pic.name}
-                </option>
-              ))}
-            </select>
+
+            {selectedRole != 0 || selectedRole == 2 ? (
+              <div className="flex flex-col gap-2 mb-3">
+                {pics?.length === 0 && (
+                  <span className="text-gray-400">No PICs available</span>
+                )}
+                {pics?.map((pic) => (
+                  <label
+                    key={pic.id}
+                    className="inline-flex items-center gap-2 mx-8"
+                  >
+                    <input
+                      type="checkbox"
+                      value={pic.id}
+                      checked={selectedPic?.includes(String(pic.id))}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedPic((prev) => [...prev, e.target.value]);
+                        } else {
+                          setSelectedPic((prev) =>
+                            prev.filter((id) => id !== e.target.value)
+                          );
+                        }
+                      }}
+                      className="scale-150 mr-2 cursor-pointer accent-green-700"
+                    />
+                    <span className="text-lg">{pic.name}</span>
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <select
+                className="border rounded p-4 mb-3"
+                value={selectedPic}
+                onChange={(e) => {
+                  const options = Array.from(e.target.selectedOptions).map(
+                    (opt) => opt.value
+                  );
+                  setSelectedPic(options);
+                }}
+              >
+                {pics?.length === 0 && (
+                  <option disabled>No PICs available</option>
+                )}
+                {pics?.map((pic) => (
+                  <option key={pic.id} value={pic.id}>
+                    {pic.name}
+                  </option>
+                ))}
+              </select>
+            )}
           </>
         )}
 
@@ -496,9 +552,32 @@ function ProfilPegawaiForm({
   );
 }
 
-function GajiPokokForm({ salary, setSalary, getDisplay, onSave }) {
+function GajiPokokForm({
+  salary,
+  setSalary,
+  salaryInterval,
+  setSalaryInterval,
+  selectedSalaryInterval,
+  setSelectedSalaryInterval,
+  getDisplay,
+  onSave,
+}) {
   return (
     <div className="flex flex-col border p-6 rounded-md shadow-sm">
+      <h2 className="font-bold text-xl mb-4">Profil Pegawai</h2>
+      <label className="mb-1">Gaji Pegawai</label>
+      <select
+        className="border rounded p-4 mb-3"
+        value={selectedSalaryInterval}
+        onChange={(e) => setSelectedSalaryInterval(e.target.value)}
+      >
+        {salaryInterval.map((salaryInterval, index) => (
+          <option key={index} value={salaryInterval}>
+            {salaryInterval}
+          </option>
+        ))}
+      </select>
+
       <label className="mb-1">Gaji Pegawai</label>
       <div className="relative">
         <span className="absolute inset-y-0 -top-3 left-4 flex items-center  text-gray-500">

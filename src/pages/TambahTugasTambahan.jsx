@@ -1,316 +1,201 @@
-import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate, Outlet } from "react-router-dom";
-import { getStores } from "../services/stores";
-import { getWarehouses } from "../services/warehouses";
-import { getCage } from "../services/cages";
-import { useParams } from "react-router-dom";
-import {
-  createAdditionalWorks,
-  getAdditionalWorkById,
-} from "../services/dailyWorks";
-import {
-  translateDateToBahasa,
-  formatDateToDDMMYYYY,
-} from "../utils/dateFormat";
-import { deleteAdditionalWorkById } from "../services/dailyWorks";
-import { updateAdditionalWorkById } from "../services/dailyWorks";
-import { formatRupiah } from "../utils/moneyFormat";
+import React, { useState } from "react";
 
 const TambahTugasTambahan = () => {
-  const { id } = useParams();
-
-  const [locations, setLocations] = useState(["Kandang", "Toko", "Gudang"]);
-  const [selectedLocation, setSelectedLocation] = useState(locations[0]);
-
-  const [slot, setSlot] = useState(0);
-  const [description, setDescription] = useState("");
+  const [taskName, setTaskName] = useState("");
+  const [site, setSite] = useState("");
+  const [location, setLocation] = useState("");
+  const [specificLocation, setSpecificLocation] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [slot, setSlot] = useState(1);
   const [salary, setSalary] = useState("");
+  const [description, setDescription] = useState("");
 
-  const [additionalWorkStaffInformation, setAdditionalWorkStaffInformation] =
-    useState([]);
-  const userRole = localStorage.getItem("role");
-  const location = useLocation();
-  const navigate = useNavigate();
+  const [workers, setWorkers] = useState([{ role: "", name: "" }]);
 
-  // const fetchLocations = async () => {
-  //   try {
-  //     const [cageResponse, storeResponse, warehouseResponse] =
-  //       await Promise.all([getCage(), getStores(), getWarehouses()]);
-
-  //     if (
-  //       cageResponse.status === 200 &&
-  //       storeResponse.status === 200 &&
-  //       warehouseResponse.status === 200
-  //     ) {
-  //       const combinedData = [
-  //         ...cageResponse.data.data,
-  //         ...storeResponse.data.data,
-  //         ...warehouseResponse.data.data,
-  //       ];
-  //       setLocations(combinedData);
-  //       setSelectedLocation(combinedData[0]);
-  //     }
-  //   } catch (error) {
-  //     console.log("gagal :", error);
-  //   }
-  // };
-
-  const fetchAdditionalData = async (id) => {
-    try {
-      const getAdditionalResponse = await getAdditionalWorkById(id);
-      console.log("getAdditionalResponse: ", getAdditionalResponse);
-      if (getAdditionalResponse.status == 200) {
-        setDescription(getAdditionalResponse.data.data.description);
-        setSelectedLocation(getAdditionalResponse.data.data.location);
-        setSlot(getAdditionalResponse.data.data.slot);
-        setAdditionalWorkStaffInformation(
-          getAdditionalResponse.data.data.additionalWorkStaffInformation
-        );
-        setSalary(getAdditionalResponse.data.data.salary);
-      }
-    } catch (error) {
-      console.log("error :", error);
-    }
+  const handleAddWorker = () => {
+    setWorkers([...workers, { role: "", name: "" }]);
   };
 
-  useEffect(() => {
-    // fetchLocations();
-    if (id) {
-      fetchAdditionalData(id);
-    }
-  }, []);
+  const handleRemoveWorker = (index) => {
+    const newWorkers = [...workers];
+    newWorkers.splice(index, 1);
+    setWorkers(newWorkers);
+  };
 
-  const tambahTugasHandle = async () => {
+  const handleWorkerChange = (index, field, value) => {
+    const newWorkers = [...workers];
+    newWorkers[index][field] = value;
+    setWorkers(newWorkers);
+  };
+
+  const handleSubmit = () => {
     const payload = {
+      taskName,
+      site,
+      location,
+      specificLocation,
+      date,
+      time,
+      slot,
+      salary,
       description,
-      slot: parseInt(slot),
-      location: selectedLocation,
-      salary: salary,
+      workers,
     };
-
-    try {
-      const response = await createAdditionalWorks(payload);
-      // console.log("response:", response);
-      if (response.status === 201) {
-        navigate(-1, { state: { refetch: true } });
-      }
-    } catch (error) {
-      console.log("gagal :", error);
-    }
+    console.log("Submitted data:", payload);
   };
 
-  const getDisplayValue = (val) => (val === 0 ? "" : val);
-
-  const deleteAdditionalsWork = async (id) => {
-    try {
-      const deleteResponse = await deleteAdditionalWorkById(id);
-      // console.log("deleteResponse: ", deleteResponse);
-      if (deleteResponse.status == 204) {
-        navigate(-1, { state: { refetch: true } });
-      }
-    } catch (error) {
-      console.log("error :", error);
-    }
-  };
-
-  const updateTugasHandle = async (id) => {
-    const payload = {
-      description,
-      slot: parseInt(slot),
-      location: selectedLocation,
-      salary: salary,
-    };
-
-    try {
-      const updateResponse = await updateAdditionalWorkById(id, payload);
-      // console.log("updateResponse: ", updateResponse);
-      if (updateResponse.status == 200) {
-        navigate(-1, { state: { refetch: true } });
-      }
-    } catch (error) {
-      console.log("error :", error);
-    }
-  };
   return (
-    <div className="flex flex-col px-4 py-3 gap-4">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-2 flex-wrap gap-4">
-        <h1 className="text-3xl font-bold">
-          {id ? "Detail Tugas Tambahan" : "Tambah Tugas Tambahan"}
-        </h1>
+    <div className="mx-6 p-6 bg-white rounded border space-y-4">
+      <h1 className="text-2xl font-bold">Tambah Tugas Tambahan</h1>
+
+      <div>
+        <label className="block font-medium">Nama Tugas Tambahan</label>
+        <input
+          type="text"
+          className="w-full border rounded p-2"
+          value={taskName}
+          onChange={(e) => setTaskName(e.target.value)}
+        />
       </div>
 
-      {/* Table Section */}
-      <div className="w-full mx-auto p-6 bg-white shadow rounded border border-black-6">
-        {/* nama tugas tambahan */}
-        <div className="mt-4">
-          <label className="block font-medium mb-1">Nama Tugas Tambahan</label>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label className="block font-medium">Site</label>
+          <select
+            className="w-full border rounded p-2"
+            value={site}
+            onChange={(e) => setSite(e.target.value)}
+          >
+            <option value="">Pilih Site</option>
+            <option value="Sidodadi">Sidodadi</option>
+          </select>
+        </div>
+        <div>
+          <label className="block font-medium">Lokasi</label>
+          <select
+            className="w-full border rounded p-2"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+          >
+            <option value="">Pilih Lokasi</option>
+            <option value="Kandang">Kandang</option>
+          </select>
+        </div>
+        <div>
+          <label className="block font-medium">Lokasi Spesifik</label>
+          <select
+            className="w-full border rounded p-2"
+            value={specificLocation}
+            onChange={(e) => setSpecificLocation(e.target.value)}
+          >
+            <option value="">Pilih Lokasi Spesifik</option>
+            <option value="Sidodadi 01">Sidodadi 01</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block font-medium">Tanggal Pelaksanaan</label>
           <input
-            type="text"
-            value={description}
-            placeholder="Nama Tugas Tambahan"
-            className="w-full border border-black-6 rounded p-2 bg-black-4"
-            onChange={(e) => {
-              setDescription(e.target.value);
-            }}
+            type="date"
+            className="w-full border rounded p-2"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
           />
         </div>
-
-        {/* Pilih Lokasi */}
-        <label className="block font-medium  mt-4">Lokasi</label>
-        <select
-          className="w-full border border-black-6 bg-black-4 cursor-pointer rounded p-2"
-          value={selectedLocation}
-          onChange={(e) => {
-            // const selected = locations.find(
-            //   (location) => location.name == e.target.value
-            // );
-            setSelectedLocation(e.target.value);
-          }}
-        >
-          {locations.map((location) => (
-            <option key={location} value={location}>
-              {location}
-            </option>
-          ))}
-        </select>
-
-        {/* nama tugas tambahan */}
-        <div className="mt-4">
-          <label className="block font-medium">Slot Pekerja</label>
+        <div>
+          <label className="block font-medium">Waktu Pelaksanaan</label>
           <input
-            type="number"
-            value={getDisplayValue(slot)}
-            placeholder="Masukkan Jumlah Pekerja"
-            className="w-1/2 border border-black-6 rounded p-2 bg-black-4"
-            onChange={(e) => {
-              setSlot(e.target.value);
-            }}
+            type="time"
+            className="w-full border rounded p-2"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
           />
         </div>
-        <div className="mt-4">
-          <label className="block font-medium">Gaji Tambahan / Pekerja</label>
+      </div>
 
-          <div className="flex items-center border border-black-6 rounded p-2 bg-black-4">
-            <span className="text-gray-500 mr-2">Rp</span>
-            <input
-              type="number"
-              className="bg-transparent outline-none w-full"
-              placeholder="0"
-              value={salary}
-              onChange={(e) => {
-                const cleaned = e.target.value.replace(/[.,]/g, "");
-                console.log("cleaned: ", cleaned);
-                setSalary(cleaned);
-              }}
-            />
-          </div>
-        </div>
+      <div>
+        <label className="block font-medium">Slot Pekerja</label>
+        <input
+          type="number"
+          className="w-full border rounded p-2"
+          value={slot}
+          onChange={(e) => setSlot(e.target.value)}
+        />
+      </div>
 
-        {id ? (
-          <div className="mt-4">
-            <label className="block font-medium">Pegawai yang mengambil</label>
-            <div className=" py-2 ">
-              <table className="w-full mb-8">
-                <thead className="px-8 rounded-[4px] bg-green-700 text-white text-center">
-                  <tr>
-                    <th className="py-2 px-4">Tanggal</th>
-                    <th className="py-2 px-4">Waktu</th>
-                    <th className="py-2 px-4">Nama Pegawai</th>
-                    <th className="py-2 px-4">Status </th>
-                  </tr>
-                </thead>
-                <tbody className="">
-                  {additionalWorkStaffInformation.length > 0 ? (
-                    additionalWorkStaffInformation.map((item, index) => (
-                      <tr
-                        key={index}
-                        className="border-b border-black-6 text-center"
-                      >
-                        <td className="py-2 px-4">
-                          {formatDateToDDMMYYYY(item.date)}
-                        </td>
-                        <td className="py-2 px-4">{item.time}</td>
-                        <td className="py-2 px-4">{item.staffName}</td>
-                        <td className="py-2 px-4 flex justify-center">
-                          <span
-                            className={`w-36 py-1 flex justify-center rounded text-sm font-semibold ${
-                              item.isDone
-                                ? "bg-aman-box-surface-color text-aman-text-color"
-                                : "bg-orange-200 text-kritis-text-color"
-                            }`}
-                          >
-                            {item.isDone ? "Selesai" : "Dalam Proses"}
-                          </span>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan="4"
-                        className="py-4 px-4 text-center text-black-9"
-                      >
-                        Belum ada pegawai yang mengambil pekerjaan
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ) : (
-          <></>
-        )}
-
-        <div className="flex gap-4 justify-end">
-          {id ? (
-            <div className="mt-6 text-right ">
-              <button
-                onClick={() => {
-                  deleteAdditionalsWork(id);
-                }}
-                className="bg-kritis-box-surface-color text-white py-2 px-6 rounded hover:bg-kritis-text-color cursor-pointer"
-              >
-                Hapus Tugas Tambahan
-              </button>
-            </div>
-          ) : (
-            <></>
-          )}
-          {/* Hapus Tugas Button */}
-
-          {/* Simpan Button */}
-          <div className="mt-6 text-right ">
-            <button
-              onClick={() => {
-                if (id) {
-                  updateTugasHandle(id);
-                } else {
-                  tambahTugasHandle();
-                }
-              }}
-              className="bg-green-700 text-white py-2 px-6 rounded hover:bg-green-900 cursor-pointer"
+      <div>
+        <label className="block font-medium">Pilih Pekerja (optional)</label>
+        {workers.map((worker, index) => (
+          <div key={index} className="flex gap-2 mb-2">
+            <select
+              className="flex-1 border rounded p-2"
+              value={worker.role}
+              onChange={(e) =>
+                handleWorkerChange(index, "role", e.target.value)
+              }
             >
-              Simpan
+              <option value="">Pilih Jabatan Pekerja</option>
+              <option value="Mandor">Mandor</option>
+              <option value="Pekerja">Pekerja</option>
+            </select>
+            <select
+              className="flex-1 border rounded p-2"
+              value={worker.name}
+              onChange={(e) =>
+                handleWorkerChange(index, "name", e.target.value)
+              }
+            >
+              <option value="">Pilih Nama Pekerja</option>
+              <option value="Budi">Budi</option>
+              <option value="Siti">Siti</option>
+            </select>
+            <button
+              onClick={() => handleRemoveWorker(index)}
+              className="text-red-600 hover:text-red-800"
+            >
+              🗑️
             </button>
           </div>
-        </div>
+        ))}
+        <button
+          onClick={handleAddWorker}
+          className="mt-2 bg-yellow-500 text-black py-1 px-4 rounded hover:bg-yellow-600"
+        >
+          Tambah pekerja
+        </button>
+      </div>
 
-        {/* Simpan Button */}
-        {/* <div className="mt-6 text-right ">
-          <button
-            onClick={() => {
-              console.log("description:", description);
-              console.log("selectedLocation:", selectedLocation);
-              console.log("slot: ", slot);
-              console.log("salary: ", salary);
-            }}
-            className="bg-green-700 text-white py-2 px-6 rounded hover:bg-green-900 cursor-pointer"
-          >
-            Check
-          </button>
-        </div> */}
+      <div>
+        <label className="block font-medium">Gaji Tambahan / Pekerja</label>
+        <input
+          type="text"
+          className="w-full border rounded p-2"
+          value={salary}
+          onChange={(e) => setSalary(e.target.value)}
+          placeholder="Rp 300.000"
+        />
+      </div>
+
+      <div>
+        <label className="block font-medium">Deskripsi Pekerjaan</label>
+        <textarea
+          className="w-full border rounded p-2"
+          rows={3}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+      </div>
+
+      <div className="text-right">
+        <button
+          onClick={handleSubmit}
+          className="bg-green-700 text-white py-2 px-6 rounded hover:bg-green-900"
+        >
+          Simpan
+        </button>
       </div>
     </div>
   );

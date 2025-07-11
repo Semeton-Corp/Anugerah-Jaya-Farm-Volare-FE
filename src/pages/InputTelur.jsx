@@ -21,9 +21,6 @@ const InputTelur = () => {
 
   const [chickenCages, setChickenCages] = useState([]);
   const [selectedChickenCage, setSelectedChickenCage] = useState(0);
-  const [idBatch, setIdBatch] = useState("");
-  const [chickenCategory, setChickenCategory] = useState("");
-  const [chickenAge, setChickenAge] = useState(0);
 
   const [warehouses, setWarehouses] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(0);
@@ -48,13 +45,6 @@ const InputTelur = () => {
       (warehouse) => warehouse.id === selectedChickenCage?.cage?.location?.id
     );
   }, [warehouses, selectedChickenCage]);
-
-  // const [selectedCageName, setSelectedCageName] = useState("");
-  const [ok, setOk] = useState("");
-  const [retak, setRetak] = useState("");
-  const [pecah, setPecah] = useState("");
-  const [reject, setReject] = useState("");
-  const [weight, setWeight] = useState("");
 
   const navigate = useNavigate();
 
@@ -173,7 +163,7 @@ const InputTelur = () => {
 
   const handleSubmit = async () => {
     const payload = {
-      chickenCageId: selectedChickenCage.cage.id,
+      chickenCageId: selectedChickenCage.id,
       warehouseId: selectedWarehouse.id,
       totalKarpetGoodEgg: parseInt(totalKarpetGoodEgg),
       totalRemainingGoodEgg: parseInt(totalRemainingGoodEgg),
@@ -185,7 +175,8 @@ const InputTelur = () => {
       totalRemainingRejectEgg: parseInt(totalRemainingRejectEgg),
     };
 
-    // console.log("payload: ", payload);
+    console.log("payload: ", payload);
+    console.log("chickenCages: ", chickenCages);
 
     if (id) {
       // console.log("THERE IS AN ID: ", id);
@@ -262,9 +253,6 @@ const InputTelur = () => {
             onChange={(e) => {
               const cageObj = JSON.parse(e.target.value);
               setSelectedChickenCage(cageObj);
-              setIdBatch(cageObj.batchId);
-              setChickenCategory(cageObj.chickenCategory);
-              setChickenAge(cageObj.chickenAge);
             }}
           >
             <option value="" disabled hidden>

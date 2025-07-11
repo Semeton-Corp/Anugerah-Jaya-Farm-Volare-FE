@@ -101,7 +101,6 @@ const DetailProduksi = () => {
         </div>
       </div>
 
-      {/* detail penjualan */}
       <div className=" flex gap-4">
         <div className=" w-full bg-white px-8 py-6 rounded-lg border border-black-6">
           <div className="flex justify-end items-start mb-4">
