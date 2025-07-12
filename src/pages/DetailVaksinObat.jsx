@@ -115,7 +115,7 @@ const DetailVaksinObat = () => {
           </div>
           <div>
             <p className="text-gray-600">Kategori ayam</p>
-            <p className="font-bold">{chickenCage?.chickenCategory}</p>
+            <p className="font-bold">{chickenCage?.cage?.chickenCategory}</p>
           </div>
           <div>
             <p className="text-gray-600">Lokasi Kandang</p>
@@ -164,8 +164,8 @@ const DetailVaksinObat = () => {
                   className="border-t hover:bg-black-3 transition-all"
                 >
                   <td className="py-2 px-4">{row.tanggal}</td>
-                  <td className="py-2 px-4">{row.kategori}</td>
-                  <td className="py-2 px-4">{row.usia}</td>
+                  <td className="py-2 px-4">{row.chickenCategory}</td>
+                  <td className="py-2 px-4">{row.chickenAge}</td>
                   <td className="py-2 px-4">{row.type}</td>
                   <td className="py-2 px-4">{row.healthItemName}</td>
                   <td className="py-2 px-4">{row.dose}</td>
@@ -240,6 +240,13 @@ const DetailVaksinObat = () => {
           </div>
         </div>
       )}
+      <button
+        onClick={() => {
+          console.log("chickenCage: ", chickenCage);
+        }}
+      >
+        CHECK
+      </button>
     </div>
   );
 };

@@ -24,6 +24,23 @@ export const getItems = (category, storeId) => {
   });
 };
 
+export const getItemById = (id) => {
+  return api.get(`/items/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const updateItem = (payload, id) => {
+  return api.put(`/items/${id}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
 ///Price
 export const createItemPrice = (payload) => {
   return api.post("/items/prices", payload, {

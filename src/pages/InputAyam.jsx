@@ -15,6 +15,10 @@ import {
 import DeleteModal from "../components/DeleteModal";
 
 const InputAyam = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const locationId = localStorage.getItem("locationId");
+  const userRole = localStorage.getItem("role");
   const [obatExpanded, setObatExpanded] = useState(false);
 
   const [chickenCages, setChickenCages] = useState([]);
@@ -37,10 +41,6 @@ const InputAyam = () => {
 
   const [isEditMode, setIsEditMode] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-  const userRole = localStorage.getItem("role");
-  const location = useLocation();
-  const navigate = useNavigate();
 
   const [vaksinExpanded, setVaksinExpanded] = useState(false);
   const [vaksinList, setVaksinList] = useState([]);
@@ -84,7 +84,12 @@ const InputAyam = () => {
   useEffect(() => {
     const fetchCages = async () => {
       try {
-        const response = await getChickenCage();
+        let response;
+        if (userRole == "Owner") {
+          response = await getChickenCage();
+        } else {
+          response = await getChickenCage(locationId);
+        }
         const dataChickenCage = response.data.data;
         console.log("dataChickenCage: ", dataChickenCage);
 

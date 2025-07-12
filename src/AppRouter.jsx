@@ -80,6 +80,7 @@ import DetailVaksinObatItem from "./pages/DetailVaksinObatItem";
 import TambahGudang from "./pages/TambahGudang";
 import DetailGudang from "./pages/DetailGudang";
 import DetailToko from "./pages/DetailToko";
+import DetailTugasTambahan from "./pages/DetailTugasTambahan";
 
 const AppRouter = createBrowserRouter([
   {
@@ -382,6 +383,10 @@ const AppRouter = createBrowserRouter([
                     element: <TambahTugasTambahan />,
                   },
                   {
+                    path: "detail-tugas-tambahan/:id",
+                    element: <DetailTugasTambahan />,
+                  },
+                  {
                     path: "tambah-tugas-rutin",
                     element: <TambahTugasRutin />,
                   },
@@ -549,7 +554,7 @@ const AppRouter = createBrowserRouter([
         path: "",
         element: <MainLayout role="Pekerja Toko" />,
         children: [
-          { path: "", element: <Navigate to="overview" replace /> },
+          { path: "", element: <Navigate to="ringkasan" replace /> },
           {
             path: "profile",
             element: <Profile />,

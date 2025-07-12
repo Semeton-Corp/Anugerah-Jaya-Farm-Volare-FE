@@ -12,7 +12,7 @@ import {
 } from "../services/warehouses";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
 import { createWarehouseItems } from "../services/warehouses";
-import { createItem } from "../services/item";
+import { createItem, getItemById, updateItem } from "../services/item";
 
 const TambahBarangBaru = () => {
   const [cages, setCages] = useState([]);
@@ -52,7 +52,7 @@ const TambahBarangBaru = () => {
 
   const fetchWarehouseItembyId = async (id) => {
     try {
-      const detailResponse = await getWarehouseItemById(id);
+      const detailResponse = await getItemById(id);
       console.log("detailResponse: ", detailResponse);
       if (detailResponse.status == 200) {
         setName(detailResponse.data.data.name);
@@ -80,8 +80,8 @@ const TambahBarangBaru = () => {
 
     if (id) {
       try {
-        const updateResponse = await updateWarehouseItem(payload, id);
-        // console.log("updateResponse: ", updateResponse);
+        const updateResponse = await updateItem(payload, id);
+        console.log("updateResponse: ", updateResponse);
         if (updateResponse.status == 200) {
           navigate(-1, { state: { refecth: true } });
         }

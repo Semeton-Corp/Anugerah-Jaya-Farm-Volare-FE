@@ -7,6 +7,7 @@ import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getChickenMonitoring } from "../services/chickenMonitorings";
 import { deleteChickenData } from "../services/chickenMonitorings";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
+import { getChickenCage } from "../services/cages";
 
 const data = [
   { date: "29 Mar", produksi: 25, penjualan: 30 },
@@ -40,8 +41,14 @@ const VaksinObat = () => {
 
   const fetchDataAyam = async () => {
     try {
-      const response = await getChickenMonitoring(locationId);
+      let response;
+      if (userRole == "Owner") {
+        response = await getChickenCage();
+      } else {
+        response = await getChickenCage(locationId);
+      }
       if (response.status === 200) {
+        console.log("response.data.data: ", response.data.data);
         setDetailAyamState(response.data.data);
         // console.log("DetailAyamData: ", response.data.data);
       }
@@ -117,14 +124,12 @@ const VaksinObat = () => {
                   key={index}
                   className="border-t border-gray-200 hover:bg-gray-50 text-center"
                 >
-                  <td className="py-2 px-4">{row.chickenCage.batchId}</td>
+                  <td className="py-2 px-4">{row.batchId}</td>
+                  <td className="py-2 px-4">{row.cage.chickenCategory}</td>
+                  <td className="py-2 px-4">{row.chickenAge}</td>
+                  <td className="py-2 px-4">{row.cage.name}</td>
                   <td className="py-2 px-4">
-                    {row.chickenCage.cage.chickenCategory}
-                  </td>
-                  <td className="py-2 px-4">{row.chickenCage.chickenAge}</td>
-                  <td className="py-2 px-4">{row.chickenCage.cage.name}</td>
-                  <td className="py-2 px-4">
-                    {row.chickenCage.isNeedRoutineVaccine ? (
+                    {row.isNeedRoutineVaccine ? (
                       <span className="px-3 py-1 bg-kritis-box-surface-color text-kritis-text-color rounded shadow-sm">
                         Perlu Vaksin
                       </span>

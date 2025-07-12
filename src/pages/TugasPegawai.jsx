@@ -63,7 +63,11 @@ const TugasPegawai = () => {
   const [tugasRutinData, setTugasRutinData] = useState([]);
   const [tugasTambahanData, setTugasTambahanData] = useState([]);
 
-  const detailPages = ["tambah-tugas-rutin", "tambah-tugas-tambahan"];
+  const detailPages = [
+    "tambah-tugas-rutin",
+    "tambah-tugas-tambahan",
+    "detail-tugas-tambahan",
+  ];
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
@@ -128,7 +132,7 @@ const TugasPegawai = () => {
   };
 
   const detailTugasTambahanHandle = (id) => {
-    navigate(`${location.pathname}/tambah-tugas-tambahan/${id}`);
+    navigate(`${location.pathname}/detail-tugas-tambahan/${id}`);
   };
 
   const tambahTugasRutinHandle = () => {
@@ -184,9 +188,7 @@ const TugasPegawai = () => {
               {tugasTambahanData.length > 0 ? (
                 tugasTambahanData.map((item, index) => (
                   <tr key={index} className="border-b border-black-6">
-                    <td className="py-2 px-4">
-                      {translateDateToBahasa(item.date)}
-                    </td>
+                    <td className="py-2 px-4">{item.date}</td>
                     <td className="py-2 px-4">{item.description}</td>
                     <td className="py-2 px-4">{item.location}</td>
                     <td className="py-2 px-4">{item.remainingSlot}</td>

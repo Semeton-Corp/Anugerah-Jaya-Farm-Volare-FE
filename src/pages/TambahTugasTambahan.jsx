@@ -4,15 +4,23 @@ import { getLocations } from "../services/location";
 import { getCage } from "../services/cages";
 import { getWarehouses } from "../services/warehouses";
 import { getStores } from "../services/stores";
-import { formatDateToDDMMYYYY } from "../utils/dateFormat";
+import {
+  convertToInputDateFormat,
+  formatDateToDDMMYYYY,
+} from "../utils/dateFormat";
 import { RiDeleteBinFill } from "react-icons/ri";
 import { getRoles } from "../services/roles";
 import { getListUser } from "../services/user";
-import { createAdditionalWorks } from "../services/dailyWorks";
-import { useNavigate } from "react-router-dom";
+import {
+  createAdditionalWorks,
+  getAdditionalWorkById,
+} from "../services/dailyWorks";
+import { useNavigate, useParams } from "react-router-dom";
 
 const TambahTugasTambahan = () => {
   const navigate = useNavigate();
+
+  const { id } = useParams();
 
   const [taskName, setTaskName] = useState("");
   const [site, setSite] = useState("");
@@ -23,10 +31,9 @@ const TambahTugasTambahan = () => {
   const [slot, setSlot] = useState(1);
   const [salary, setSalary] = useState("");
   const [description, setDescription] = useState("");
-  const [workers, setWorkers] = useState([{ role: "", id: "" }]);
+  const [workers, setWorkers] = useState([{ roleName: "", id: "" }]);
 
   const [employeeOptions, setEmployeeOptions] = useState();
-  const [selectedEmployee, setSelectedEmployee] = useState("");
   const [employeeOptionsMap, setEmployeeOptionsMap] = useState({});
 
   const [roles, setRoles] = useState([]);
@@ -41,7 +48,7 @@ const TambahTugasTambahan = () => {
   const [specificLocationOptions, setSpecificLocationOptions] = useState([]);
 
   const handleAddWorker = () => {
-    setWorkers([...workers, { role: "", id: "" }]);
+    setWorkers([...workers, { roleId: "", id: "" }]);
   };
 
   const handleRemoveWorker = (index) => {
@@ -86,6 +93,7 @@ const TambahTugasTambahan = () => {
   };
 
   const fetchSite = async () => {
+    // console.log("id: ", id);
     try {
       const siteResponse = await getLocations();
       // console.log("siteResponse: ", siteResponse);
@@ -97,40 +105,38 @@ const TambahTugasTambahan = () => {
     }
   };
 
-  const fetchSpecificLocations = async () => {
-    if (!site || !location) {
-      setSpecificLocationOptions([]);
-      return;
-    }
-    // console.log("site: ", site);
-    // console.log("location: ", location);
-
+  const fetchSpecificLocations = async (
+    siteId = site,
+    locationType = location
+  ) => {
     try {
       let response;
-      if (location === "Kandang") {
-        response = await getCage({ locationId: site });
-      } else if (location === "Gudang") {
-        response = await getWarehouses({ locationId: site });
-      } else if (location === "Toko") {
-        response = await getStores({ locationId: site });
+      if (locationType === "Kandang") {
+        response = await getCage({ locationId: siteId });
+      } else if (locationType === "Gudang") {
+        response = await getWarehouses({ locationId: siteId });
+      } else if (locationType === "Toko") {
+        response = await getStores({ locationId: siteId });
       }
 
       if (response?.status === 200) {
-        console.log("response: ", response);
         setSpecificLocationOptions(response.data.data);
+        return response.data.data;
       } else {
         setSpecificLocationOptions([]);
+        return [];
       }
     } catch (err) {
       console.error("Failed to fetch specific locations", err);
       setSpecificLocationOptions([]);
+      return [];
     }
   };
 
   const fetchRoles = async () => {
     try {
       const rolesResponse = await getRoles();
-      console.log("rolesResponse: ", rolesResponse);
+      // console.log("rolesResponse: ", rolesResponse);s
       if (rolesResponse.status == 200) {
         // console.log("rolesResponse.data.data: ", rolesResponse.data.data);
         const allRoles = rolesResponse.data.data;
@@ -173,11 +179,97 @@ const TambahTugasTambahan = () => {
     }
   };
 
-  useEffect(() => {
-    fetchSite();
-    fetchRoles();
-  }, []);
+  const fetchDetailData = async (id) => {
+    try {
+      const detailData = await getAdditionalWorkById(id);
+      // console.log("detailData: ", detailData);
+      if (detailData.status == 200) {
+        const data = detailData.data.data;
 
+        setTaskName(data.name);
+        setSite(data.location.id);
+        setLocation(data.locationType);
+        setDate(convertToInputDateFormat(data.date));
+        setTime(data.time);
+        setSlot(data.slot);
+        setSalary(data.salary);
+        setDescription(data.description);
+
+        const transformedWorkers = await Promise.all(
+          (data.additionalWorkUserInformation || []).map(
+            async (worker, index) => {
+              // worker.role.id or worker.roleId — depends on your API
+              const roleId = worker.role?.id || worker.roleId;
+              const userId = worker.user?.id || worker.userId;
+
+              console.log("roleId: ", roleId);
+              // fetch employees for this role + site
+              const response = await getListUser(roleId, data.location.id);
+              // console.log(`response ${worker} ${roleId}: `, response);
+              if (response.status === 200) {
+                console.log(
+                  `response.data.data: ${roleId} `,
+                  response.data.data
+                );
+                setEmployeeOptionsMap((prev) => ({
+                  ...prev,
+                  [index]: response.data.data,
+                }));
+              }
+
+              return {
+                roleId: roleId,
+                id: userId,
+              };
+            }
+          )
+        );
+
+        setWorkers(transformedWorkers);
+
+        // now fetch specific locations after site & location are set
+        // console.log("data.location.id: ", data.location.id);
+        // console.log("data.locationType: ", data.locationType);
+        const specificLists = await fetchSpecificLocations(
+          data.location.id,
+          data.locationType
+        );
+        // console.log("specificLists: ", specificLists);
+
+        // then find matching specificLocation
+        const matchSpecificLocation = specificLists.find(
+          (item) => item.name === data.place
+        );
+
+        if (matchSpecificLocation) {
+          setSpecificLocation(matchSpecificLocation.id);
+        } else {
+          setSpecificLocation(""); // fallback
+        }
+        /// after the location.id and setLocation is already set i want to call fetchSpecificLocations()
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    const initFetch = async () => {
+      try {
+        // run initial fetches in parallel or sequence
+        await Promise.all([fetchSite(), fetchRoles()]);
+
+        // then if id exists, fetch detail
+        if (id) {
+          await fetchDetailData(id);
+        }
+      } catch (err) {
+        console.error("Failed to initialize data", err);
+      }
+    };
+
+    initFetch();
+  }, []);
   useEffect(() => {
     fetchEmployees();
   }, [selectedRole]);
@@ -292,9 +384,9 @@ const TambahTugasTambahan = () => {
           <div key={index} className="flex gap-2 mb-2">
             <select
               className="flex-1 border rounded p-2"
-              value={worker.role}
+              value={worker.roleId}
               onChange={(e) =>
-                handleWorkerChange(index, "role", e.target.value)
+                handleWorkerChange(index, "roleId", e.target.value)
               }
             >
               <option value="">Pilih Jabatan Pekerja</option>
@@ -308,10 +400,8 @@ const TambahTugasTambahan = () => {
             </select>
             <select
               className="flex-1 border rounded p-2"
-              value={worker.name}
-              onChange={(e) =>
-                handleWorkerChange(index, "name", e.target.value)
-              }
+              value={worker.id}
+              onChange={(e) => handleWorkerChange(index, "id", e.target.value)}
             >
               <option value="">Pilih Nama Pekerja</option>
               {employeeOptionsMap[index]?.map((employee) => (
@@ -379,6 +469,7 @@ const TambahTugasTambahan = () => {
           console.log("workers:", workers);
           console.log("roles: ", roles);
           console.log("specificLocationOptions: ", specificLocationOptions);
+          console.log("employeeOptionsMap: ", employeeOptionsMap);
         }}
       >
         CHECK

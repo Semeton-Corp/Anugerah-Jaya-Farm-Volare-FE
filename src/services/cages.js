@@ -11,11 +11,14 @@ export const getCage = () => {
   });
 };
 
-export const getChickenCage = () => {
-  return api.get(`/cages/chickens?locationId=${locationId}`, {
-    headers: {
+export const getChickenCage = (locationId) => {
+  return api.get(`/cages/chickens`, {
+  headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
+    },
+    params: {
+      locationId: locationId,
     },
   });
 };

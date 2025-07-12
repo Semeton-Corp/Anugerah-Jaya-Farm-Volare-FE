@@ -104,6 +104,7 @@ const DaftarBarang = () => {
   }
 
   const editDataHandle = async (id) => {
+    console.log("id: ", id);
     navigate(`${location.pathname}/tambah-barang-baru/${id}`);
   };
 
@@ -155,7 +156,9 @@ const DaftarBarang = () => {
 
                   <td className="py-2 px-4 flex justify-center gap-4">
                     <span
-                      onClick={editDataHandle}
+                      onClick={() => {
+                        editDataHandle(data.id);
+                      }}
                       className="px-4 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer"
                     >
                       Edit Stok
