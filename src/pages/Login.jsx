@@ -24,14 +24,10 @@ const Login = () => {
     setError(null);
 
     try {
-      console.log("email", email);
-      console.log("password", email);
-
       const response = await login(userName, password);
 
-      console.log("response", response);
-
       if (response.status === 200) {
+        console.log("response: ", response);
         const { accessToken, role, photoProfile, name, location } =
           response.data.data;
         localStorage.setItem("token", accessToken);
@@ -39,6 +35,7 @@ const Login = () => {
         localStorage.setItem("userName", name);
         localStorage.setItem("photoProfile", photoProfile);
         localStorage.setItem("locationId", location.id);
+        localStorage.setItem("locationName", location.name);
 
         const rolePath = role.name.toLowerCase().replace(/\s+/g, "-");
         navigate(`/${rolePath}`);

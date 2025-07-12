@@ -6,72 +6,89 @@ import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getEggMonitoring } from "../services/eggs";
 import { PiCalendarBlank } from "react-icons/pi";
 import { deleteEggData } from "../services/eggs";
-import { getTodayDateInBahasa } from "../utils/dateFormat";
-
-// const produksiDetail = [
-//   {
-//     kandang: "Kandang A1",
-//     qty: 1000,
-//     ok: 800,
-//     retak: 12,
-//     pecah: 100,
-//     reject: 40,
-//     abnormality: "3%",
-//     keterangan: "aman",
-//   },
-//   {
-//     kandang: "Kandang A2",
-//     qty: 1000,
-//     ok: 800,
-//     retak: 12,
-//     pecah: 100,
-//     reject: 40,
-//     abnormality: "12%",
-//     keterangan: "kritis",
-//   },
-// ];
+import {
+  formatDate,
+  formatDateToDDMMYYYY,
+  getTodayDateInBahasa,
+} from "../utils/dateFormat";
+import { useRef } from "react";
+import { getLocations } from "../services/location";
 
 const DetailProduksi = () => {
   const userRole = localStorage.getItem("role");
   const userName = localStorage.getItem("userName");
+
+  const [siteOptions, setSiteOptions] = useState([]);
+  const [selectedSite, setSelectedSite] = useState(
+    localStorage.getItem("locationId")
+  );
   const location = useLocation();
   const navigate = useNavigate();
 
   const [produksiDetail, setProduksiDetail] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
 
   const isDetailPage = location.pathname.includes("input-telur");
+
+  const dateInputRef = useRef(null);
+  const openDatePicker = () => {
+    if (dateInputRef.current) {
+      dateInputRef.current.showPicker?.() || dateInputRef.current.click();
+    }
+  };
 
   const inputTelurHandle = () => {
     navigate(`${location.pathname}/input-telur`);
   };
 
-  const fetchDataTelur = async () => {
-    try {
-      const response = await getEggMonitoring();
-      // console.log("response: ", response);
-      if (response.status === 200) {
-        setProduksiDetail(response.data.data);
-        console.log("response.data.data: ", response.data.data);
-      }
-    } catch (error) {}
+  const handleDateChange = (e) => {
+    const date = e.target.value;
+    setSelectedDate(date);
+    fetchDataTelur();
   };
 
-  async function deleteDataHandle(dataId) {
+  const fetchDataTelur = async () => {
     try {
-      const response = await deleteEggData(dataId);
-      await fetchDataAyam(); // langsung reload data
+      let response;
+
+      const effectiveLocationId = userRole === "Owner" ? "" : selectedSite;
+      const date = formatDateToDDMMYYYY(selectedDate);
+
+      response = await getEggMonitoring(effectiveLocationId, date);
+      console.log("response: ", response);
+
+      if (response?.status === 200) {
+        setProduksiDetail(response.data.data);
+        // console.log("response.data.data: ", response.data.data);
+      }
     } catch (error) {
-      console.error("Gagal menghapus data ayam:", error);
+      console.error(error);
     }
-  }
+  };
+
+  const fetchSites = async () => {
+    try {
+      const res = await getLocations();
+      if (res.status === 200) {
+        setSiteOptions(res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch sites", err);
+    }
+  };
 
   useEffect(() => {
     fetchDataTelur();
+    fetchSites();
 
     if (location.state?.refetch) {
       fetchDataTelur();
     }
   }, [location]);
+
+  useEffect(() => {
+    fetchDataTelur();
+  }, [selectedSite, selectedDate]);
 
   async function editDataHandle(dataId) {
     const currectPath = location.pathname;
@@ -88,15 +105,35 @@ const DetailProduksi = () => {
       <div className="flex justify-between items-center mb-2 flex-wrap gap-4">
         <h1 className="text-3xl font-bold">Data Produksi Telur</h1>
         <div className="flex gap-4">
-          <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-            <MdStore size={18} />
-            <div className="text-base font-medium ms-2">Semua Site</div>
-          </div>
-          <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-            <PiCalendarBlank size={18} />
-            <div className="text-base font-medium ms-2">
-              Hari ini ({getTodayDateInBahasa()})
+          {userRole == "Owner" && (
+            <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+              <MdStore size={18} />
+              <select
+                value={selectedSite}
+                onChange={(e) => setSelectedSite(e.target.value)}
+                className="ml-2 bg-transparent text-base font-medium outline-none"
+              >
+                <option value="">Semua Site</option>
+                {siteOptions.map((site) => (
+                  <option key={site.id} value={site.id}>
+                    {site.name}
+                  </option>
+                ))}
+              </select>
             </div>
+          )}
+
+          <div
+            className="flex items-center rounded-lg bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+            onClick={openDatePicker}
+          >
+            <input
+              ref={dateInputRef}
+              type="date"
+              value={selectedDate}
+              onChange={handleDateChange}
+              className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+            />
           </div>
         </div>
       </div>
