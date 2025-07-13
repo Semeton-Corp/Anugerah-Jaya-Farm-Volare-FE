@@ -195,7 +195,7 @@ const DaftarPegawai = () => {
               </tr>
             </thead>
             <tbody className="">
-              {pegawaiAktifData.map((item, index) => (
+              {pegawaiAktifData?.map((item, index) => (
                 <tr key={index} className="border-b border-black-6">
                   <td className="py-3 px-4">
                     <div className="flex gap-6">

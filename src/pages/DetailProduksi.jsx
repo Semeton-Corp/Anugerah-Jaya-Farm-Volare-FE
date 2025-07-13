@@ -20,7 +20,7 @@ const DetailProduksi = () => {
 
   const [siteOptions, setSiteOptions] = useState([]);
   const [selectedSite, setSelectedSite] = useState(
-    localStorage.getItem("locationId")
+    userRole === "Owner" ? 0 : localStorage.getItem("locationId")
   );
   const location = useLocation();
   const navigate = useNavigate();
@@ -30,6 +30,15 @@ const DetailProduksi = () => {
 
   const isDetailPage = location.pathname.includes("input-telur");
 
+  const isSelectedDateToday = (selectedDate) => {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+
+    const todayStr = `${yyyy}-${mm}-${dd}`; // same format as selectedDate
+    return selectedDate === todayStr;
+  };
   const dateInputRef = useRef(null);
   const openDatePicker = () => {
     if (dateInputRef.current) {
@@ -43,19 +52,20 @@ const DetailProduksi = () => {
 
   const handleDateChange = (e) => {
     const date = e.target.value;
+    console.log("date: ", date);
     setSelectedDate(date);
-    fetchDataTelur();
   };
 
   const fetchDataTelur = async () => {
     try {
       let response;
 
-      const effectiveLocationId = userRole === "Owner" ? "" : selectedSite;
       const date = formatDateToDDMMYYYY(selectedDate);
-
-      response = await getEggMonitoring(effectiveLocationId, date);
-      console.log("response: ", response);
+      console.log("effectiveLocationId: ", selectedSite);
+      console.log("date: ", date);
+      response = await getEggMonitoring(selectedSite, date);
+      // console.log("response: ", response);
+      // console.log("response: ", response);
 
       if (response?.status === 200) {
         setProduksiDetail(response.data.data);
@@ -162,7 +172,9 @@ const DetailProduksi = () => {
                 <th className="py-2 px-4">Reject (butir)</th>
                 <th className="py-2 px-4">Abnormality (%)</th>
                 <th className="py-2 px-4">Status</th>
-                <th className="py-2 px-4">Aksi</th>
+                {isSelectedDateToday(selectedDate) && (
+                  <th className="py-2 px-4">Aksi</th>
+                )}
               </tr>
             </thead>
             <tbody className="text-center">
@@ -197,23 +209,16 @@ const DetailProduksi = () => {
                     </th>
                   )}
 
-                  <td className="py-1 px-4 text-center">
-                    <span
-                      onClick={() => editDataHandle(item.id)}
-                      className="py-1 px-5 rounded-[4px] bg-green-700 hover:bg-green-900 cursor-pointer  text-white"
-                    >
-                      Lihat Detail
-                    </span>
-                    {/* {userName === item.eggPic ||
-                      (userRole === "Owner" && (
-                        <span
-                          onClick={() => editDataHandle(item.id)}
-                          className="py-1 px-5 rounded-[4px] bg-green-700 hover:bg-green-900 cursor-pointer  text-white"
-                        >
-                          Lihat Detail
-                        </span>
-                      ))} */}
-                  </td>
+                  {isSelectedDateToday(selectedDate) && (
+                    <td className="py-1 px-4 text-center">
+                      <span
+                        onClick={() => editDataHandle(item.id)}
+                        className="py-1 px-5 rounded-[4px] bg-green-700 hover:bg-green-900 cursor-pointer  text-white"
+                      >
+                        Lihat Detail
+                      </span>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

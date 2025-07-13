@@ -42,7 +42,8 @@ const InputTelur = () => {
 
   const filteredWarehouses = useMemo(() => {
     return warehouses.filter(
-      (warehouse) => warehouse.id === selectedChickenCage?.cage?.location?.id
+      (warehouse) =>
+        warehouse.location.id === selectedChickenCage?.cage?.location?.id
     );
   }, [warehouses, selectedChickenCage]);
 
@@ -68,15 +69,14 @@ const InputTelur = () => {
 
         const dataChickenCage = chickenResponse.data.data;
         const dataWarehouse = warehouseResponse.data.data;
-
-        console.log("dataWarehouse: ", dataWarehouse);
-        console.log("dataChickenCage: ", dataChickenCage);
+        // console.log("dataWarehouse: ", dataWarehouse);
+        // console.log("dataChickenCage: ", dataChickenCage);
 
         if (userRole != "Owner") {
           const filterCage = dataChickenCage.filter(
             (cage) => cage.eggPic == userName
           );
-          console.log("filterCage: ", filterCage);
+          // console.log("filterCage: ", filterCage);
           setChickenCages(filterCage);
           setSelectedChickenCage(filterCage[0]);
         } else {
@@ -124,12 +124,6 @@ const InputTelur = () => {
 
           // console.log("Nama kandang: ", data.cage.name);
           // setSelectedCageName(data.cage.name);
-        } else {
-          if (dataChickenCage.length > 0) {
-            // console.log("dataChickenCage: ", dataChickenCage);
-            // console.log("dataChickenCage[0]?.name: ", dataChickenCage[0]?.name);
-            setSelectedChickenCage(dataChickenCage[0]);
-          }
         }
       } catch (error) {
         console.error("Gagal memuat data kandang:", error);
@@ -246,12 +240,16 @@ const InputTelur = () => {
         <label className="block font-medium mb-1">Kandang</label>
         {isEditMode ? (
           <select
-            className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-8"
+            disabled={!isEditMode || !!id}
+            className={`w-full border bg-black-4 rounded p-2 mb-8 ${
+              !isEditMode || !!id ? "" : "cursor-pointer"
+            }`}
             value={
               selectedChickenCage ? JSON.stringify(selectedChickenCage) : ""
             }
             onChange={(e) => {
               const cageObj = JSON.parse(e.target.value);
+              console.log("cageObj: ", cageObj);
               setSelectedChickenCage(cageObj);
             }}
           >
@@ -310,7 +308,7 @@ const InputTelur = () => {
               setSelectedWarehouse(warehouseObj);
             }}
           >
-            {warehouses.map((warehouse) => (
+            {filteredWarehouses.map((warehouse) => (
               <option key={warehouse.id} value={JSON.stringify(warehouse)}>
                 {warehouse.name}
               </option>
@@ -545,10 +543,26 @@ const InputTelur = () => {
           // console.log("chickenCages: ", chickenCages);
           // console.log("selectedChickenCage: ", selectedChickenCage);
 
-          console.log("filteredWarehouses: ", filteredWarehouses);
-          console.log("selectedWarehouse: ", selectedWarehouse);
-          console.log("selectedChickenCage: ", selectedChickenCage);
+          // console.log("filteredWarehouses: ", filteredWarehouses);
+          // console.log("selectedWarehouse: ", selectedWarehouse);
+          // console.log("selectedChickenCage: ", selectedChickenCage);
+          // console.log("warehouses: ", warehouses);
+
+          const payload = {
+            chickenCageId: selectedChickenCage.id,
+            warehouseId: selectedWarehouse.id,
+            totalKarpetGoodEgg: parseInt(totalKarpetGoodEgg),
+            totalRemainingGoodEgg: parseInt(totalRemainingGoodEgg),
+            totalWeightGoodEgg: parseInt(totalWeightGoodEgg),
+            totalKarpetCrackedEgg: parseInt(totalKarpetCrackedEgg),
+            totalRemainingCrackedEgg: parseInt(totalRemainingCrackedEgg),
+            totalWeightCrackedEgg: parseInt(totalWeightCrackedEgg),
+            totalKarpetRejectEgg: parseInt(totalKarpetRejectEgg),
+            totalRemainingRejectEgg: parseInt(totalRemainingRejectEgg),
+          };
+          console.log("payload: ", payload);
           console.log("chickenCages: ", chickenCages);
+          console.log("selectedChickenCage: ", selectedChickenCage);
           console.log("warehouses: ", warehouses);
         }}
       >

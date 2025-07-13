@@ -12,61 +12,18 @@ const Kandang = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // const data = [
-  //   {
-  //     kandang: "Sidodadi DOC",
-  //     idAyam: "0611202500001",
-  //     kategori: "DOC",
-  //     usia: 1,
-  //     kapasitas: 11000,
-  //     pic: "Siti Rahayu",
-  //   },
-  //   {
-  //     kandang: "Sidodadi Grower",
-  //     idAyam: "0610202500001",
-  //     kategori: "Grower",
-  //     usia: 10,
-  //     kapasitas: 11000,
-  //     pic: "Siti Rahayu",
-  //   },
-  //   {
-  //     kandang: "Sidodadi 01",
-  //     idAyam: "0609202500001",
-  //     kategori: "Pre Layer",
-  //     usia: 16,
-  //     kapasitas: 4000,
-  //     pic: "Yono",
-  //   },
-  //   {
-  //     kandang: "Sidodadi 02",
-  //     idAyam: "0608202500001",
-  //     kategori: "Layer",
-  //     usia: 19,
-  //     kapasitas: 4000,
-  //     pic: "Yono",
-  //   },
-  //   {
-  //     kandang: "Sidodadi 03",
-  //     idAyam: "0607202500001",
-  //     kategori: "Afkir",
-  //     usia: 30,
-  //     kapasitas: 4000,
-  //     pic: "Abdi",
-  //   },
-  // ];
   const fetchKandangData = async () => {
     try {
       const kandangResponse = await getChickenCage();
 
       if (kandangResponse.status === 200) {
         const allKandang = kandangResponse.data.data;
-        const role = localStorage.getItem("role");
         const locationId = parseInt(localStorage.getItem("locationId"), 10);
 
         let filteredKandang = allKandang;
 
         console.log("allKandang: ", allKandang);
-        if (role !== "Owner") {
+        if (userRole !== "Owner") {
           filteredKandang = allKandang.filter(
             (item) => item.cage.location.id === locationId
           );
@@ -93,10 +50,10 @@ const Kandang = () => {
     <div className="px-4 md:px-8 py-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Kandang</h2>
-        <button className="flex items-center gap-2 bg-orange-300 text-black text-sm px-4 py-2 rounded hover:bg-orange-500 transition cursor-pointer">
+        {/* <button className="flex items-center gap-2 bg-orange-300 text-black text-sm px-4 py-2 rounded hover:bg-orange-500 transition cursor-pointer">
           <FaWarehouse />
           Sidodadi
-        </button>
+        </button> */}
       </div>
 
       <div className="p-6 border bg-white rounded-[4px]">
@@ -106,12 +63,11 @@ const Kandang = () => {
               <tr className="bg-green-700 text-white">
                 <th className="py-2 px-4">Kandang</th>
                 <th className="py-2 px-4">ID Batch</th>
-
                 <th className="py-2 px-4">Kategori</th>
                 <th className="py-2 px-4">Usia (minggu)</th>
                 <th className="py-2 px-4">Kapasitas Maksimum (Ekor)</th>
-
-                <th className="py-2 px-4">PIC</th>
+                <th className="py-2 px-4">PIC Ayam</th>
+                <th className="py-2 px-4">PIC Telur</th>
               </tr>
             </thead>
             <tbody>
@@ -122,8 +78,8 @@ const Kandang = () => {
                   <td className="py-2 px-4">{row.cage.chickenCategory}</td>
                   <td className="py-2 px-4">{row.cage.chickenAge}</td>
                   <td className="py-2 px-4">{row.cage.capacity}</td>
-
                   <td className="py-2 px-4">{row.chickenPic}</td>
+                  <td className="py-2 px-4">{row.eggPic}</td>
                 </tr>
               ))}
             </tbody>
