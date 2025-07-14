@@ -82,13 +82,6 @@ const DaftarSuplier = () => {
       {/* header */}
       <div className="flex justify-between mb-2 flex-wrap gap-4">
         <h1 className="text-3xl font-bold">Daftar Supplier</h1>
-
-        <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-          <PiCalendarBlank size={18} />
-          <div className="text-base font-medium ms-2">
-            Hari ini ({getTodayDateInBahasa()})
-          </div>
-        </div>
       </div>
 
       {/* entire box */}

@@ -8,32 +8,15 @@ import { getChickenMonitoring } from "../services/chickenMonitorings";
 import { deleteChickenData } from "../services/chickenMonitorings";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
 import { getWarehouseItems } from "../services/warehouses";
-import { getItems } from "../services/item";
-
-// const daftarBarangData = [
-//   {
-//     namaBarang: "Jagung",
-//     jenisBarang: "Pakan",
-//     satuan: "Kg",
-//   },
-//   {
-//     namaBarang: "Dedak",
-//     jenisBarang: "Pakan",
-//     satuan: "Kg",
-//   },
-//   {
-//     namaBarang: "Telur OK",
-//     jenisBarang: "Telur",
-//     satuan: "Liter",
-//   },
-// ];
+import { deleteItem, getItems } from "../services/item";
 
 const DaftarBarang = () => {
   const userRole = localStorage.getItem("role");
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [detailAyamData, setDetailAyamState] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedDeleteId, setSelectedDeleteId] = useState(null);
 
   const [daftarBarangData, setDaftarBarangData] = useState([]);
 
@@ -54,7 +37,7 @@ const DaftarBarang = () => {
   const fetchWarehouseItems = async () => {
     try {
       const warehouseItemResponse = await getItems();
-      // console.log("warehouseItemResponse: ", warehouseItemResponse);
+      console.log("warehouseItemResponse: ", warehouseItemResponse);
       if (warehouseItemResponse.status == 200) {
         setDaftarBarangData(warehouseItemResponse.data.data);
       }
@@ -63,19 +46,23 @@ const DaftarBarang = () => {
     }
   };
 
-  const fetchDataAyam = async () => {
+  async function deleteDataHandle(dataId) {
     try {
-      const response = await getChickenMonitoring();
-      if (response.status === 200) {
-        setDetailAyamState(response.data.data);
-        // console.log("response.data.data: ", response.data.data);
+      const deleteResponse = await deleteItem(dataId);
+      // console.log("deleteResponse: ", deleteResponse);
+      // console.log("response.status", response.status);
 
-        // console.log("DetailAyamData: ", response.data.data);
+      if (deleteResponse.status === 204) {
+        alert("✅ Data berhasil dihapus!");
+        fetchWarehouseItems();
+      } else {
+        alert("⚠️ Gagal menghapus data. Silakan coba lagi.");
       }
     } catch (error) {
-      console.error("Gagal memuat data ayam:", error);
+      console.error("Gagal menghapus data ayam:", error);
+      alert("❌ Terjadi kesalahan saat menghapus data.");
     }
-  };
+  }
 
   useEffect(() => {
     fetchWarehouseItems();
@@ -85,23 +72,6 @@ const DaftarBarang = () => {
       window.history.replaceState({}, document.title);
     }
   }, [location]);
-
-  async function deleteDataHandle(dataId) {
-    try {
-      const response = await deleteChickenData(dataId);
-      console.log("response.status", response.status);
-
-      if (response.status === 204) {
-        alert("✅ Data berhasil dihapus!");
-        await fetchDataAyam();
-      } else {
-        alert("⚠️ Gagal menghapus data. Silakan coba lagi.");
-      }
-    } catch (error) {
-      console.error("Gagal menghapus data ayam:", error);
-      alert("❌ Terjadi kesalahan saat menghapus data.");
-    }
-  }
 
   const editDataHandle = async (id) => {
     console.log("id: ", id);
@@ -145,31 +115,71 @@ const DaftarBarang = () => {
               </tr>
             </thead>
             <tbody>
-              {daftarBarangData.map((data, index) => (
-                <tr
-                  key={index}
-                  className="border-t border-gray-200 hover:bg-gray-50 text-center"
-                >
-                  <td className="py-2 px-4">{data.name}</td>
-                  <td className="py-2 px-4">{data.category}</td>
-                  <td className="py-2 px-4">{data.unit}</td>
-
-                  <td className="py-2 px-4 flex justify-center gap-4">
-                    <span
-                      onClick={() => {
-                        editDataHandle(data.id);
-                      }}
-                      className="px-4 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer"
+              {daftarBarangData.map(
+                (data, index) =>
+                  data.category !== "Telur" && (
+                    <tr
+                      key={index}
+                      className="border-t border-gray-200 hover:bg-gray-50 text-center"
                     >
-                      Edit Stok
-                    </span>
-                  </td>
-                </tr>
-              ))}
+                      <td className="py-2 px-4">{data.name}</td>
+                      <td className="py-2 px-4">{data.category}</td>
+                      <td className="py-2 px-4">{data.unit}</td>
+
+                      <td className="py-2 px-4 flex justify-center gap-4">
+                        <span
+                          onClick={() => {
+                            editDataHandle(data.id);
+                          }}
+                          className="px-4 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer"
+                        >
+                          Edit
+                        </span>
+                        {data.category !== "Telur" && (
+                          <span
+                            onClick={() => {
+                              setSelectedDeleteId(data.id);
+                              setShowDeleteModal(true);
+                            }}
+                            className="px-4 py-1 bg-kritis-box-surface-color rounded-[4px] text-white hover:bg-kritis-text-color cursor-pointer"
+                          >
+                            Hapus
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  )
+              )}
             </tbody>
           </table>
         </div>
       </div>
+      {showDeleteModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/15 bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded shadow-md max-w-sm w-full">
+            <h2 className="text-xl font-semibold mb-4">Konfirmasi</h2>
+            <p className="mb-6">Apakah Anda yakin ingin menghapus data ini?</p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+              >
+                Batal
+              </button>
+              <button
+                onClick={async () => {
+                  await deleteDataHandle(selectedDeleteId);
+                  setShowDeleteModal(false);
+                  setSelectedDeleteId(null);
+                }}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-800"
+              >
+                Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

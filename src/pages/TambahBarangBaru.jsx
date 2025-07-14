@@ -109,7 +109,7 @@ const TambahBarangBaru = () => {
 
       <div className="w-full mx-auto p-6 bg-white shadow rounded border">
         <h2 className="text-lg font-semibold mb-1">Input data barang</h2>
-        <p className="text-sm mb-6">{getTodayDateInBahasa()}</p>
+        {id ? <></> : <p className="text-sm mb-6">{getTodayDateInBahasa()}</p>}
 
         {/* nama barang */}
         <label className="block font-medium mb-1">Nama Barang</label>

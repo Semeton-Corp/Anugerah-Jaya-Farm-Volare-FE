@@ -33,6 +33,15 @@ export const getItemById = (id) => {
   });
 };
 
+export const deleteItem = (id) => {
+  return api.delete(`/items/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
 export const updateItem = (payload, id) => {
   return api.put(`/items/${id}`, payload, {
     headers: {
@@ -41,6 +50,7 @@ export const updateItem = (payload, id) => {
     },
   });
 };
+
 ///Price
 export const createItemPrice = (payload) => {
   return api.post("/items/prices", payload, {
