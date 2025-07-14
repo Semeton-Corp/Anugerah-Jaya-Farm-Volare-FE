@@ -6,8 +6,14 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getChickenMonitoring } from "../services/chickenMonitorings";
 import { deleteChickenData } from "../services/chickenMonitorings";
-import { getTodayDateInBahasa } from "../utils/dateFormat";
+import {
+  formatDate,
+  formatDateToDDMMYYYY,
+  getTodayDateInBahasa,
+} from "../utils/dateFormat";
 import { AlertTriangle } from "lucide-react";
+import { getLocations } from "../services/location";
+import { useRef } from "react";
 
 // const detailAyamData = [
 //   {
@@ -74,8 +80,32 @@ const data = [
 
 const DetailAyam = () => {
   const userRole = localStorage.getItem("role");
+  const userName = localStorage.getItem("userName");
+
   const location = useLocation();
   const navigate = useNavigate();
+
+  const [siteOptions, setSiteOptions] = useState([]);
+  const [selectedSite, setSelectedSite] = useState(
+    userRole === "Owner" ? 0 : localStorage.getItem("locationId")
+  );
+  const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
+
+  const isSelectedDateToday = (selectedDate) => {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+
+    const todayStr = `${yyyy}-${mm}-${dd}`; // same format as selectedDate
+    return selectedDate === todayStr;
+  };
+  const dateInputRef = useRef(null);
+  const openDatePicker = () => {
+    if (dateInputRef.current) {
+      dateInputRef.current.showPicker?.() || dateInputRef.current.click();
+    }
+  };
 
   const [detailAyamData, setDetailAyamState] = useState([]);
 
@@ -95,7 +125,8 @@ const DetailAyam = () => {
 
   const fetchDataAyam = async () => {
     try {
-      const response = await getChickenMonitoring();
+      const date = formatDateToDDMMYYYY(selectedDate);
+      const response = await getChickenMonitoring(selectedSite, date);
       if (response.status === 200) {
         setDetailAyamState(response.data.data);
         console.log("response.data.data: ", response.data.data);
@@ -107,14 +138,22 @@ const DetailAyam = () => {
     }
   };
 
-  useEffect(() => {
-    fetchDataAyam();
-
-    if (location.state?.refetch) {
-      fetchDataAyam();
-      window.history.replaceState({}, document.title);
+  const fetchSites = async () => {
+    try {
+      const res = await getLocations();
+      if (res.status === 200) {
+        setSiteOptions(res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch sites", err);
     }
-  }, [location]);
+  };
+
+  const handleDateChange = (e) => {
+    const date = e.target.value;
+    console.log("date: ", date);
+    setSelectedDate(date);
+  };
 
   async function deleteDataHandle(dataId) {
     try {
@@ -138,6 +177,20 @@ const DetailAyam = () => {
     navigate(`${currectPath}/input-ayam/${dataId}`);
   }
 
+  useEffect(() => {
+    fetchDataAyam();
+    fetchSites();
+
+    if (location.state?.refetch) {
+      fetchDataAyam();
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
+
+  useEffect(() => {
+    fetchDataAyam();
+  }, [selectedSite, selectedDate]);
+
   // Render detail input page only
   if (isDetailPage) {
     return <Outlet />;
@@ -153,15 +206,35 @@ const DetailAyam = () => {
         </h1>
 
         <div className="flex gap-4">
-          <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-            <MdStore size={18} />
-            <div className="text-base font-medium ms-2">Semua site</div>
-          </div>
-          <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-            <PiCalendarBlank size={18} />
-            <div className="text-base font-medium ms-2">
-              Hari ini (20 Mar 2025)
+          {userRole == "Owner" && (
+            <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+              <MdStore size={18} />
+              <select
+                value={selectedSite}
+                onChange={(e) => setSelectedSite(e.target.value)}
+                className="ml-2 bg-transparent text-base font-medium outline-none"
+              >
+                <option value="">Semua Site</option>
+                {siteOptions.map((site) => (
+                  <option key={site.id} value={site.id}>
+                    {site.name}
+                  </option>
+                ))}
+              </select>
             </div>
+          )}
+
+          <div
+            className="flex items-center rounded-lg bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+            onClick={openDatePicker}
+          >
+            <input
+              ref={dateInputRef}
+              type="date"
+              value={selectedDate}
+              onChange={handleDateChange}
+              className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+            />
           </div>
         </div>
       </div>
@@ -205,8 +278,9 @@ const DetailAyam = () => {
                 <th className="py-2 px-4">Mati</th>
                 <th className="py-2 px-4">Pakan (Kg)</th>
                 <th className="py-2 px-4">Mortalitas</th>
-
-                <th className="py-2 px-4">Aksi</th>
+                {isSelectedDateToday(selectedDate) && (
+                  <th className="py-2 px-4">Aksi</th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -231,23 +305,32 @@ const DetailAyam = () => {
                       <p>%</p>
                     </div>
                   </td>
-
-                  <td className="py-2 px-4 flex justify-center gap-4">
-                    <span
-                      onClick={() => {
-                        editDataHandle(row.id);
-                      }}
-                      className="py-1 px-4 rounded bg-green-700 hover:bg-green-900  text-white cursor-pointer"
-                    >
-                      Lihat Detail
-                    </span>
-                  </td>
+                  {isSelectedDateToday(selectedDate) && (
+                    <td className="py-2 px-4 flex justify-center gap-4">
+                      <span
+                        onClick={() => {
+                          editDataHandle(row.id);
+                        }}
+                        className="py-1 px-4 rounded bg-green-700 hover:bg-green-900  text-white cursor-pointer"
+                      >
+                        Lihat Detail
+                      </span>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
+      <button
+        onClick={() => {
+          console.log("selectedSite: ", selectedSite);
+          console.log("selectedDate: ", selectedDate);
+        }}
+      >
+        CHECK
+      </button>
     </div>
   );
 };

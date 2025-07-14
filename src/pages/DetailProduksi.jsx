@@ -61,10 +61,10 @@ const DetailProduksi = () => {
       let response;
 
       const date = formatDateToDDMMYYYY(selectedDate);
-      console.log("effectiveLocationId: ", selectedSite);
-      console.log("date: ", date);
+      // console.log("effectiveLocationId: ", selectedSite);
+      // console.log("date: ", date);
       response = await getEggMonitoring(selectedSite, date);
-      // console.log("response: ", response);
+      console.log("response: ", response);
       // console.log("response: ", response);
 
       if (response?.status === 200) {
@@ -180,13 +180,13 @@ const DetailProduksi = () => {
             <tbody className="text-center">
               {produksiDetail.map((item, i) => (
                 <tr key={i} className="border-b">
-                  <td className="py-2 px-4">{item.cage.name}</td>
-                  <td className="py-2 px-4">{item.totalAllEgg}</td>
-                  <td className="py-2 px-4">{item.totalGoodEgg}</td>
-                  <td className="py-2 px-4">{item.averageWeight}</td>
-                  <td className="py-2 px-4">{item.totalCrackedEgg}</td>
-                  <td className="py-2 px-4">{item.totalRejectEgg}</td>
-                  <td className="py-2 px-4">{item.abnormalityRate}</td>
+                  <td className="py-2 px-4">{item?.chickenCage.cage?.name}</td>
+                  <td className="py-2 px-4">{item?.totalAllEgg}</td>
+                  <td className="py-2 px-4">{item?.totalGoodEgg}</td>
+                  <td className="py-2 px-4">{item?.averageWeight}</td>
+                  <td className="py-2 px-4">{item?.totalCrackedEgg}</td>
+                  <td className="py-2 px-4">{item?.totalRejectEgg}</td>
+                  <td className="py-2 px-4">{item?.abnormalityRate}</td>
 
                   <td className="py-2 px-4 flex justify-center">
                     <span

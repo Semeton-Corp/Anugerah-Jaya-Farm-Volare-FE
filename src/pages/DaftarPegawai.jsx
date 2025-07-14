@@ -100,11 +100,11 @@ const DaftarPegawai = () => {
 
   const fectPegawaiAktifData = async () => {
     try {
-      console.log("page: ", page);
-      const fetchResponse = await getListUser({ page: page });
+      // console.log("page: ", page);
+      const fetchResponse = await getListUser();
       console.log("fetchResponse: ", fetchResponse);
       if (fetchResponse.status == 200) {
-        setPegawaiAktifData(fetchResponse.data.data.users);
+        setPegawaiAktifData(fetchResponse.data.data);
       }
     } catch (error) {
       console.log("error :", error);

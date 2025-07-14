@@ -10,7 +10,7 @@ export const inputAyam = (payload) => {
   });
 };
 
-export const getChickenMonitoring = (locationId) => {
+export const getChickenMonitoring = (locationId, date) => {
   return api.get("chickens/monitorings", {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -18,6 +18,7 @@ export const getChickenMonitoring = (locationId) => {
     },
     params: {
       locationId: locationId,
+      date: date,
     },
   });
 };

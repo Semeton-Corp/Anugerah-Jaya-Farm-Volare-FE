@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { PiCalendarBlank } from "react-icons/pi";
 import { BiSolidEditAlt } from "react-icons/bi";
 import { MdDelete, MdStore } from "react-icons/md";
@@ -6,8 +6,13 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getChickenMonitoring } from "../services/chickenMonitorings";
 import { deleteChickenData } from "../services/chickenMonitorings";
-import { getTodayDateInBahasa } from "../utils/dateFormat";
+import {
+  formatDate,
+  formatDateToDDMMYYYY,
+  getTodayDateInBahasa,
+} from "../utils/dateFormat";
 import { getChickenCage } from "../services/cages";
+import { getLocations } from "../services/location";
 
 const data = [
   { date: "29 Mar", produksi: 25, penjualan: 30 },
@@ -21,10 +26,31 @@ const data = [
 
 const VaksinObat = () => {
   const userRole = localStorage.getItem("role");
+  const userName = localStorage.getItem("userName");
+
   const location = useLocation();
   const navigate = useNavigate();
 
-  const locationId = localStorage.getItem("locationId");
+  const [siteOptions, setSiteOptions] = useState([]);
+  const [selectedSite, setSelectedSite] = useState(
+    userRole === "Owner" ? 0 : localStorage.getItem("locationId")
+  );
+  const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
+  const isSelectedDateToday = (selectedDate) => {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+    return selectedDate === todayStr;
+  };
+  const dateInputRef = useRef(null);
+  const openDatePicker = () => {
+    if (dateInputRef.current) {
+      dateInputRef.current.showPicker?.() || dateInputRef.current.click();
+    }
+  };
 
   const [detailAyamData, setDetailAyamState] = useState([]);
 
@@ -39,14 +65,17 @@ const VaksinObat = () => {
     navigate(`${currectPath}/detail-vaksin-&-obat/${dataId}`);
   }
 
+  const handleDateChange = (e) => {
+    const date = e.target.value;
+    console.log("date: ", date);
+    setSelectedDate(date);
+  };
+
   const fetchDataAyam = async () => {
     try {
-      let response;
-      if (userRole == "Owner") {
-        response = await getChickenCage();
-      } else {
-        response = await getChickenCage(locationId);
-      }
+      const date = formatDateToDDMMYYYY(selectedDate);
+      const response = await getChickenCage(selectedSite, date);
+
       if (response.status === 200) {
         console.log("response.data.data: ", response.data.data);
         setDetailAyamState(response.data.data);
@@ -57,14 +86,29 @@ const VaksinObat = () => {
     }
   };
 
+  const fetchSites = async () => {
+    try {
+      const res = await getLocations();
+      if (res.status === 200) {
+        setSiteOptions(res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch sites", err);
+    }
+  };
+
   useEffect(() => {
     fetchDataAyam();
-
+    fetchSites();
     if (location.state?.refetch) {
       fetchDataAyam();
       window.history.replaceState({}, document.title);
     }
   }, [location]);
+
+  useEffect(() => {
+    fetchDataAyam();
+  }, [selectedSite, selectedDate]);
 
   //   async function deleteDataHandle(dataId) {
   //     try {
@@ -91,15 +135,35 @@ const VaksinObat = () => {
       <div className="flex justify-between items-center mb-2 flex-wrap gap-4">
         <h1 className="text-3xl font-bold">Detail Vaksin & Obat</h1>
         <div className="flex gap-4">
-          <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-            <MdStore size={18} />
-            <div className="text-base font-medium ms-2">Semua site</div>
-          </div>
-          <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-            <PiCalendarBlank size={18} />
-            <div className="text-base font-medium ms-2">
-              Hari ini (20 Mar 2025)
+          {userRole == "Owner" && (
+            <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+              <MdStore size={18} />
+              <select
+                value={selectedSite}
+                onChange={(e) => setSelectedSite(e.target.value)}
+                className="ml-2 bg-transparent text-base font-medium outline-none"
+              >
+                <option value="">Semua Site</option>
+                {siteOptions.map((site) => (
+                  <option key={site.id} value={site.id}>
+                    {site.name}
+                  </option>
+                ))}
+              </select>
             </div>
+          )}
+
+          <div
+            className="flex items-center rounded-lg bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+            onClick={openDatePicker}
+          >
+            <input
+              ref={dateInputRef}
+              type="date"
+              value={selectedDate}
+              onChange={handleDateChange}
+              className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+            />
           </div>
         </div>
       </div>

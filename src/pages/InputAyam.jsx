@@ -228,7 +228,7 @@ const InputAyam = () => {
     }
 
     const payload = {
-      chickenCageId: parseInt(selectedChickenCage.cage.id),
+      chickenCageId: parseInt(selectedChickenCage.id),
       // chickenCategory: selectedChikenCategory,
       // age: parseInt(ageChiken),
       // totalLiveChicken: parseInt(totalLiveChicken),
