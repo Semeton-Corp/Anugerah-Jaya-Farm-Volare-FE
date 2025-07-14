@@ -19,6 +19,8 @@ const InputAyam = () => {
   const navigate = useNavigate();
   const locationId = localStorage.getItem("locationId");
   const userRole = localStorage.getItem("role");
+  const userName = localStorage.getItem("userName");
+
   const [obatExpanded, setObatExpanded] = useState(false);
 
   const [chickenCages, setChickenCages] = useState([]);
@@ -42,45 +44,6 @@ const InputAyam = () => {
   const [isEditMode, setIsEditMode] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const [vaksinExpanded, setVaksinExpanded] = useState(false);
-  const [vaksinList, setVaksinList] = useState([]);
-
-  const handleVaksinChange = (index, field, value) => {
-    const newList = [...vaksinList];
-    newList[index][field] = value;
-    setVaksinList(newList);
-  };
-
-  const addVaksinInput = () => {
-    setVaksinList([
-      ...vaksinList,
-      { jenis: "", dosis: "", satuan: "mililiter" },
-    ]);
-
-    if (!vaksinExpanded) {
-      setVaksinExpanded(true);
-    }
-  };
-
-  const [obatList, setObatList] = useState([]);
-
-  const handleObatChange = (index, field, value) => {
-    const newList = [...obatList];
-    newList[index][field] = value;
-    setObatList(newList);
-  };
-
-  const addObatInput = () => {
-    setObatList([
-      ...obatList,
-      { penyakit: "", jenis: "", dosis: "", satuan: "mililiter" },
-    ]);
-
-    if (!obatExpanded) {
-      setObatExpanded(true);
-    }
-  };
-
   useEffect(() => {
     const fetchCages = async () => {
       try {
@@ -93,50 +56,27 @@ const InputAyam = () => {
         const dataChickenCage = response.data.data;
         console.log("dataChickenCage: ", dataChickenCage);
 
-        setChickenCages(dataChickenCage);
-        setSelectedChickenCage(dataChickenCage[0]);
+        const filteredChickenCage = dataChickenCage.filter(
+          (item) => item.chickenPic === userName
+        );
+
+        setChickenCages(filteredChickenCage);
+        setSelectedChickenCage(filteredChickenCage[0]);
 
         if (id) {
           // console.log("THERE IS AN ID: ", id);
           const updateResponse = await getChickenMonitoringById(id);
           const data = updateResponse.data.data;
-          console.log("THERE IS DATA: ", data);
+          // console.log("THERE IS DATA: ", data);
 
           setSelectedChickenCage(data.chickenCage);
           setTotalSickChicken(data.totalSickChicken);
           setTotalDeathChicken(data.totalDeathChicken);
           setTotalFeed(data.totalFeed);
+          setNote(data.note);
           setIsEditMode(false);
 
           console.log("data.chickenCage.cage: ", data.chickenCage);
-
-          const vaksinListget = data.chickenVaccines.map((v) => ({
-            id: v.id,
-            jenis: v.vaccine,
-            dosis: parseFloat(v.dose),
-            satuan: v.unit,
-          }));
-
-          setVaksinList(vaksinListget || []);
-
-          const chickenDiseasesGet = data.chickenDiseases.map((o) => ({
-            id: o.id,
-            penyakit: o.disease,
-            jenis: o.medicine,
-            dosis: parseFloat(o.dose),
-            satuan: o.unit,
-          }));
-
-          if (vaksinListget.length > 0) {
-            setVaksinExpanded(true);
-          }
-
-          if (chickenDiseasesGet.length > 0) {
-            setObatExpanded(true);
-          }
-
-          console.log("OBAT: ", data.chickenDiseases);
-          setObatList(chickenDiseasesGet || []);
         } else {
           if (data.length > 0) {
             // setSelectedCage(data[0].id);
@@ -171,49 +111,6 @@ const InputAyam = () => {
 
   async function simpanAyamHandle() {
     setLoading(true);
-
-    // Validate chickenVaccines
-    const chickenVaccines = [];
-    for (const v of vaksinList) {
-      if (!v.jenis || !v.dosis || !v.satuan) {
-        alert("Semua field vaksin harus diisi terlebih dahulu!");
-        console.log("v.jenis: ", v.jenis);
-        console.log("v.dosis: ", v.dosis);
-        console.log("v.satuan: ", v.satuan);
-
-        setLoading(false);
-        return; // STOP ENTIRE FUNCTION
-      }
-
-      const item = {
-        vaccine: v.jenis,
-        dose: parseFloat(v.dosis),
-        unit: v.satuan,
-      };
-      if (v.id) item.id = v.id;
-
-      chickenVaccines.push(item);
-    }
-
-    // Validate chickenDiseases
-    const chickenDiseases = [];
-    for (const o of obatList) {
-      if (!o.penyakit || !o.jenis || !o.dosis || !o.satuan) {
-        alert("Semua field obat harus diisi terlebih dahulu!");
-        setLoading(false);
-        return; // STOP ENTIRE FUNCTION
-      }
-
-      const item = {
-        disease: o.penyakit,
-        medicine: o.jenis,
-        dose: parseFloat(o.dosis),
-        unit: o.satuan,
-      };
-      if (o.id) item.id = o.id;
-
-      chickenDiseases.push(item);
-    }
 
     // Check required main fields
     if (

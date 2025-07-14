@@ -13,7 +13,7 @@ export const getCage = () => {
 
 export const getChickenCage = (locationId) => {
   return api.get(`/cages/chickens`, {
-  headers: {
+    headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
     },

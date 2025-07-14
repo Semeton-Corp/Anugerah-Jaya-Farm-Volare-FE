@@ -191,12 +191,10 @@ const DetailAyam = () => {
     fetchDataAyam();
   }, [selectedSite, selectedDate]);
 
-  // Render detail input page only
   if (isDetailPage) {
     return <Outlet />;
   }
 
-  // Render main table page
   return (
     <div className="flex flex-col px-4 py-3 gap-4">
       {/* Header */}
@@ -305,18 +303,19 @@ const DetailAyam = () => {
                       <p>%</p>
                     </div>
                   </td>
-                  {isSelectedDateToday(selectedDate) && (
-                    <td className="py-2 px-4 flex justify-center gap-4">
-                      <span
-                        onClick={() => {
-                          editDataHandle(row.id);
-                        }}
-                        className="py-1 px-4 rounded bg-green-700 hover:bg-green-900  text-white cursor-pointer"
-                      >
-                        Lihat Detail
-                      </span>
-                    </td>
-                  )}
+                  {isSelectedDateToday(selectedDate) &&
+                    row.chickenCage.chickenPic === userName && (
+                      <td className="py-2 px-4 flex justify-center gap-4">
+                        <span
+                          onClick={() => {
+                            editDataHandle(row.id);
+                          }}
+                          className="py-1 px-4 rounded bg-green-700 hover:bg-green-900  text-white cursor-pointer"
+                        >
+                          Lihat Detail
+                        </span>
+                      </td>
+                    )}
                 </tr>
               ))}
             </tbody>

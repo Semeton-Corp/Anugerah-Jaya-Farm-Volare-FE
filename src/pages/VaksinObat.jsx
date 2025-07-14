@@ -35,22 +35,6 @@ const VaksinObat = () => {
   const [selectedSite, setSelectedSite] = useState(
     userRole === "Owner" ? 0 : localStorage.getItem("locationId")
   );
-  const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
-  const isSelectedDateToday = (selectedDate) => {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const dd = String(today.getDate()).padStart(2, "0");
-
-    const todayStr = `${yyyy}-${mm}-${dd}`;
-    return selectedDate === todayStr;
-  };
-  const dateInputRef = useRef(null);
-  const openDatePicker = () => {
-    if (dateInputRef.current) {
-      dateInputRef.current.showPicker?.() || dateInputRef.current.click();
-    }
-  };
 
   const [detailAyamData, setDetailAyamState] = useState([]);
 
@@ -65,16 +49,11 @@ const VaksinObat = () => {
     navigate(`${currectPath}/detail-vaksin-&-obat/${dataId}`);
   }
 
-  const handleDateChange = (e) => {
-    const date = e.target.value;
-    console.log("date: ", date);
-    setSelectedDate(date);
-  };
 
   const fetchDataAyam = async () => {
     try {
-      const date = formatDateToDDMMYYYY(selectedDate);
-      const response = await getChickenCage(selectedSite, date);
+      // console.log("selectedSite: ", selectedSite);
+      const response = await getChickenCage(selectedSite);
 
       if (response.status === 200) {
         console.log("response.data.data: ", response.data.data);
@@ -108,23 +87,8 @@ const VaksinObat = () => {
 
   useEffect(() => {
     fetchDataAyam();
-  }, [selectedSite, selectedDate]);
+  }, [selectedSite]);
 
-  //   async function deleteDataHandle(dataId) {
-  //     try {
-  //       const response = await deleteChickenData(dataId);
-  //       await fetchDataAyam(); // langsung reload data
-  //     } catch (error) {
-  //       console.error("Gagal menghapus data ayam:", error);
-  //     }
-  //   }
-
-  //   async function editDataHandle(dataId) {
-  //     const currectPath = location.pathname;
-  //     navigate(`${currectPath}/input-ayam/${dataId}`);
-  //   }
-
-  // Render detail input page only
   if (isDetailPage) {
     return <Outlet />;
   }
@@ -133,7 +97,7 @@ const VaksinObat = () => {
     <div className="flex flex-col px-4 py-3 gap-4">
       {/* Header */}
       <div className="flex justify-between items-center mb-2 flex-wrap gap-4">
-        <h1 className="text-3xl font-bold">Detail Vaksin & Obat</h1>
+        <h1 className="text-3xl font-bold">Vaksin & Obat</h1>
         <div className="flex gap-4">
           {userRole == "Owner" && (
             <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
@@ -152,19 +116,6 @@ const VaksinObat = () => {
               </select>
             </div>
           )}
-
-          <div
-            className="flex items-center rounded-lg bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
-            onClick={openDatePicker}
-          >
-            <input
-              ref={dateInputRef}
-              type="date"
-              value={selectedDate}
-              onChange={handleDateChange}
-              className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
-            />
-          </div>
         </div>
       </div>
 
