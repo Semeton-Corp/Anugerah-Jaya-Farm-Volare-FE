@@ -209,16 +209,17 @@ const DetailProduksi = () => {
                     </th>
                   )}
 
-                  {isSelectedDateToday(selectedDate) && (
-                    <td className="py-1 px-4 text-center">
-                      <span
-                        onClick={() => editDataHandle(item.id)}
-                        className="py-1 px-5 rounded-[4px] bg-green-700 hover:bg-green-900 cursor-pointer  text-white"
-                      >
-                        Lihat Detail
-                      </span>
-                    </td>
-                  )}
+                  {isSelectedDateToday(selectedDate) &&
+                    item.chickenCage.eggPic == userName && (
+                      <td className="py-1 px-4 text-center">
+                        <span
+                          onClick={() => editDataHandle(item.id)}
+                          className="py-1 px-5 rounded-[4px] bg-green-700 hover:bg-green-900 cursor-pointer  text-white"
+                        >
+                          Lihat Detail
+                        </span>
+                      </td>
+                    )}
                 </tr>
               ))}
             </tbody>
