@@ -54,29 +54,30 @@ const InputAyam = () => {
           response = await getChickenCage(locationId);
         }
         const dataChickenCage = response.data.data;
-        console.log("dataChickenCage: ", dataChickenCage);
 
-        const filteredChickenCage = dataChickenCage.filter(
-          (item) => item.chickenPic === userName
-        );
-
-        setChickenCages(filteredChickenCage);
-        setSelectedChickenCage(filteredChickenCage[0]);
+        if (userRole != "Owner") {
+          const filteredChickenCage = dataChickenCage.filter(
+            (item) => item.chickenPic === userName
+          );
+          setChickenCages(filteredChickenCage);
+          setSelectedChickenCage(filteredChickenCage[0]);
+        } else {
+          setChickenCages(dataChickenCage);
+          setSelectedChickenCage(dataChickenCage[0]);
+        }
 
         if (id) {
           // console.log("THERE IS AN ID: ", id);
           const updateResponse = await getChickenMonitoringById(id);
           const data = updateResponse.data.data;
           // console.log("THERE IS DATA: ", data);
-
           setSelectedChickenCage(data.chickenCage);
           setTotalSickChicken(data.totalSickChicken);
           setTotalDeathChicken(data.totalDeathChicken);
           setTotalFeed(data.totalFeed);
           setNote(data.note);
           setIsEditMode(false);
-
-          console.log("data.chickenCage.cage: ", data.chickenCage);
+          // console.log("data.chickenCage.cage: ", data.chickenCage);
         } else {
           if (data.length > 0) {
             // setSelectedCage(data[0].id);
@@ -112,7 +113,6 @@ const InputAyam = () => {
   async function simpanAyamHandle() {
     setLoading(true);
 
-    // Check required main fields
     if (
       !selectedChickenCage ||
       !totalSickChicken ||
@@ -121,7 +121,7 @@ const InputAyam = () => {
     ) {
       alert("Semua field utama harus diisi!");
       setLoading(false);
-      return; // STOP ENTIRE FUNCTION
+      return;
     }
 
     const payload = {

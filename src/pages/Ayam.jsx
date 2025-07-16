@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { PiCalendarBlank } from "react-icons/pi";
 import { MdEgg, MdShoppingCart } from "react-icons/md";
 import { PiMoneyWavyFill } from "react-icons/pi";
@@ -13,9 +13,7 @@ import {
   GiChicken,
   GiDeathSkull,
 } from "react-icons/gi";
-import { FaPercentage } from "react-icons/fa";
-
-const COLORS = ["#06b6d4", "#facc15", "#f97316", "#10b981", "#ef4444"];
+import { FaCalendarAlt, FaPercentage } from "react-icons/fa";
 
 import {
   LineChart,
@@ -29,7 +27,12 @@ import {
   Legend,
   ResponsiveContainer,
   CartesianGrid,
+  BarChart,
+  Bar,
 } from "recharts";
+import { getLocations } from "../services/location";
+import { getChickenCage } from "../services/cages";
+import { getChickenOverview } from "../services/chickenMonitorings";
 
 const ayamChartData = [
   {
@@ -69,70 +72,37 @@ const ayamChartData = [
   },
 ];
 
-const detailAyamData = [
-  {
-    kandang: "Kandang A1",
-    kategori: "DOC",
-    usiaMinggu: 49,
-    hidup: 4000,
-    sakit: 50,
-    mati: 10,
-    pakanKg: 20,
-    mortalitas: "3%",
-  },
-  {
-    kandang: "Kandang A2",
-    kategori: "Grower",
-    usiaMinggu: 49,
-    hidup: 1200,
-    sakit: 20,
-    mati: 12,
-    pakanKg: 40,
-    mortalitas: "0.8%",
-  },
-  {
-    kandang: "Kandang A3",
-    kategori: "Pre Layer",
-    usiaMinggu: 49,
-    hidup: 1200,
-    sakit: 20,
-    mati: 12,
-    pakanKg: 40,
-    mortalitas: "0.8%",
-  },
-  {
-    kandang: "Kandang A4",
-    kategori: "Layer",
-    usiaMinggu: 49,
-    hidup: 1200,
-    sakit: 20,
-    mati: 12,
-    pakanKg: 40,
-    mortalitas: "0.8%",
-  },
-  {
-    kandang: "Kandang A5",
-    kategori: "Afkir",
-    usiaMinggu: 49,
-    hidup: 1200,
-    sakit: 20,
-    mati: 12,
-    pakanKg: 40,
-    mortalitas: "0.8%",
-  },
+const chickenAgeData = [
+  { age: "DOC", value: 40 },
+  { age: "Grower", value: 48 },
+  { age: "Prelayer", value: 27 },
+  { age: "Layer", value: 44 },
+  { age: "Afkir", value: 45 },
 ];
-
-const usiaAyamData = [
-  { name: "DOC", value: 200 },
-  { name: "Grower", value: 300 },
-  { name: "Pre Layer", value: 150 },
-  { name: "Layer", value: 500 },
-  { name: "Afkir", value: 100 },
-];
-
 
 const Ayam = () => {
   const location = useLocation();
+  const userRole = localStorage.getItem("role");
+
+  const [siteOptions, setSiteOptions] = useState([]);
+  const [selectedSite, setSelectedSite] = useState(
+    userRole === "Owner" ? 0 : localStorage.getItem("locationId")
+  );
+
+  const [chickenCageOptions, setChickenCageOptions] = useState([]);
+  const [selectedChickenCage, setSelectedChickenCage] = useState(0);
+
+  const [graphFilterOptions, setGraphFilterOptions] = useState([
+    "Minggu Ini",
+    "Bulan Ini",
+    "Tahun Ini",
+  ]);
+  const [graphFilter, setGraphFilter] = useState("Minggu Ini");
+
+  const [chickenDetail, setChickenDetail] = useState([]);
+  const [ayamChartData, setAyamChartData] = useState([]);
+  const [chickenAgeData, setChickenAgeData] = useState([]);
+
   const detailPages = ["detail-ayam"];
 
   const isDetailPage = detailPages.some((segment) =>
@@ -146,6 +116,74 @@ const Ayam = () => {
 
     navigate(detailPath);
   };
+
+  const fetchSites = async () => {
+    try {
+      const res = await getLocations();
+      if (res.status === 200) {
+        setSiteOptions(res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch sites", err);
+    }
+  };
+
+  const fetchChickenCages = async () => {
+    try {
+      const cageResponse = await getChickenCage(selectedSite);
+      if (cageResponse.status === 200) {
+        setChickenCageOptions(cageResponse.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch sites", err);
+    }
+  };
+
+  const fetchOverviewData = async () => {
+    try {
+      const overviewResponse = await getChickenOverview(
+        selectedSite,
+        selectedChickenCage,
+        graphFilter
+      );
+      console.log("overviewResponse: ", overviewResponse);
+      if (overviewResponse.status == 200) {
+        const data = overviewResponse.data.data;
+        setChickenDetail(data.chickenDetail);
+
+        const transformedChartData = data.chickenGraphs.map((item) => ({
+          date: item.key,
+          ayamMati: item.deathChicken,
+          ayamSakit: item.sickChicken,
+        }));
+        setAyamChartData(transformedChartData);
+
+        const pie = data.chickenPie;
+
+        const ageData = [
+          { age: "DOC", value: pie.chickenDOC },
+          { age: "Grower", value: pie.chickenGrower },
+          { age: "Prelayer", value: pie.chickenPrelayer },
+          { age: "Layer", value: pie.chickenLayer },
+          { age: "Afkir", value: pie.chickenAfkir },
+        ];
+        console.log("ageData: ", ageData);
+        setChickenAgeData(ageData);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchChickenCages();
+    fetchSites();
+  }, []);
+
+  useEffect(() => {
+    fetchOverviewData();
+  }, [selectedChickenCage, selectedSite, graphFilter]);
+
   return (
     <>
       {isDetailPage ? (
@@ -155,21 +193,38 @@ const Ayam = () => {
           {/* header section */}
           <div className="flex justify-between mb-2 flex-wrap gap-4">
             <h1 className="text-3xl font-bold">Ayam</h1>
-            <div className="flex gap-2">
-              <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-                <MdStore size={18} />
-                <div className="text-base font-medium ms-2">Semua Toko</div>
-              </div>
+            <div className="flex gap-4">
+              {userRole == "Owner" && (
+                <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+                  <MdStore size={18} />
+                  <select
+                    value={selectedSite}
+                    onChange={(e) => setSelectedSite(e.target.value)}
+                    className="ml-2 bg-transparent text-base font-medium outline-none"
+                  >
+                    <option value="">Semua Site</option>
+                    {siteOptions.map((site) => (
+                      <option key={site.id} value={site.id}>
+                        {site.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
                 <GiBirdCage size={18} />
-                <div className="text-base font-medium ms-2">Semua kandang</div>
-              </div>
-
-              <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-                <PiCalendarBlank size={18} />
-                <div className="text-base font-medium ms-2">
-                  Hari ini (20 Mar 2025)
-                </div>
+                <select
+                  value={selectedChickenCage}
+                  onChange={(e) => setSelectedChickenCage(e.target.value)}
+                  className="ml-2 bg-transparent text-base font-medium outline-none"
+                >
+                  <option value="">Semua Kandang</option>
+                  {chickenCageOptions.map((chickenCage) => (
+                    <option key={chickenCage.id} value={chickenCage.id}>
+                      {chickenCage.cage.name}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>
@@ -188,7 +243,9 @@ const Ayam = () => {
               <div className="flex flex-wrap gap-4">
                 <div>
                   {/* popuasl */}
-                  <p className="text-3xl font-semibold">25.000</p>
+                  <p className="text-3xl font-semibold">
+                    {chickenDetail?.totalLiveChicken ?? "-"}
+                  </p>
                 </div>
               </div>
             </div>
@@ -206,7 +263,9 @@ const Ayam = () => {
                 <div className="flex flex-wrap gap-4">
                   <div>
                     {/* popuasl */}
-                    <p className="text-3xl font-semibold">100</p>
+                    <p className="text-3xl font-semibold">
+                      {chickenDetail?.totalSickChicken ?? "-"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -225,7 +284,9 @@ const Ayam = () => {
                 <div className="flex flex-wrap gap-4">
                   <div>
                     {/* popuasl */}
-                    <p className="text-3xl font-semibold">250</p>
+                    <p className="text-3xl font-semibold">
+                      {chickenDetail?.totalDeathChicken ?? "-"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -244,7 +305,9 @@ const Ayam = () => {
                 <div className="flex flex-wrap gap-4">
                   <div className="flex">
                     {/* popuasl */}
-                    <p className="text-3xl font-semibold pe-2">80</p>
+                    <p className="text-3xl font-semibold pe-2">
+                      {chickenDetail?.totalKPIPerformance ?? "-"}
+                    </p>
                     <p className="text-3xl font-semibold">%</p>
                   </div>
                 </div>
@@ -253,19 +316,36 @@ const Ayam = () => {
           </div>
 
           {/* chart, incomes, and history section */}
-          <div className="flex flex-col lg:flex-row h-120 gap-6">
+          <div className="flex flex-col lg:flex-row h-90 gap-6">
             {/* Chart Section (3/4 width on large screens) */}
-            <div className="w-full lg:w-5/8 bg-white rounded-lg p-4 border border-black-6">
-              <h2 className="text-xl font-semibold mb-4">
-                Ayam Mati & Ayam Sakit
-              </h2>
+            <div className="w-full bg-white rounded-lg p-6 border border-black-6 mb-2">
+              <div className="flex justify-between">
+                <h2 className="text-xl font-semibold mb-4">
+                  Ayam Mati & Ayam Sakit
+                </h2>
+                <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+                  <FaCalendarAlt size={18} />
+                  <select
+                    value={graphFilter}
+                    onChange={(e) => setGraphFilter(e.target.value)}
+                    className="ml-2 bg-transparent text-base font-medium outline-none"
+                  >
+                    {graphFilterOptions.map((choice, index) => (
+                      <option key={index} value={choice}>
+                        {choice}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
               <ResponsiveContainer width="100%" height="90%">
                 <LineChart data={ayamChartData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
                   <YAxis domain={[0, 50]} />
                   <Tooltip />
-                  <Legend verticalAlign="top" align="right" />
+                  <Legend verticalAlign="top" align="center" />
                   <Line
                     type="monotone"
                     dataKey="ayamMati"
@@ -281,84 +361,31 @@ const Ayam = () => {
                 </LineChart>
               </ResponsiveContainer>
             </div>
+          </div>
 
-            <div className="w-3/8 bg-white rounded-lg p-4 border  border-black-6">
-              <h2 className="text-lg font-semibold ">Distribusi Usia Ayam</h2>
+          <div className="bg-white border rounded shadow p-4 border-black-6">
+            <h2 className="text-lg font-semibold mb-4">Distribusi Usia Ayam</h2>
+            <div className="w-full h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={usiaAyamData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={150}
-                    label
-                  >
-                    {usiaAyamData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
+                <BarChart data={chickenAgeData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="age" />
+                  <YAxis />
                   <Tooltip />
-                  <Legend
-                    verticalAlign="middle"
-                    align="right"
-                    layout="vertical"
-                  />
-                </PieChart>
+                  <Bar dataKey="value" fill="#4b9ea5" barSize={40} />
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
-
-          {/* detail penjualan */}
-          {/* <div className="bg-white p-4 border rounded-lg w-full border-black-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Detail ayam</h2>
-              <div
-                onClick={detailAyamHandle}
-                className="p-2 rounded-full hover:bg-black-4 cursor-pointer"
-              >
-                <FiMaximize2 size={24} color="" />
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left border-collapse">
-                <thead>
-                  <tr className="bg-green-700 text-white text-center">
-                    <th className="py-2 px-4">Kandang</th>
-                    <th className="py-2 px-4">Kategori</th>
-                    <th className="py-2 px-4">Usia (minggu)</th>
-                    <th className="py-2 px-4">Hidup</th>
-                    <th className="py-2 px-4">Sakit</th>
-                    <th className="py-2 px-4">Mati</th>
-                    <th className="py-2 px-4">Pakan (Kg)</th>
-                    <th className="py-2 px-4">Mortalitas</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {detailAyamData.map((row, index) => (
-                    <tr
-                      key={index}
-                      className="border-t border-gray-200 hover:bg-gray-50 text-center"
-                    >
-                      <td className="py-2 px-4">{row.kandang}</td>
-                      <td className="py-2 px-4">{row.kategori}</td>
-                      <td className="py-2 px-4">{row.usiaMinggu}</td>
-                      <td className="py-2 px-4">{row.hidup}</td>
-                      <td className="py-2 px-4">{row.sakit}</td>
-                      <td className="py-2 px-4">{row.mati}</td>
-                      <td className="py-2 px-4">{row.pakanKg}</td>
-                      <td className="py-2 px-4">{row.mortalitas}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div> */}
+          <button
+            onClick={() => {
+              console.log("selectedSite: ", selectedSite);
+              console.log("selectedChickenCage: ", selectedChickenCage);
+              console.log("graphFilter: ", graphFilter);
+            }}
+          >
+            CHECK
+          </button>
         </div>
       )}
     </>

@@ -120,6 +120,20 @@ export const updateChickenHealthItem = (payload, id) => {
   });
 };
 
+export const getChickenOverview = (locationId, cageId, overviewGraphTime) => {
+  return api.get(`/chickens/overview`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    params: {
+      overviewGraphTime: overviewGraphTime,
+      locationId: locationId,
+      cageId: cageId,
+    },
+  });
+};
+
 //HEALTH MONITORING
 
 export const createChickenHealthMonitoring = (payload) => {

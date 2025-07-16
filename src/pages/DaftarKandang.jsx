@@ -4,9 +4,17 @@ import { useState } from "react";
 import { MdStore } from "react-icons/md";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { getChickenCage } from "../services/cages";
+import { getLocations } from "../services/location";
 
 const DaftarKandang = () => {
+  const userRole = localStorage.getItem("role");
+
   const [kandangData, setKandangData] = useState([]);
+
+  const [siteOptions, setSiteOptions] = useState([]);
+  const [selectedSite, setSelectedSite] = useState(
+    userRole === "Owner" ? 0 : localStorage.getItem("locationId")
+  );
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -35,27 +43,27 @@ const DaftarKandang = () => {
     navigate(`${location.pathname}/pindah-ayam`);
   };
 
+  const fetchSites = async () => {
+    try {
+      const res = await getLocations();
+      if (res.status === 200) {
+        setSiteOptions(res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch sites", err);
+    }
+  };
+
   const fetchKandangData = async () => {
     try {
-      const kandangResponse = await getChickenCage();
-
+      const kandangResponse = await getChickenCage(selectedSite);
+      console.log("kandangResponse: ", kandangResponse);
       if (kandangResponse.status === 200) {
         const allKandang = kandangResponse.data.data;
-        const role = localStorage.getItem("role");
-        const locationId = parseInt(localStorage.getItem("locationId"), 10);
 
-        let filteredKandang = allKandang;
-
-        console.log("allKandang: ", allKandang);
-        if (role !== "Owner") {
-          filteredKandang = allKandang.filter(
-            (item) => item.cage.location.id === locationId
-          );
-        }
-
-        console.log("Filtered Kandang:", filteredKandang);
+        console.log("Filtered Kandang:", allKandang);
         // Do something with filteredKandang, e.g., set state
-        setKandangData(filteredKandang);
+        setKandangData(allKandang);
       }
     } catch (error) {
       console.log("error :", error);
@@ -70,6 +78,14 @@ const DaftarKandang = () => {
     }
   }, [location]);
 
+  useEffect(() => {
+    fetchSites();
+  }, []);
+
+  useEffect(() => {
+    fetchKandangData();
+  }, [selectedSite]);
+
   if (isDetailPage) {
     return <Outlet />;
   }
@@ -78,10 +94,23 @@ const DaftarKandang = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Kandang</h1>
-        <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-          <MdStore size={18} />
-          <div className="text-base font-medium ms-2">Semua Toko</div>
-        </div>
+        {userRole == "Owner" && (
+          <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+            <MdStore size={18} />
+            <select
+              value={selectedSite}
+              onChange={(e) => setSelectedSite(e.target.value)}
+              className="ml-2 bg-transparent text-base font-medium outline-none"
+            >
+              <option value="">Semua Site</option>
+              {siteOptions.map((site) => (
+                <option key={site.id} value={site.id}>
+                  {site.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       <div className="bg-white rounded-lg shadow p-8">

@@ -4,6 +4,7 @@ import { getTodayDateInBahasa } from "../utils/dateFormat";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   createChickenHealthMonitoring,
+  getChickenHealthItems,
   getChickenHealthMonitoringById,
   getChickenHealthMonitoringsDetails,
   updateChickenHealthMonitoring,
@@ -25,9 +26,12 @@ const InputVaksinObat = () => {
 
   // Sample options
   const jenisOptions = ["Vaksin Rutin", "Vaksin Kondisional", "Obat"];
-  const namaOptions = ["Vaksin DOC", "Obat A", "Vaksin B"];
+  const [namaOptions, setNamaOptions] = useState([
+    "Vaksin DOC",
+    "Obat A",
+    "Vaksin B",
+  ]);
   const satuanOptions = ["mililiter", "liter", "gram", "kilogram"];
-
 
   const handleSubmit = async () => {
     const payload = {
@@ -40,7 +44,6 @@ const InputVaksinObat = () => {
     };
 
     // console.log("payload: ", payload);
-
     // console.log("Payload to submit:", payload);
     // alert("Data berhasil disiapkan!");
 
@@ -56,7 +59,7 @@ const InputVaksinObat = () => {
           navigate(-1, { state: { refetch: true } });
         }
 
-        console.log("updateResponse: ", updateResponse);
+        // console.log("updateResponse: ", updateResponse);
       } catch (error) {
         const apiMessage = error?.response?.data?.message;
 
@@ -119,8 +122,23 @@ const InputVaksinObat = () => {
     }
   };
 
+  const fetchChickenHealthItems = async () => {
+    try {
+      const healthResponse = await getChickenHealthItems();
+      // console.log("healthResponse: ", healthResponse);
+      if (healthResponse.status === 200) {
+        const namaOptions = healthResponse.data.data.map((item) => item.name);
+        // console.log("namaOptions: ", namaOptions);
+        setNamaOptions(namaOptions);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
   useEffect(() => {
     fetchDetailVaksinObat();
+    fetchChickenHealthItems();
     if (monitoringId) {
       fetchMonitoringDetail();
     }
