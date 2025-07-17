@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useRef } from "react";
 import { IoSearch } from "react-icons/io5";
 import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { PiCalendarBlank } from "react-icons/pi";
 import { BiSolidEditAlt } from "react-icons/bi";
 import {
+  formatDate,
   formatDateToDDMMYYYY,
   getTodayDateInBahasa,
 } from "../utils/dateFormat";
@@ -56,14 +57,25 @@ const RiwayatGudang = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
+
   const [page, setPage] = useState(1);
   const [historyData, setHistoryData] = useState([]);
+
+  const [totalData, setTotaldata] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
   const detailPages = ["detail-riwayat-gudang"];
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
+
+  const dateInputRef = useRef(null);
+  const openDatePicker = () => {
+    if (dateInputRef.current) {
+      dateInputRef.current.showPicker?.() || dateInputRef.current.click();
+    }
+  };
 
   const detailRiwayatHandle = () => {
     const currentPath = location.pathname;
@@ -72,25 +84,33 @@ const RiwayatGudang = () => {
     navigate(detailPath);
   };
 
-  const fetchHistoryData = async (pageNumber = 1) => {
+  const fetchHistoryData = async (page) => {
     try {
-      const tempToday = new Date().toISOString().slice(0, 10);
-      const today = formatDateToDDMMYYYY(tempToday);
+      const date = selectedDate
+        ? formatDateToDDMMYYYY(selectedDate)
+        : undefined;
 
-      const res = await getWarehouseItemHistories(today, pageNumber);
-      const result = res.data;
-      // console.log("res: ", res);
+      const historyResponse = await getWarehouseItemHistories(date, page);
+      console.log("page: ", page);
+      // console.log("historyResponse: ", historyResponse);
 
-      setHistoryData(result.data);
-      setTotalPages(result.totalPages || 1);
+      setTotaldata(historyResponse.data.data.totalData);
+      setHistoryData(historyResponse.data.data.warehouseItemHistories);
+      setTotalPages(historyResponse.data.data.totalPage);
     } catch (error) {
       console.error("Error fetching warehouse history:", error);
     }
   };
 
+  const handleDateChange = (e) => {
+    const date = e.target.value;
+    console.log("date: ", date);
+    setSelectedDate(date);
+  };
+
   useEffect(() => {
-    fetchHistoryData();
-  }, []);
+    fetchHistoryData(page);
+  }, [selectedDate, page]);
 
   if (isDetailPage) {
     return <Outlet />;
@@ -102,11 +122,17 @@ const RiwayatGudang = () => {
       <div className="flex justify-between mb-2 flex-wrap gap-4">
         <h1 className="text-3xl font-bold">Riwayat Gudang</h1>
 
-        <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-          <PiCalendarBlank size={18} />
-          <div className="text-base font-medium ms-2">
-            Hari ini ({getTodayDateInBahasa()})
-          </div>
+        <div
+          className="flex items-center rounded-lg bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+          onClick={openDatePicker}
+        >
+          <input
+            ref={dateInputRef}
+            type="date"
+            value={selectedDate}
+            onChange={handleDateChange}
+            className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+          />
         </div>
       </div>
 
@@ -128,27 +154,27 @@ const RiwayatGudang = () => {
               </tr>
             </thead>
             <tbody className="text-center">
-              {riwayatGudangData.map((data, index) => (
+              {historyData.map((data, index) => (
                 <tr key={index} className="border-b border-black-6">
-                  <td className="py-2 px-4 ">{data.waktu}</td>
-                  <td className="py-2 px-4">{data.namaBarang}</td>
-                  <td className="py-2 px-4">{data.satuan}</td>
-                  <td className="py-2 px-4">{data.kuantitas}</td>
-                  <td className="py-2 px-4">{data.asalBarang}</td>
-                  <td className="py-2 px-4">{data.tujuan}</td>
+                  <td className="py-2 px-4 ">{data.time}</td>
+                  <td className="py-2 px-4">{data.item.name}</td>
+                  <td className="py-2 px-4">{data.item.unit}</td>
+                  <td className="py-2 px-4">{data.quantity}</td>
+                  <td className="py-2 px-4">{data.source}</td>
+                  <td className="py-2 px-4">{data.destination}</td>
                   <td className="py-2 px-4">
                     <span
                       className={`py-1 px-5 rounded text-sm font-semibold ${
-                        data.keterangan === "Barang masuk"
+                        data.status === "Barang Masuk"
                           ? "bg-aman-box-surface-color text-aman-text-color"
-                          : data.keterangan === "Pending"
+                          : data.status === "Pending"
                           ? "bg-green-200 text-green-900"
-                          : data.keterangan === "Stok diperbaharui"
+                          : data.status === "Stok diperbaharui"
                           ? "bg-orange-200 text-orange-900"
                           : "bg-kritis-box-surface-color text-kritis-text-color"
                       }`}
                     >
-                      {data.keterangan}
+                      {data.status}
                     </span>
                   </td>
                   <td className="py-2 px-4">
@@ -172,8 +198,8 @@ const RiwayatGudang = () => {
                 className={`rounded-[4px] py-2 px-6 ${
                   page === 1
                     ? "bg-gray-200 cursor-not-allowed"
-                    : "bg-green-100 hover:bg-green-200"
-                } flex items-center justify-center text-black text-base font-medium`}
+                    : "bg-green-100 hover:bg-green-200 cursor-pointer"
+                } flex items-center justify-center text-black text-base font-medium `}
                 onClick={() => page > 1 && setPage(page - 1)}
               >
                 <p>Previous</p>
@@ -182,8 +208,8 @@ const RiwayatGudang = () => {
                 className={`rounded-[4px] py-2 px-6 ${
                   page === totalPages
                     ? "bg-gray-200 cursor-not-allowed"
-                    : "bg-green-700 hover:bg-green-800"
-                } flex items-center justify-center text-white text-base font-medium`}
+                    : "bg-green-700 hover:bg-green-800 cursor-pointer"
+                } flex items-center justify-center text-white text-base font-medium `}
                 onClick={() => page < totalPages && setPage(page + 1)}
               >
                 <p>Next</p>
@@ -192,6 +218,15 @@ const RiwayatGudang = () => {
           </div>
         </div>
       </div>
+      <button
+        onClick={() => {
+          console.log("page: ", page);
+          console.log("totalData: ", totalData);
+          console.log("totalPage: ", totalPages);
+        }}
+      >
+        CHECK
+      </button>
     </div>
   );
 };

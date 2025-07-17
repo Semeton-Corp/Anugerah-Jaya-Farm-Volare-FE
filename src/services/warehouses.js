@@ -58,8 +58,8 @@ export const getWarehousesOverview = (id) => {
 export const getWarehouseItemHistories = (date, page) => {
   return api.get(`/warehouses/items/histories`, {
     params: {
-      date,
-      page,
+      date: date,
+      page: page,
     },
     headers: {
       Authorization: `Bearer ${token}`,
