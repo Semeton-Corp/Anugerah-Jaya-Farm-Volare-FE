@@ -57,7 +57,7 @@ const RiwayatGudang = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
+  const [selectedDate, setSelectedDate] = useState();
 
   const [page, setPage] = useState(1);
   const [historyData, setHistoryData] = useState([]);
@@ -77,9 +77,9 @@ const RiwayatGudang = () => {
     }
   };
 
-  const detailRiwayatHandle = () => {
+  const detailRiwayatHandle = (id) => {
     const currentPath = location.pathname;
-    const detailPath = currentPath + "/detail-riwayat-gudang";
+    const detailPath = currentPath + `/detail-riwayat-gudang/${id}`;
 
     navigate(detailPath);
   };
@@ -179,7 +179,9 @@ const RiwayatGudang = () => {
                   </td>
                   <td className="py-2 px-4">
                     <span
-                      onClick={detailRiwayatHandle}
+                      onClick={() => {
+                        detailRiwayatHandle(data.id);
+                      }}
                       className="underline hover:text-black-5 cursor-pointer"
                     >
                       Detail
@@ -192,7 +194,12 @@ const RiwayatGudang = () => {
 
           {/* footer */}
           <div className="flex justify-between mt-16 px-6">
-            <p className="text-sm text-[#CCCCCC]">Menampilkan 1-7 data</p>
+            {historyData?.length > 0 ? (
+              <p className="text-sm text-[#CCCCCC]">{`Menampilkan halaman ${page} dari ${totalPages} halaman. Total ${totalData} data riwayat`}</p>
+            ) : (
+              <p></p>
+            )}
+
             <div className="flex gap-3">
               <div
                 className={`rounded-[4px] py-2 px-6 ${
@@ -218,7 +225,7 @@ const RiwayatGudang = () => {
           </div>
         </div>
       </div>
-      <button
+      {/* <button
         onClick={() => {
           console.log("page: ", page);
           console.log("totalData: ", totalData);
@@ -226,7 +233,7 @@ const RiwayatGudang = () => {
         }}
       >
         CHECK
-      </button>
+      </button> */}
     </div>
   );
 };

@@ -273,6 +273,12 @@ const AppRouter = createBrowserRouter([
               {
                 path: "riwayat-gudang",
                 element: <RiwayatGudang />,
+                children: [
+                  {
+                    path: "detail-riwayat-gudang/:id",
+                    element: <DetailRiwayatGudang />,
+                  },
+                ],
               },
               {
                 path: "daftar-vaksin-&-obat",

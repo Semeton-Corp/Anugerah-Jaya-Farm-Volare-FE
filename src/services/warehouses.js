@@ -67,6 +67,14 @@ export const getWarehouseItemHistories = (date, page) => {
   });
 };
 
+export const getWarehouseItemHistoryById = (id) => {
+  return api.get(`/warehouses/items/histories/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export const getWarehousesByLocation = (locationId) => {
   return api.get(`/warehouses`, {
     headers: {
