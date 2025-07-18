@@ -169,8 +169,8 @@ const InputTelur = () => {
       totalRemainingRejectEgg: parseInt(totalRemainingRejectEgg),
     };
 
-    console.log("payload: ", payload);
-    console.log("chickenCages: ", chickenCages);
+    // console.log("payload: ", payload);
+    // console.log("chickenCages: ", chickenCages);
 
     if (id) {
       // console.log("THERE IS AN ID: ", id);

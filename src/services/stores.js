@@ -49,7 +49,6 @@ export const getStoreOverview = (id) => {
   });
 };
 
-
 export const getListStoreSale = () => {
   return api.get("/stores/sales", {
     headers: {
@@ -60,6 +59,14 @@ export const getListStoreSale = () => {
 
 export const getStoreSaleById = (id) => {
   return api.get(`/stores/sales/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const createStoreRequestItem = (payload) => {
+  return api.post("/stores/request/items", payload, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

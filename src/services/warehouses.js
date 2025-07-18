@@ -46,6 +46,16 @@ export const deleteWarehouse = (id) => {
   });
 };
 
+export const getEggWarehouseItemSummary = (id, date) => {
+  return api.get(`/warehouses/items/eggs/summary/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    params: { date: date },
+  });
+};
+
 export const getWarehousesOverview = (id) => {
   return api.get(`/warehouses/overview/${id}`, {
     headers: {

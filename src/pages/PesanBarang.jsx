@@ -1,8 +1,32 @@
 import React, { useState } from "react";
+import { useEffect } from "react";
 import { MdEgg } from "react-icons/md";
+import {
+  getEggWarehouseItemSummary,
+  getWarehouses,
+  getWarehousesByLocation,
+} from "../services/warehouses";
+import { getItems } from "../services/item";
+import { createStoreRequestItem } from "../services/stores";
+import { formatDate, formatDateToDDMMYYYY } from "../utils/dateFormat";
+import { useNavigate } from "react-router-dom";
 
 const PesanBarang = () => {
-  const [warehouse, setWarehouse] = useState("");
+  const navigate = useNavigate();
+  const userRole = localStorage.getItem("role");
+  const userName = localStorage.getItem("userName");
+
+  const [stok, setStok] = useState([]);
+
+  const [warehouses, setWarehouses] = useState([]);
+  const [selectedWarehouse, setSelectedWarehouse] = useState("");
+
+  const [selectedWarehouseItem, setSelectedWarehouseItem] = useState(0);
+
+  const [selectedSite, setSelectedSite] = useState(
+    userRole === "Owner" ? 0 : localStorage.getItem("locationId")
+  );
+
   const [jumlah, setJumlah] = useState("");
   const [tanggal] = useState("20 Maret 2025");
 
@@ -12,19 +36,90 @@ const PesanBarang = () => {
     stok: "-",
   };
 
-  const handlePesan = () => {
-    if (!warehouse || !jumlah) {
+  const handlePesan = async () => {
+    if (!selectedWarehouse || !jumlah) {
       alert("Harap lengkapi form pemesanan.");
       return;
     }
 
-    console.log("Pemesanan dikirim:", {
-      warehouse,
-      namaBarang: barang.nama,
-      jumlah,
-      satuan: barang.satuan,
-    });
+    const payload = {
+      itemId: selectedWarehouseItem.id,
+      warehouseId: parseInt(selectedWarehouse),
+      quantity: parseInt(jumlah),
+    };
+    try {
+      const pesanResponse = await createStoreRequestItem(payload);
+      // console.log("pesanResponse: ", pesanResponse);
+      if (pesanResponse == 201) {
+        navigate(-1, { state: { refetch: true } });
+      }
+    } catch (error) {
+      if (
+        error.response.data.message == "insuficcient stock for request item"
+      ) {
+        alert("❌ Stok gudang tidak memadai untuk melakukan pesanan");
+      }
+      console.log("error :", error.response.data.message);
+    }
   };
+
+  const fetchWarehouses = async () => {
+    try {
+      const warehousesReponse = await getWarehousesByLocation(selectedSite);
+      // console.log("warehousesReponse: ", warehousesReponse);
+      if (warehousesReponse.status == 200) {
+        setWarehouses(warehousesReponse.data.data);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const fetchWarehouseItem = async () => {
+    try {
+      const itemsReponse = await getItems();
+      console.log("itemsReponse: ", itemsReponse);
+      if (itemsReponse.status == 200) {
+        const selectedItem = itemsReponse.data.data.find(
+          (item) => item.name == "Telur OK"
+        );
+        // console.log("selectedItem: ", selectedItem);
+        setSelectedWarehouseItem(selectedItem);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const fetchStok = async () => {
+    const date = formatDateToDDMMYYYY(formatDate(new Date()));
+    // console.log("date: ", date);
+    try {
+      const stokResponse = await getEggWarehouseItemSummary(
+        selectedWarehouse,
+        date
+      );
+      // console.log("stokResponse: ", stokResponse);
+      if (stokResponse.status == 200) {
+        const selectedStok = stokResponse.data.data.find(
+          (item) => item.name == "Telur OK" && item.unit == "Ikat"
+        );
+        // console.log("stok: ", stok);
+        setStok(selectedStok);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchWarehouses();
+    fetchWarehouseItem();
+  }, []);
+
+  useEffect(() => {
+    fetchStok();
+  }, [selectedWarehouse]);
 
   return (
     <div className="p-6 space-y-6">
@@ -50,46 +145,47 @@ const PesanBarang = () => {
         <div className=" justify-center gap-4">
           <div className="flex justify-center flex-wrap gap-4">
             <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-              <p className="text-3xl font-bold text-center">50</p>
+              <p className="text-3xl font-bold text-center">
+                {stok.quantity ? parseInt(stok.quantity) : "-"}
+              </p>
               <p className="text-xl text-center">Ikat</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Form Input Pemesanan */}
       <div className="border rounded p-4 w-full space-y-4">
         <div className="flex justify-between items-center">
           <h2 className="font-bold text-lg">Input Pemesanan Barang</h2>
           <p className="text-sm">{tanggal}</p>
         </div>
 
-        {/* Gudang Pemesanan */}
         <div>
           <label className="block text-sm mb-1">Gudang Pemesanan</label>
           <select
-            value={warehouse}
-            onChange={(e) => setWarehouse(e.target.value)}
+            value={selectedWarehouse}
+            onChange={(e) => setSelectedWarehouse(e.target.value)}
             className="w-full border bg-gray-100 p-2 rounded"
           >
             <option value="">Pilih gudang tempat pemesanan</option>
-            <option value="Gudang A">Gudang A</option>
-            <option value="Gudang B">Gudang B</option>
+            {warehouses?.map((warehouse, index) => (
+              <option key={index} value={warehouse.id}>
+                {warehouse.name}
+              </option>
+            ))}
           </select>
         </div>
 
-        {/* Nama Barang */}
         <div>
           <label className="block text-sm mb-1">Nama Barang</label>
           <input
             type="text"
             disabled
-            value={barang.nama}
+            value={selectedWarehouseItem.name}
             className="w-full border bg-gray-100 p-2 rounded"
           />
         </div>
 
-        {/* Jumlah */}
         <div>
           <label className="block text-sm mb-1">Jumlah Pemesanan</label>
           <div className="flex items-center gap-2">
@@ -113,6 +209,13 @@ const PesanBarang = () => {
           </button>
         </div>
       </div>
+      <button
+        onClick={() => {
+          console.log("payload: ", payload);
+        }}
+      >
+        CHECK
+      </button>
     </div>
   );
 };
