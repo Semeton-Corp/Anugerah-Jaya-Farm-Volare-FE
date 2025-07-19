@@ -100,6 +100,7 @@ const DetailAyam = () => {
     const todayStr = `${yyyy}-${mm}-${dd}`; 
     return selectedDate === todayStr;
   };
+  
   const dateInputRef = useRef(null);
   const openDatePicker = () => {
     if (dateInputRef.current) {

@@ -123,16 +123,29 @@ const RiwayatGudang = () => {
         <h1 className="text-3xl font-bold">Riwayat Gudang</h1>
 
         <div
-          className="flex items-center rounded-lg bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+          className="flex items-center rounded-lg bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2 px-4 py-2"
           onClick={openDatePicker}
         >
-          <input
-            ref={dateInputRef}
-            type="date"
-            value={selectedDate}
-            onChange={handleDateChange}
-            className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
-          />
+          {selectedDate ? (
+            <input
+              ref={dateInputRef}
+              type="date"
+              value={selectedDate}
+              onChange={handleDateChange}
+              className="bg-transparent cursor-pointer"
+            />
+          ) : (
+            <>
+              <span className="text-gray-700">Semua Hari</span>
+              <input
+                ref={dateInputRef}
+                type="date"
+                value={selectedDate}
+                onChange={handleDateChange}
+                className="hidden"
+              />
+            </>
+          )}
         </div>
       </div>
 

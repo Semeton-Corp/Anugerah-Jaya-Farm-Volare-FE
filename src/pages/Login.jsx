@@ -28,6 +28,7 @@ const Login = () => {
 
       if (response.status === 200) {
         console.log("response: ", response);
+        
         const { accessToken, role, photoProfile, name, location } =
           response.data.data;
         localStorage.setItem("token", accessToken);

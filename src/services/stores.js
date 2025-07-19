@@ -73,6 +73,20 @@ export const createStoreRequestItem = (payload) => {
   });
 };
 
+export const getStoreRequestItems = (date, page, warehouseId, storeId) => {
+  return api.get("/stores/request/items", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    params: {
+      date: date,
+      page: page,
+      warehouseId: warehouseId,
+      storeId: storeId,
+    },
+  });
+};
+
 export const createStoreSale = (payload) => {
   return api.post("/stores/sales", payload, {
     headers: {

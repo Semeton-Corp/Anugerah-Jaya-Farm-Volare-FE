@@ -10,6 +10,14 @@ export const createStorePlacement = (payload) => {
   });
 };
 
+export const getCurrentUserStorePlacement = () => {
+  return api.get("/placements/stores/me", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export const deleteStorePlacementById = (payload) => {
   return api.delete(`/placements/stores/${payload}`, {
     headers: {

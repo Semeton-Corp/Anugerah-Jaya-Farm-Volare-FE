@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { IoSearch } from "react-icons/io5";
 import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
@@ -8,6 +8,10 @@ import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import KonfirmasiBarangSampaiModal from "../components/KonfirmasiBarangSampaiModal";
 import SortirTelurModal from "../components/SortirTelurModal";
 import BatalModal from "../components/BatalModal";
+import { getCurrentUserStorePlacement } from "../services/placement";
+import { useEffect } from "react";
+import { getStoreRequestItems } from "../services/stores";
+import { formatDate, formatDateToDDMMYYYY } from "../utils/dateFormat";
 
 const dummyData = [
   {
@@ -52,7 +56,7 @@ const getStatusStyle = (status) => {
   switch (status) {
     case "Sedang Dikirim":
       return "bg-orange-200 text-yellow-800";
-    case "Pending":
+    case "Menunggu":
       return "bg-green-200 text-green-900";
     case "Ditolak":
     case "Dibatalkan":
@@ -73,7 +77,7 @@ const getSecondAction = (status) => {
         label: "Barang Sampai",
         color: "bg-orange-300 hover:bg-orange-500 cursor-pointer",
       };
-    case "Pending":
+    case "Menunggu":
       return {
         label: "Batal Pesan",
         color:
@@ -95,6 +99,27 @@ const RequestKeGudang = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const [requestData, setRequestData] = useState([]);
+
+  const [storePlacement, setStorePlacement] = useState();
+  const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalData, setTotalData] = useState(0);
+
+  const [showBarangSampaiModal, setShowBarangSampaiModal] = useState(false);
+  const [showSortirModal, setShowSortirModal] = useState(false);
+  const [showBatalModal, setShowBatalModal] = useState(false);
+
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const dateInputRef = useRef(null);
+  const openDatePicker = () => {
+    if (dateInputRef.current) {
+      dateInputRef.current.showPicker?.() || dateInputRef.current.click();
+    }
+  };
+
   const detailPages = ["pesan-barang"];
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
@@ -107,16 +132,9 @@ const RequestKeGudang = () => {
     navigate(inputPath);
   };
 
-  const [showBarangSampaiModal, setShowBarangSampaiModal] = useState(false);
-  const [showSortirModal, setShowSortirModal] = useState(false);
-  const [showBatalModal, setShowBatalModal] = useState(false);
-
-  BatalModal;
-  const [selectedItem, setSelectedItem] = useState(null);
-
   const handleSearch = (e) => {
     setQuery(e.target.value);
-    onSearch(e.target.value); // Call parent function with search input
+    onSearch(e.target.value);
   };
 
   const handleBarangSampai = (data) => {
@@ -132,6 +150,58 @@ const RequestKeGudang = () => {
     navigate(inputPath);
   };
 
+  const fetchPlacementData = async () => {
+    try {
+      const placementResponse = await getCurrentUserStorePlacement();
+      // console.log("placementResponse: ", placementResponse);
+      if (placementResponse.status == 200) {
+        setStorePlacement(placementResponse.data.data.store);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const fetchRequestItemsData = async () => {
+    try {
+      const date = formatDateToDDMMYYYY(selectedDate);
+      const requestReponse = await getStoreRequestItems(
+        date,
+        page,
+        undefined,
+        storePlacement?.id
+      );
+      if (requestReponse.status == 200) {
+        setRequestData(requestReponse.data.data.storeRequestItems);
+        if (requestReponse.data.data.totalPage) {
+          setTotalPages(requestReponse.data.data.totalPage);
+        }
+        if (requestReponse.data.data.totalData) {
+          setTotalData(requestReponse.data.data.totalData);
+        }
+      }
+      console.log("requestReponse: ", requestReponse);
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const handleDateChange = (e) => {
+    const date = e.target.value;
+    console.log("date: ", date);
+    setSelectedDate(date);
+  };
+
+  useEffect(() => {
+    fetchPlacementData();
+  }, []);
+
+  useEffect(() => {
+    if (storePlacement) {
+      fetchRequestItemsData();
+    }
+  }, [storePlacement, page, selectedDate]);
+
   return (
     <>
       {isDetailPage ? (
@@ -142,9 +212,17 @@ const RequestKeGudang = () => {
           <div className="flex justify-between mb-2 flex-wrap gap-4">
             <h1 className="text-3xl font-bold">Request ke Gudang</h1>
 
-            <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-              <PiCalendarBlank size={18} />
-              <div className="text-base font-medium ms-2">Semua Hari</div>
+            <div
+              className="flex items-center rounded-lg bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+              onClick={openDatePicker}
+            >
+              <input
+                ref={dateInputRef}
+                type="date"
+                value={selectedDate}
+                onChange={handleDateChange}
+                className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+              />
             </div>
           </div>
 
@@ -171,11 +249,11 @@ const RequestKeGudang = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {dummyData.map((item, idx) => (
+                  {requestData?.map((item, idx) => (
                     <tr key={idx} className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-2">{item.namaBarang}</td>
-                      <td className="px-4 py-2">{item.jumlah}</td>
-                      <td className="px-4 py-2">{item.gudang}</td>
+                      <td className="px-4 py-2">{item.item.name}</td>
+                      <td className="px-4 py-2">{item.quantity}</td>
+                      <td className="px-4 py-2">{item.warehouse.name}</td>
                       <td className="px-4 py-2">
                         <span
                           className={`px-3 py-1 rounded text-sm font-semibold ${getStatusStyle(
@@ -220,6 +298,37 @@ const RequestKeGudang = () => {
                 </tbody>
               </table>
             </div>
+
+            <div className="flex justify-between mt-16 px-6">
+              {requestData?.length > 0 ? (
+                <p className="text-sm text-[#CCCCCC]">{`Menampilkan halaman ${page} dari ${totalPages} halaman. Total ${totalData} data riwayat`}</p>
+              ) : (
+                <p></p>
+              )}
+
+              <div className="flex gap-3">
+                <div
+                  className={`rounded-[4px] py-2 px-6 ${
+                    page === 1
+                      ? "bg-gray-200 cursor-not-allowed"
+                      : "bg-green-100 hover:bg-green-200 cursor-pointer"
+                  } flex items-center justify-center text-black text-base font-medium `}
+                  onClick={() => page > 1 && setPage(page - 1)}
+                >
+                  <p>Previous</p>
+                </div>
+                <div
+                  className={`rounded-[4px] py-2 px-6 ${
+                    page === totalPages
+                      ? "bg-gray-200 cursor-not-allowed"
+                      : "bg-green-700 hover:bg-green-800 cursor-pointer"
+                  } flex items-center justify-center text-white text-base font-medium `}
+                  onClick={() => page < totalPages && setPage(page + 1)}
+                >
+                  <p>Next</p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {showBarangSampaiModal && selectedItem && (
@@ -263,6 +372,17 @@ const RequestKeGudang = () => {
               item={selectedItem} // jika modalmu butuh data barang
             />
           )}
+
+          <button
+            onClick={() => {
+              console.log("storePlacement: ", storePlacement);
+              console.log("totalPages: ", totalPages);
+              console.log("page: ", page);
+              console.log("requestData: ", requestData);
+            }}
+          >
+            CHECK
+          </button>
         </div>
       )}
     </>

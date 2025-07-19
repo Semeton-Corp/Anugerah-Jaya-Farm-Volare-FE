@@ -49,8 +49,8 @@ const PesanBarang = () => {
     };
     try {
       const pesanResponse = await createStoreRequestItem(payload);
-      // console.log("pesanResponse: ", pesanResponse);
-      if (pesanResponse == 201) {
+      console.log("pesanResponse: ", pesanResponse);
+      if (pesanResponse.status == 201) {
         navigate(-1, { state: { refetch: true } });
       }
     } catch (error) {
@@ -211,6 +211,12 @@ const PesanBarang = () => {
       </div>
       <button
         onClick={() => {
+          const payload = {
+            itemId: selectedWarehouseItem.id,
+            warehouseId: parseInt(selectedWarehouse),
+            quantity: parseInt(jumlah),
+          };
+
           console.log("payload: ", payload);
         }}
       >
