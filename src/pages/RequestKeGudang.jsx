@@ -10,7 +10,11 @@ import SortirTelurModal from "../components/SortirTelurModal";
 import BatalModal from "../components/BatalModal";
 import { getCurrentUserStorePlacement } from "../services/placement";
 import { useEffect } from "react";
-import { getStoreRequestItems } from "../services/stores";
+import {
+  getStoreRequestItems,
+  storeConfirmationStoreRequestItem,
+  updateStoreRequestItem,
+} from "../services/stores";
 import { formatDate, formatDateToDDMMYYYY } from "../utils/dateFormat";
 
 const dummyData = [
@@ -137,8 +141,27 @@ const RequestKeGudang = () => {
     onSearch(e.target.value);
   };
 
-  const handleBarangSampai = (data) => {
-    console.log("Payload dikirim:", data);
+  const handleBarangSampai = async (data) => {
+    // console.log("Payload dikirim:", data);
+    // console.log("selectedItem: ", selectedItem);
+    const payload = {
+      quantity: parseInt(data.jumlah),
+    };
+
+    try {
+      const sampaiResponse = await storeConfirmationStoreRequestItem(
+        payload,
+        selectedItem.id
+      );
+      // console.log("sampaiResponse: ", sampaiResponse);
+      if (sampaiResponse.status == 200) {
+        fetchRequestItemsData();
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+    // console.log("payload: ", payload);
+
     // Kirim ke backend di sini
     // contoh: await api.konfirmasiBarangSampai(data)
   };
@@ -182,6 +205,31 @@ const RequestKeGudang = () => {
       }
       console.log("requestReponse: ", requestReponse);
     } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const batalHandle = async () => {
+    try {
+      const payload = {
+        status: "Dibatalkan",
+      };
+      console.log("payload: ", payload);
+      console.log("selectedItem: ", selectedItem);
+
+      const cancelResponse = await updateStoreRequestItem(
+        payload,
+        selectedItem.id
+      );
+
+      if (cancelResponse.status == 200) {
+        setShowBatalModal(false);
+        fetchRequestItemsData();
+      }
+      // console.log("cancelResponse: ", cancelResponse);
+      // console.log("confirmResponse: ", confirmResponse);
+    } catch (error) {
+      alert("Terjadi kesalahan dalam melakukan konfirmasi: ", error);
       console.log("error :", error);
     }
   };
@@ -335,9 +383,9 @@ const RequestKeGudang = () => {
             <KonfirmasiBarangSampaiModal
               isOpen={showBarangSampaiModal}
               onClose={() => setShowBarangSampaiModal(false)}
-              namaBarang={selectedItem.namaBarang}
+              namaBarang={selectedItem.item.name}
               satuan="Ikat"
-              defaultJumlah={selectedItem.jumlah}
+              defaultJumlah={selectedItem.quantity}
               onSubmit={(data) => {
                 handleBarangSampai({
                   ...data,
@@ -367,6 +415,7 @@ const RequestKeGudang = () => {
               onCancel={() => setShowBatalModal(false)}
               onConfirm={() => {
                 console.log("Item dibatalkan:", selectedItem);
+                batalHandle();
                 setShowBatalModal(false);
               }}
               item={selectedItem} // jika modalmu butuh data barang

@@ -58,6 +58,7 @@ const KonfirmasiBarangSampaiModal = ({
           <div className="flex items-center gap-2">
             <input
               type="number"
+              readOnly={mode == "Sesuai"}
               value={jumlah}
               onChange={(e) => setJumlah(e.target.value)}
               placeholder="Masukkan jumlah barang yang datang"
