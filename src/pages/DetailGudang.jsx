@@ -103,9 +103,9 @@ const DetailGudang = () => {
         selectedRole,
         locationId
       );
-      //   console.log("employeeResponse: ", employeeResponse.data.data.users);
+      // console.log("employeeOptionsResponse: ", employeeOptionsResponse);
       if (employeeOptionsResponse.status) {
-        setEmployeeOptions(employeeOptionsResponse.data.data.users);
+        setEmployeeOptions(employeeOptionsResponse.data.data);
       }
     } catch (error) {
       console.log("error :", error);
@@ -135,9 +135,7 @@ const DetailGudang = () => {
   useEffect(() => {
     fetchDetailData();
     fetchRoles();
-    if (selectedRole) {
-      fetchEmployees();
-    }
+    fetchEmployees();
   }, [selectedRole]);
 
   return (

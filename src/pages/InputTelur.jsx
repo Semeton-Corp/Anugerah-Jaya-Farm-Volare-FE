@@ -55,14 +55,15 @@ const InputTelur = () => {
     const fetchChickenCages = async () => {
       try {
         let warehouseResponse;
+        let chickenResponse;
 
         if (userRole === "Owner") {
           warehouseResponse = await getWarehousesByLocation();
+          chickenResponse = await getChickenCage();
         } else {
+          chickenResponse = await getChickenCage(locationId);
           warehouseResponse = await getWarehousesByLocation(locationId);
         }
-
-        const chickenResponse = await getChickenCage();
 
         setWarehouses(warehouseResponse.data.data);
         setSelectedWarehouse(warehouseResponse.data.data[0]);
@@ -72,7 +73,7 @@ const InputTelur = () => {
         // console.log("dataWarehouse: ", dataWarehouse);
         // console.log("dataChickenCage: ", dataChickenCage);
 
-        if (userRole != "Owner") {
+        if (userRole != "Owner" && userRole != "Kepala Kandang") {
           const filterCage = dataChickenCage.filter(
             (cage) => cage.eggPic == userName
           );
@@ -548,19 +549,19 @@ const InputTelur = () => {
           // console.log("selectedChickenCage: ", selectedChickenCage);
           // console.log("warehouses: ", warehouses);
 
-          const payload = {
-            chickenCageId: selectedChickenCage.id,
-            warehouseId: selectedWarehouse.id,
-            totalKarpetGoodEgg: parseInt(totalKarpetGoodEgg),
-            totalRemainingGoodEgg: parseInt(totalRemainingGoodEgg),
-            totalWeightGoodEgg: parseInt(totalWeightGoodEgg),
-            totalKarpetCrackedEgg: parseInt(totalKarpetCrackedEgg),
-            totalRemainingCrackedEgg: parseInt(totalRemainingCrackedEgg),
-            totalWeightCrackedEgg: parseInt(totalWeightCrackedEgg),
-            totalKarpetRejectEgg: parseInt(totalKarpetRejectEgg),
-            totalRemainingRejectEgg: parseInt(totalRemainingRejectEgg),
-          };
-          console.log("payload: ", payload);
+          // const payload = {
+          //   chickenCageId: selectedChickenCage.id,
+          //   warehouseId: selectedWarehouse.id,
+          //   totalKarpetGoodEgg: parseInt(totalKarpetGoodEgg),
+          //   totalRemainingGoodEgg: parseInt(totalRemainingGoodEgg),
+          //   totalWeightGoodEgg: parseInt(totalWeightGoodEgg),
+          //   totalKarpetCrackedEgg: parseInt(totalKarpetCrackedEgg),
+          //   totalRemainingCrackedEgg: parseInt(totalRemainingCrackedEgg),
+          //   totalWeightCrackedEgg: parseInt(totalWeightCrackedEgg),
+          //   totalKarpetRejectEgg: parseInt(totalKarpetRejectEgg),
+          //   totalRemainingRejectEgg: parseInt(totalRemainingRejectEgg),
+          // };
+          // console.log("payload: ", payload);
           console.log("chickenCages: ", chickenCages);
           console.log("selectedChickenCage: ", selectedChickenCage);
           console.log("warehouses: ", warehouses);

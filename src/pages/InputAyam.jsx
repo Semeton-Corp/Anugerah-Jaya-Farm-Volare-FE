@@ -55,7 +55,8 @@ const InputAyam = () => {
         }
         const dataChickenCage = response.data.data;
 
-        if (userRole != "Owner") {
+        if (userRole !== "Owner" && userRole !== "Kepala Kandang") {
+          // console.log("userRole: ", userRole);
           const filteredChickenCage = dataChickenCage.filter(
             (item) => item.chickenPic === userName
           );

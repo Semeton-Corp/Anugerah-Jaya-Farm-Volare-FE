@@ -42,6 +42,14 @@ export const deleteWarehousePlacementById = (payload) => {
   });
 };
 
+export const getCurrentUserWarehousePlacement = () => {
+  return api.get("/placements/warehouses/me", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 //cage
 export const createCagePlacement = (payload) => {
   return api.post("/placements/cages", payload, {
