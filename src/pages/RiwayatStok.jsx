@@ -10,6 +10,7 @@ import {
   getTodayDateInBahasa,
 } from "../utils/dateFormat";
 import { getStoreItemsHistories } from "../services/stores";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const riwayatAktivitasTokoData = [
   {
@@ -52,6 +53,8 @@ const riwayatAktivitasTokoData = [
 
 const RiwayatStok = () => {
   const [query, setQuery] = useState("");
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const [storeItemHistories, setStoreItemHistories] = useState([]);
 
@@ -65,6 +68,18 @@ const RiwayatStok = () => {
     if (dateInputRef.current) {
       dateInputRef.current.showPicker?.() || dateInputRef.current.click();
     }
+  };
+
+  const detailPages = ["detail-riwayat-stok"];
+  const isDetailPage = detailPages.some((segment) =>
+    location.pathname.includes(segment)
+  );
+
+  const detailRiwayatHandle = (id) => {
+    const currentPath = location.pathname;
+    const detailPath = currentPath + `/detail-riwayat-stok/${id}`;
+
+    navigate(detailPath);
   };
 
   const handleDateChange = (e) => {
@@ -102,6 +117,9 @@ const RiwayatStok = () => {
     fetchHistoryData(page);
   }, [selectedDate, page]);
 
+  if (isDetailPage) {
+    return <Outlet />;
+  }
   return (
     <div className="flex flex-col px-4 py-3 gap-4 ">
       {/* header */}
@@ -136,6 +154,7 @@ const RiwayatStok = () => {
                 <th className="py-2 px-4">Toko</th>
                 <th className="py-2 px-4">Tempat pemesanan</th>
                 <th className="py-2 px-4">Keterangan</th>
+                <th className="py-2 px-4"></th>
               </tr>
             </thead>
             <tbody className="text-center">
@@ -160,6 +179,16 @@ const RiwayatStok = () => {
                       }`}
                     >
                       {item.status}
+                    </span>
+                  </td>
+                  <td className="py-2 px-4">
+                    <span
+                      onClick={() => {
+                        detailRiwayatHandle(item.id);
+                      }}
+                      className="underline hover:text-black-5 cursor-pointer"
+                    >
+                      Detail
                     </span>
                   </td>
                 </tr>

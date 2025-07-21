@@ -159,3 +159,11 @@ export const getStoreItemsHistories = (date, page) => {
     },
   });
 };
+
+export const getStoreItemsHistoryById = (id) => {
+  return api.get(`/stores/items/histories/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

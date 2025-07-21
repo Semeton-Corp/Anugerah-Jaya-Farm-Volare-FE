@@ -81,6 +81,7 @@ import TambahGudang from "./pages/TambahGudang";
 import DetailGudang from "./pages/DetailGudang";
 import DetailToko from "./pages/DetailToko";
 import DetailTugasTambahan from "./pages/DetailTugasTambahan";
+import DetailRiwayatStok from "./pages/DetailRiwayatStok";
 
 const AppRouter = createBrowserRouter([
   {
@@ -318,6 +319,12 @@ const AppRouter = createBrowserRouter([
               {
                 path: "riwayat-stok",
                 element: <RiwayatStok />,
+                children: [
+                  {
+                    path: "detail-riwayat-stok/:id",
+                    element: <DetailRiwayatStok />,
+                  },
+                ],
               },
             ],
           },
@@ -654,6 +661,12 @@ const AppRouter = createBrowserRouter([
               {
                 path: "riwayat-stok",
                 element: <RiwayatStok />,
+                children: [
+                  {
+                    path: "detail-riwayat-stok/:id",
+                    element: <DetailRiwayatStok />,
+                  },
+                ],
               },
             ],
           },
