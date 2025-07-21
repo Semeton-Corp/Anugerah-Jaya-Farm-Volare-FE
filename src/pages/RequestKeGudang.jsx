@@ -132,7 +132,6 @@ const RequestKeGudang = () => {
   const pesanBarangHandle = () => {
     const currentPath = location.pathname;
     const inputPath = currentPath + "/pesan-barang";
-
     navigate(inputPath);
   };
 
@@ -169,7 +168,6 @@ const RequestKeGudang = () => {
   const handleLihatDetail = () => {
     const currentPath = location.pathname;
     const inputPath = currentPath + "/detail-pesan-barang-gudang";
-
     navigate(inputPath);
   };
 
@@ -311,40 +309,49 @@ const RequestKeGudang = () => {
                           {item.status}
                         </span>
                       </td>
-                      <td className="px-4 py-2 space-x-2">
-                        <button
-                          onClick={handleLihatDetail}
-                          className="bg-green-700 hover:bg-green-900 text-white px-3 py-1 text-sm rounded cursor-pointer"
-                        >
-                          Lihat detail
-                        </button>
-                        {getSecondAction(item.status) && (
-                          <button
-                            onClick={() => {
-                              const label = getSecondAction(item.status).label;
-                              if (label === "Barang Sampai") {
-                                setSelectedItem(item);
-                                setShowBarangSampaiModal(true);
-                              } else if (label === "Sortir Telur") {
-                                setSelectedItem(item);
-                                setShowSortirModal(true);
-                              } else if (label === "Batal Pesan") {
-                                setSelectedItem(item);
-                                setShowBatalModal(true);
-                              }
-                            }}
-                            className={`${
-                              getSecondAction(item.status).color
-                            } px-3 py-1 text-sm rounded`}
-                          >
-                            {getSecondAction(item.status).label}
-                          </button>
-                        )}
+                      <td>
+                        {getSecondAction(item.status) &&
+                          (getSecondAction(item.status).label !==
+                            "Sortir Telur" ||
+                            item.item.name === "Telur Retak") && (
+                            <button
+                              onClick={() => {
+                                const label = getSecondAction(
+                                  item.status
+                                ).label;
+                                if (label === "Barang Sampai") {
+                                  setSelectedItem(item);
+                                  setShowBarangSampaiModal(true);
+                                } else if (
+                                  item.item.name === "Telur Retak" &&
+                                  label === "Sortir Telur"
+                                ) {
+                                  setSelectedItem(item);
+                                  setShowSortirModal(true);
+                                } else if (label === "Batal Pesan") {
+                                  setSelectedItem(item);
+                                  setShowBatalModal(true);
+                                }
+                              }}
+                              className={`${
+                                getSecondAction(item.status).color
+                              } px-3 py-1 mx-2 text-sm rounded`}
+                            >
+                              {getSecondAction(item.status).label}
+                            </button>
+                          )}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              {requestData.length < 1 && (
+                <>
+                  <p className="p-3 w-full flex justify-center italic text-gray-500">
+                    Belum ada data pesanan ke gudang
+                  </p>
+                </>
+              )}
             </div>
 
             <div className="flex justify-between mt-16 px-6">
@@ -418,7 +425,7 @@ const RequestKeGudang = () => {
                 batalHandle();
                 setShowBatalModal(false);
               }}
-              item={selectedItem} // jika modalmu butuh data barang
+              item={selectedItem}
             />
           )}
 

@@ -1,10 +1,15 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { IoSearch } from "react-icons/io5";
 import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { PiCalendarBlank } from "react-icons/pi";
 import { BiSolidEditAlt } from "react-icons/bi";
-import { getTodayDateInBahasa } from "../utils/dateFormat";
+import {
+  formatDate,
+  formatDateToDDMMYYYY,
+  getTodayDateInBahasa,
+} from "../utils/dateFormat";
+import { getStoreItemsHistories } from "../services/stores";
 
 const riwayatAktivitasTokoData = [
   {
@@ -48,10 +53,54 @@ const riwayatAktivitasTokoData = [
 const RiwayatStok = () => {
   const [query, setQuery] = useState("");
 
+  const [storeItemHistories, setStoreItemHistories] = useState([]);
+
+  const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalData, setTotalData] = useState(0);
+
+  const dateInputRef = useRef(null);
+  const openDatePicker = () => {
+    if (dateInputRef.current) {
+      dateInputRef.current.showPicker?.() || dateInputRef.current.click();
+    }
+  };
+
+  const handleDateChange = (e) => {
+    const date = e.target.value;
+    console.log("date: ", date);
+    setSelectedDate(date);
+  };
+
   const handleSearch = (e) => {
     setQuery(e.target.value);
     onSearch(e.target.value); // Call parent function with search input
   };
+
+  const fetchHistoryData = async (page) => {
+    try {
+      const date = selectedDate
+        ? formatDateToDDMMYYYY(selectedDate)
+        : undefined;
+
+      const historyResponse = await getStoreItemsHistories(date, page);
+      // console.log("page: ", page);
+
+      if (historyResponse.status == 200) {
+        setStoreItemHistories(historyResponse.data.data.storeItemHistories);
+      }
+      // setTotaldata(historyResponse.data.data.totalData);
+      // setHistoryData(historyResponse.data.data.warehouseItemHistories);
+      // setTotalPages(historyResponse.data.data.totalPage);
+    } catch (error) {
+      console.error("Error fetching warehouse history:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchHistoryData(page);
+  }, [selectedDate, page]);
 
   return (
     <div className="flex flex-col px-4 py-3 gap-4 ">
@@ -59,11 +108,17 @@ const RiwayatStok = () => {
       <div className="flex justify-between mb-2 flex-wrap gap-4">
         <h1 className="text-3xl font-bold">Riwayat Stok Toko</h1>
 
-        <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-          <PiCalendarBlank size={18} />
-          <div className="text-base font-medium ms-2">
-            Hari ini ({getTodayDateInBahasa()})
-          </div>
+        <div
+          className="flex items-center rounded-lg bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+          onClick={openDatePicker}
+        >
+          <input
+            ref={dateInputRef}
+            type="date"
+            value={selectedDate}
+            onChange={handleDateChange}
+            className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+          />
         </div>
       </div>
 
@@ -84,34 +139,38 @@ const RiwayatStok = () => {
               </tr>
             </thead>
             <tbody className="text-center">
-              {riwayatAktivitasTokoData.map((item, index) => (
+              {storeItemHistories.map((item, index) => (
                 <tr key={index} className="border-b border-black-6">
-                  <td className="py-2 px-4 ">{item.waktu}</td>
-
-                  <td className="py-2 px-4">{item.namaBarang}</td>
-                  <td className="py-2 px-4">{item.satuan}</td>
-                  <td className="py-2 px-4">{item.kuantitas}</td>
-                  <td className="py-2 px-4">{item.toko}</td>
-                  <td className="py-2 px-4">{item.tempatPemesanan}</td>
+                  <td className="py-2 px-4 ">{item.time}</td>
+                  <td className="py-2 px-4">{item.item.name}</td>
+                  <td className="py-2 px-4">{item.item.unit}</td>
+                  <td className="py-2 px-4">{item.quantity}</td>
+                  <td className="py-2 px-4">{item.destination}</td>
+                  <td className="py-2 px-4">{item.source ?? "-"}</td>
                   <td className="py-2 px-4">
                     <span
                       className={`py-1 px-5 rounded text-sm font-semibold ${
-                        item.keterangan === "Barang masuk"
+                        item.status === "Barang masuk"
                           ? "bg-aman-box-surface-color text-aman-text-color"
-                          : item.keterangan === "Pending"
+                          : item.status === "Pending"
                           ? "bg-green-200 text-green-900"
-                          : item.keterangan === "Barang keluar"
+                          : item.status === "Barang keluar"
                           ? "bg-orange-200 text-orange-900"
                           : "bg-kritis-box-surface-color text-kritis-text-color"
                       }`}
                     >
-                      {item.keterangan}
+                      {item.status}
                     </span>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          {storeItemHistories.length < 1 && (
+            <p className="p-3 w-full flex justify-center italic text-gray-300">
+              Belum ada riwayat stok toko
+            </p>
+          )}
 
           {/* footer */}
           <div className="flex justify-between mt-16 px-6">
@@ -127,6 +186,13 @@ const RiwayatStok = () => {
           </div>
         </div>
       </div>
+      <button
+        onClick={() => {
+          console.log("selectedDate: ", selectedDate);
+        }}
+      >
+        CHECK
+      </button>
     </div>
   );
 };

@@ -146,3 +146,15 @@ export const updateStoreSalePayment = (storeSaleId, id, payload) => {
     },
   });
 };
+
+export const getStoreItemsHistories = (date, page) => {
+  return api.get("/stores/items/histories", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    params: {
+      date: date,
+      page: page,
+    },
+  });
+};
