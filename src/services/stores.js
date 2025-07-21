@@ -1,11 +1,12 @@
 import api from "./api";
 const token = localStorage.getItem("token");
 
-export const getStores = () => {
+export const getStores = (locationId) => {
   return api.get("/stores", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
+    params: { locationId: locationId },
   });
 };
 

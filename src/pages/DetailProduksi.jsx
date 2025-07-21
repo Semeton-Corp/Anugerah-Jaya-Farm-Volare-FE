@@ -64,7 +64,7 @@ const DetailProduksi = () => {
       // console.log("effectiveLocationId: ", selectedSite);
       // console.log("date: ", date);
       response = await getEggMonitoring(selectedSite, date);
-      console.log("response: ", response);
+      // console.log("response: ", response);
       // console.log("response: ", response);
 
       if (response?.status === 200) {

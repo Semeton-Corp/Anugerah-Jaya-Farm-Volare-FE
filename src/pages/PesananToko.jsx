@@ -11,10 +11,12 @@ import { getCurrentUserWarehousePlacement } from "../services/placement";
 import { getWarehousesByLocation } from "../services/warehouses";
 import {
   getStoreRequestItems,
+  getStores,
   updateStoreRequestItem,
   warehouseConfirmationStoreRequestItem,
 } from "../services/stores";
 import KonfirmasiPemenuhanPesananTokoTelurOk from "../components/KonfirmasiPemenuhanPesananTokoTelurOk ";
+import KonfirmasiPemenuhanPesananTokoTelurRetak from "../components/KonfirmasiPemenuhanPesananTokoTelurRetak";
 
 const pesananTokoData = [
   {
@@ -86,7 +88,9 @@ const getSecondAction = (status) => {
 
 const PesananToko = () => {
   const userRole = localStorage.getItem("role");
-  const locationId = localStorage.getItem("locationId");
+  const [selectedSite, setSelectedSite] = useState(
+    userRole === "Owner" ? 0 : localStorage.getItem("locationId")
+  );
 
   const [warehouses, setWarehouses] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(0);
@@ -102,7 +106,11 @@ const PesananToko = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [totalData, setTotalData] = useState(0);
 
-  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showConfirmationTelurOk, setShowConfirmationTelurOk] = useState(false);
+  const [showConfirmationTelurRetak, setShowConfirmationTelurRetak] =
+    useState(false);
+  const [stores, setStores] = useState([]);
+
   const [selectedItem, setSelectedItem] = useState(null);
 
   const [showBatalModal, setShowBatalModal] = useState(false);
@@ -123,7 +131,7 @@ const PesananToko = () => {
 
   const fetchWarehouseData = async () => {
     try {
-      const warehouseResponse = await getWarehousesByLocation(locationId);
+      const warehouseResponse = await getWarehousesByLocation(selectedSite);
       // console.log("warehouseResponse: ", warehouseResponse);
       if (warehouseResponse.status == 200) {
         setWarehouses(warehouseResponse.data.data);
@@ -156,7 +164,7 @@ const PesananToko = () => {
           setTotalData(requestReponse.data.data.totalData);
         }
       }
-      console.log("requestReponse: ", requestReponse);
+      // console.log("requestReponse: ", requestReponse);
     } catch (error) {
       console.log("error :", error);
     }
@@ -172,7 +180,26 @@ const PesananToko = () => {
       );
       console.log("confirmResponse: ", confirmResponse);
       if (confirmResponse.status == 200) {
-        setShowConfirmation(false);
+        setShowConfirmationTelurOk(false);
+        fetchRequestItemsData();
+      }
+    } catch (error) {
+      alert("Terjadi kesalahan dalam melakukan konfirmasi: ", error);
+      console.log("error :", error);
+    }
+  };
+
+  const confirmTelurRetakHandle = async (payload) => {
+    try {
+      console.log("payload: ", payload);
+      console.log("selectedItem.id: ", selectedItem.id);
+      const confirmResponse = await warehouseConfirmationStoreRequestItem(
+        payload,
+        selectedItem.id
+      );
+      console.log("confirmResponse: ", confirmResponse);
+      if (confirmResponse.status == 200) {
+        setShowConfirmationTelurOk(false);
         fetchRequestItemsData();
       }
     } catch (error) {
@@ -206,8 +233,21 @@ const PesananToko = () => {
     }
   };
 
+  const fetchStore = async () => {
+    try {
+      const storeResponse = await getStores(selectedSite);
+      // console.log("storeResponse: ", storeResponse);
+      if (storeResponse.status == 200) {
+        setStores(storeResponse.data.data);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
   useEffect(() => {
     fetchWarehouseData();
+    fetchStore();
   }, []);
 
   useEffect(() => {
@@ -336,7 +376,11 @@ const PesananToko = () => {
                 >
                   <td className="py-2 px-4">{data.item.name}</td>
                   <td className="py-2 px-4">{data.quantity}</td>
-                  <td className="py-2 px-4">{data.store.name ?? "-"}</td>
+                  <td className="py-2 px-4">
+                    {data.store.name && data.store.name.trim() !== ""
+                      ? data.store.name
+                      : "-"}
+                  </td>
                   <td className="py-2 px-4">
                     <span
                       className={`${getStatusStyle(
@@ -356,7 +400,12 @@ const PesananToko = () => {
                           className="px-6 py-1 rounded bg-green-700 hover:bg-green-900 text-white cursor-pointer flex items-center gap-2"
                           onClick={() => {
                             setSelectedItem(data);
-                            setShowConfirmation(true);
+                            // console.log("data: ", data);
+                            if (data.item.name == "Telur OK") {
+                              setShowConfirmationTelurOk(true);
+                            } else if (data.item.name == "Telur Retak") {
+                              setShowConfirmationTelurRetak(true);
+                            }
                           }}
                         >
                           Kirim Barang
@@ -382,15 +431,29 @@ const PesananToko = () => {
           </table>
         </div>
       </div>
-      {showConfirmation && selectedItem && (
+      {showConfirmationTelurOk && selectedItem && (
         <div className="fixed inset-0 flex justify-center items-center bg-black/10 bg-opacity-50 z-50">
           <KonfirmasiPemenuhanPesananTokoTelurOk
             item={selectedItem}
             onSubmit={(payload) => {
               confirmTelurOkHandle(payload);
-              setShowConfirmation(false);
+              setShowConfirmationTelurOk(false);
             }}
-            onCancel={() => setShowConfirmation(false)}
+            onCancel={() => setShowConfirmationTelurOk(false)}
+          />
+        </div>
+      )}
+
+      {showConfirmationTelurRetak && selectedItem && (
+        <div className="fixed inset-0 flex justify-center items-center bg-black/10 bg-opacity-50 z-50">
+          <KonfirmasiPemenuhanPesananTokoTelurRetak
+            item={selectedItem}
+            stores={stores}
+            onSubmit={(payload) => {
+              confirmTelurRetakHandle(payload);
+              setShowConfirmationTelurRetak(false);
+            }}
+            onCancel={() => setShowConfirmationTelurRetak(false)}
           />
         </div>
       )}

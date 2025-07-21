@@ -96,9 +96,13 @@ const InputTelur = () => {
 
           const data = updateResponse.data.data;
           // console.log("data: ", data);
+          // console.log("dataChickenCage: ", dataChickenCage);
+          // console.log("data: ", data);
+
+          
           if (updateResponse.status == 200) {
             const selectedCage = dataChickenCage.find(
-              (cage) => cage.cage.id === data.cage.id
+              (cage) => cage.cage.id === data.chickenCage.cage.id
             );
 
             const selectedWarehouse = dataWarehouse.find(
@@ -191,7 +195,7 @@ const InputTelur = () => {
     } else {
       try {
         const response = await inputTelur(payload);
-        console.log("response: ", response);
+        // console.log("response: ", response);
         if (response.status === 201) {
           console.log("Data berhasil dikirim:", response.data);
           navigate(-1, { state: { refetch: true } });
@@ -222,7 +226,7 @@ const InputTelur = () => {
       if (response.status == 204) {
         navigate(-1, { state: { refetch: true } });
       }
-      console.log("response: ", response);
+      // console.log("response: ", response);
     } catch (error) {
       console.error("Gagal menghapus data ayam:", error);
     }
