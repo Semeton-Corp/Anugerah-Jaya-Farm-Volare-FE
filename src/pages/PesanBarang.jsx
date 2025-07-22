@@ -10,6 +10,7 @@ import { getItems } from "../services/item";
 import { createStoreRequestItem } from "../services/stores";
 import { formatDate, formatDateToDDMMYYYY } from "../utils/dateFormat";
 import { useNavigate } from "react-router-dom";
+import { getCurrentUserStorePlacement } from "../services/placement";
 
 const PesanBarang = () => {
   const navigate = useNavigate();
@@ -20,6 +21,9 @@ const PesanBarang = () => {
 
   const [warehouses, setWarehouses] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState("");
+
+  const [stores, setStores] = useState([]);
+  const [storeId, setStoreId] = useState(0);
 
   const [selectedWarehouseItem, setSelectedWarehouseItem] = useState(0);
 
@@ -46,6 +50,7 @@ const PesanBarang = () => {
       itemId: selectedWarehouseItem.id,
       warehouseId: parseInt(selectedWarehouse),
       quantity: parseInt(jumlah),
+      storeId: storeId,
     };
     try {
       const pesanResponse = await createStoreRequestItem(payload);
@@ -59,7 +64,7 @@ const PesanBarang = () => {
       ) {
         alert("❌ Stok gudang tidak memadai untuk melakukan pesanan");
       }
-      console.log("error :", error.response.data.message);
+      console.log("error :", error);
     }
   };
 
@@ -112,9 +117,29 @@ const PesanBarang = () => {
     }
   };
 
+  const fetchPlacement = async () => {
+    try {
+      const placementResponse = await getCurrentUserStorePlacement();
+      // console.log("placementResponse: ", placementResponse);
+      if (placementResponse.status == 200) {
+        console.log(
+          "placementResponse.data.data[0].store.id: ",
+          placementResponse.data.data[0].store.id
+        );
+        setStoreId(placementResponse.data.data[0].store.id);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
   useEffect(() => {
     fetchWarehouses();
     fetchWarehouseItem();
+    if (userRole == "Owner") {
+    } else {
+      fetchPlacement();
+    }
   }, []);
 
   useEffect(() => {

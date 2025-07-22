@@ -16,6 +16,9 @@ const Presensi = () => {
   const [attendanceData, setAttendanceData] = useState([]);
   const [note, setNote] = useState([]);
 
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState(""); // "sakit" | "izin"
+
   const monthNamesBahasa = [
     "Januari",
     "Februari",
@@ -109,7 +112,7 @@ const Presensi = () => {
 
         try {
           const res = await updatePresence(payload, presenceId);
-          console.log("res: ", res);
+          // console.log("res: ", res);
           if (res.status == 200) {
             getTodayPresence();
           }
@@ -184,7 +187,17 @@ const Presensi = () => {
     );
   };
 
-  const handleSakit = async () => {
+  const handleSakit = () => {
+    setModalType("sakit");
+    setShowModal(true);
+  };
+
+  const handleIzin = () => {
+    setModalType("izin");
+    setShowModal(true);
+  };
+
+  const handleSubmitSakit = async () => {
     const now = new Date();
 
     const hours = String(now.getHours()).padStart(2, "0");
@@ -213,6 +226,10 @@ const Presensi = () => {
           const res = await updatePresence(payload, presenceId);
           if (res.status == 200) {
             getTodayPresence();
+            alert(
+              "Berhasil melakukan pengajuan sakit, mohon tunggu persetujuan"
+            );
+            setShowModal(false);
           }
           // console.log("Update success:", res.data);
         } catch (err) {
@@ -233,7 +250,59 @@ const Presensi = () => {
       }
     );
   };
-  const handleIzin = async () => {};
+  const handleSubmitIzin = async () => {
+    const now = new Date();
+
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const endTime = `${hours}:${minutes}`;
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        // const latitude = -8.556790777490797;
+        // const longitude = 115.21758360400582;
+
+        const payload = {
+          status: "Izin",
+          evidence: "evidence",
+          note: note,
+          latitude: latitude,
+          longitude: longitude,
+        };
+
+        // console.log("payload: ", payload);
+        // console.log("presenceId: ", presenceId);
+
+        try {
+          const res = await updatePresence(payload, presenceId);
+          if (res.status == 200) {
+            getTodayPresence();
+            alert(
+              "Berhasil melakukan pengajuan izin, mohon tunggu persetujuan"
+            );
+            setShowModal(false);
+          }
+          console.log("Update success:", res.data);
+        } catch (err) {
+          const serverMessage = err?.response?.data?.message;
+
+          let customMessage = "Terjadi kesalahan tak terduga";
+
+          if (serverMessage === "location is not within the allowed radius") {
+            customMessage =
+              "Pastikan Anda berada di lokasi kerja! Presensi hanya bisa dilakukan di tempat kerja.";
+          }
+
+          alert(customMessage);
+        }
+      },
+      (error) => {
+        console.error("Location error:", error);
+      }
+    );
+  };
 
   useEffect(() => {
     getTodayPresence();
@@ -292,6 +361,9 @@ const Presensi = () => {
             </>
           )}
         </div>
+        <p className="pt-4">
+          *Presensi hanya bisa dilakukan di tempat bekerja{" "}
+        </p>
       </div>
 
       {/* Tabel Presensi */}
@@ -339,6 +411,60 @@ const Presensi = () => {
           </tbody>
         </table>
       </div>
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/15 bg-opacity-50 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full relative">
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-2 right-3 text-xl"
+            >
+              ✖
+            </button>
+
+            <h2 className="text-xl font-bold mb-4">
+              Pengajuan {modalType === "sakit" ? "Sakit" : "Izin"}
+            </h2>
+
+            <div className="mb-4">
+              <label className="block mb-1">Keterangan</label>
+              <textarea
+                className="w-full border rounded px-2 py-1"
+                placeholder="Tuliskan alasan sakit / izin"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block mb-1">
+                Bukti {modalType === "sakit" ? "Sakit" : "Izin"}
+              </label>
+              <input
+                type="file"
+                onChange={(e) => {
+                  console.log(e.target.files[0]);
+                }}
+                className="w-full border rounded px-2 py-1"
+              />
+            </div>
+
+            <div className="text-right">
+              <button
+                onClick={() => {
+                  if (modalType === "sakit") {
+                    handleSubmitSakit();
+                  } else {
+                    handleSubmitIzin();
+                  }
+                }}
+                className="bg-green-700 hover:bg-green-900 cursor-pointer text-white px-4 py-2 rounded"
+              >
+                Ajukan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <button
         onClick={() => {
           console.log("isGoHome: ", isGoHome);

@@ -176,7 +176,7 @@ const RequestKeGudang = () => {
       const placementResponse = await getCurrentUserStorePlacement();
       // console.log("placementResponse: ", placementResponse);
       if (placementResponse.status == 200) {
-        setStorePlacement(placementResponse.data.data.store);
+        setStorePlacement(placementResponse.data.data[0].store);
       }
     } catch (error) {
       console.log("error :", error);
@@ -192,6 +192,7 @@ const RequestKeGudang = () => {
         undefined,
         storePlacement?.id
       );
+      console.log("requestReponse: ", requestReponse);
       if (requestReponse.status == 200) {
         setRequestData(requestReponse.data.data.storeRequestItems);
         if (requestReponse.data.data.totalPage) {
@@ -240,13 +241,19 @@ const RequestKeGudang = () => {
 
   useEffect(() => {
     fetchPlacementData();
-  }, []);
+    if (location.state?.refetch) {
+      fetchDataAyam();
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   useEffect(() => {
     if (storePlacement) {
       fetchRequestItemsData();
     }
   }, [storePlacement, page, selectedDate]);
+
+
 
   return (
     <>

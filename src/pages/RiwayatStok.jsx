@@ -100,11 +100,14 @@ const RiwayatStok = () => {
         : undefined;
 
       const historyResponse = await getStoreItemsHistories(date, page);
+
+      console.log("historyResponse: ", historyResponse);
       // console.log("page: ", page);
 
       if (historyResponse.status == 200) {
         setStoreItemHistories(historyResponse.data.data.storeItemHistories);
       }
+
       // setTotaldata(historyResponse.data.data.totalData);
       // setHistoryData(historyResponse.data.data.warehouseItemHistories);
       // setTotalPages(historyResponse.data.data.totalPage);
@@ -120,6 +123,7 @@ const RiwayatStok = () => {
   if (isDetailPage) {
     return <Outlet />;
   }
+  
   return (
     <div className="flex flex-col px-4 py-3 gap-4 ">
       {/* header */}

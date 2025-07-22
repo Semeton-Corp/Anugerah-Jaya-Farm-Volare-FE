@@ -25,6 +25,7 @@ export const deleteStorePlacementById = (payload) => {
     },
   });
 };
+
 //warehouse
 export const createWarehousePlacement = (payload) => {
   return api.post("/placements/warehouses", payload, {
