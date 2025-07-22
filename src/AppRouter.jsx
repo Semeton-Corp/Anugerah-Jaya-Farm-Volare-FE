@@ -639,7 +639,7 @@ const AppRouter = createBrowserRouter([
                 element: <OverviewStok />,
                 children: [
                   {
-                    path: "edit-stok",
+                    path: "edit-stok/:storeId/:itemId",
                     element: <EditStok />,
                   },
                 ],

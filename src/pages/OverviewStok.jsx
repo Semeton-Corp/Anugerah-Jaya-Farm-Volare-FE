@@ -10,7 +10,12 @@ import { getTodayDateInBahasa } from "../utils/dateFormat";
 import { MdEgg, MdShoppingCart } from "react-icons/md";
 import { FaCartShopping } from "react-icons/fa6";
 import { useEffect } from "react";
-import { getStoreOverview, getStores } from "../services/stores";
+import {
+  getStoreItemStocks,
+  getStoreOverview,
+  getStores,
+} from "../services/stores";
+import { getCurrentUserStorePlacement } from "../services/placement";
 
 const stokTokoData = [
   {
@@ -94,48 +99,19 @@ export const barangPesananData = [
   },
 ];
 
-const aktivitasTokoData = [
-  {
-    tanggal: "20 Maret 2025",
-    namaBarang: "Telur OK",
-    idBarang: "ID1234",
-    satuan: "Ikat",
-    kuantitas: 4000,
-    tempat: "Gudang A1",
-    keterangan: "Barang Keluar",
-  },
-  {
-    tanggal: "21 Maret 2025",
-    namaBarang: "Telur Retak",
-    idBarang: "ID1234",
-    satuan: "Butir",
-    kuantitas: 1200,
-    tempat: "Gudang A1",
-    keterangan: "Barang Keluar",
-  },
-  {
-    tanggal: "22 Maret 2025",
-    namaBarang: "Telur Pecah",
-    idBarang: "ID1234",
-    satuan: "Butir",
-    kuantitas: 1200,
-    tempat: "Gudang A1",
-    keterangan: "Barang Masuk",
-  },
-  {
-    tanggal: "23 Maret 2025",
-    namaBarang: "Telur Retak",
-    idBarang: "ID1234",
-    satuan: "Butir",
-    kuantitas: 1200,
-    tempat: "Gudang A1",
-    keterangan: "Barang Masuk",
-  },
-];
 const OverviewStok = () => {
   const userRole = localStorage.getItem("role");
   const location = useLocation();
   const navigate = useNavigate();
+
+  const [telurOkKg, setTelurOkKg] = useState(0);
+  const [telurOkIkat, setTelurOkIkat] = useState(0);
+  const [telurRetakKg, setTelurRetakKg] = useState(0);
+  const [telurRetakIkat, setTelurRetakIkat] = useState(0);
+  const [telurBonyokPlastik, setTelurBonyokPlastik] = useState(0);
+
+  const [storeItems, setStoreItems] = useState([]);
+
   const detailPages = [
     "detail-stok-toko",
     "riwayat-aktivitas-toko",
@@ -163,17 +139,51 @@ const OverviewStok = () => {
     navigate(detailPath);
   };
 
-  const editStokHandle = () => {
+  const editStokHandle = (storeId, itemId) => {
     const currentPath = location.pathname;
-    const detailPath = currentPath + "/edit-stok";
+    const detailPath = currentPath + `/edit-stok/${storeId}/${itemId}`;
 
     navigate(detailPath);
   };
 
   const fetchStokData = async () => {
     try {
-      const stokResponse = await getStoreOverview(selectedStore);
+      const stokResponse = await getStoreItemStocks(selectedStore);
       console.log("stokResponse: ", stokResponse);
+      if (stokResponse.status == 200) {
+        const eggSummaries = stokResponse.data.data.eggStoreItemSummaries;
+        const okKg =
+          eggSummaries.find(
+            (item) => item.name === "Telur OK" && item.unit === "Kg"
+          )?.quantity ?? 0;
+
+        const okIkat =
+          eggSummaries.find(
+            (item) => item.name === "Telur OK" && item.unit === "Ikat"
+          )?.quantity ?? 0;
+
+        const retakKg =
+          eggSummaries.find(
+            (item) => item.name === "Telur Retak" && item.unit === "Kg"
+          )?.quantity ?? 0;
+
+        const retakIkat =
+          eggSummaries.find(
+            (item) => item.name === "Telur Retak" && item.unit === "Ikat"
+          )?.quantity ?? 0;
+
+        const bonyokPlastik =
+          eggSummaries.find(
+            (item) => item.name === "Telur Bonyok" && item.unit === "Plastik"
+          )?.quantity ?? 0;
+
+        setTelurOkKg(okKg);
+        setTelurOkIkat(okIkat);
+        setTelurRetakKg(retakKg);
+        setTelurRetakIkat(retakIkat);
+        setTelurBonyokPlastik(bonyokPlastik);
+        setStoreItems(stokResponse.data.data.storeItems);
+      }
     } catch (error) {
       console.log("error :", error);
     }
@@ -186,10 +196,18 @@ const OverviewStok = () => {
       if (storeResponse.status === 200) {
         setStores(storeResponse.data.data);
         setSelectedStore(storeResponse.data.data[0].id);
-        console.log(
-          "storeResponse.data.data[0].id: ",
-          storeResponse.data.data[0].id
-        );
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const fetchPlacement = async () => {
+    try {
+      const placementResponse = await getCurrentUserStorePlacement();
+      console.log("placementResponse: ", placementResponse);
+      if (placementResponse.status === 200) {
+        setSelectedStore(placementResponse.data.data[0].store.id);
       }
     } catch (error) {
       console.log("error :", error);
@@ -197,14 +215,22 @@ const OverviewStok = () => {
   };
 
   useEffect(() => {
-    fetchStores();
+    if (userRole == "Owner") {
+      fetchStores();
+    } else {
+      fetchPlacement();
+    }
   }, []);
 
   useEffect(() => {
     if (selectedStore) {
       fetchStokData();
     }
-  }, [selectedStore]);
+    if (location?.state?.refetch) {
+      fetchStokData();
+      window.history.replaceState({}, document.title);
+    }
+  }, [selectedStore, location]);
   return (
     <>
       {isDetailPage ? (
@@ -215,16 +241,12 @@ const OverviewStok = () => {
           <div className="flex justify-between mb-2 flex-wrap gap-4">
             <h1 className="text-3xl font-bold">Stok Toko</h1>
             <div className="flex gap-2">
-              <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-                <MdStore size={18} />
-                <div className="text-base font-medium ms-2">Semua Toko</div>
-              </div>
-              <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-                <PiCalendarBlank size={18} />
-                <div className="text-base font-medium ms-2">
-                  Hari ini ({getTodayDateInBahasa()})
+              {userRole == "Owner" && (
+                <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+                  <MdStore size={18} />
+                  <div className="text-base font-medium ms-2">Semua Toko</div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -244,14 +266,18 @@ const OverviewStok = () => {
               <div className="flex justify-center gap-4">
                 <div className="flex justify-center flex-wrap gap-4">
                   <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                    <p className="text-3xl font-bold text-center">50</p>
+                    <p className="text-3xl font-bold text-center">
+                      {parseInt(telurOkIkat)}
+                    </p>
                     <p className="text-xl text-center">Ikat</p>
                   </div>
                 </div>
 
                 <div className="flex justify-center flex-wrap gap-4">
                   <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                    <p className="text-3xl font-bold text-center">750</p>
+                    <p className="text-3xl font-bold text-center">
+                      {parseInt(telurOkKg)}
+                    </p>
                     <p className="text-xl text-center">Kg</p>
                   </div>
                 </div>
@@ -271,7 +297,9 @@ const OverviewStok = () => {
                 <div className="flex justify-center flex-wrap gap-4">
                   {/* item ikat */}
                   <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                    <p className="text-3xl font-bold text-center">3</p>
+                    <p className="text-3xl font-bold text-center">
+                      {parseInt(telurRetakIkat)}
+                    </p>
                     <p className="text-xl text-center">Ikat</p>
                   </div>
                 </div>
@@ -279,7 +307,9 @@ const OverviewStok = () => {
                 <div className="flex justify-center flex-wrap gap-4">
                   {/* item ikat */}
                   <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                    <p className="text-3xl font-bold text-center">45</p>
+                    <p className="text-3xl font-bold text-center">
+                      {parseInt(telurRetakKg)}
+                    </p>
                     <p className="text-xl text-center">kg</p>
                   </div>
                 </div>
@@ -298,7 +328,9 @@ const OverviewStok = () => {
               <div className="flex justify-center flex-wrap gap-4">
                 {/* item butir */}
                 <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                  <p className="text-3xl font-bold text-center">15</p>
+                  <p className="text-3xl font-bold text-center">
+                    {parseInt(telurBonyokPlastik)}
+                  </p>
                   <p className="text-xl text-center">Plastik</p>
                 </div>
               </div>
@@ -349,27 +381,29 @@ const OverviewStok = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {stokTokoData.map((item, index) => (
+                    {storeItems.map((item, index) => (
                       <tr key={index} className="border-b text-center">
-                        <td className="py-2 px-4">{item.namaBarang}</td>
-                        <td className="py-2 px-4">{item.satuan}</td>
-                        <td className="py-2 px-4">{item.kuantitas}</td>
+                        <td className="py-2 px-4">{item.item.name}</td>
+                        <td className="py-2 px-4">{item.item.unit}</td>
+                        <td className="py-2 px-4">{item.quantity}</td>
                         {/* <td className="py-2 px-4">{item.tempat}</td> */}
                         <td className="py-2 px-4 ">
                           <span
                             className={`w-24 py-1 px-5 rounded text-sm font-semibold ${
-                              item.keterangan === "aman"
+                              item.description === "aman"
                                 ? "bg-aman-box-surface-color text-aman-text-color"
                                 : "bg-kritis-box-surface-color text-kritis-text-color"
                             }`}
                           >
-                            {item.keterangan}
+                            {item.description}
                           </span>
                         </td>
                         {userRole !== "Owner" && (
                           <td className="py-2 px-4 flex justify-center">
                             <button
-                              onClick={editStokHandle}
+                              onClick={() =>
+                                editStokHandle(item.store.id, item.item.id)
+                              }
                               className="px-3 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer font-medium mb-3"
                             >
                               Edit Stok
@@ -438,6 +472,14 @@ const OverviewStok = () => {
               </table>
             </div>
           )} */}
+          <button
+            onClick={() => {
+              console.log("selectedStore: ", selectedStore);
+              console.log("storeItems: ", storeItems);
+            }}
+          >
+            CHECK
+          </button>
         </div>
       )}
     </>

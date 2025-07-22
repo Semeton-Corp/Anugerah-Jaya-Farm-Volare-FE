@@ -167,3 +167,27 @@ export const getStoreItemsHistoryById = (id) => {
     },
   });
 };
+
+export const getStoreItemStocks = (id) => {
+  return api.get(`/stores/overview/stocks/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const getStoreItem = (storeId, itemId) => {
+  return api.get(`/stores/${storeId}/items/${itemId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const updateStoreItem = (storeId, itemId, payload) => {
+  return api.put(`/stores/${storeId}/items/${itemId}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

@@ -1,14 +1,51 @@
 import React, { useState } from "react";
 import ConfirmUpdateModal from "../components/ConfirmModal";
+import { useNavigate, useParams } from "react-router-dom";
+import { getStoreItem, updateStoreItem } from "../services/stores";
+import { useEffect } from "react";
 
 const EditStok = () => {
+  const navigate = useNavigate();
+  const { storeId, itemId } = useParams();
+
+  const [itemName, setItemName] = useState("");
+  const [storeName, setStoreName] = useState("");
+
   const [jumlah, setJumlah] = useState(50);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const handleSubmit = () => {
-    console.log("Jumlah disimpan:", jumlah);
-    // Simpan logic di sini
+  const handleSubmit = async () => {
+    try {
+      const payload = {
+        quantity: parseInt(jumlah),
+      };
+      const updateResponse = await updateStoreItem(storeId, itemId, payload);
+      // console.log("updateResponse: ", updateResponse);
+      if (updateResponse.status == 200) {
+        navigate(-1, { state: { refetch: true } });
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
   };
+
+  const fetchDetail = async () => {
+    try {
+      const detailResponse = await getStoreItem(storeId, itemId);
+      // console.log("detailResponse: ", detailResponse);
+      if (detailResponse.status == 200) {
+        setItemName(detailResponse.data.data.item.name);
+        setStoreName(detailResponse.data.data.store.name);
+        setJumlah(detailResponse.data.data.quantity);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDetail();
+  }, []);
 
   return (
     <div className="p-6">
@@ -16,12 +53,12 @@ const EditStok = () => {
       <div className=" border rounded p-4 space-y-6 w-full ">
         <div>
           <label className="block text-sm mb-1">Nama Barang</label>
-          <p className="text-lg font-bold">Telur OK</p>
+          <p className="text-lg font-bold">{itemName}</p>
         </div>
 
         <div>
           <label className="block text-sm mb-1">Nama Toko</label>
-          <p className="text-lg font-bold">Toko A</p>
+          <p className="text-lg font-bold">{storeName}</p>
         </div>
 
         <div>
@@ -55,6 +92,14 @@ const EditStok = () => {
         onCancel={() => setShowConfirm(false)}
         onConfirm={handleSubmit}
       />
+      <button
+        onClick={() => {
+          console.log("storeId: ", storeId);
+          console.log("itemId: ", itemId);
+        }}
+      >
+        CHECK
+      </button>
     </div>
   );
 };
