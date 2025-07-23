@@ -1,7 +1,14 @@
 import React, { useState } from "react";
 import { FaSearch } from "react-icons/fa";
 
-const InformasiPembeli = ({ phone, setPhone, name, setName }) => {
+const InformasiPembeli = ({
+  phone,
+  setPhone,
+  name,
+  setName,
+  customerType,
+  setCustomerType,
+}) => {
   const [mode, setMode] = useState("registered");
 
   const handleSearch = () => {
@@ -22,7 +29,10 @@ const InformasiPembeli = ({ phone, setPhone, name, setName }) => {
       <div className="flex items-center gap-2 mb-6">
         <div className="flex gap-2">
           <button
-            onClick={() => setMode("registered")}
+            onClick={() => {
+              setMode("registered");
+              setCustomerType("Pelanggan Lama");
+            }}
             className={`px-3 py-1 rounded border text-sm cursor-pointer ${
               mode === "registered"
                 ? "bg-green-100 border-green-600"
@@ -34,6 +44,7 @@ const InformasiPembeli = ({ phone, setPhone, name, setName }) => {
           <button
             onClick={() => {
               setMode("new");
+              setCustomerType("Pelanggan Baru");
               setPhone("");
               setName("");
             }}

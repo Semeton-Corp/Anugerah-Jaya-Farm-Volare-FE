@@ -10,8 +10,12 @@ import {
 import { useState, useEffect } from "react";
 import { translateDateToBahasa } from "../utils/dateFormat";
 import { getCurrentPresence } from "../services/presence";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const Tugas = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [tugasTambahanData, setTugasTambahanData] = useState([]);
 
   const [dailyWorks, setDailyWorks] = useState([]);
@@ -19,10 +23,16 @@ const Tugas = () => {
 
   const [isPresence, setIsPresence] = useState(false);
 
+  const detailPages = ["detail-tugas-tambahan"];
+
+  const isDetailPage = detailPages.some((segment) =>
+    location.pathname.includes(segment)
+  );
+
   const fetchTugasTambahanData = async () => {
     try {
       const response = await getAdditionalWorks();
-      // console.log("response.data.data: ", response);
+      // console.log("response tugas tambahan: ", response);
 
       if (response.status == 200) {
         setTugasTambahanData(response.data.data);
@@ -36,7 +46,7 @@ const Tugas = () => {
   const fetchAllTugas = async () => {
     try {
       const response = await getDailyWorkUser();
-      console.log("response fetch tugas: ", response);
+      // console.log("response fetch tugas: ", response);
 
       if (response.status == 200) {
         setDailyWorks(response.data.data.dailyWorks);
@@ -55,6 +65,7 @@ const Tugas = () => {
       const takeResponse = await takeAdditionalWorks(id);
       // console.log("takeResponse: ", takeResponse);
       if (takeResponse.status == 201) {
+        alert("Berhasil mengambil tugas tambahan, tugas akan masuk ke tugas pegawai esok hari!")
         fetchTugasTambahanData();
       }
     } catch (error) {
@@ -83,13 +94,9 @@ const Tugas = () => {
     }
   };
 
-  useEffect(() => {
-    getTodayPresence();
-    if (isPresence) {
-      fetchTugasTambahanData();
-      fetchAllTugas();
-    }
-  }, []);
+  const detailTugasHandle = (id) => {
+    navigate(`${location.pathname}/detail-tugas-tambahan/${id}`);
+  };
 
   const finishAdditionalTask = async (taskId) => {
     const payload = {
@@ -135,6 +142,18 @@ const Tugas = () => {
         return "";
     }
   };
+
+  useEffect(() => {
+    getTodayPresence();
+    if (isPresence) {
+      fetchTugasTambahanData();
+      fetchAllTugas();
+    }
+  }, []);
+
+  if (isDetailPage) {
+    return <Outlet />;
+  }
 
   return (
     <div className="p-4">
@@ -183,9 +202,7 @@ const Tugas = () => {
                   </span>
                 </td>
                 <td className="py-2 px-4 flex gap-2">
-                  {!additionalWorks.some(
-                    (aw) => aw.additionalWork.id === item.id
-                  ) && (
+                  {!item.IsTakenByCurrentUser && (
                     <button
                       onClick={() => {
                         takeAdditionalTaskHandle(item.id);
@@ -197,7 +214,10 @@ const Tugas = () => {
                   )}
                 </td>
                 <td>
-                  <button className=" text-black text-sm underline font-medium cursor-pointer">
+                  <button
+                    onClick={() => detailTugasHandle(item.id)}
+                    className=" text-black text-sm underline font-medium cursor-pointer"
+                  >
                     Details
                   </button>
                 </td>

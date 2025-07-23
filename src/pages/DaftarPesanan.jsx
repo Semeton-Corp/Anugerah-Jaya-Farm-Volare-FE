@@ -91,7 +91,7 @@ const DaftarPesanan = () => {
                   </tr>
                 </thead>
                 <tbody className="text-center">
-                  {dataAntrianPesanan.map((item, index) => (
+                  {dataAntrianPesanan?.map((item, index) => (
                     <tr key={index} className="border-b">
                       <td className="py-2 px-4">{item.warehouseItem.name}</td>
                       <td className="py-2 px-4">{item.quantity}</td>

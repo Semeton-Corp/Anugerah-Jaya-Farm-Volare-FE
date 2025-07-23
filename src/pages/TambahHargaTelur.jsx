@@ -38,17 +38,15 @@ const TambahHargaTelur = () => {
       }
     } else {
       try {
-        const tambahResponse = await getItemPrices(payload);
-        console.log("tambahResponse: ", tambahResponse);
-
+        const tambahResponse = await createItemPrice(payload);
+        // console.log("tambahResponse: ", tambahResponse);
         if (tambahResponse.status == 201) {
           navigate(-1, { state: { refetch: true } });
         }
       } catch (error) {
         console.alert("error :", error);
       }
-      console.log("Submitted:", payload);
-      // TODO: send payload to API
+      // console.log("Submitted:", payload);
     }
   };
 

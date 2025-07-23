@@ -32,7 +32,7 @@ export const takeAdditionalWorks = (id) => {
   return api.post(
     `/works/additionals/takes/${id}`,
     {},
-    {
+  {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",

@@ -44,7 +44,7 @@ const DaftarHargaTelur = () => {
 
     navigate(detailPath);
   };
-  
+
   const fetchHargaTelur = async () => {
     try {
       const hargaResponse = await getItemPrices();
@@ -117,7 +117,7 @@ const DaftarHargaTelur = () => {
               <tr key={idx} className="border-b">
                 <td className="px-3 py-2">{row.category}</td>
                 <td className="px-3 py-2">{row.item.name}</td>
-                <td className="px-3 py-2">{row.item.name}</td>
+                <td className="px-3 py-2">{row.item.unit}</td>
                 <td className="px-3 py-2">{`Rp ${row.price}`}</td>
                 <td className="px-3 py-2">
                   <button

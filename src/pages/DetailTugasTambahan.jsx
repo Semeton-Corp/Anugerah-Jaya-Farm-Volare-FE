@@ -6,6 +6,7 @@ import {
 } from "../services/dailyWorks";
 
 const DetailTugasTambahan = () => {
+  const userRole = localStorage.getItem("role");
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -15,6 +16,7 @@ const DetailTugasTambahan = () => {
   const fetchDetail = async () => {
     try {
       const response = await getAdditionalWorkById(id);
+      console.log("response: ", response);
       if (response.status === 200) {
         setDetailData(response.data.data);
       }
@@ -49,10 +51,10 @@ const DetailTugasTambahan = () => {
   }
 
   return (
-    <div className="mx-6 p-6 bg-white rounded border space-y-4">
+    <div className="mx-6 p-6 bg-white rounded border">
       <h1 className="text-2xl font-bold">Detail Tugas Tambahan</h1>
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 mt-6">
         <div>
           <span className="font-medium">Nama Tugas Tambahan</span>
           <div className="text-lg font-semibold">{detailData.name}</div>
@@ -73,7 +75,7 @@ const DetailTugasTambahan = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
           <div>
             <div className="font-medium">Tanggal Pelaksanaan</div>
             <div className="font-bold">{detailData.date}</div>
@@ -88,14 +90,12 @@ const DetailTugasTambahan = () => {
           </div>
         </div>
 
-        <div>
+        <div className="mt-6">
           <div className="font-medium">Gaji Tambahan / Pekerja</div>
-          <div className="font-bold text-lg text-red-600">
-            {detailData.salary}
-          </div>
+          <div className="font-bold text-lg">{`RP ${detailData.salary}`}</div>
         </div>
 
-        <div>
+        <div className="mt-6">
           <div className="font-medium">Deskripsi Pekerjaan</div>
           <div className="bg-gray-100 p-2 rounded">
             {detailData.description}
@@ -103,12 +103,12 @@ const DetailTugasTambahan = () => {
         </div>
 
         <div>
-          <div className="font-medium mb-2">
+          <div className="font-medium mb-2 mt-6">
             Pegawai yang mengambil pekerjaan
           </div>
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-teal-800 text-white">
+              <tr className="bg-green-700 text-white">
                 <th className="px-4 py-2 text-left">Nama Pegawai</th>
                 <th className="px-4 py-2 text-left">Jabatan</th>
               </tr>
@@ -117,10 +117,8 @@ const DetailTugasTambahan = () => {
               {detailData.additionalWorkUserInformation?.map(
                 (worker, index) => (
                   <tr key={index} className="border-t">
-                    <td className="px-4 py-2">
-                      {worker.user?.userName || "-"}
-                    </td>
-                    <td className="px-4 py-2">{worker.role?.name || "-"}</td>
+                    <td className="px-4 py-2">{worker.userName || "-"}</td>
+                    <td className="px-4 py-2">{worker.roleName || "-"}</td>
                   </tr>
                 )
               )}
@@ -128,15 +126,16 @@ const DetailTugasTambahan = () => {
           </table>
         </div>
       </div>
-
-      <div className="text-right">
-        <button
-          onClick={handleDelete}
-          className="bg-red-500 text-white py-2 px-6 rounded hover:bg-red-700"
-        >
-          Hapus Tugas Tambahan
-        </button>
-      </div>
+      {userRole == "Owner" && (
+        <div className="text-right">
+          <button
+            onClick={handleDelete}
+            className="bg-red-500 text-white py-2 px-6 rounded hover:bg-red-700"
+          >
+            Hapus Tugas Tambahan
+          </button>
+        </div>
+      )}
     </div>
   );
 };

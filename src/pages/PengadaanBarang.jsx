@@ -137,7 +137,7 @@ const PengadaanBarang = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left border-collapse">
             <thead>
-              <tr className="bg-green-700 text-white text-center">
+              <tr className="bg-green-700 text-white ">
                 <th className="py-2 px-4">Tanggal Pemesanan</th>
                 <th className="py-2 px-4">Nama Barang</th>
                 <th className="py-2 px-4">Satuan</th>

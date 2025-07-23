@@ -22,7 +22,13 @@ import { createStoreSalePayment } from "../services/stores";
 import { updateStoreSalePayment } from "../services/stores";
 import { updateStoreSale } from "../services/stores";
 import InformasiPembeli from "../components/InformasiPembeli";
-import { getItems } from "../services/item";
+import {
+  getItemPrices,
+  getItemPricesDiscount,
+  getItems,
+} from "../services/item";
+import { getCustomers } from "../services/costumer";
+import { getCurrentUserStorePlacement } from "../services/placement";
 
 const InputDataPesanan = () => {
   const location = useLocation();
@@ -41,7 +47,9 @@ const InputDataPesanan = () => {
   const [items, setItems] = useState([]);
   const [selectedItem, setSelectedItem] = useState("");
 
-  const [customer, setCustomer] = useState("");
+  const [customers, setCustomers] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [customerType, setCustomerType] = useState("Pelanggan Lama");
   const [phone, setPhone] = useState(0);
   const [quantity, setQuantity] = useState(0);
   const [unit, setUnit] = useState("Ikat");
@@ -61,6 +69,15 @@ const InputDataPesanan = () => {
   const [paymentMethod, setPaymentMethod] = useState("Tunai");
   const [paymentProof, setPaymentProof] = useState("https://example.com");
 
+  const [unitOptions, setUnitOptions] = useState([]);
+
+  const [itemPrices, setItemPrices] = useState([]);
+  const [itemPrice, setItemPrice] = useState([]);
+  const [itemPriceDiscounts, setItemPriceDiscounts] = useState([]);
+  const [itemPriceDiscount, setItemPriceDiscount] = useState([]);
+
+  const [transactionCount, setTransactionCount] = useState(0);
+
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [paymentId, setPaymentId] = useState(0);
@@ -69,13 +86,40 @@ const InputDataPesanan = () => {
     location.pathname.includes(segment)
   );
 
+  const fetchItemPrices = async () => {
+    try {
+      const priceResponse = await getItemPrices();
+      const discountResponse = await getItemPricesDiscount();
+      // console.log("priceResponse: ", priceResponse);
+      // console.log("discountResponse: ", discountResponse);
+      if (priceResponse.status == 200 && discountResponse.status == 200) {
+        setItemPrices(priceResponse.data.data);
+        setItemPriceDiscounts(discountResponse.data.data);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
   const fetchStoresData = async () => {
     try {
       const response = await getStores();
-
       if (response.status == 200) {
         setStores(response.data.data);
         setSelectedStore(response.data.data[0].id);
+      }
+    } catch (error) {
+      alert("Gagal memuat data toko: ", error);
+      console.log("error: ", error);
+    }
+  };
+
+  const fetchStorePlacement = async () => {
+    try {
+      const response = await getCurrentUserStorePlacement();
+      // console.log("response: ", response);
+      if (response.status == 200) {
+        setSelectedStore(response.data.data[0].store.id);
       }
     } catch (error) {
       alert("Gagal memuat data toko: ", error);
@@ -88,11 +132,14 @@ const InputDataPesanan = () => {
       const response = await getItems("Telur", {
         // storeId
       });
-      console.log("response fetch item data", response);
 
       if (response.status == 200) {
-        setItems(response.data.data);
-        setSelectedItem(response.data.data[0].id);
+        const filterData = response.data.data.filter(
+          (item) => item.name != "Telur Reject"
+        );
+        setItems(filterData);
+
+        setSelectedItem(filterData[0]);
       }
     } catch (error) {}
   };
@@ -100,14 +147,13 @@ const InputDataPesanan = () => {
   const fetchEditSaleStoreData = async (id) => {
     try {
       const response = await getStoreSaleById(id);
-      console.log("id: ", id);
-
-      console.log("response get sale by id: ", response);
+      // console.log("id: ", id);
+      // console.log("response get sale by id: ", response);
       // console.log("customer name: ", response.data.data.customer);
 
       if (response.status == 200) {
         setSelectedStore(response.data.data.store.id);
-        setCustomer(response.data.data.customer);
+        setCustomerName(response.data.data.customer);
         setPhone(response.data.data.phone);
         setSelectedItem(response.data.data.warehouseItem.name);
         setQuantity(response.data.data.quantity);
@@ -115,7 +161,6 @@ const InputDataPesanan = () => {
         setPrice(response.data.data.price);
         setSendDate(convertToInputDateFormat(response.data.data.sentDate));
         setTotal(response.data.data.totalPrice);
-
         setPaymentHistory(response.data.data.payments);
         setRemaining(response.data.data.remainingPayment);
         setPaymentStatus(response.data.data.paymentStatus);
@@ -123,10 +168,57 @@ const InputDataPesanan = () => {
     } catch (error) {}
   };
 
-  useEffect(() => {
-    fetchStoresData();
-    fetchItemsData(selectedStore);
+  const fetchCostumer = async (id) => {
+    try {
+      const costumerResponse = await getCustomers();
+      // console.log("costumerResponse: ", costumerResponse);
+    } catch (error) {}
+  };
 
+  const getPrice = () => {
+    const priceItem = itemPrices.find(
+      (price) =>
+        price.item.name == selectedItem.name &&
+        price.item.unit == selectedItem.unit
+    );
+
+    const applicableDiscounts = itemPriceDiscounts.filter(
+      (discount) => transactionCount >= discount.minimumTransactionUser
+    );
+
+    const selectedDiscount = applicableDiscounts.length
+      ? applicableDiscounts.reduce((prev, curr) =>
+          curr.minimumTransactionUser > prev.minimumTransactionUser
+            ? curr
+            : prev
+        )
+      : 0;
+
+    const price = priceItem?.price;
+    const discountPercent = selectedDiscount.totalDiscount / 100;
+
+    if (!price) {
+      alert("❌ Harga barang yang dipilih belum ditentukan oleh pusat!");
+    }
+
+    const totalitemPrice = price * quantity;
+    const totalDiscount = totalitemPrice * discountPercent;
+    // console.log("totalitemPrice: ", totalitemPrice);
+    // console.log("totalDiscount: ", totalDiscount);
+    setItemPrice(totalitemPrice);
+    setItemPriceDiscount(totalDiscount);
+  };
+
+  //START useEffect
+  useEffect(() => {
+    if (userRole == "Owner") {
+      fetchStoresData();
+    } else {
+      fetchStorePlacement();
+    }
+    fetchItemPrices();
+    fetchItemsData(selectedStore);
+    fetchCostumer();
     if (id) {
       fetchEditSaleStoreData(id);
       setEditable(false);
@@ -138,6 +230,16 @@ const InputDataPesanan = () => {
   }, [selectedStore]);
 
   useEffect(() => {
+    if (selectedItem.name == "Telur Bonyok") {
+      setUnitOptions(["Plastik"]);
+      setUnit("Plastik");
+    } else {
+      setUnitOptions(["Ikat", "Kg"]);
+      setUnit("Ikat");
+    }
+  }, [selectedItem]);
+
+  useEffect(() => {
     setTotal(price * quantity);
   }, [price, quantity]);
 
@@ -146,6 +248,12 @@ const InputDataPesanan = () => {
       setRemaining(total - nominal);
     }
   }, [total, nominal]);
+
+  useEffect(() => {
+    if (quantity) {
+      getPrice();
+    }
+  }, [selectedItem, transactionCount, quantity]);
 
   const submitHandle = async () => {
     const storeSalePayment = {
@@ -156,7 +264,7 @@ const InputDataPesanan = () => {
     };
 
     const payload = {
-      customer: customer,
+      customer: customerName,
       phone: phone.toString(),
       warehouseItemId: selectedItem,
       saleUnit: unit,
@@ -195,7 +303,7 @@ const InputDataPesanan = () => {
     const storeSalePayment = paymentHistory;
 
     const payload = {
-      customer: customer,
+      customer: customerName,
       phone: phone.toString(),
       warehouseItemId: selectedItem,
       saleUnit: unit,
@@ -410,8 +518,10 @@ const InputDataPesanan = () => {
         <InformasiPembeli
           phone={phone}
           setPhone={setPhone}
-          name={customer}
-          setName={setCustomer}
+          name={customerName}
+          setName={setCustomerName}
+          customerType={customerType}
+          setCustomerType={setCustomerType}
         />
 
         {/* nama pelanggan & nomor telpon */}
@@ -449,53 +559,54 @@ const InputDataPesanan = () => {
             <label className="block font-medium  mt-4">Nama Barang</label>
             <select
               className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
-              value={selectedItem}
+              value={selectedItem?.id}
               onChange={(e) => {
-                setSelectedItem(e.target.value);
+                const selected = items.find(
+                  (item) => item.id == e.target.value
+                );
+                console.log("selected: ", selected);
+                setSelectedItem(selected);
               }}
             >
               {items.map((item) => (
                 <option value={item.id} key={item.id}>
-                  {item.name}
+                  {`${item.name} - ${item.unit}`}
                 </option>
               ))}
             </select>
           </div>
         </div>
 
-        <div>
-          <div className="w-full">
-            <label className="block font-medium  mt-4">Jumlah Barang</label>
-            <div className="flex justify-between gap-4">
-              <div className="w-full">
-                <input
-                  className="w-full border bg-black-4 cursor-text rounded p-2 mb-4"
-                  type="number"
-                  placeholder="Masukkan nama barang"
-                  value={quantity === 0 ? "" : quantity}
-                  onChange={(e) => {
-                    setQuantity(Number(e.target.value));
-                  }}
-                />
-              </div>
-
-              <div className="w-full">
-                <select
-                  className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
-                  value={unit}
-                  onChange={(e) => {
-                    setUnit(e.target.value);
-                  }}
-                >
-                  <option disabled hidden value="">
-                    Pilih satuan kuantitas
-                  </option>
-                  <option value="Ikat">Ikat</option>
-                  <option value="Karpet">Karpet</option>
-                  <option value="Butir">Butir</option>
-                </select>
-              </div>
-            </div>
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <label className="block font-medium mt-4">Jumlah Barang</label>
+            <input
+              className="w-full border bg-black-4 cursor-text rounded p-2 mb-4"
+              type="number"
+              placeholder="Masukkan jumlah barang"
+              value={quantity === 0 ? "" : quantity}
+              onChange={(e) => setQuantity(Number(e.target.value))}
+            />
+          </div>
+          <div className="flex-1">
+            <label className="block font-medium mt-4">Satuan</label>
+            <p className="text-lg font-bold items-center">
+              {selectedItem.unit}
+            </p>
+            {/* <select
+              className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
+              value={unit}
+              onChange={(e) => setUnit(e.target.value)}
+            >
+              <option disabled hidden value="">
+                Pilih satuan kuantitas
+              </option>
+              {unitOptions?.map((unit, index) => (
+                <option key={index} value={unit}>
+                  {unit}
+                </option>
+              ))}
+            </select> */}
           </div>
         </div>
 
@@ -532,20 +643,28 @@ const InputDataPesanan = () => {
           </div>
         </div>
         <div className="flex justify-end">
-          <div className="p-4 max-w-xl">
-            <div className="flex justify-between mb-2">
+          <div className="p-4 max-w-4xl">
+            <div className="grid grid-cols-2 mb-2">
               <span className="text-lg">Harga Barang :</span>
-              <span className="font-bold text-lg">Rp {10000}</span>
+              <span className="font-bold text-lg text-right">
+                Rp {itemPrice ?? "0"}
+              </span>
             </div>
-            <div></div>
-            <div className="flex justify-between mb-4">
+
+            <div className="grid grid-cols-2 mb-4">
               <span className="text-lg">Potongan Harga :</span>
-              <span className="font-bold text-lg">Rp -{0}</span>
+              <span className="font-bold text-lg text-right">
+                Rp -{itemPriceDiscount}
+              </span>
             </div>
+
             <hr className="my-2" />
-            <div className="flex justify-between mt-4">
+
+            <div className="grid grid-cols-2 mt-4">
               <span className="font-bold text-xl">Total :</span>
-              <span className="font-bold text-xl">Rp {total}</span>
+              <span className="font-bold text-xl text-right">
+                Rp {itemPrice - itemPriceDiscount}
+              </span>
             </div>
           </div>
         </div>
@@ -684,8 +803,9 @@ const InputDataPesanan = () => {
           onClick={() => {
             console.log("===== Form Data =====");
             console.log("Toko:", selectedStore);
+            console.log("Customer Type:", customerType);
             console.log("Barang:", selectedItem);
-            console.log("Nama Pelanggan:", customer);
+            console.log("Nama Pelanggan:", customerName);
             console.log("No. Telepon:", phone);
             console.log("Jumlah:", quantity);
             console.log("Unit:", unit);
@@ -714,11 +834,12 @@ const InputDataPesanan = () => {
             console.log("===== Form Data =====");
             console.log("ID:", id);
             console.log("Toko:", selectedStore);
+            console.log("customerType: ", customerType);
             console.log("Barang:", selectedItem);
-            console.log("Nama Pelanggan:", customer);
+            console.log("Nama Pelanggan:", customerName);
             console.log("No. Telepon:", phone);
             console.log("Jumlah:", quantity);
-            console.log("Satuan:", unit);
+            console.log("Satuan:", selectedItem.unit);
             console.log("Harga:", price);
             console.log("Total:", total);
             console.log("Tanggal Kirim:", sendDate);
@@ -728,6 +849,9 @@ const InputDataPesanan = () => {
             console.log("Nominal Bayar:", nominal);
             console.log("Sisa Cicilan:", remaining);
             console.log("Bukti Pembayaran:", paymentProof);
+            console.log("itemPrices: ", itemPrices);
+            console.log("itemPriceDiscounts: ", itemPriceDiscounts);
+            console.log("selectedItem: ", selectedItem);
             console.log("=====================");
           }}
           className="px-5 py-3 bg-green-700 rounded-[4px] hover:bg-green-900 cursor-pointer text-white"
