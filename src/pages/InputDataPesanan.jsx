@@ -50,6 +50,8 @@ const InputDataPesanan = () => {
   const [customers, setCustomers] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerType, setCustomerType] = useState("Pelanggan Lama");
+  const [selectedCustomerId, setSelectedCustomerId] = useState(0);
+
   const [phone, setPhone] = useState(0);
   const [quantity, setQuantity] = useState(0);
   const [unit, setUnit] = useState("Ikat");
@@ -75,6 +77,7 @@ const InputDataPesanan = () => {
   const [itemPrice, setItemPrice] = useState([]);
   const [itemPriceDiscounts, setItemPriceDiscounts] = useState([]);
   const [itemPriceDiscount, setItemPriceDiscount] = useState([]);
+  const [discount, setDiscount] = useState([]);
 
   const [transactionCount, setTransactionCount] = useState(0);
 
@@ -144,6 +147,21 @@ const InputDataPesanan = () => {
     } catch (error) {}
   };
 
+  const fetchCustomerData = async () => {
+    try {
+      const customerResponse = await getCustomers();
+      console.log("customerResponse: ", customerResponse);
+      if (customerResponse.status == 200) {
+        setCustomers(customerResponse.data.data);
+        // setStores(response.data.data);
+        // setSelectedStore(response.data.data[0].id);
+      }
+    } catch (error) {
+      alert("Gagal memuat data toko: ", error);
+      console.log("error: ", error);
+    }
+  };
+
   const fetchEditSaleStoreData = async (id) => {
     try {
       const response = await getStoreSaleById(id);
@@ -205,6 +223,7 @@ const InputDataPesanan = () => {
     const totalDiscount = totalitemPrice * discountPercent;
     // console.log("totalitemPrice: ", totalitemPrice);
     // console.log("totalDiscount: ", totalDiscount);
+    setDiscount(selectedDiscount.totalDiscount);
     setItemPrice(totalitemPrice);
     setItemPriceDiscount(totalDiscount);
   };
@@ -216,6 +235,7 @@ const InputDataPesanan = () => {
     } else {
       fetchStorePlacement();
     }
+    fetchCustomerData();
     fetchItemPrices();
     fetchItemsData(selectedStore);
     fetchCostumer();
@@ -230,22 +250,13 @@ const InputDataPesanan = () => {
   }, [selectedStore]);
 
   useEffect(() => {
-    if (selectedItem.name == "Telur Bonyok") {
-      setUnitOptions(["Plastik"]);
-      setUnit("Plastik");
-    } else {
-      setUnitOptions(["Ikat", "Kg"]);
-      setUnit("Ikat");
-    }
-  }, [selectedItem]);
-
-  useEffect(() => {
-    setTotal(price * quantity);
+    setTotal(itemPrice - itemPriceDiscount);
+    // console.log("total: ", itemPrice - itemPriceDiscount);
   }, [price, quantity]);
 
   useEffect(() => {
     if (!id) {
-      setRemaining(total - nominal);
+      setRemaining(itemPrice - itemPriceDiscount - nominal);
     }
   }, [total, nominal]);
 
@@ -264,37 +275,51 @@ const InputDataPesanan = () => {
     };
 
     const payload = {
-      customer: customerName,
-      phone: phone.toString(),
-      warehouseItemId: selectedItem,
+      itemId: selectedItem.id,
       saleUnit: unit,
       storeId: parseInt(selectedStore),
       quantity: quantity,
-      price: price.toString(),
+      price: total.toString(),
+      discount: discount,
       sendDate: formatDateToDDMMYYYY(sendDate),
       paymentType: paymentType,
       storeSalePayment: storeSalePayment,
+      customerType: customerType,
+      ...(customerType === "Pelanggan Baru"
+        ? {
+            customerName: customerName,
+            customerPhoneNumber: phone.toString(),
+          }
+        : {
+            customerId: selectedCustomerId,
+          }),
     };
 
     console.log("payload is ready: ", payload);
 
     try {
       const response = await createStoreSale(payload);
-      // console.log("response: ", response);
+      console.log("response: ", response);
 
       if (response.status == 201) {
         navigate(-1, { state: { refetch: true } });
       }
     } catch (error) {
-      console.log("response: ", error.response.data.message);
+      console.log("response: ", error);
+
       if (
         error.response.data.message == "nominal is not equal to total price"
       ) {
         alert(
-          "Jumlah pembayaran penuh harus memiliki nominal yang sama dengan tagihan total"
+          "❌Jumlah pembayaran penuh harus memiliki nominal yang sama dengan tagihan total"
         );
+      } else if (
+        error.response.data.message ==
+        "customer phone number must be in valid format 08"
+      ) {
+        alert("❌Masukkan format nomor telepon dengan 08XXXXXX");
       } else {
-        alert("Gagal menyimpan data pesanan");
+        alert("❌Gagal menyimpan data pesanan");
       }
     }
   };
@@ -310,7 +335,7 @@ const InputDataPesanan = () => {
       storeId: parseInt(selectedStore),
       isSend: false,
       quantity: quantity,
-      price: price.toString(),
+      price: itemPrice.toString(),
       sendDate: formatDateToDDMMYYYY(sendDate),
       paymentType: paymentType,
       storeSalePayment: storeSalePayment,
@@ -522,6 +547,9 @@ const InputDataPesanan = () => {
           setName={setCustomerName}
           customerType={customerType}
           setCustomerType={setCustomerType}
+          customers={customers}
+          setTransactionCount={setTransactionCount}
+          setSelectedCustomerId={setSelectedCustomerId}
         />
 
         {/* nama pelanggan & nomor telpon */}
@@ -545,7 +573,7 @@ const InputDataPesanan = () => {
               className="w-full border bg-black-4 cursor-text rounded p-2 mb-4"
               type="number"
               placeholder="Masukkan nomor telepon"
-              value={phone}
+              value={phone}as
               onChange={(e) => {
                 setPhone(e.target.value);
               }}
@@ -565,6 +593,7 @@ const InputDataPesanan = () => {
                   (item) => item.id == e.target.value
                 );
                 console.log("selected: ", selected);
+                setUnit(selected.unit);
                 setSelectedItem(selected);
               }}
             >
@@ -789,7 +818,7 @@ const InputDataPesanan = () => {
               <p className="me-2">RP</p>
               <p className="">
                 {remaining === 0
-                  ? "-"
+                  ? "0"
                   : Intl.NumberFormat("id-ID").format(remaining)}
               </p>
             </div>
@@ -801,20 +830,6 @@ const InputDataPesanan = () => {
       <div className="flex justify-end mb-8">
         <div
           onClick={() => {
-            console.log("===== Form Data =====");
-            console.log("Toko:", selectedStore);
-            console.log("Customer Type:", customerType);
-            console.log("Barang:", selectedItem);
-            console.log("Nama Pelanggan:", customerName);
-            console.log("No. Telepon:", phone);
-            console.log("Jumlah:", quantity);
-            console.log("Unit:", unit);
-            console.log("Harga:", price);
-            console.log("Tanggal Kirim:", formatDateToDDMMYYYY(sendDate));
-            console.log("Status Pembayaran:", paymentType);
-            console.log("Nominal:", nominal);
-            console.log("=====================");
-
             if (id) {
               editSubmitHandle();
             } else {
@@ -831,27 +846,48 @@ const InputDataPesanan = () => {
       <div className="flex justify-end mb-8">
         <div
           onClick={() => {
+            const storeSalePayment = {
+              paymentDate: formatDateToDDMMYYYY(paymentDate),
+              nominal: nominal.toString(),
+              paymentProof: paymentProof,
+              paymentMethod: paymentMethod,
+            };
+            const payload = {
+              itemId: selectedItem.id,
+              saleUnit: unit,
+              storeId: parseInt(selectedStore),
+              quantity: quantity,
+              price: itemPrice.toString(),
+              discount: discount,
+              sendDate: formatDateToDDMMYYYY(sendDate),
+              paymentType: paymentType,
+              storeSalePayment: storeSalePayment,
+              customerType: customerType,
+            };
             console.log("===== Form Data =====");
-            console.log("ID:", id);
-            console.log("Toko:", selectedStore);
-            console.log("customerType: ", customerType);
-            console.log("Barang:", selectedItem);
-            console.log("Nama Pelanggan:", customerName);
-            console.log("No. Telepon:", phone);
-            console.log("Jumlah:", quantity);
-            console.log("Satuan:", selectedItem.unit);
-            console.log("Harga:", price);
-            console.log("Total:", total);
-            console.log("Tanggal Kirim:", sendDate);
-            console.log("Tanggal Bayar:", paymentDate);
-            console.log("Jenis Pembayaran:", paymentType);
-            console.log("Metode Pembayaran:", paymentMethod);
-            console.log("Nominal Bayar:", nominal);
-            console.log("Sisa Cicilan:", remaining);
-            console.log("Bukti Pembayaran:", paymentProof);
-            console.log("itemPrices: ", itemPrices);
-            console.log("itemPriceDiscounts: ", itemPriceDiscounts);
-            console.log("selectedItem: ", selectedItem);
+            console.log("payload: ", payload);
+            // console.log("ID:", id);
+            // console.log("Toko:", selectedStore);
+            // console.log("customerType: ", customerType);
+            // console.log("Barang:", selectedItem);
+            // console.log("Nama Pelanggan:", customerName);
+            // console.log("No. Telepon:", phone);
+            // console.log("Jumlah:", quantity);
+            // console.log("Satuan:", selectedItem.unit);
+            // console.log("Harga:", price);
+            // console.log("Total:", total);
+            // console.log("Tanggal Kirim:", sendDate);
+            // console.log("Tanggal Bayar:", paymentDate);
+            // console.log("Jenis Pembayaran:", paymentType);
+            // console.log("Metode Pembayaran:", paymentMethod);
+            // console.log("Nominal Bayar:", nominal);
+            // console.log("Sisa Cicilan:", remaining);
+            // console.log("Bukti Pembayaran:", paymentProof);
+            // console.log("itemPrices: ", itemPrices);
+            // console.log("itemPriceDiscounts: ", itemPriceDiscounts);
+            // console.log("selectedItem: ", selectedItem);
+            // console.log("customers: ", customers);
+            // console.log("transactionCount: ", transactionCount);
             console.log("=====================");
           }}
           className="px-5 py-3 bg-green-700 rounded-[4px] hover:bg-green-900 cursor-pointer text-white"

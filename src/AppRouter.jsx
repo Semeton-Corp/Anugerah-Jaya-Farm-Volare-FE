@@ -82,6 +82,7 @@ import DetailGudang from "./pages/DetailGudang";
 import DetailToko from "./pages/DetailToko";
 import DetailTugasTambahan from "./pages/DetailTugasTambahan";
 import DetailRiwayatStok from "./pages/DetailRiwayatStok";
+import PageKosong from "./pages/PageKosong";
 
 const AppRouter = createBrowserRouter([
   {
@@ -124,6 +125,10 @@ const AppRouter = createBrowserRouter([
                     element: <InputTelur />,
                   },
                 ],
+              },
+              {
+                path: "page-kosong",
+                element: <PageKosong />,
               },
               {
                 path: "kandang",

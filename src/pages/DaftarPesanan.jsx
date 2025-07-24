@@ -29,6 +29,7 @@ const DaftarPesanan = () => {
   const fetchDataAntrianPesanan = async () => {
     try {
       const response = await getListStoreSale();
+      console.log("response: ", response);
       // console.log("response List: ", response);
       // console.log("(response.data.data): ", response.data.data.storeSales);
       if (response.status == 200) {
@@ -85,6 +86,7 @@ const DaftarPesanan = () => {
                     <th className="py-2 px-4">Jumlah</th>
                     <th className="py-2 px-4">Pelanggan</th>
                     <th className="py-2 px-4">Tanggal Kirim</th>
+                    <th className="py-2 px-4">Pembayaran</th>
                     <th className="py-2 px-4">Pengiriman</th>
                     <th className="py-2 px-4">Aksi</th>
                     <th className="py-2 px-4"></th>
@@ -93,27 +95,18 @@ const DaftarPesanan = () => {
                 <tbody className="text-center">
                   {dataAntrianPesanan?.map((item, index) => (
                     <tr key={index} className="border-b">
-                      <td className="py-2 px-4">{item.warehouseItem.name}</td>
+                      <td className="py-2 px-4">{item.orderDate}</td>
+                      <td className="py-2 px-4">{item.item.name}</td>
+                      <td className="py-2 px-4">{item.item.unit}</td>
                       <td className="py-2 px-4">{item.quantity}</td>
-                      <td className="py-2 px-4">{item.customer}</td>
-                      <td className="py-2 px-8">
-                        <div
-                          className={`px-3 py-1 rounded-[4px] ${
-                            item.paymentType == "Penuh"
-                              ? "bg-aman-box-surface-color text-aman-text-color"
-                              : "bg-orange-200 text-orange-900"
-                          }`}
-                        >
-                          {item.paymentType}
-                        </div>
-                      </td>
-
+                      <td className="py-2 px-4">{item.customer.name}</td>
+                      <td className="py-2 px-4">{item.sentDate}</td>
                       <td className="py-2 px-8">
                         <div
                           className={`px-3 py-1 rounded-[4px] ${
                             item.paymentStatus == "Lunas"
                               ? "bg-aman-box-surface-color text-aman-text-color"
-                              : "bg-orange-200 text-orange-900"
+                              : "bg-kritis-box-surface-color text-kritis-text-color"
                           }`}
                         >
                           {item.paymentStatus}
@@ -123,7 +116,7 @@ const DaftarPesanan = () => {
                       <td className="py-2 px-8">
                         <div
                           className={`px-3 py-1 rounded-[4px] ${
-                            item.isSend == true
+                            item.isSend
                               ? "bg-aman-box-surface-color text-aman-text-color"
                               : "bg-kritis-box-surface-color text-kritis-text-color"
                           }`}
