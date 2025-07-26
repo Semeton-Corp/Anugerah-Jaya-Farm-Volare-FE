@@ -103,6 +103,10 @@ const InputDataPesanan = () => {
       if (priceResponse.status == 200 && discountResponse.status == 200) {
         setItemPrices(priceResponse.data.data);
         setItemPriceDiscounts(discountResponse.data.data);
+        if (id) {
+          fetchEditSaleStoreData(id);
+          setEditable(false);
+        }
       }
     } catch (error) {
       console.log("error :", error);
@@ -174,11 +178,13 @@ const InputDataPesanan = () => {
       // console.log("customer name: ", response.data.data.customer);
 
       if (response.status == 200) {
+        console.log("test: ");
         setSelectedStore(response.data.data.store.id);
         setCustomerName(response.data.data.customer.name);
-        setPhone(response.data.data.phone);
-        setSelectedItem(response.data.data.warehouseItem.name);
+        setPhone(response.data.data.customer.phoneNumber);
+        setSelectedItem(response.data.data.item);
         setQuantity(response.data.data.quantity);
+        console.log("nilai quantity: ", response.data.data.quantity);
         setUnit(response.data.data.saleUnit);
         setPrice(response.data.data.price);
         setSendDate(convertToInputDateFormat(response.data.data.sentDate));
@@ -265,7 +271,7 @@ const InputDataPesanan = () => {
           setTelurRetakIkat(retakIkat);
           setTelurBonyokPlastik(bonyokPlastik);
         }
-        console.log("summaryResponse: ", summaryResponse);
+        // console.log("summaryResponse: ", summaryResponse);
       }
     } catch (error) {
       console.log("error :", error);
@@ -283,10 +289,6 @@ const InputDataPesanan = () => {
     fetchCustomerData();
     fetchItemPrices();
     fetchItemsData(selectedStore);
-    if (id) {
-      fetchEditSaleStoreData(id);
-      setEditable(false);
-    }
   }, []);
 
   useEffect(() => {
@@ -347,7 +349,7 @@ const InputDataPesanan = () => {
 
     try {
       const response = await createStoreSale(payload);
-      console.log("response: ", response);
+      // console.log("response: ", response);
 
       if (response.status == 201) {
         navigate(-1, { state: { refetch: true } });
@@ -395,7 +397,7 @@ const InputDataPesanan = () => {
 
     try {
       const response = await updateStoreSale(id, payload);
-      console.log("response update: ", response);
+      // console.log("response update: ", response);
 
       if (response.status == 200) {
         navigate(-1, { state: { refetch: true } });
