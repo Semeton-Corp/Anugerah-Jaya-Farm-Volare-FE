@@ -6,7 +6,7 @@ import { TbEggCrackedFilled } from "react-icons/tb";
 import { BiSolidEditAlt } from "react-icons/bi";
 import { MdDelete } from "react-icons/md";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
-import { getStores } from "../services/stores";
+import { getEggStoreItemSummary, getStores } from "../services/stores";
 import { getWarehouseItems } from "../services/warehouses";
 import {
   getTodayDateInBahasa,
@@ -71,10 +71,15 @@ const InputDataPesanan = () => {
   const [paymentMethod, setPaymentMethod] = useState("Tunai");
   const [paymentProof, setPaymentProof] = useState("https://example.com");
 
-  const [unitOptions, setUnitOptions] = useState([]);
+  const [telurOkKg, setTelurOkKg] = useState(0);
+  const [telurOkIkat, setTelurOkIkat] = useState(0);
+  const [telurRetakKg, setTelurRetakKg] = useState(0);
+  const [telurRetakIkat, setTelurRetakIkat] = useState(0);
+  const [telurBonyokPlastik, setTelurBonyokPlastik] = useState(0);
 
   const [itemPrices, setItemPrices] = useState([]);
   const [itemPrice, setItemPrice] = useState([]);
+  const [itemTotalPrice, setItemTotalPrice] = useState([]);
   const [itemPriceDiscounts, setItemPriceDiscounts] = useState([]);
   const [itemPriceDiscount, setItemPriceDiscount] = useState([]);
   const [discount, setDiscount] = useState([]);
@@ -165,13 +170,12 @@ const InputDataPesanan = () => {
   const fetchEditSaleStoreData = async (id) => {
     try {
       const response = await getStoreSaleById(id);
-      // console.log("id: ", id);
-      // console.log("response get sale by id: ", response);
+      console.log("response get sale by id: ", response);
       // console.log("customer name: ", response.data.data.customer);
 
       if (response.status == 200) {
         setSelectedStore(response.data.data.store.id);
-        setCustomerName(response.data.data.customer);
+        setCustomerName(response.data.data.customer.name);
         setPhone(response.data.data.phone);
         setSelectedItem(response.data.data.warehouseItem.name);
         setQuantity(response.data.data.quantity);
@@ -183,13 +187,6 @@ const InputDataPesanan = () => {
         setRemaining(response.data.data.remainingPayment);
         setPaymentStatus(response.data.data.paymentStatus);
       }
-    } catch (error) {}
-  };
-
-  const fetchCostumer = async (id) => {
-    try {
-      const costumerResponse = await getCustomers();
-      // console.log("costumerResponse: ", costumerResponse);
     } catch (error) {}
   };
 
@@ -221,15 +218,63 @@ const InputDataPesanan = () => {
 
     const totalitemPrice = price * quantity;
     const totalDiscount = totalitemPrice * discountPercent;
-    // console.log("totalitemPrice: ", totalitemPrice);
-    // console.log("totalDiscount: ", totalDiscount);
+
     setDiscount(selectedDiscount.totalDiscount);
-    setItemPrice(totalitemPrice);
+    setItemPrice(price);
+    setItemTotalPrice(totalitemPrice);
     setItemPriceDiscount(totalDiscount);
+    setTotal(totalitemPrice - totalDiscount);
+  };
+
+  const getItemSummary = async () => {
+    try {
+      const placementResponse = await getCurrentUserStorePlacement();
+      if (placementResponse.status == 200) {
+        const storeId = placementResponse.data.data[0].store.id;
+        const summaryResponse = await getEggStoreItemSummary(storeId);
+        if (summaryResponse.status == 200) {
+          const eggSummaries = summaryResponse.data.data;
+          const okKg =
+            eggSummaries.find(
+              (item) => item.name === "Telur OK" && item.unit === "Kg"
+            )?.quantity ?? 0;
+
+          const okIkat =
+            eggSummaries.find(
+              (item) => item.name === "Telur OK" && item.unit === "Ikat"
+            )?.quantity ?? 0;
+
+          const retakKg =
+            eggSummaries.find(
+              (item) => item.name === "Telur Retak" && item.unit === "Kg"
+            )?.quantity ?? 0;
+
+          const retakIkat =
+            eggSummaries.find(
+              (item) => item.name === "Telur Retak" && item.unit === "Ikat"
+            )?.quantity ?? 0;
+
+          const bonyokPlastik =
+            eggSummaries.find(
+              (item) => item.name === "Telur Bonyok" && item.unit === "Plastik"
+            )?.quantity ?? 0;
+
+          setTelurOkKg(okKg);
+          setTelurOkIkat(okIkat);
+          setTelurRetakKg(retakKg);
+          setTelurRetakIkat(retakIkat);
+          setTelurBonyokPlastik(bonyokPlastik);
+        }
+        console.log("summaryResponse: ", summaryResponse);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
   };
 
   //START useEffect
   useEffect(() => {
+    getItemSummary();
     if (userRole == "Owner") {
       fetchStoresData();
     } else {
@@ -238,7 +283,6 @@ const InputDataPesanan = () => {
     fetchCustomerData();
     fetchItemPrices();
     fetchItemsData(selectedStore);
-    fetchCostumer();
     if (id) {
       fetchEditSaleStoreData(id);
       setEditable(false);
@@ -249,14 +293,18 @@ const InputDataPesanan = () => {
     fetchItemsData(selectedStore);
   }, [selectedStore]);
 
-  useEffect(() => {
-    setTotal(itemPrice - itemPriceDiscount);
-    // console.log("total: ", itemPrice - itemPriceDiscount);
-  }, [price, quantity]);
+  // useEffect(() => {
+  //   const total = itemPrice - itemPriceDiscount;
+  //   setTotal(itemPrice - itemPriceDiscount);
+  //   console.log("total: ", total);
+  //   console.log("itemPrice: ", itemPrice);
+  //   console.log("itemPriceDiscount: ", itemPriceDiscount);
+  //   // console.log("total: ", itemPrice - itemPriceDiscount);
+  // }, [price, quantity]);
 
   useEffect(() => {
     if (!id) {
-      setRemaining(itemPrice - itemPriceDiscount - nominal);
+      setRemaining(itemTotalPrice - itemPriceDiscount - nominal);
     }
   }, [total, nominal]);
 
@@ -279,7 +327,7 @@ const InputDataPesanan = () => {
       saleUnit: unit,
       storeId: parseInt(selectedStore),
       quantity: quantity,
-      price: total.toString(),
+      price: itemPrice.toString(),
       discount: discount,
       sendDate: formatDateToDDMMYYYY(sendDate),
       paymentType: paymentType,
@@ -318,6 +366,8 @@ const InputDataPesanan = () => {
         "customer phone number must be in valid format 08"
       ) {
         alert("❌Masukkan format nomor telepon dengan 08XXXXXX");
+      } else if (error.response.data.message == "customer already exist") {
+        alert("❌Pelanggan sudah terdaftar, gunakan nomor telepon lain");
       } else {
         alert("❌Gagal menyimpan data pesanan");
       }
@@ -335,7 +385,7 @@ const InputDataPesanan = () => {
       storeId: parseInt(selectedStore),
       isSend: false,
       quantity: quantity,
-      price: itemPrice.toString(),
+      price: itemTotalPrice.toString(),
       sendDate: formatDateToDDMMYYYY(sendDate),
       paymentType: paymentType,
       storeSalePayment: storeSalePayment,
@@ -463,11 +513,15 @@ const InputDataPesanan = () => {
 
             <div className="flex justify-center flex-wrap gap-4">
               <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                <p className="text-3xl font-bold text-center">50</p>
+                <p className="text-3xl font-bold text-center">
+                  {parseInt(telurOkIkat)}
+                </p>
                 <p className="text-xl text-center">Ikat</p>
               </div>
               <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                <p className="text-3xl font-bold text-center">750</p>
+                <p className="text-3xl font-bold text-center">
+                  {parseInt(telurOkKg)}
+                </p>
                 <p className="text-xl text-center">Kg</p>
               </div>
             </div>
@@ -485,11 +539,15 @@ const InputDataPesanan = () => {
             <div className="flex justify-center flex-wrap gap-4">
               {/* item butir */}
               <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                <p className="text-3xl font-bold text-center">3</p>
+                <p className="text-3xl font-bold text-center">
+                  {parseInt(telurRetakIkat)}
+                </p>
                 <p className="text-xl text-center">Ikat</p>
               </div>
               <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                <p className="text-3xl font-bold text-center">45</p>
+                <p className="text-3xl font-bold text-center">
+                  {parseInt(telurRetakKg)}
+                </p>
                 <p className="text-xl text-center">Kg</p>
               </div>
             </div>
@@ -506,7 +564,9 @@ const InputDataPesanan = () => {
             <div className="flex justify-center flex-wrap gap-4">
               {/* item butir */}
               <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                <p className="text-3xl font-bold text-center">15</p>
+                <p className="text-3xl font-bold text-center">
+                  {parseInt(telurBonyokPlastik)}
+                </p>
                 <p className="text-xl text-center">Plastik</p>
               </div>
             </div>
@@ -676,7 +736,7 @@ const InputDataPesanan = () => {
             <div className="grid grid-cols-2 mb-2">
               <span className="text-lg">Harga Barang :</span>
               <span className="font-bold text-lg text-right">
-                Rp {itemPrice ?? "0"}
+                Rp {itemTotalPrice ?? "0"}
               </span>
             </div>
 
@@ -692,7 +752,7 @@ const InputDataPesanan = () => {
             <div className="grid grid-cols-2 mt-4">
               <span className="font-bold text-xl">Total :</span>
               <span className="font-bold text-xl text-right">
-                Rp {itemPrice - itemPriceDiscount}
+                Rp {itemTotalPrice - itemPriceDiscount}
               </span>
             </div>
           </div>
@@ -857,7 +917,7 @@ const InputDataPesanan = () => {
               saleUnit: unit,
               storeId: parseInt(selectedStore),
               quantity: quantity,
-              price: itemPrice.toString(),
+              price: itemTotalPrice.toString(),
               discount: discount,
               sendDate: formatDateToDDMMYYYY(sendDate),
               paymentType: paymentType,

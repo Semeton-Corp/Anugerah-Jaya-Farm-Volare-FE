@@ -191,3 +191,11 @@ export const updateStoreItem = (storeId, itemId, payload) => {
     },
   });
 };
+
+export const getEggStoreItemSummary = (storeId) => {
+  return api.get(`/stores/items/eggs/summary/${storeId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

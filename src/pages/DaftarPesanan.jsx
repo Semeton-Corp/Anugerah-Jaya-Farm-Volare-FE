@@ -8,6 +8,7 @@ import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
 import { useState } from "react";
 import { getListStoreSale } from "../services/stores";
+import { useEffect } from "react";
 
 const DaftarPesanan = () => {
   const location = useLocation();
@@ -47,9 +48,13 @@ const DaftarPesanan = () => {
     navigate(inputPath);
   };
 
-  useState(() => {
+  useEffect(() => {
     fetchDataAntrianPesanan();
-  }, []);
+    if (location?.state?.refetch) {
+      fetchDataAntrianPesanan();
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   return (
     <>
