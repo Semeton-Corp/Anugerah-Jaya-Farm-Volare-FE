@@ -66,6 +66,14 @@ export const getStoreSaleById = (id) => {
   });
 };
 
+export const deleteStoreSale = (id) => {
+  return api.delete(`/stores/sales/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export const createStoreRequestItem = (payload) => {
   return api.post("/stores/request/items", payload, {
     headers: {

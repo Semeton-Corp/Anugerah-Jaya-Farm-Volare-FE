@@ -30,7 +30,7 @@ const DaftarPesanan = () => {
   const fetchDataAntrianPesanan = async () => {
     try {
       const response = await getListStoreSale();
-      console.log("response: ", response);
+      // console.log("response: ", response);
       // console.log("response List: ", response);
       // console.log("(response.data.data): ", response.data.data.storeSales);
       if (response.status == 200) {

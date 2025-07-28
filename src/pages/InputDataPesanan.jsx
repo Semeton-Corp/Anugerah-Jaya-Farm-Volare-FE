@@ -6,11 +6,16 @@ import { TbEggCrackedFilled } from "react-icons/tb";
 import { BiSolidEditAlt } from "react-icons/bi";
 import { MdDelete } from "react-icons/md";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
-import { getEggStoreItemSummary, getStores } from "../services/stores";
+import {
+  deleteStoreSale,
+  getEggStoreItemSummary,
+  getStores,
+} from "../services/stores";
 import { getWarehouseItems } from "../services/warehouses";
 import {
   getTodayDateInBahasa,
   formatDateToDDMMYYYY,
+  formatTanggalIndonesia,
 } from "../utils/dateFormat";
 import { useState, useRef } from "react";
 import { useEffect } from "react";
@@ -40,6 +45,7 @@ const InputDataPesanan = () => {
 
   const { id } = useParams();
   const [isEditable, setEditable] = useState(true);
+  const [isOutOfStock, setIsOutOfStock] = useState(false);
 
   const [stores, setStores] = useState([]);
   const [selectedStore, setSelectedStore] = useState("");
@@ -90,9 +96,21 @@ const InputDataPesanan = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [paymentId, setPaymentId] = useState(0);
 
+  const [showModal, setShowModal] = useState(false);
+
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
+
+  function getAvailableStock(name, unit) {
+    if (name === "Telur OK" && unit === "Kg") return telurOkKg;
+    if (name === "Telur OK" && unit === "Ikat") return telurOkIkat;
+    if (name === "Telur Retak" && unit === "Kg") return telurRetakKg;
+    if (name === "Telur Retak" && unit === "Ikat") return telurRetakIkat;
+    if (name === "Telur Bonyok" && unit === "Plastik")
+      return telurBonyokPlastik;
+    return 0;
+  }
 
   const fetchItemPrices = async () => {
     try {
@@ -159,7 +177,7 @@ const InputDataPesanan = () => {
   const fetchCustomerData = async () => {
     try {
       const customerResponse = await getCustomers();
-      console.log("customerResponse: ", customerResponse);
+      // console.log("customerResponse: ", customerResponse);
       if (customerResponse.status == 200) {
         setCustomers(customerResponse.data.data);
         // setStores(response.data.data);
@@ -295,14 +313,19 @@ const InputDataPesanan = () => {
     fetchItemsData(selectedStore);
   }, [selectedStore]);
 
-  // useEffect(() => {
-  //   const total = itemPrice - itemPriceDiscount;
-  //   setTotal(itemPrice - itemPriceDiscount);
-  //   console.log("total: ", total);
-  //   console.log("itemPrice: ", itemPrice);
-  //   console.log("itemPriceDiscount: ", itemPriceDiscount);
-  //   // console.log("total: ", itemPrice - itemPriceDiscount);
-  // }, [price, quantity]);
+  useEffect(() => {
+    if (!selectedItem) return;
+
+    const name = selectedItem.name;
+    const unit = selectedItem.unit;
+    const available = getAvailableStock(name, unit);
+
+    if (quantity > available) {
+      setIsOutOfStock(true);
+    } else {
+      setIsOutOfStock(false);
+    }
+  }, [quantity, selectedItem]);
 
   useEffect(() => {
     if (!id) {
@@ -345,7 +368,7 @@ const InputDataPesanan = () => {
           }),
     };
 
-    console.log("payload is ready: ", payload);
+    console.log("create payload is ready: ", payload);
 
     try {
       const response = await createStoreSale(payload);
@@ -371,7 +394,9 @@ const InputDataPesanan = () => {
       } else if (error.response.data.message == "customer already exist") {
         alert("❌Pelanggan sudah terdaftar, gunakan nomor telepon lain");
       } else {
-        alert("❌Gagal menyimpan data pesanan");
+        alert(
+          "❌Gagal menyimpan data pesanan, periksa kembali data input anda"
+        );
       }
     }
   };
@@ -380,20 +405,11 @@ const InputDataPesanan = () => {
     const storeSalePayment = paymentHistory;
 
     const payload = {
-      customer: customerName,
-      phone: phone.toString(),
-      warehouseItemId: selectedItem,
-      saleUnit: unit,
-      storeId: parseInt(selectedStore),
-      isSend: false,
       quantity: quantity,
-      price: itemTotalPrice.toString(),
       sendDate: formatDateToDDMMYYYY(sendDate),
-      paymentType: paymentType,
-      storeSalePayment: storeSalePayment,
     };
 
-    console.log("payload is ready: ", payload);
+    console.log("edit payload is ready: ", payload);
 
     try {
       const response = await updateStoreSale(id, payload);
@@ -416,6 +432,20 @@ const InputDataPesanan = () => {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      const deleteResponse = await deleteStoreSale(id);
+      // console.log("deleteResponse: ", deleteResponse);
+      if (deleteResponse.status === 204) {
+        setShowModal(false);
+        navigate(-1, { state: { refetch: true } });
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+    setShowModal(false);
+  };
+
   const createStoreSalePaymentHandle = async (id) => {
     const payload = {
       paymentDate: formatDateToDDMMYYYY(paymentDate),
@@ -424,9 +454,11 @@ const InputDataPesanan = () => {
       paymentMethod: paymentMethod,
     };
 
+    // console.log("payload: ", payload);
+
     try {
       const response = await createStoreSalePayment(id, payload);
-      console.log("response: ", response);
+      // console.log("response: ", response);
       if (response.status == 201) {
         fetchEditSaleStoreData(id);
         setShowPaymentModal(false);
@@ -454,6 +486,7 @@ const InputDataPesanan = () => {
 
   const updateStoreSalePaymentHandle = async () => {
     const payload = {
+      paymentMethod: paymentMethod,
       paymentDate: formatDateToDDMMYYYY(paymentDate),
       nominal: nominal.toString(),
       paymentProof: paymentProof,
@@ -461,7 +494,7 @@ const InputDataPesanan = () => {
 
     try {
       const response = await updateStoreSalePayment(id, paymentId, payload);
-      console.log("response: ", response);
+      // console.log("response: ", response);
       if (response.status == 200) {
         fetchEditSaleStoreData(id);
         setPaymentType("Cicil");
@@ -498,13 +531,10 @@ const InputDataPesanan = () => {
         </div>
       </div>
 
-      {/* Telur  ok, retak, pecah, reject*/}
-
       {id ? (
         <></>
       ) : (
         <div className="flex md:grid-cols-2 gap-4 justify-between">
-          {/* telur OK */}
           <div className="p-4 w-full rounded-md border-2 border-black-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">Telur OK</h2>
@@ -514,13 +544,13 @@ const InputDataPesanan = () => {
             </div>
 
             <div className="flex justify-center flex-wrap gap-4">
-              <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+              <div className="flex flex-col items-center justify-center min-w-32 px-4  py-4 bg-green-200 rounded-md">
                 <p className="text-3xl font-bold text-center">
                   {parseInt(telurOkIkat)}
                 </p>
                 <p className="text-xl text-center">Ikat</p>
               </div>
-              <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+              <div className="flex flex-col items-center justify-center min-w-32 px-4  py-4 bg-green-200 rounded-md">
                 <p className="text-3xl font-bold text-center">
                   {parseInt(telurOkKg)}
                 </p>
@@ -529,7 +559,6 @@ const InputDataPesanan = () => {
             </div>
           </div>
 
-          {/* telur Retak */}
           <div className="p-4 w-full rounded-md border-2 border-black-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">Telur Retak</h2>
@@ -539,14 +568,13 @@ const InputDataPesanan = () => {
             </div>
 
             <div className="flex justify-center flex-wrap gap-4">
-              {/* item butir */}
-              <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+              <div className="flex flex-col items-center justify-center min-w-32 px-4 py-4 bg-green-200 rounded-md">
                 <p className="text-3xl font-bold text-center">
                   {parseInt(telurRetakIkat)}
                 </p>
                 <p className="text-xl text-center">Ikat</p>
               </div>
-              <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+              <div className="flex flex-col items-center justify-center min-w-32 px-4  py-4 bg-green-200 rounded-md">
                 <p className="text-3xl font-bold text-center">
                   {parseInt(telurRetakKg)}
                 </p>
@@ -554,7 +582,6 @@ const InputDataPesanan = () => {
               </div>
             </div>
           </div>
-          {/* penjualan telur */}
           <div className="p-4 w-full rounded-md border-2 border-black-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">Telur Bonyok</h2>
@@ -564,8 +591,7 @@ const InputDataPesanan = () => {
             </div>
 
             <div className="flex justify-center flex-wrap gap-4">
-              {/* item butir */}
-              <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+              <div className="flex flex-col items-center justify-center min-w-32 px-4 py-4 bg-green-200 rounded-md">
                 <p className="text-3xl font-bold text-center">
                   {parseInt(telurBonyokPlastik)}
                 </p>
@@ -576,33 +602,13 @@ const InputDataPesanan = () => {
         </div>
       )}
 
-      {/* InputDataPesanan box  */}
       <div className="p-4 border border-black-6 rounded-[4px]">
         <h1 className="text-lg font-bold">
           {id ? "Detail Data Pesanan" : "Input Data Pesanan"}
         </h1>
-        {/* 
-        {userRole !== "Pekerja Toko" && (
-          <>
-            <label className="block font-medium  mt-4">Pilih Toko</label>
-            <select
-              className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
-              value={selectedStore}
-              onChange={(e) => {
-                setSelectedStore(e.target.value);
-              }}
-            >
-              {stores.map((store) => (
-                <option value={store.id} key={store.id}>
-                  {store.name}
-                </option>
-              ))}
-            </select>
-          </>
-        )} */}
-        {/* Pilih Toko/Gudang */}
 
         <InformasiPembeli
+          id={id}
           phone={phone}
           setPhone={setPhone}
           name={customerName}
@@ -614,164 +620,201 @@ const InputDataPesanan = () => {
           setSelectedCustomerId={setSelectedCustomerId}
         />
 
-        {/* nama pelanggan & nomor telpon */}
-        {/* <div className="flex justify-between gap-4">
-          <div className="w-full">
-            <label className="block font-medium  mt-4">Nama Pelanggan</label>
-            <input
-              className="w-full border bg-black-4 cursor-text rounded p-2 mb-4"
-              type="text"
-              placeholder="Masukkan nama barang"
-              value={customer}
-              onChange={(e) => {
-                setCustomer(e.target.value);
-              }}
-            />
-          </div>
-
-          <div className="w-full">
-            <label className="block font-medium  mt-4">Nomor Telepon</label>
-            <input
-              className="w-full border bg-black-4 cursor-text rounded p-2 mb-4"
-              type="number"
-              placeholder="Masukkan nomor telepon"
-              value={phone}as
-              onChange={(e) => {
-                setPhone(e.target.value);
-              }}
-            />
-          </div>
-        </div> */}
-
-        {/* nama barang & jumlah barang */}
         <div className="flex justify-between gap-4">
           <div className="w-full">
             <label className="block font-medium  mt-4">Nama Barang</label>
-            <select
-              className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
-              value={selectedItem?.id}
-              onChange={(e) => {
-                const selected = items.find(
-                  (item) => item.id == e.target.value
-                );
-                console.log("selected: ", selected);
-                setUnit(selected.unit);
-                setSelectedItem(selected);
-              }}
-            >
-              {items.map((item) => (
-                <option value={item.id} key={item.id}>
-                  {`${item.name} - ${item.unit}`}
-                </option>
-              ))}
-            </select>
+            {isEditable && !id ? (
+              <select
+                className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
+                value={selectedItem?.id}
+                onChange={(e) => {
+                  const selected = items.find(
+                    (item) => item.id == e.target.value
+                  );
+                  console.log("selected: ", selected);
+                  setUnit(selected.unit);
+                  setSelectedItem(selected);
+                }}
+              >
+                {items.map((item) => (
+                  <option value={item.id} key={item.id}>
+                    {`${item.name} - ${item.unit}`}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <p className="text-lg font-bold">{selectedItem.name}</p>
+            )}
           </div>
         </div>
 
         <div className="flex gap-4">
           <div className="flex-1">
             <label className="block font-medium mt-4">Jumlah Barang</label>
-            <input
-              className="w-full border bg-black-4 cursor-text rounded p-2 mb-4"
-              type="number"
-              placeholder="Masukkan jumlah barang"
-              value={quantity === 0 ? "" : quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
-            />
+            {isEditable ? (
+              <input
+                className="w-full border bg-black-4 cursor-text rounded p-2 mb-4"
+                type="number"
+                placeholder="Masukkan jumlah barang"
+                value={quantity === 0 ? "" : quantity}
+                onChange={(e) => setQuantity(Number(e.target.value))}
+              />
+            ) : (
+              <p className="text-lg font-bold">{quantity}</p>
+            )}
           </div>
           <div className="flex-1">
             <label className="block font-medium mt-4">Satuan</label>
             <p className="text-lg font-bold items-center">
               {selectedItem.unit}
             </p>
-            {/* <select
-              className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
-              value={unit}
-              onChange={(e) => setUnit(e.target.value)}
-            >
-              <option disabled hidden value="">
-                Pilih satuan kuantitas
-              </option>
-              {unitOptions?.map((unit, index) => (
-                <option key={index} value={unit}>
-                  {unit}
-                </option>
-              ))}
-            </select> */}
           </div>
         </div>
 
-        {/* harga (butir) & tanggal kirim */}
-        <div className="flex justify-between gap-4">
-          {/* <div className="w-full">
-            <label className="block font-medium  mt-4">{`Harga (per ${unit})`}</label>
-            <input
-              className="w-full border bg-black-4 cursor-text rounded p-2 mb-4"
-              type="number  "
-              placeholder="Masukkan nama barang"
-              value={price}
-              onChange={(e) => {
-                setPrice(e.target.value);
-              }}
-            />
-          </div> */}
+        {isOutOfStock && (
+          <p className="text-red-600">
+            *Jumlah barang yang anda masukkan tidak mencukupi, maka pesanan akan
+            masuk antrian
+          </p>
+        )}
 
+        <div className="flex justify-between gap-4">
           <div className="w-full">
-            <label className="block font-medium mt-4">Tanggal Kirim</label>
-            <input
-              ref={dateInputRef}
-              className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
-              type="date"
-              value={sendDate}
-              onClick={() => {
-                // Manually open the date picker when the input is clicked
-                if (dateInputRef.current?.showPicker) {
-                  dateInputRef.current.showPicker(); // Modern browsers
-                }
-              }}
-              onChange={(e) => setSendDate(e.target.value)}
-            />
+            <label
+              className={`block font-medium mt-4 ${
+                isOutOfStock ? " text-gray-400/40" : "text-black"
+              }`}
+            >
+              Tanggal Kirim
+            </label>
+            {isEditable ? (
+              <input
+                disabled={isOutOfStock}
+                ref={dateInputRef}
+                className={`w-full border bg-black-4  rounded p-2 mb-4 ${
+                  isOutOfStock
+                    ? "bg-gray-400/10 cursor-not-allowed text-gray-400/20"
+                    : "cursor-pointer"
+                }`}
+                type="date"
+                value={sendDate}
+                onClick={() => {
+                  if (dateInputRef.current?.showPicker) {
+                    dateInputRef.current.showPicker();
+                  }
+                }}
+                onChange={(e) => setSendDate(e.target.value)}
+              />
+            ) : (
+              <p className="text-lg font-bold">
+                {formatTanggalIndonesia(sendDate)}
+              </p>
+            )}
           </div>
         </div>
         <div className="flex justify-end">
           <div className="p-4 max-w-4xl">
             <div className="grid grid-cols-2 mb-2">
-              <span className="text-lg">Harga Barang :</span>
-              <span className="font-bold text-lg text-right">
-                Rp {itemTotalPrice ?? "0"}
+              <span
+                className={`text-lg ${
+                  isOutOfStock ? " text-gray-400/30" : "text-black"
+                }`}
+              >
+                Harga Barang :
+              </span>
+              <span
+                className={`font-bold text-lg text-right ${
+                  isOutOfStock ? " text-gray-400/30" : "text-black"
+                }`}
+              >
+                Rp {isOutOfStock ? "0" : itemTotalPrice ?? "0"}
               </span>
             </div>
 
             <div className="grid grid-cols-2 mb-4">
-              <span className="text-lg">Potongan Harga :</span>
-              <span className="font-bold text-lg text-right">
-                Rp -{itemPriceDiscount}
+              <span
+                className={`text-lg ${
+                  isOutOfStock ? " text-gray-400/30" : "text-black"
+                }`}
+              >
+                Potongan Harga :
+              </span>
+              <span
+                className={`font-bold text-lg text-right ${
+                  isOutOfStock ? " text-gray-400/30" : "text-black"
+                }`}
+              >
+                Rp -{isOutOfStock ? "0" : itemPriceDiscount}
               </span>
             </div>
 
-            <hr className="my-2" />
+            <hr className="my-2 " />
 
             <div className="grid grid-cols-2 mt-4">
-              <span className="font-bold text-xl">Total :</span>
-              <span className="font-bold text-xl text-right">
-                Rp {itemTotalPrice - itemPriceDiscount}
+              <span
+                className={`text-lg ${
+                  isOutOfStock ? " text-gray-400/30" : "text-black"
+                }`}
+              >
+                Total :
+              </span>
+              <span
+                className={`font-bold text-lg text-right ${
+                  isOutOfStock ? " text-gray-400/30" : "text-black"
+                }`}
+              >
+                Rp {isOutOfStock ? "0" : itemTotalPrice - itemPriceDiscount}
               </span>
             </div>
           </div>
         </div>
+        {/* edit button */}
+        {id && (
+          <div className="flex gap-6 justify-end mt-4">
+            <div
+              onClick={() => {
+                setEditable(!isEditable);
+              }}
+              className="px-5 py-3 bg-green-700 rounded-[4px] hover:bg-green-900 cursor-pointer text-white"
+            >
+              Edit data pesanan
+            </div>
+            <div
+              onClick={() => {
+                setShowModal(true);
+              }}
+              className="px-5 py-3 bg-kritis-box-surface-color rounded-[4px] hover:bg-kritis-text-color cursor-pointer text-white"
+            >
+              Hapus
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Status Pembayaran */}
       <div className="p-4 border border-black-6 rounded-[4px]">
         <div className="flex justify-between">
-          <h1 className="text-lg font-bold">Pembayaran</h1>
+          <h1
+            className={`text-lg font-bold ${
+              isOutOfStock ? " text-gray-400/30" : "text-black"
+            }`}
+          >
+            Pembayaran
+          </h1>
+
           <div
-            className="px-5 py-3 bg-orange-400 rounded-[4px] hover:bg-orange-600 cursor-pointer"
+            className={`px-5 py-3  rounded-[4px]  ${
+              isOutOfStock
+                ? " bg-orange-400/30 cursor-not-allowed"
+                : "bg-orange-400 hover:bg-orange-600 cursor-pointer"
+            } `}
             onClick={() => {
-              if (paymentStatus == "Lunas") {
-                alert("Pesanan ini sudah Lunas!");
-              } else {
-                setShowPaymentModal(true);
+              if (!isOutOfStock) {
+                if (paymentStatus == "Lunas") {
+                  alert("Pesanan ini sudah Lunas!");
+                } else {
+                  setShowPaymentModal(true);
+                }
               }
             }}
           >
@@ -782,7 +825,13 @@ const InputDataPesanan = () => {
         {/* table */}
         <div className="mt-4">
           <table className="w-full">
-            <thead className="w-full bg-green-700 text-white">
+            <thead
+              className={`w-full  ${
+                isOutOfStock
+                  ? " bg-green-700/30 text-white"
+                  : "bg-green-700 text-white"
+              }`}
+            >
               <tr>
                 <th className="px-4 py-2">Tanggal</th>
                 <th className="px-4 py-2">Metode Pembayaran</th>
@@ -810,6 +859,7 @@ const InputDataPesanan = () => {
                     <td className="px-4 py-2 flex gap-3 justify-center">
                       <BiSolidEditAlt
                         onClick={() => {
+                          setPaymentMethod(payment.paymentMethod);
                           setNominal(payment.nominal);
                           setPaymentDate(
                             convertToInputDateFormat(payment.date)
@@ -850,7 +900,12 @@ const InputDataPesanan = () => {
                 </tr>
               ) : (
                 <tr>
-                  <td colSpan={5} className="text-center py-4 text-gray-500">
+                  <td
+                    colSpan={5}
+                    className={`text-center py-4 italic  ${
+                      isOutOfStock ? "text-gray-500/20" : "text-gray-500"
+                    }`}
+                  >
                     Belum ada data pembayaran.
                   </td>
                 </tr>
@@ -862,24 +917,46 @@ const InputDataPesanan = () => {
         {/* status pembayaran */}
         <div className="flex mt-4 items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-lg font-bold">Status Pembayaran: </h1>
+            <h1
+              className={`text-lg font-bold ${
+                isOutOfStock ? "text-gray-400/50" : "text-black"
+              }`}
+            >
+              Status Pembayaran:{" "}
+            </h1>
             <div
               className={`px-5 py-3 text-xl rounded-[4px] ${
                 paymentStatus === "Belum Lunas"
                   ? "bg-orange-200 text-kritis-text-color"
                   : "bg-aman-box-surface-color text-aman-text-color"
-              }`}
+              }
+              ${
+                isOutOfStock ? "bg-orange-200/50 text-kritis-text-color/30" : ""
+              }
+              `}
             >
               {paymentStatus}
             </div>
           </div>
 
           <div>
-            <div className="text-xl font-semibold">Sisa cicilan</div>
-            <div className="font-semibold text-3xl flex">
+            <div
+              className={`text-xl font-semibold ${
+                isOutOfStock ? "text-gray-500/20" : "text-black"
+              }`}
+            >
+              Sisa cicilan
+            </div>
+            <div
+              className={`font-semibold text-3xl flex ${
+                isOutOfStock ? "text-gray-500/20" : "text-black"
+              }`}
+            >
               <p className="me-2">RP</p>
               <p className="">
                 {remaining === 0
+                  ? "0"
+                  : isOutOfStock
                   ? "0"
                   : Intl.NumberFormat("id-ID").format(remaining)}
               </p>
@@ -928,28 +1005,9 @@ const InputDataPesanan = () => {
             };
             console.log("===== Form Data =====");
             console.log("payload: ", payload);
-            // console.log("ID:", id);
-            // console.log("Toko:", selectedStore);
-            // console.log("customerType: ", customerType);
-            // console.log("Barang:", selectedItem);
-            // console.log("Nama Pelanggan:", customerName);
-            // console.log("No. Telepon:", phone);
-            // console.log("Jumlah:", quantity);
-            // console.log("Satuan:", selectedItem.unit);
-            // console.log("Harga:", price);
-            // console.log("Total:", total);
-            // console.log("Tanggal Kirim:", sendDate);
-            // console.log("Tanggal Bayar:", paymentDate);
-            // console.log("Jenis Pembayaran:", paymentType);
-            // console.log("Metode Pembayaran:", paymentMethod);
-            // console.log("Nominal Bayar:", nominal);
-            // console.log("Sisa Cicilan:", remaining);
-            // console.log("Bukti Pembayaran:", paymentProof);
-            // console.log("itemPrices: ", itemPrices);
-            // console.log("itemPriceDiscounts: ", itemPriceDiscounts);
-            // console.log("selectedItem: ", selectedItem);
-            // console.log("customers: ", customers);
-            // console.log("transactionCount: ", transactionCount);
+            console.log("customers: ", customers);
+            console.log("itemPrices: ", itemPrices);
+            console.log("itemPriceDiscounts: ", itemPriceDiscounts);
             console.log("=====================");
           }}
           className="px-5 py-3 bg-green-700 rounded-[4px] hover:bg-green-900 cursor-pointer text-white"
@@ -1085,6 +1143,21 @@ const InputDataPesanan = () => {
               {id ? "Tambah Pembayaran" : "Pembayaran"}
             </h3>
 
+            <label className="block mb-2 font-medium">Metode Pembayaran</label>
+            <select
+              className="w-full border p-2 rounded mb-4"
+              value={paymentMethod}
+              onChange={(e) => {
+                setPaymentMethod(e.target.value);
+              }}
+            >
+              <option className="text-black-6" value="" disabled hidden>
+                Pilih Metode Pembayaran
+              </option>
+              <option value="Tunai">Tunai</option>
+              <option value="Non Tunai">Non Tunai</option>
+            </select>
+
             {/* Nominal Bayar */}
             <label className="block mb-2 font-medium">Nominal Bayar</label>
             <input
@@ -1157,6 +1230,38 @@ const InputDataPesanan = () => {
           </div>
         </div>
       )}
+
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
+            <h2 className="text-center text-lg font-semibold mb-4">
+              Apakah anda yakin untuk menghapus data penjualan ini?
+            </h2>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setShowModal(false)}
+                className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded font-semibold cursor-pointer"
+              >
+                Tidak
+              </button>
+              <button
+                onClick={handleDelete}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded font-semibold cursor-pointer"
+              >
+                Ya, Lanjutkan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <button
+        onClick={() => {
+          console.log("telurOkIkat: ", telurOkIkat);
+          console.log("selectedItem: ", selectedItem);
+        }}
+      >
+        CHECK
+      </button>
     </div>
   );
 };

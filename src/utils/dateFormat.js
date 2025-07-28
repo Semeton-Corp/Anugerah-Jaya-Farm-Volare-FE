@@ -61,3 +61,23 @@ export const formatDate = (date) => {
   const dd = String(d.getDate()).padStart(2, "0");
   return `${yyyy}-${mm}-${dd}`;
 };
+
+export const formatTanggalIndonesia = (tanggal) => {
+  const bulanIndonesia = [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ];
+
+  const [tahun, bulan, hari] = tanggal.split("-");
+  return `${parseInt(hari)} ${bulanIndonesia[parseInt(bulan) - 1]} ${tahun}`;
+};

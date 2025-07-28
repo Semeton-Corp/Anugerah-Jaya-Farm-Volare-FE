@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FaSearch } from "react-icons/fa";
 
 const InformasiPembeli = ({
+  id,
   phone,
   setPhone,
   name,
@@ -58,46 +59,51 @@ const InformasiPembeli = ({
       <div className="mb-3">
         <span className="font-semibold ">Informasi Pembeli</span>
       </div>
-
-      <div className="flex items-center gap-2 mb-6">
-        <div className="flex gap-2">
-          <button
-            onClick={() => {
-              setMode("registered");
-              setCustomerType("Pelanggan Lama");
-              setTransactionCount(0);
-            }}
-            className={`px-3 py-1 rounded border text-sm cursor-pointer ${
-              mode === "registered"
-                ? "bg-green-100 border-green-600"
-                : "bg-white border-gray-300"
-            }`}
-          >
-            Pelanggan terdaftar
-          </button>
-          <button
-            onClick={() => {
-              setMode("new");
-              setCustomerType("Pelanggan Baru");
-              setPhone("");
-              setName("");
-              setTransactionCount(0);
-            }}
-            className={`px-3 py-1 rounded border text-sm cursor-pointer ${
-              mode === "new"
-                ? "bg-green-100 border-green-600"
-                : "bg-white border-gray-300"
-            }`}
-          >
-            Pelanggan baru
-          </button>
+      {!id && (
+        <div className="flex items-center gap-2 mb-6">
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                setMode("registered");
+                setCustomerType("Pelanggan Lama");
+                setTransactionCount(0);
+              }}
+              className={`px-3 py-1 rounded border text-sm cursor-pointer ${
+                mode === "registered"
+                  ? "bg-green-100 border-green-600"
+                  : "bg-white border-gray-300"
+              }`}
+            >
+              Pelanggan terdaftar
+            </button>
+            <button
+              onClick={() => {
+                setMode("new");
+                setCustomerType("Pelanggan Baru");
+                setPhone("");
+                setName("");
+                setTransactionCount(0);
+              }}
+              className={`px-3 py-1 rounded border text-sm cursor-pointer ${
+                mode === "new"
+                  ? "bg-green-100 border-green-600"
+                  : "bg-white border-gray-300"
+              }`}
+            >
+              Pelanggan baru
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4 items-start">
         <div>
           <label className="block mb-1 text-sm">Nomor Telepon</label>
-          {mode === "registered" ? (
+          {id ? (
+            <>
+              <p className="text-lg font-bold">{phone}</p>
+            </>
+          ) : mode === "registered" ? (
             <div className="relative w-full">
               <div className="flex items-center border border-black rounded overflow-hidden w-full">
                 <input
@@ -143,7 +149,11 @@ const InformasiPembeli = ({
 
         <div>
           <label className="block mb-1 text-sm">Nama Pelanggan</label>
-          {mode === "registered" ? (
+          {id ? (
+            <>
+              <p className="text-lg font-bold">{name}</p>
+            </>
+          ) : mode === "registered" ? (
             <p className="pt-2 text-black">{name || "-"}</p>
           ) : (
             <input
