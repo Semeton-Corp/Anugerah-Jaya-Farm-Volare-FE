@@ -23,10 +23,11 @@ const TambahBarangBaru = () => {
 
   const [name, setName] = useState("");
   const [category, setCategory] = useState([
-    "Pakan",
     "Telur",
     "Barang",
-    "Bahan Baku",
+    "Bahan Baku Adukan",
+    "Bahan Baku Adukan - Jagung",
+    "Pakan Jadi",
   ]);
   const [selectedCategory, setSelectedCategory] = useState(category[0]);
   const [unit, setUnit] = useState("");
@@ -53,7 +54,7 @@ const TambahBarangBaru = () => {
   const fetchWarehouseItembyId = async (id) => {
     try {
       const detailResponse = await getItemById(id);
-      console.log("detailResponse: ", detailResponse);
+      // console.log("detailResponse: ", detailResponse);
       if (detailResponse.status == 200) {
         setName(detailResponse.data.data.name);
         setSelectedCategory(detailResponse.data.data.category);
@@ -121,18 +122,6 @@ const TambahBarangBaru = () => {
           onChange={(e) => setName(e.target.value)}
         />
 
-        <div className="gap-4 mb-6">
-          <div>
-            <label className="block font-medium mb-1">Satuan Barang</label>
-            <input
-              type="text"
-              className="w-full border rounded p-2 bg-black-4"
-              placeholder="Masukkan satuan barang..."
-              value={getDisplayValue(unit)}
-              onChange={(e) => setUnit(e.target.value)}
-            />
-          </div>
-        </div>
         {/* Pilih kategori */}
         <label className="block font-medium mb-1">Kategori</label>
         <select
@@ -148,6 +137,63 @@ const TambahBarangBaru = () => {
             </option>
           ))}
         </select>
+
+        <div className="gap-4 mb-6">
+          <div>
+            <label className="block font-medium mb-1">Satuan Barang</label>
+            <input
+              type="text"
+              className="w-full border rounded p-2 bg-black-4"
+              placeholder="Masukkan satuan barang..."
+              value={getDisplayValue(unit)}
+              onChange={(e) => setUnit(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 mb-6 gap-4">
+          <div>
+            <label className="block font-medium mb-1">
+              Jumlah Penggunaan Harian
+            </label>
+            <div className="flex gap-4 items-center">
+              <input
+                type="text"
+                className="w-full border rounded p-2 bg-black-4"
+                placeholder="Tulis jumlah penggunaan harian (cth : Karung)"
+                value={getDisplayValue(unit)}
+                onChange={(e) => setUnit(e.target.value)}
+              />
+              <p className="text-lg font-bold">-</p>
+            </div>
+          </div>
+          <div>
+            <label className="block font-medium mb-1"></label>
+          </div>
+        </div>
+
+        {selectedCategory == "Bahan Baku Adukan - Jagung" && (
+          <div className="grid grid-cols-2 mb-6 gap-4">
+            <div>
+              <label className="block font-medium mb-1">
+                Kapasitas Maksimum Gudang
+              </label>
+              <div className="flex gap-4 items-center">
+                <input
+                  type="text"
+                  className="w-full border rounded p-2 bg-black-4"
+                  placeholder="Tuliskan kapasitas maksimum jagung yang bisa disimpan"
+                  value={getDisplayValue(unit)}
+                  onChange={(e) => setUnit(e.target.value)}
+                />
+                <p className="text-lg font-bold">-</p>
+              </div>
+            </div>
+            <div>
+              <label className="block font-medium mb-1"></label>
+            </div>
+          </div>
+        )}
 
         <div className="mt-6 text-right">
           <button

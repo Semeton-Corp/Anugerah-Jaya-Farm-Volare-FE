@@ -37,7 +37,7 @@ const DaftarBarang = () => {
   const fetchWarehouseItems = async () => {
     try {
       const warehouseItemResponse = await getItems();
-      console.log("warehouseItemResponse: ", warehouseItemResponse);
+      // console.log("warehouseItemResponse: ", warehouseItemResponse);
       if (warehouseItemResponse.status == 200) {
         setDaftarBarangData(warehouseItemResponse.data.data);
       }
@@ -49,8 +49,6 @@ const DaftarBarang = () => {
   async function deleteDataHandle(dataId) {
     try {
       const deleteResponse = await deleteItem(dataId);
-      // console.log("deleteResponse: ", deleteResponse);
-      // console.log("response.status", response.status);
 
       if (deleteResponse.status === 204) {
         alert("✅ Data berhasil dihapus!");

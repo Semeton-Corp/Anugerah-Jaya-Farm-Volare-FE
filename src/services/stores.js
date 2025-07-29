@@ -207,3 +207,11 @@ export const getEggStoreItemSummary = (storeId) => {
     },
   });
 };
+
+export const sendStoreSale = (id) => {
+  return api.patch(`/stores/sales/${id}/send`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

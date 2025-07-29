@@ -7,7 +7,7 @@ import { FiMaximize2 } from "react-icons/fi";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
 import { useState } from "react";
-import { getListStoreSale } from "../services/stores";
+import { getListStoreSale, sendStoreSale } from "../services/stores";
 import { useEffect } from "react";
 
 const DaftarPesanan = () => {
@@ -27,12 +27,23 @@ const DaftarPesanan = () => {
     navigate(inputPath);
   };
 
+  const sendSaleHandle = async (id) => {
+    try {
+      const sendResponse = await sendStoreSale(id);
+      // console.log("sendResponse: ", sendResponse);
+      if (sendResponse.status == 200) {
+        alert("✅ Pesanan berhasil dikirim!")
+        fetchDataAntrianPesanan();
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
   const fetchDataAntrianPesanan = async () => {
     try {
       const response = await getListStoreSale();
       // console.log("response: ", response);
-      // console.log("response List: ", response);
-      // console.log("(response.data.data): ", response.data.data.storeSales);
       if (response.status == 200) {
         setDataAntrianPesanan(response.data.data.storeSales);
       }
@@ -131,14 +142,27 @@ const DaftarPesanan = () => {
                       </td>
 
                       <td className="py-2 px-4">
-                        <button
-                          onClick={() => {
-                            editDataPesananHandle(item.id);
-                          }}
-                          className="px-3 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer"
-                        >
-                          Lihat Detail
-                        </button>
+                        <div className="flex gap-4">
+                          {!item.isSend && (
+                            <button
+                              onClick={() => {
+                                sendSaleHandle(item.id);
+                              }}
+                              className="px-3 py-1 bg-orange-300 rounded-[4px]  hover:bg-orange-500 cursor-pointer"
+                            >
+                              Kirim
+                            </button>
+                          )}
+
+                          <button
+                            onClick={() => {
+                              editDataPesananHandle(item.id);
+                            }}
+                            className="px-3 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer"
+                          >
+                            Lihat Detail
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

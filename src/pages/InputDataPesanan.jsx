@@ -289,7 +289,6 @@ const InputDataPesanan = () => {
           setTelurRetakIkat(retakIkat);
           setTelurBonyokPlastik(bonyokPlastik);
         }
-        // console.log("summaryResponse: ", summaryResponse);
       }
     } catch (error) {
       console.log("error :", error);
@@ -403,13 +402,11 @@ const InputDataPesanan = () => {
 
   const editSubmitHandle = async () => {
     const storeSalePayment = paymentHistory;
-
     const payload = {
       quantity: quantity,
       sendDate: formatDateToDDMMYYYY(sendDate),
     };
-
-    console.log("edit payload is ready: ", payload);
+    // console.log("edit payload is ready: ", payload);
 
     try {
       const response = await updateStoreSale(id, payload);
@@ -631,7 +628,7 @@ const InputDataPesanan = () => {
                   const selected = items.find(
                     (item) => item.id == e.target.value
                   );
-                  console.log("selected: ", selected);
+                  // console.log("selected: ", selected);
                   setUnit(selected.unit);
                   setSelectedItem(selected);
                 }}

@@ -18,33 +18,6 @@ import {
 import KonfirmasiPemenuhanPesananTokoTelurOk from "../components/KonfirmasiPemenuhanPesananTokoTelurOk ";
 import KonfirmasiPemenuhanPesananTokoTelurRetak from "../components/KonfirmasiPemenuhanPesananTokoTelurRetak";
 
-const pesananTokoData = [
-  {
-    namaBarang: "Telur OK",
-    satuan: "Ikat",
-    kuantitas: 12,
-    tokoPemesan: "Toko A1",
-    keterangan: "Belum dikirim",
-    aksi: ["Kirim barang", "Tolak"],
-  },
-  {
-    namaBarang: "Telur retak",
-    satuan: "Karpet",
-    kuantitas: 12,
-    tokoPemesan: "Toko A1",
-    keterangan: "Dalam pengiriman",
-    aksi: [],
-  },
-  {
-    namaBarang: "Telur pecah",
-    satuan: "Karpet",
-    kuantitas: 10,
-    tokoPemesan: "Toko A2",
-    keterangan: "Sampai",
-    aksi: [],
-  },
-];
-
 const getStatusStyle = (status) => {
   switch (status) {
     case "Sedang Dikirim":
