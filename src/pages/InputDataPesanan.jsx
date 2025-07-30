@@ -7,6 +7,7 @@ import { BiSolidEditAlt } from "react-icons/bi";
 import { MdDelete } from "react-icons/md";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import {
+  createStoreSaleQueue,
   deleteStoreSale,
   getEggStoreItemSummary,
   getStores,
@@ -397,6 +398,47 @@ const InputDataPesanan = () => {
           "❌Gagal menyimpan data pesanan, periksa kembali data input anda"
         );
       }
+    }
+  };
+
+  const queueHandle = async () => {
+    if (
+      !customerType ||
+      !selectedItem.id ||
+      !selectedStore ||
+      !quantity ||
+      !unit ||
+      !sendDate
+    ) {
+      alert("❌Mohon isi field dengan benar!");
+      return;
+    }
+
+    try {
+      const payload = {
+        customerType: customerType,
+        ...(customerType === "Pelanggan Baru"
+          ? {
+              customerName: customerName,
+              customerPhoneNumber: phone.toString(),
+            }
+          : {
+              customerId: selectedCustomerId,
+            }),
+        itemId: selectedItem.id,
+        storeId: parseInt(selectedStore),
+        quantity: quantity,
+        saleUnit: unit,
+        sendDate: formatDateToDDMMYYYY(sendDate),
+      };
+
+      const queueResponse = await createStoreSaleQueue(payload);
+      // console.log("queueResponse: ", queueResponse);
+      if (queueResponse.status == 201) {
+        //////
+      }
+    } catch (error) {
+      console.log("error :", error);
     }
   };
 
@@ -966,7 +1008,9 @@ const InputDataPesanan = () => {
       <div className="flex justify-end mb-8">
         <div
           onClick={() => {
-            if (id) {
+            if (isOutOfStock) {
+              queueHandle();
+            } else if (id) {
               editSubmitHandle();
             } else {
               submitHandle();
@@ -974,7 +1018,7 @@ const InputDataPesanan = () => {
           }}
           className="px-5 py-3 bg-green-700 rounded-[4px] hover:bg-green-900 cursor-pointer text-white"
         >
-          Simpan
+          {isOutOfStock ? "Masukkan ke antrian" : "Simpan"}
         </div>
       </div>
 

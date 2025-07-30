@@ -215,3 +215,11 @@ export const sendStoreSale = (id) => {
     },
   });
 };
+
+export const createStoreSaleQueue = (payload) => {
+  return api.post(`/stores/queues`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

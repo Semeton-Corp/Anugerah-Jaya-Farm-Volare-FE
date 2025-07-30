@@ -11,33 +11,9 @@ import { getListStoreSale } from "../services/stores";
 import { useEffect } from "react";
 import { updateStoreSale } from "../services/stores";
 import { formatDateToDDMMYYYY } from "../utils/dateFormat";
-
-// const dataAntrianPesanan = [
-//   {
-//     nomorAntrian: "1",
-//     tanggalKirim: "22 Maret 2025",
-//     namaBarang: "Telur OK",
-//     kuantitas: "12 Ikat",
-//     pengirim: "Toko A",
-//     customer: "Pak Tono",
-//   },
-//   {
-//     nomorAntrian: "2",
-//     tanggalKirim: "22 Maret 2025",
-//     namaBarang: "Telur retak",
-//     kuantitas: "12 Karpet",
-//     pengirim: "Toko B",
-//     customer: "Pak Adi",
-//   },
-//   {
-//     nomorAntrian: "3",
-//     tanggalKirim: "22 Maret 2025",
-//     namaBarang: "Telur pecah",
-//     kuantitas: "10 Karpet",
-//     pengirim: "Gudang A1",
-//     customer: "Pak Yono",
-//   },
-// ];
+import { IoLogoWhatsapp } from "react-icons/io";
+import { getItemPrices, getItemPricesDiscount } from "../services/item";
+import AlokasiAntrianModal from "./AlokasiAntrianModal";
 
 const AntrianPesanan = () => {
   const location = useLocation();
@@ -45,6 +21,36 @@ const AntrianPesanan = () => {
   const detailPages = ["input-data-pesanan"];
 
   const [dataAntrianPesanan, setDataAntrianPesanan] = useState([]);
+  const [paymentHistory, setPaymentHistory] = useState([]);
+
+  const [selectedItem, setSelectedItem] = useState("");
+  const [itemName, setItemName] = useState("");
+
+  const [customerName, setCustomerName] = useState("");
+  const [customerType, setCustomerType] = useState("Pelanggan Lama");
+  const [selectedCustomerId, setSelectedCustomerId] = useState(0);
+
+  const [quantity, setQuantity] = useState(0);
+  const [units, setUnits] = useState(["Ikat", "Kg"]);
+  const [unit, setUnit] = useState("Ikat");
+
+  const [nominal, setNominal] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [remaining, setRemaining] = useState(0);
+
+  const [itemPrices, setItemPrices] = useState([]);
+  const [itemPrice, setItemPrice] = useState([]);
+  const [itemTotalPrice, setItemTotalPrice] = useState([]);
+  const [itemPriceDiscounts, setItemPriceDiscounts] = useState([]);
+  const [itemPriceDiscount, setItemPriceDiscount] = useState([]);
+  const [discount, setDiscount] = useState([]);
+
+  const today = new Date().toISOString().split("T")[0];
+  const [paymentDate, setPaymentDate] = useState(today);
+  const [paymentStatus, setPaymentStatus] = useState("Belum Lunas");
+  const [paymentMethod, setPaymentMethod] = useState("Tunai");
+
+  const [showAlokasiModal, setShowAlokasiModal] = useState(false);
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
@@ -53,14 +59,12 @@ const AntrianPesanan = () => {
   const inputDataPesananHandle = () => {
     const currentPath = location.pathname;
     const inputPath = currentPath + "/input-data-pesanan";
-
     navigate(inputPath);
   };
 
   const editDataPesananHandle = (id) => {
     const currentPath = location.pathname;
     const inputPath = currentPath + "/input-data-pesanan/" + id;
-
     navigate(inputPath);
   };
 
@@ -68,41 +72,45 @@ const AntrianPesanan = () => {
     try {
       const response = await getListStoreSale();
       console.log("response: ", response);
-      console.log("response.data.data: ", response.data.data);
       if (response.status == 200) {
         setDataAntrianPesanan(response.data.data.storeSales);
-        console.log("dataAntrianpesanan: ", response.data.data);
       }
     } catch (error) {
       alert("Gagal memuat data antrian pesanan: ", error);
     }
   };
 
-  const sendHandle = async (id, item) => {
-    const payload = {
-      customer: item.customer,
-      phone: item.phone.toString(),
-      warehouseItemId: item.selectedItem,
-      saleUnit: item.unit,
-      storeId: item.store.id,
-      isSend: true,
-      quantity: item.quantity,
-      sendDate: formatDateToDDMMYYYY(item.sentDate),
-      paymentType: item.paymentType,
-      storeSalePayment: item.storeSalePayment,
-      price: item.price,
-    };
-
+  const fetchItemPrices = async () => {
     try {
-      const response = await updateStoreSale(id, payload);
-      console.log("response send: ", response);
+      const priceResponse = await getItemPrices();
+      const discountResponse = await getItemPricesDiscount();
+      if (priceResponse.status == 200 && discountResponse.status == 200) {
+        setItemPrices(priceResponse.data.data);
+        setItemPriceDiscounts(discountResponse.data.data);
+      }
     } catch (error) {
-      console.log("send error: ", error);
+      console.log("error :", error);
     }
+  };
+
+  const setSelectedItemHandle = (item) => {
+    setSelectedItem(item);
+    setCustomerName(item.customer.name);
+    setItemName(item.item.name);
+    // if (item.item.name == "Telur Bonyok") {
+    //   setUnits(["Plastik"]);
+    // } else {
+    //   setUnits(["Ikat", "Kg"]);
+    // }
+
+    setQuantity(item.quantity);
+
+    setUnit(item.saleUnit);
   };
 
   useState(() => {
     fetchDataAntrianPesanan();
+    fetchItemPrices();
   }, []);
 
   useEffect(() => {
@@ -194,36 +202,23 @@ const AntrianPesanan = () => {
             </div>
           </div>
 
-          {/* chart, incomes, and history section */}
-
           {/* detail penjualan */}
           <div className=" flex gap-4 ">
             <div className=" w-full bg-white px-8 py-6 rounded-lg border border-black-6">
-              {/* <div className="flex justify-between items-start mb-4">
-                <h2 className="text-lg font-semibold">Antrian Pesanan</h2>
-                <button
-                  onClick={inputDataPesananHandle}
-                  className="px-5 py-3 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer font-medium"
-                >
-                  + Input Data Pesanan
-                </button>
-              </div> */}
-
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-green-700 text-white text-center">
                     <th className="py-2 px-4">Antiran</th>
-                    <th className="py-2 px-4">Tanggal Kirim</th>
                     <th className="py-2 px-4">Nama Barang</th>
-                    <th className="py-2 px-4">Kuantitas</th>
-                    <th className="py-2 px-4">Pengirim</th>
+                    <th className="py-2 px-4">Satuan</th>
+                    <th className="py-2 px-4">Jumlah</th>
                     <th className="py-2 px-4">Customer</th>
                     <th className="py-2 px-4">Aksi</th>
-                    <th className="py-2 px-4"></th>
+                    <th className="py-2 px-4">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="text-center">
-                  {dataAntrianPesanan.map((item, index) => (
+                  {dataAntrianPesanan?.map((item, index) => (
                     <tr key={index} className="border-b">
                       <td className="py-2 px-4">
                         <div className="flex justify-center">
@@ -231,28 +226,39 @@ const AntrianPesanan = () => {
                           <p>{index + 1}</p>
                         </div>
                       </td>
-                      <td className="py-2 px-4">{item.sentDate}</td>
-                      <td className="py-2 px-4">{item.warehouseItem.name}</td>
-                      <td className="py-2 px-4">{item.quantity}</td>
-                      <td className="py-2 px-4">{item.store.name}</td>
-                      <td className="py-2 px-4">{item.customer}</td>
+                      <td className="py-2 px-4">{item?.item?.name}</td>
+                      <td className="py-2 px-4">{item?.item?.unit}</td>
+                      <td className="py-2 px-4">{item?.quantity}</td>
+                      <td className="py-2 px-4">{item?.customer?.name}</td>
+
                       <td className="py-2 px-4">
-                        {item.isSend ? (
-                          <></>
-                        ) : (
+                        <div className="flex gap-3 justify-center">
+                          <button
+                            onClick={() => {}}
+                            className="px-3 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer"
+                          >
+                            <IoLogoWhatsapp />
+                          </button>
                           <button
                             onClick={() => {
-                              sendHandle(item.id, item);
+                              setSelectedItemHandle(item);
+                              setShowAlokasiModal(true);
                             }}
                             className="px-3 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer"
                           >
-                            Kirim Telur
+                            Alokasikan
                           </button>
-                        )}
+                          <button
+                            onClick={() => {}}
+                            className="px-3 py-1 bg-kritis-box-surface-color rounded-[4px] text-white hover:bg-kritis-text-color cursor-pointer"
+                          >
+                            Hapus
+                          </button>
+                        </div>
                       </td>
                       <td className="py-2 px-4">
                         <p
-                          onClick={() => editDataPesananHandle(item.id)}
+                          onClick={() => editDataPesananHandle(item?.id)}
                           className="underline font-medium hover:text-black-6 cursor-pointer"
                         >
                           Detail
@@ -264,6 +270,24 @@ const AntrianPesanan = () => {
               </table>
             </div>
           </div>
+          {showAlokasiModal && (
+            <AlokasiAntrianModal
+              customerName={customerName}
+              itemName={itemName}
+              quantity={quantity}
+              setQuantity={setQuantity}
+              units={units}
+              unit={unit}
+              setUnit={setUnit}
+              setShowAlokasiModal={setShowAlokasiModal}
+              paymentHistory={paymentHistory}
+              paymentDate={paymentDate}
+              paymentStatus={paymentStatus}
+              paymentMethod={paymentMethod}
+              nominal={nominal}
+              remaining={remaining}
+            />
+          )}
         </div>
       )}
     </>
