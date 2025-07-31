@@ -151,6 +151,7 @@ const TambahHargaTelur = () => {
               console.log("kategori: ", kategori);
               console.log("barang: ", barang);
               console.log("harga: ", harga);
+              console.log("items: ", items);
             }}
             className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-900 cursor-pointer"
           >

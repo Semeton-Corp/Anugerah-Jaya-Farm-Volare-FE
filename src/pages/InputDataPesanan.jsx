@@ -35,6 +35,38 @@ import {
 } from "../services/item";
 import { getCustomers } from "../services/costumer";
 import { getCurrentUserStorePlacement } from "../services/placement";
+import { toJpeg } from "html-to-image";
+import { Receipt } from "lucide-react";
+import ReceiptModal from "../components/Receipt";
+
+const dummyData = {
+  time: "2025-07-31 14:45",
+  receiptNumber: "AJF-00123",
+  customerName: "Budi Santoso",
+  customerPhone: "081234567890",
+  items: [
+    {
+      name: "Telur Ayam Kampung",
+      qty: 2,
+      unit: "Kg",
+      unitPrice: "Rp 35.000",
+      total: "Rp 70.000",
+    },
+    {
+      name: "Telur Bonyok",
+      qty: 1,
+      unit: "Plastik",
+      unitPrice: "Rp 20.000",
+      total: "Rp 20.000",
+    },
+  ],
+  subTotal: "90.000",
+  discount: "10.000",
+  total: "80.000",
+  paymentType: "Lunas",
+  paymentMethod: "Tunai",
+  remaining: "Rp 0",
+};
 
 const InputDataPesanan = () => {
   const location = useLocation();
@@ -43,6 +75,7 @@ const InputDataPesanan = () => {
 
   const detailPages = ["input-data-pesanan"];
   const dateInputRef = useRef(null);
+  const receiptRef = useRef();
 
   const { id } = useParams();
   const [isEditable, setEditable] = useState(true);
@@ -71,6 +104,8 @@ const InputDataPesanan = () => {
   const [paymentHistory, setPaymentHistory] = useState([]);
 
   const today = new Date().toISOString().split("T")[0];
+
+  const [isSend, setIsSend] = useState(false);
   const [sendDate, setSendDate] = useState(today);
   const [paymentDate, setPaymentDate] = useState(today);
   const [paymentType, setPaymentType] = useState("Cicil");
@@ -93,6 +128,7 @@ const InputDataPesanan = () => {
 
   const [transactionCount, setTransactionCount] = useState(0);
 
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [paymentId, setPaymentId] = useState(0);
@@ -203,7 +239,6 @@ const InputDataPesanan = () => {
         setPhone(response.data.data.customer.phoneNumber);
         setSelectedItem(response.data.data.item);
         setQuantity(response.data.data.quantity);
-        console.log("nilai quantity: ", response.data.data.quantity);
         setUnit(response.data.data.saleUnit);
         setPrice(response.data.data.price);
         setSendDate(convertToInputDateFormat(response.data.data.sentDate));
@@ -211,6 +246,7 @@ const InputDataPesanan = () => {
         setPaymentHistory(response.data.data.payments);
         setRemaining(response.data.data.remainingPayment);
         setPaymentStatus(response.data.data.paymentStatus);
+        setIsSend(response.data.data.isSend);
       }
     } catch (error) {}
   };
@@ -331,7 +367,7 @@ const InputDataPesanan = () => {
     if (!id) {
       setRemaining(itemTotalPrice - itemPriceDiscount - nominal);
     }
-  }, [total, nominal]);
+  }, [nominal, itemTotalPrice, itemPriceDiscount]);
 
   useEffect(() => {
     if (quantity) {
@@ -372,7 +408,6 @@ const InputDataPesanan = () => {
 
     try {
       const response = await createStoreSale(payload);
-      // console.log("response: ", response);
 
       if (response.status == 201) {
         navigate(-1, { state: { refetch: true } });
@@ -448,12 +483,9 @@ const InputDataPesanan = () => {
       quantity: quantity,
       sendDate: formatDateToDDMMYYYY(sendDate),
     };
-    // console.log("edit payload is ready: ", payload);
 
     try {
       const response = await updateStoreSale(id, payload);
-      // console.log("response update: ", response);
-
       if (response.status == 200) {
         navigate(-1, { state: { refetch: true } });
       }
@@ -710,7 +742,7 @@ const InputDataPesanan = () => {
           </div>
         </div>
 
-        {isOutOfStock && (
+        {isOutOfStock && !id && (
           <p className="text-red-600">
             *Jumlah barang yang anda masukkan tidak mencukupi, maka pesanan akan
             masuk antrian
@@ -756,34 +788,40 @@ const InputDataPesanan = () => {
             <div className="grid grid-cols-2 mb-2">
               <span
                 className={`text-lg ${
-                  isOutOfStock ? " text-gray-400/30" : "text-black"
+                  isOutOfStock && !id ? " text-gray-400/30" : "text-black"
                 }`}
               >
                 Harga Barang :
               </span>
               <span
                 className={`font-bold text-lg text-right ${
-                  isOutOfStock ? " text-gray-400/30" : "text-black"
+                  isOutOfStock && !id ? " text-gray-400/30" : "text-black"
                 }`}
               >
-                Rp {isOutOfStock ? "0" : itemTotalPrice ?? "0"}
+                Rp{" "}
+                {isOutOfStock && !id
+                  ? "0"
+                  : itemTotalPrice.toLocaleString("id-ID") ?? "0"}
               </span>
             </div>
 
             <div className="grid grid-cols-2 mb-4">
               <span
                 className={`text-lg ${
-                  isOutOfStock ? " text-gray-400/30" : "text-black"
+                  isOutOfStock && !id ? " text-gray-400/30" : "text-black"
                 }`}
               >
                 Potongan Harga :
               </span>
               <span
                 className={`font-bold text-lg text-right ${
-                  isOutOfStock ? " text-gray-400/30" : "text-black"
+                  isOutOfStock && !id ? " text-gray-400/30" : "text-black"
                 }`}
               >
-                Rp -{isOutOfStock ? "0" : itemPriceDiscount}
+                Rp -
+                {isOutOfStock && !id
+                  ? "0"
+                  : itemPriceDiscount.toLocaleString("id-ID")}
               </span>
             </div>
 
@@ -792,24 +830,29 @@ const InputDataPesanan = () => {
             <div className="grid grid-cols-2 mt-4">
               <span
                 className={`text-lg ${
-                  isOutOfStock ? " text-gray-400/30" : "text-black"
+                  isOutOfStock && !id ? " text-gray-400/30" : "text-black"
                 }`}
               >
                 Total :
               </span>
               <span
                 className={`font-bold text-lg text-right ${
-                  isOutOfStock ? " text-gray-400/30" : "text-black"
+                  isOutOfStock && !id ? " text-gray-400/30" : "text-black"
                 }`}
               >
-                Rp {isOutOfStock ? "0" : itemTotalPrice - itemPriceDiscount}
+                Rp{" "}
+                {isOutOfStock && !id
+                  ? "0"
+                  : (itemTotalPrice - itemPriceDiscount).toLocaleString(
+                      "id-ID"
+                    )}
               </span>
             </div>
           </div>
         </div>
         {/* edit button */}
-        {id && (
-          <div className="flex gap-6 justify-end mt-4">
+        {!isSend && id && (
+          <div className="flex gap-6 justify-endid mt-4">
             <div
               onClick={() => {
                 setEditable(!isEditable);
@@ -835,7 +878,7 @@ const InputDataPesanan = () => {
         <div className="flex justify-between">
           <h1
             className={`text-lg font-bold ${
-              isOutOfStock ? " text-gray-400/30" : "text-black"
+              isOutOfStock && !id ? " text-gray-400/30" : "text-black"
             }`}
           >
             Pembayaran
@@ -843,7 +886,7 @@ const InputDataPesanan = () => {
 
           <div
             className={`px-5 py-3  rounded-[4px]  ${
-              isOutOfStock
+              isOutOfStock && !id
                 ? " bg-orange-400/30 cursor-not-allowed"
                 : "bg-orange-400 hover:bg-orange-600 cursor-pointer"
             } `}
@@ -854,6 +897,8 @@ const InputDataPesanan = () => {
                 } else {
                   setShowPaymentModal(true);
                 }
+              } else if (isOutOfStock && id) {
+                setShowPaymentModal(true);
               }
             }}
           >
@@ -866,7 +911,7 @@ const InputDataPesanan = () => {
           <table className="w-full">
             <thead
               className={`w-full  ${
-                isOutOfStock
+                isOutOfStock && !id
                   ? " bg-green-700/30 text-white"
                   : "bg-green-700 text-white"
               }`}
@@ -958,7 +1003,7 @@ const InputDataPesanan = () => {
           <div className="flex items-center gap-4">
             <h1
               className={`text-lg font-bold ${
-                isOutOfStock ? "text-gray-400/50" : "text-black"
+                isOutOfStock && !id ? "text-gray-400/50" : "text-black"
               }`}
             >
               Status Pembayaran:{" "}
@@ -970,7 +1015,9 @@ const InputDataPesanan = () => {
                   : "bg-aman-box-surface-color text-aman-text-color"
               }
               ${
-                isOutOfStock ? "bg-orange-200/50 text-kritis-text-color/30" : ""
+                isOutOfStock && !id
+                  ? "bg-orange-200/50 text-kritis-text-color/30"
+                  : ""
               }
               `}
             >
@@ -981,21 +1028,21 @@ const InputDataPesanan = () => {
           <div>
             <div
               className={`text-xl font-semibold ${
-                isOutOfStock ? "text-gray-500/20" : "text-black"
+                isOutOfStock && !id ? "text-gray-500/20" : "text-black"
               }`}
             >
               Sisa cicilan
             </div>
             <div
               className={`font-semibold text-3xl flex ${
-                isOutOfStock ? "text-gray-500/20" : "text-black"
+                isOutOfStock && !id ? "text-gray-500/20" : "text-black"
               }`}
             >
               <p className="me-2">RP</p>
               <p className="">
                 {remaining === 0
                   ? "0"
-                  : isOutOfStock
+                  : isOutOfStock && !id
                   ? "0"
                   : Intl.NumberFormat("id-ID").format(remaining)}
               </p>
@@ -1006,19 +1053,30 @@ const InputDataPesanan = () => {
 
       {/* simpan button */}
       <div className="flex justify-end mb-8">
-        <div
-          onClick={() => {
-            if (isOutOfStock) {
-              queueHandle();
-            } else if (id) {
-              editSubmitHandle();
-            } else {
-              submitHandle();
-            }
-          }}
-          className="px-5 py-3 bg-green-700 rounded-[4px] hover:bg-green-900 cursor-pointer text-white"
-        >
-          {isOutOfStock ? "Masukkan ke antrian" : "Simpan"}
+        <div className="flex gap-4">
+          <div
+            onClick={() => {
+              setShowReceiptModal(true);
+            }}
+            className="px-5 py-3 bg-green-200 rounded-[4px] hover:bg-green-400 cursor-pointer text-green-900"
+          >
+            Cetak Struk
+          </div>
+
+          <div
+            onClick={() => {
+              if (isOutOfStock) {
+                queueHandle();
+              } else if (id) {
+                editSubmitHandle();
+              } else {
+                submitHandle();
+              }
+            }}
+            className="px-5 py-3 bg-green-700 rounded-[4px] hover:bg-green-900 cursor-pointer text-white"
+          >
+            {isOutOfStock ? "Masukkan ke antrian" : "Simpan"}
+          </div>
         </div>
       </div>
 
@@ -1294,6 +1352,14 @@ const InputDataPesanan = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {showReceiptModal && (
+        <ReceiptModal
+          data={dummyData}
+          onClose={() => setShowModal(false)}
+          ref={receiptRef}
+        />
       )}
       <button
         onClick={() => {

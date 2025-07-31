@@ -223,3 +223,19 @@ export const createStoreSaleQueue = (payload) => {
     },
   });
 };
+
+export const getStoresaleQueues = () => {
+  return api.get(`/stores/queues`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const allocateStoreSaleQueue = (payload, id) => {
+  return api.post(`/stores/queues/${id}/allocates`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
