@@ -35,8 +35,6 @@ import {
 } from "../services/item";
 import { getCustomers } from "../services/costumer";
 import { getCurrentUserStorePlacement } from "../services/placement";
-import { toJpeg } from "html-to-image";
-import { Receipt } from "lucide-react";
 import ReceiptModal from "../components/Receipt";
 
 const dummyData = {
@@ -133,7 +131,7 @@ const InputDataPesanan = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [paymentId, setPaymentId] = useState(0);
 
-  const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
@@ -508,13 +506,13 @@ const InputDataPesanan = () => {
       const deleteResponse = await deleteStoreSale(id);
       // console.log("deleteResponse: ", deleteResponse);
       if (deleteResponse.status === 204) {
-        setShowModal(false);
+        setShowDeleteModal(false);
         navigate(-1, { state: { refetch: true } });
       }
     } catch (error) {
       console.log("error :", error);
     }
-    setShowModal(false);
+    setShowDeleteModal(false);
   };
 
   const createStoreSalePaymentHandle = async (id) => {
@@ -863,7 +861,7 @@ const InputDataPesanan = () => {
             </div>
             <div
               onClick={() => {
-                setShowModal(true);
+                setShowDeleteModal(true);
               }}
               className="px-5 py-3 bg-kritis-box-surface-color rounded-[4px] hover:bg-kritis-text-color cursor-pointer text-white"
             >
@@ -1054,14 +1052,16 @@ const InputDataPesanan = () => {
       {/* simpan button */}
       <div className="flex justify-end mb-8">
         <div className="flex gap-4">
-          <div
-            onClick={() => {
-              setShowReceiptModal(true);
-            }}
-            className="px-5 py-3 bg-green-200 rounded-[4px] hover:bg-green-400 cursor-pointer text-green-900"
-          >
-            Cetak Struk
-          </div>
+          {id && (
+            <div
+              onClick={() => {
+                setShowReceiptModal(true);
+              }}
+              className="px-5 py-3 bg-green-200 rounded-[4px] hover:bg-green-400 cursor-pointer text-green-900"
+            >
+              Cetak Struk
+            </div>
+          )}
 
           <div
             onClick={() => {
@@ -1107,6 +1107,8 @@ const InputDataPesanan = () => {
             console.log("customers: ", customers);
             console.log("itemPrices: ", itemPrices);
             console.log("itemPriceDiscounts: ", itemPriceDiscounts);
+            console.log("id: ", id);
+            console.log("paymentHistory: ", paymentHistory);
             console.log("=====================");
           }}
           className="px-5 py-3 bg-green-700 rounded-[4px] hover:bg-green-900 cursor-pointer text-white"
@@ -1330,7 +1332,7 @@ const InputDataPesanan = () => {
         </div>
       )}
 
-      {showModal && (
+      {showDeleteModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
             <h2 className="text-center text-lg font-semibold mb-4">
@@ -1338,7 +1340,7 @@ const InputDataPesanan = () => {
             </h2>
             <div className="flex justify-center gap-4">
               <button
-                onClick={() => setShowModal(false)}
+                onClick={() => setShowDeleteModal(false)}
                 className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded font-semibold cursor-pointer"
               >
                 Tidak
@@ -1357,7 +1359,18 @@ const InputDataPesanan = () => {
       {showReceiptModal && (
         <ReceiptModal
           data={dummyData}
-          onClose={() => setShowModal(false)}
+          orderId={id}
+          customerName={customerName}
+          customerPhoneNumber={phone}
+          itemName={selectedItem.name}
+          quantity={quantity}
+          unit={selectedItem.unit}
+          itemPrice={itemPrice}
+          itemTotalPrice={itemTotalPrice}
+          itemPriceDiscount={itemPriceDiscount}
+          paymentHistory={paymentHistory}
+          remaining={remaining}
+          onClose={() => setShowReceiptModal(false)}
           ref={receiptRef}
         />
       )}

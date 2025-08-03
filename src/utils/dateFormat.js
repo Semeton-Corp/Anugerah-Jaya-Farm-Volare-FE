@@ -81,3 +81,31 @@ export const formatTanggalIndonesia = (tanggal) => {
   const [tahun, bulan, hari] = tanggal.split("-");
   return `${parseInt(hari)} ${bulanIndonesia[parseInt(bulan) - 1]} ${tahun}`;
 };
+
+export function getFormattedDateTime() {
+  const now = new Date();
+
+  // Array nama bulan dalam bahasa Indonesia
+  const bulanIndo = [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ];
+
+  const jam = now.getHours().toString().padStart(2, "0");
+  const menit = now.getMinutes().toString().padStart(2, "0");
+  const tanggal = now.getDate();
+  const bulan = bulanIndo[now.getMonth()];
+  const tahun = now.getFullYear();
+
+  return `${jam}:${menit}, ${tanggal} ${bulan} ${tahun}`;
+}

@@ -14,6 +14,8 @@ const DaftarPesanan = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [dataAntrianPesanan, setDataAntrianPesanan] = useState([]);
+  const [showSendModal, setShowSendModal] = useState(false);
+  const [selectedSendId, setSelectedSendId] = useState("");
 
   const detailPages = ["input-data-pesanan"];
   const isDetailPage = detailPages.some((segment) =>
@@ -27,12 +29,13 @@ const DaftarPesanan = () => {
     navigate(inputPath);
   };
 
-  const sendSaleHandle = async (id) => {
+  const sendSaleHandle = async () => {
     try {
-      const sendResponse = await sendStoreSale(id);
+      const sendResponse = await sendStoreSale(selectedSendId);
       // console.log("sendResponse: ", sendResponse);
       if (sendResponse.status == 200) {
-        alert("✅ Pesanan berhasil dikirim!")
+        alert("✅ Pesanan berhasil dikirim!");
+        setShowSendModal(false);
         fetchDataAntrianPesanan();
       }
     } catch (error) {
@@ -146,7 +149,8 @@ const DaftarPesanan = () => {
                           {!item.isSend && (
                             <button
                               onClick={() => {
-                                sendSaleHandle(item.id);
+                                setShowSendModal(true);
+                                setSelectedSendId(item.id);
                               }}
                               className="px-3 py-1 bg-orange-300 rounded-[4px]  hover:bg-orange-500 cursor-pointer"
                             >
@@ -170,6 +174,29 @@ const DaftarPesanan = () => {
               </table>
             </div>
           </div>
+          {showSendModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
+                <h2 className="text-center text-lg font-semibold mb-4">
+                  Apakah anda yakin untuk mengirim pesanan ini?
+                </h2>
+                <div className="flex justify-center gap-4">
+                  <button
+                    onClick={() => setShowSendModal(false)}
+                    className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded font-semibold cursor-pointer"
+                  >
+                    Tidak
+                  </button>
+                  <button
+                    onClick={sendSaleHandle}
+                    className="bg-green-700 hover:bg-green-900 text-white px-4 py-2 rounded font-semibold cursor-pointer"
+                  >
+                    Ya, Kirim
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </>
