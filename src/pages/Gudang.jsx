@@ -123,6 +123,7 @@ const Gudang = () => {
   const fetchOverviewData = async () => {
     try {
       const overviewResponse = await getWarehousesOverview(selectedWarehouse);
+      console.log("selectedWarehouse: ", selectedWarehouse);
       console.log("overviewData: ", overviewResponse);
       if (overviewResponse.status == 200) {
         setEggStocks(overviewResponse.data.data.eggStocks);

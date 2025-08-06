@@ -442,7 +442,19 @@ const AntrianPesanan = () => {
                       <td className="py-2 px-4">
                         <div className="flex gap-3 justify-center">
                           <button
-                            onClick={() => {}}
+                            onClick={() => {
+                              const localNumber = "081246087972"; // nanti bisa ganti ke item?.customer?.phone
+                              const waNumber = localNumber.replace(/^0/, "62");
+
+                              const namaCustomer = item?.customer?.name || "";
+                              const namaBarang = item?.item?.name || "";
+                              const satuan = item?.item?.unit || "";
+                              const jumlah = item?.quantity || "";
+                              const message = `Halo ${namaCustomer}, kami dari Anugerah Jaya Farm ingin mengonfirmasi pesanan Anda:%0A%0A🧺 Nama Barang: ${namaBarang}%0A📦 Jumlah: ${jumlah} ${satuan}%0A%0AApakah jadi untuk memesan?`;
+                              const waURL = `https://wa.me/${waNumber}?text=${message}`;
+
+                              window.open(waURL, "_blank");
+                            }}
                             className="px-3 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer"
                           >
                             <IoLogoWhatsapp />

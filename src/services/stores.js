@@ -42,10 +42,23 @@ export const deleteStore = (id) => {
   });
 };
 
-export const getStoreOverview = (id) => {
-  return api.get(`/stores/overview/${id}`, {
+export const getStoreOverview = (
+  month,
+  year,
+  storeId,
+  itemId,
+  overviewGraphTime
+) => {
+  return api.get(`/stores/overview`, {
     headers: {
       Authorization: `Bearer ${token}`,
+    },
+    params: {
+      month: month,
+      year: year,
+      storeId: storeId,
+      itemId: itemId,
+      overviewGraphTime: overviewGraphTime,
     },
   });
 };
@@ -68,6 +81,14 @@ export const getStoreSaleById = (id) => {
 
 export const deleteStoreSale = (id) => {
   return api.delete(`/stores/sales/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const deleteStoreSalePayment = (storeId, paymentId) => {
+  return api.delete(`/stores/sales/${storeId}/payments/${paymentId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

@@ -7,7 +7,6 @@ import { formatOrderId } from "../utils/orderUtils";
 const ReceiptModal = forwardRef(
   (
     {
-      data,
       orderId,
       customerName,
       customerPhoneNumber,

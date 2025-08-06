@@ -21,17 +21,11 @@ const InputAyam = () => {
   const userRole = localStorage.getItem("role");
   const userName = localStorage.getItem("userName");
 
-  const [obatExpanded, setObatExpanded] = useState(false);
-
   const [chickenCages, setChickenCages] = useState([]);
   const [selectedChickenCage, setSelectedChickenCage] = useState("");
 
   const [loading, setLoading] = useState(true);
   const { id } = useParams();
-
-  const selectedCageName = chickenCages.find(
-    (cage) => cage.id === selectedChickenCage
-  );
 
   const [selectedChikenCategory, setSelectedChikenCategory] = useState("");
   const [ageChiken, setAgeChiken] = useState(0);
@@ -56,7 +50,6 @@ const InputAyam = () => {
         const dataChickenCage = response.data.data;
 
         if (userRole !== "Owner" && userRole !== "Kepala Kandang") {
-          // console.log("userRole: ", userRole);
           const filteredChickenCage = dataChickenCage.filter(
             (item) => item.chickenPic === userName
           );
@@ -143,7 +136,6 @@ const InputAyam = () => {
     try {
       if (id) {
         const updateResponse = await updateChickenMonitoring(id, payload);
-
         if (updateResponse.status === 200) {
           navigate(-1);
         }
@@ -221,7 +213,6 @@ const InputAyam = () => {
           </div>
         )}
 
-        {/* Kategori dan Usia Ayam */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block font-medium mb-1">ID Batch</label>
@@ -232,15 +223,6 @@ const InputAyam = () => {
                   : `-`}
               </p>
             </div>
-            {/* <select
-              className="w-full border border-black-6 cursor-pointer  bg-black-4 rounded p-2"
-              value={selectedChikenCategory}
-              onChange={(e) => setSelectedChikenCategory(e.target.value)}
-            >
-              {kategoriAyam.map((kategori, index) => {
-                return <option key={index}>{kategori}</option>;
-              })}
-            </select> */}
           </div>
           <div>
             <label className="block font-medium mb-1">Kategori ayam</label>

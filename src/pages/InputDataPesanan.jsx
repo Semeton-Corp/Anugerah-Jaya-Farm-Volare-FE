@@ -9,6 +9,7 @@ import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import {
   createStoreSaleQueue,
   deleteStoreSale,
+  deleteStoreSalePayment,
   getEggStoreItemSummary,
   getStores,
 } from "../services/stores";
@@ -36,35 +37,6 @@ import {
 import { getCustomers } from "../services/costumer";
 import { getCurrentUserStorePlacement } from "../services/placement";
 import ReceiptModal from "../components/Receipt";
-
-const dummyData = {
-  time: "2025-07-31 14:45",
-  receiptNumber: "AJF-00123",
-  customerName: "Budi Santoso",
-  customerPhone: "081234567890",
-  items: [
-    {
-      name: "Telur Ayam Kampung",
-      qty: 2,
-      unit: "Kg",
-      unitPrice: "Rp 35.000",
-      total: "Rp 70.000",
-    },
-    {
-      name: "Telur Bonyok",
-      qty: 1,
-      unit: "Plastik",
-      unitPrice: "Rp 20.000",
-      total: "Rp 20.000",
-    },
-  ],
-  subTotal: "90.000",
-  discount: "10.000",
-  total: "80.000",
-  paymentType: "Lunas",
-  paymentMethod: "Tunai",
-  remaining: "Rp 0",
-};
 
 const InputDataPesanan = () => {
   const location = useLocation();
@@ -132,6 +104,8 @@ const InputDataPesanan = () => {
   const [paymentId, setPaymentId] = useState(0);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeletePaymentModal, setShowDeletePaymentModal] = useState(false);
+  const [selectedDeletePaymentId, setSelectedDeletePaymentId] = useState("");
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
@@ -227,7 +201,7 @@ const InputDataPesanan = () => {
   const fetchEditSaleStoreData = async (id) => {
     try {
       const response = await getStoreSaleById(id);
-      console.log("response get sale by id: ", response);
+      // console.log("response get sale by id: ", response);
       // console.log("customer name: ", response.data.data.customer);
 
       if (response.status == 200) {
@@ -508,6 +482,23 @@ const InputDataPesanan = () => {
       if (deleteResponse.status === 204) {
         setShowDeleteModal(false);
         navigate(-1, { state: { refetch: true } });
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+    setShowDeleteModal(false);
+  };
+
+  const handleDeletePayment = async () => {
+    try {
+      const deleteResponse = await deleteStoreSalePayment(
+        id,
+        selectedDeletePaymentId
+      );
+      // console.log("deleteResponse: ", deleteResponse);
+      if (deleteResponse.status === 204) {
+        setShowDeletePaymentModal(false);
+        fetchEditSaleStoreData(id);
       }
     } catch (error) {
       console.log("error :", error);
@@ -850,7 +841,7 @@ const InputDataPesanan = () => {
         </div>
         {/* edit button */}
         {!isSend && id && (
-          <div className="flex gap-6 justify-endid mt-4">
+          <div className="flex gap-6 justify-end mt-4">
             <div
               onClick={() => {
                 setEditable(!isEditable);
@@ -938,26 +929,31 @@ const InputDataPesanan = () => {
                     <td className="px-4 py-2 underline cursor-pointer">
                       Lihat Bukti
                     </td>
-                    <td className="px-4 py-2 flex gap-3 justify-center">
-                      <BiSolidEditAlt
-                        onClick={() => {
-                          setPaymentMethod(payment.paymentMethod);
-                          setNominal(payment.nominal);
-                          setPaymentDate(
-                            convertToInputDateFormat(payment.date)
-                          );
-                          setPaymentId(payment.id);
-                          setShowEditModal(true);
-                        }}
-                        size={24}
-                        className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                      />
-                      <MdDelete
-                        onClick={() => {}}
-                        size={24}
-                        className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                      />
-                    </td>
+                    {!isSend && (
+                      <td className="px-4 py-2 flex gap-3 justify-center">
+                        <BiSolidEditAlt
+                          onClick={() => {
+                            setPaymentMethod(payment.paymentMethod);
+                            setNominal(payment.nominal);
+                            setPaymentDate(
+                              convertToInputDateFormat(payment.date)
+                            );
+                            setPaymentId(payment.id);
+                            setShowEditModal(true);
+                          }}
+                          size={24}
+                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                        />
+                        <MdDelete
+                          onClick={() => {
+                            setShowDeletePaymentModal(true);
+                            setSelectedDeletePaymentId(payment.id);
+                          }}
+                          size={24}
+                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                        />
+                      </td>
+                    )}
                   </tr>
                 ))
               ) : paymentDate &&
@@ -1356,9 +1352,32 @@ const InputDataPesanan = () => {
         </div>
       )}
 
+      {showDeletePaymentModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
+            <h2 className="text-center text-lg font-semibold mb-4">
+              Apakah anda yakin untuk menghapus data pembayaran ini?
+            </h2>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setShowDeletePaymentModal(false)}
+                className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded font-semibold cursor-pointer"
+              >
+                Tidak
+              </button>
+              <button
+                onClick={handleDeletePayment}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded font-semibold cursor-pointer"
+              >
+                Ya, Lanjutkan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showReceiptModal && (
         <ReceiptModal
-          data={dummyData}
           orderId={id}
           customerName={customerName}
           customerPhoneNumber={phone}
