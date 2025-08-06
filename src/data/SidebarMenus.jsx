@@ -19,7 +19,7 @@ export const sidebarMenus = {
   Owner: [
     {
       icon: <img src={overview} alt="Overview Icon" className="h-4 w-4" />,
-      tabName: "Overview",
+      tabName: "Ringkasan",
       element: <OverviewOwner />,
     },
     {
@@ -32,7 +32,7 @@ export const sidebarMenus = {
       tabName: "Produksi Telur",
       element: <ProduksiTelur />,
       subTabs: [
-        { tabName: "Overview Produksi", path: "overview-produksi" },
+        { tabName: "Ringkasan Produksi", path: "overview-produksi" },
         { tabName: "Data Produksi Telur", path: "data-produksi-telur" },
       ],
     },
@@ -53,6 +53,8 @@ export const sidebarMenus = {
       subTabs: [
         { tabName: "Overview Kinerja", path: "overview-kinerja" },
         { tabName: "Detail Kinerja Ayam", path: "detail-kinerja-ayam" },
+        { tabName: "Pengadaan DOC", path: "detail-kinerja-ayam" },
+        { tabName: "Jual Ayam Afkir", path: "detail-kinerja-ayam" },
       ],
     },
     {

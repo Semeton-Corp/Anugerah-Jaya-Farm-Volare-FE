@@ -83,6 +83,7 @@ import DetailToko from "./pages/DetailToko";
 import DetailTugasTambahan from "./pages/DetailTugasTambahan";
 import DetailRiwayatStok from "./pages/DetailRiwayatStok";
 import PageKosong from "./pages/PageKosong";
+import PengadaanDoc from "./pages/PengadaanDOC";
 
 const AppRouter = createBrowserRouter([
   {
@@ -98,12 +99,12 @@ const AppRouter = createBrowserRouter([
         path: "",
         element: <MainLayout role="Owner" />,
         children: [
-          { path: "", element: <Navigate to="overview" replace /> },
+          { path: "", element: <Navigate to="ringkasan" replace /> },
           {
             path: "profile",
             element: <Profile />,
           },
-          { path: "overview", element: <OverviewOwner /> },
+          { path: "ringkasan", element: <OverviewOwner /> },
           {
             path: "penjualan",
             element: <Penjualan />,
@@ -114,7 +115,7 @@ const AppRouter = createBrowserRouter([
           {
             path: "produksi-telur",
             children: [
-              { path: "overview-produksi", element: <ProduksiTelur /> },
+              { path: "ringkasan-produksi", element: <ProduksiTelur /> },
               {
                 path: "data-produksi-telur",
                 element: <DetailProduksi />,
@@ -221,6 +222,7 @@ const AppRouter = createBrowserRouter([
             children: [
               { path: "overview-kinerja", element: <Kinerja /> },
               { path: "detail-kinerja-ayam", element: <DetailKinerjaAyam /> },
+              { path: "pengadaan-doc", element: <PengadaanDoc /> },
             ],
           },
           {

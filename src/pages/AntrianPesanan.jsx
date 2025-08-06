@@ -140,7 +140,6 @@ const AntrianPesanan = () => {
     // } else {
     //   setUnits(["Ikat", "Kg"]);
     // }
-
     setQuantity(item.quantity);
 
     setUnit(item.saleUnit);
@@ -268,7 +267,6 @@ const AntrianPesanan = () => {
             customerId: selectedItem.customer.id,
           }),
     };
-
     // console.log("selectedItem.customer.id: ", selectedItem.customer.id);
     // console.log("create payload is ready: ", payload);
 

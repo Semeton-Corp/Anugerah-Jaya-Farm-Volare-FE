@@ -165,30 +165,30 @@ const DetailKinerjaAyam = () => {
         <Outlet />
       ) : (
         <div className="flex flex-col px-4 py-3 gap-4 ">
-          {/* header section */}
           <div className="flex justify-between mb-2 flex-wrap gap-4">
             <h1 className="text-3xl font-bold">Detail Kinerja Ayam</h1>
           </div>
 
-          {/* detail penjualan */}
           <div className="bg-white p-4 rounded-lg border border-gray-300">
             <div className="flex justify-end items-center mb-4">
               <div className="flex gap-3">
                 <div
                   onClick={() => {}}
-                  className="flex items-center rounded-lg px-4 py-2 bg-green-700 hover:bg-green-900 cursor-pointer"
+                  className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
                 >
-                  <div className="text-base font-medium text-white">
-                    Pengadaan DOC
-                  </div>
+                  <div className="text-base font-medium ">Pindah Ayam</div>
                 </div>
                 <div
                   onClick={() => {}}
-                  className="flex items-center rounded-lg px-4 py-2 bg-green-700 hover:bg-green-900 cursor-pointer"
+                  className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
                 >
-                  <div className="text-base font-medium text-white">
-                    Jual Ayam Afkir
-                  </div>
+                  <div className="text-base font-medium ">Pengadaan DOC</div>
+                </div>
+                <div
+                  onClick={() => {}}
+                  className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
+                >
+                  <div className="text-base font-medium ">Jual Ayam Afkir</div>
                 </div>
               </div>
             </div>

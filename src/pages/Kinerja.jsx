@@ -35,6 +35,16 @@ import {
   CartesianGrid,
 } from "recharts";
 
+const performanceData = [
+  { day: "Minggu", value: 36 },
+  { day: "Senin", value: 42 },
+  { day: "Selasa", value: 25 },
+  { day: "Rabu", value: 40 },
+  { day: "Kamis", value: 43 },
+  { day: "Jumat", value: 33 },
+  { day: "Sabtu", value: 41 },
+];
+
 const kinerjaData = [
   { day: "Minggu", value: 44 },
   { day: "Senin", value: 52 },
@@ -45,101 +55,19 @@ const kinerjaData = [
   { day: "Sabtu", value: 52 },
 ];
 
-const kinerjaAyamData = [
-  {
-    kandang: "Kandang A1",
-    usia: 49,
-    jumlah: 4000,
-    produksi: 50,
-    konsumsi: 50,
-    beratTelur: 10,
-    fcr: 10,
-    hdp: "10%",
-    produktivitas: "Produktif",
-  },
-  {
-    kandang: "Kandang A2",
-    usia: 49,
-    jumlah: 1200,
-    produksi: 20,
-    konsumsi: 20,
-    beratTelur: 12,
-    fcr: 10,
-    hdp: "10%",
-    produktivitas: "Periksa",
-  },
+const ageDistributionData = [
+  { stage: "DOC", value: 40 },
+  { stage: "Grower", value: 47 },
+  { stage: "Prelayer", value: 28 },
+  { stage: "Layer", value: 45 },
+  { stage: "Afkir", value: 48 },
 ];
 
-const detailAyamData = [
-  {
-    kandang: "Kandang A1",
-    kategori: "DOC",
-    usiaMinggu: 49,
-    hidup: 4000,
-    sakit: 50,
-    mati: 10,
-    pakanKg: 20,
-    mortalitas: "3%",
-    vaksin: "Vaksin A (5 ml)",
-    obat: "Obat B (4ml)",
-  },
-  {
-    kandang: "Kandang A2",
-    kategori: "Grower",
-    usiaMinggu: 49,
-    hidup: 1200,
-    sakit: 20,
-    mati: 12,
-    pakanKg: 40,
-    mortalitas: "0.8%",
-    vaksin: "-",
-    obat: "-",
-  },
-  {
-    kandang: "Kandang A3",
-    kategori: "Pre Layer",
-    usiaMinggu: 49,
-    hidup: 1200,
-    sakit: 20,
-    mati: 12,
-    pakanKg: 40,
-    mortalitas: "0.8%",
-    vaksin: "-",
-    obat: "-",
-  },
-  {
-    kandang: "Kandang A4",
-    kategori: "Layer",
-    usiaMinggu: 49,
-    hidup: 1200,
-    sakit: 20,
-    mati: 12,
-    pakanKg: 40,
-    mortalitas: "0.8%",
-    vaksin: "-",
-    obat: "-",
-  },
-  {
-    kandang: "Kandang A5",
-    kategori: "Afkir",
-    usiaMinggu: 49,
-    hidup: 1200,
-    sakit: 20,
-    mati: 12,
-    pakanKg: 40,
-    mortalitas: "0.8%",
-    vaksin: "-",
-    obat: "-",
-  },
-];
-
-const usiaAyamData = [
-  { name: "DOC", value: 200 },
-  { name: "Grower", value: 300 },
-  { name: "Pre Layer", value: 150 },
-  { name: "Layer", value: 500 },
-  { name: "Afkir", value: 100 },
-];
+const getBarColor = (day) => {
+  if (day === "Selasa") return "#FF5E5E";
+  if (day === "Jumat") return "#F2D08A";
+  else return "#87FF8B";
+};
 
 const Kinerja = () => {
   const location = useLocation();
@@ -283,64 +211,43 @@ const Kinerja = () => {
               </div>
             </div>
           </div>
-
-          {/* chart, incomes, and history section */}
+          <div className="p-4 border rounded-lg">
+            <h2 className="text-lg font-bold mb-4">Distribusi Usia Ayam</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={ageDistributionData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="stage" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="value" fill="#5A9EA7" barSize={40} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
           <div className="flex flex-col lg:flex-row h-120 gap-6">
-            <div className="w-2/5 bg-white rounded-lg p-4 border border-gray-300">
-              <h2 className="text-lg font-semibold ">Distribusi Usia Ayam</h2>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={usiaAyamData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={150}
-                    label
-                  >
-                    {usiaAyamData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend
-                    verticalAlign="middle"
-                    align="right"
-                    layout="vertical"
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="w-3/5 bg-white p-4 rounded-lg border border-gray-300">
-              <div className="flex justify-between items-center mb-8">
-                <h2 className="text-xl font-semibold">Kinerja perusahaan</h2>
-                <select
-                  value={selectedFilter}
-                  onChange={(e) => setSelectedFilter(e.target.value)}
-                  className="bg-gray-200 px-2 py-1 rounded"
-                >
-                  <option>Rentabilitas</option>
-                  <option>Produktivitas</option>
-                  <option>Penjualan</option>
-                </select>
+            <div className="w-full p-4 border rounded-lg">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-bold">Kinerja perusahaan</h2>
+                <div className="flex gap-2">
+                  <select className="border text-sm rounded px-2 py-1 text-gray-700">
+                    <option>Rentabilitas</option>
+                    <option>Produktivitas</option>
+                  </select>
+                  <button className="flex items-center gap-1 bg-yellow-500 text-white px-3 py-1 rounded text-sm">
+                    📅 Minggu ini
+                  </button>
+                </div>
               </div>
-
-              <ResponsiveContainer width="100%" height="85%">
-                <BarChart data={kinerjaData}>
+              <ResponsiveContainer width="100%" height={370}>
+                <BarChart data={performanceData}>
+                  <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="day" />
                   <YAxis />
                   <Tooltip />
-                  <Bar
-                    dataKey="value"
-                    fill="#5898A2"
-                    barSize={40}
-                    radius={[4, 4, 0, 0]}
-                  />
+                  <Bar dataKey="value">
+                    {performanceData.map((entry, index) => (
+                      <Cell key={index} fill={getBarColor(entry.day)} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>

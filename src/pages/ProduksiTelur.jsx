@@ -167,7 +167,9 @@ const ProduksiTelur = () => {
         <div className="flex flex-col px-4 py-3 gap-4 ">
           {/* header section */}
           <div className="flex justify-between mb-2 flex-wrap gap-4">
-            <h1 className="text-3xl font-bold">Produksi Telur</h1>
+            <h1 className="text-3xl font-bold">
+              {userRole == "Owner" ? "Ringkasan Produksi" : "Ringkasan"}
+            </h1>
             <div className="flex gap-4">
               {userRole == "Owner" && (
                 <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
