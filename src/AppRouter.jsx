@@ -86,6 +86,9 @@ import PageKosong from "./pages/PageKosong";
 import PengadaanDoc from "./pages/PengadaanDOC";
 import DraftPengadaanDoc from "./pages/DraftPengadaanDoc";
 import InputDraftPemesananDoc from "./pages/InputDraftPemesananDoc";
+import JualAyamAfkir from "./pages/JualAyamAfkir";
+import DraftPenjualanAyam from "./pages/DraftPenjualanAyam";
+import InputDraftPenjualanAyam from "./pages/InputDraftPenjualanAyam";
 
 const AppRouter = createBrowserRouter([
   {
@@ -235,6 +238,26 @@ const AppRouter = createBrowserRouter([
                       {
                         path: "input-draft-pesan-doc",
                         element: <InputDraftPemesananDoc />,
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                path: "jual-ayam-afkir",
+                element: <JualAyamAfkir />,
+                children: [
+                  {
+                    path: "draft-pelanggan-ayam",
+                    // element: <DraftPenjualanAyam />,
+                  },
+                  {
+                    path: "draft-penjualan-ayam",
+                    element: <DraftPenjualanAyam />,
+                    children: [
+                      {
+                        path: "input-draft-penjualan-ayam",
+                        element: <InputDraftPenjualanAyam />,
                       },
                     ],
                   },

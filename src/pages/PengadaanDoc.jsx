@@ -108,12 +108,11 @@ const PengadaanDoc = () => {
         <div className="flex justify-end items-center mb-2">
           <button
             onClick={draftPesanDocHandle}
-            className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
+            className="flex items-center rounded px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
           >
             Draft Pesan DOC
           </button>
         </div>
-
         <div className="overflow-x-auto">
           <table className="min-w-full table-auto border-collapse">
             <thead>

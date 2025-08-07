@@ -24,7 +24,6 @@ const draftData = [
 const DraftPengadaanDoc = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
   const [showBatalModal, setShowBatalModal] = useState(false);
 
   const detailPages = ["input-draft-pesan-doc"];
