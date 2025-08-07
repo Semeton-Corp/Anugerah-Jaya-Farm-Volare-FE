@@ -1,0 +1,155 @@
+import React from "react";
+import { useState } from "react";
+import { FaWhatsapp } from "react-icons/fa";
+import { IoLogoWhatsapp } from "react-icons/io";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+
+const draftData = [
+  {
+    date: "20 Mar 2025",
+    supplier: "Dagang A",
+    quantity: "4000 Ekor",
+    price: "Rp 1.000.000",
+    status: "Belum Konfirmasi",
+  },
+  {
+    date: "20 Mar 2025",
+    supplier: "Dagang B",
+    quantity: "4000 Ekor",
+    price: "Rp 1.000.000",
+    status: "Belum Konfirmasi",
+  },
+];
+
+const DraftPengadaanDoc = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const [showBatalModal, setShowBatalModal] = useState(false);
+
+  const detailPages = ["input-draft-pesan-doc"];
+  const isDetailPage = detailPages.some((segment) =>
+    location.pathname.includes(segment)
+  );
+
+  const inputDraftPesanDocHandle = () => {
+    navigate(`${location.pathname}/input-draft-pesan-doc`);
+  };
+
+  if (isDetailPage) {
+    return <Outlet />;
+  }
+
+  return (
+    <div className="p-6">
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold">Draft Pengadaan DOC</h2>
+      </div>
+
+      <div className="bg-white p-4 rounded border shadow">
+        <div className="flex justify-end items-center mb-3">
+          <button
+            onClick={inputDraftPesanDocHandle}
+            className="bg-orange-300 hover:bg-yellow-500 py-2 px-4 rounded-lg cursor-pointer"
+          >
+            + Draft Pemesanan DOC
+          </button>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full table-auto border-collapse">
+            <thead>
+              <tr className="bg-green-700 text-white text-left">
+                <th className="p-3">Tanggal Input</th>
+                <th className="p-3">Suplier</th>
+                <th className="p-3">Jumlah</th>
+                <th className="p-3">Harga</th>
+                <th className="p-3">Status</th>
+                <th className="p-3">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {draftData.map((item, index) => (
+                <tr key={index} className="border-t">
+                  <td className="p-3">{item.date}</td>
+                  <td className="p-3">{item.supplier}</td>
+                  <td className="p-3">{item.quantity}</td>
+                  <td className="p-3">{item.price}</td>
+                  <td className="p-3">
+                    <span className="px-2 py-1 text-sm rounded bg-orange-200 text-orange-900 font-medium">
+                      {item.status}
+                    </span>
+                  </td>
+                  <td className="p-3 flex items-center gap-2">
+                    <div className="flex gap-3 justify-center">
+                      <button
+                        onClick={() => {
+                          const localNumber = "081246087972"; // nanti bisa ganti ke item?.customer?.phone
+                          const waNumber = localNumber.replace(/^0/, "62");
+
+                          const namaCustomer = item?.customer?.name || "";
+                          const namaBarang = item?.item?.name || "";
+                          const satuan = item?.item?.unit || "";
+                          const jumlah = item?.quantity || "";
+                          const message = `Halo ${namaCustomer}, kami dari Anugerah Jaya Farm ingin mengonfirmasi pesanan Anda:%0A%0A🧺 Nama Barang: ${namaBarang}%0A📦 Jumlah: ${jumlah} ${satuan}%0A%0AApakah jadi untuk memesan?`;
+                          const waURL = `https://wa.me/${waNumber}?text=${message}`;
+
+                          window.open(waURL, "_blank");
+                        }}
+                        className="px-3 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer"
+                      >
+                        <IoLogoWhatsapp />
+                      </button>
+                      <button
+                        onClick={() => {
+                          // setSelectedItemHandle(item);
+                          setShowAlokasiModal(true);
+                        }}
+                        className="px-3 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer"
+                      >
+                        Konfirmasi
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowBatalModal(true);
+                        }}
+                        className="px-3 py-1 bg-kritis-box-surface-color rounded-[4px] text-white hover:bg-kritis-text-color cursor-pointer"
+                      >
+                        Batalkan
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {showBatalModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="bg-white rounded-2xl shadow-md px-8 py-6 max-w-md text-center">
+            <p className="text-lg font-semibold mb-6">
+              Apakah anda yakin untuk pengadaan barang ini?
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setShowBatalModal(false)}
+                className="bg-gray-300 hover:bg-gray-400 cursor-pointer text-black font-semibold px-6 py-2 rounded-lg"
+              >
+                Tidak
+              </button>
+              <button
+                onClick={() => {}}
+                className="bg-red-400 hover:bg-red-500 cursor-pointer text-white font-semibold px-6 py-2 rounded-lg"
+              >
+                Ya, Lanjutkan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default DraftPengadaanDoc;

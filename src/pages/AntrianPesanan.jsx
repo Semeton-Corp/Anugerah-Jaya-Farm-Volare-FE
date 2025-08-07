@@ -333,7 +333,6 @@ const AntrianPesanan = () => {
         <Outlet />
       ) : (
         <div className="flex flex-col px-4 py-3 gap-4 ">
-          {/* header section */}
           <div className="flex justify-between mb-2 flex-wrap gap-4">
             <h1 className="text-3xl font-bold">Antrian Pesanan</h1>
             <div className="text-base flex gap-2">
@@ -341,7 +340,6 @@ const AntrianPesanan = () => {
             </div>
           </div>
 
-          {/* Telur  ok, retak, pecah, reject*/}
           <div className="flex md:grid-cols-2 gap-4 justify-between">
             <div className="p-4 w-full rounded-md border-2 border-black-6">
               <div className="flex justify-between items-center mb-4">
@@ -409,7 +407,6 @@ const AntrianPesanan = () => {
             </div>
           </div>
 
-          {/* detail penjualan */}
           <div className=" flex gap-4 ">
             <div className=" w-full bg-white px-8 py-6 rounded-lg border border-black-6">
               <table className="w-full text-sm">

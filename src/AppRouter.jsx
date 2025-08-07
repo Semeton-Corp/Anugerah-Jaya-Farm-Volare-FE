@@ -84,6 +84,8 @@ import DetailTugasTambahan from "./pages/DetailTugasTambahan";
 import DetailRiwayatStok from "./pages/DetailRiwayatStok";
 import PageKosong from "./pages/PageKosong";
 import PengadaanDoc from "./pages/PengadaanDOC";
+import DraftPengadaanDoc from "./pages/DraftPengadaanDoc";
+import InputDraftPemesananDoc from "./pages/InputDraftPemesananDoc";
 
 const AppRouter = createBrowserRouter([
   {
@@ -222,7 +224,22 @@ const AppRouter = createBrowserRouter([
             children: [
               { path: "overview-kinerja", element: <Kinerja /> },
               { path: "detail-kinerja-ayam", element: <DetailKinerjaAyam /> },
-              { path: "pengadaan-doc", element: <PengadaanDoc /> },
+              {
+                path: "pengadaan-doc",
+                element: <PengadaanDoc />,
+                children: [
+                  {
+                    path: "draft-pesan-doc",
+                    element: <DraftPengadaanDoc />,
+                    children: [
+                      {
+                        path: "input-draft-pesan-doc",
+                        element: <InputDraftPemesananDoc />,
+                      },
+                    ],
+                  },
+                ],
+              },
             ],
           },
           {

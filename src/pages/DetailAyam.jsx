@@ -15,59 +15,6 @@ import { AlertTriangle } from "lucide-react";
 import { getLocations } from "../services/location";
 import { useRef } from "react";
 
-// const detailAyamData = [
-//   {
-//     kandang: "Kandang A1",
-//     kategori: "DOC",
-//     usiaMinggu: 49,
-//     hidup: 4000,
-//     sakit: 50,
-//     mati: 10,
-//     pakanKg: 20,
-//     mortalitas: "3%",
-//   },
-//   {
-//     kandang: "Kandang A2",
-//     kategori: "Grower",
-//     usiaMinggu: 49,
-//     hidup: 1200,
-//     sakit: 20,
-//     mati: 12,
-//     pakanKg: 40,
-//     mortalitas: "0.8%",
-//   },
-//   {
-//     kandang: "Kandang A3",
-//     kategori: "Pre Layer",
-//     usiaMinggu: 49,
-//     hidup: 1200,
-//     sakit: 20,
-//     mati: 12,
-//     pakanKg: 40,
-//     mortalitas: "0.8%",
-//   },
-//   {
-//     kandang: "Kandang A4",
-//     kategori: "Layer",
-//     usiaMinggu: 49,
-//     hidup: 1200,
-//     sakit: 20,
-//     mati: 12,
-//     pakanKg: 40,
-//     mortalitas: "0.8%",
-//   },
-//   {
-//     kandang: "Kandang A5",
-//     kategori: "Afkir",
-//     usiaMinggu: 49,
-//     hidup: 1200,
-//     sakit: 20,
-//     mati: 12,
-//     pakanKg: 40,
-//     mortalitas: "0.8%",
-//   },
-// ];
-
 const data = [
   { date: "29 Mar", produksi: 25, penjualan: 30 },
   { date: "30 Mar", produksi: 14, penjualan: 40 },
@@ -111,7 +58,6 @@ const DetailAyam = () => {
   const [detailAyamData, setDetailAyamState] = useState([]);
 
   const detailPages = ["input-ayam", "detail-vaksin-obat"];
-
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );

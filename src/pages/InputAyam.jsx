@@ -169,21 +169,18 @@ const InputAyam = () => {
 
   return (
     <div className="flex flex-col px-4 py-3 gap-4">
-      {/* Header */}
       <div className="flex justify-between items-center mb-2 flex-wrap gap-4">
         <h1 className="text-3xl font-bold">
           {userRole === "Pekerja Kandang" ? "Data Ayam" : "Detail Ayam"}
         </h1>
       </div>
 
-      {/* Table Section */}
       <div className="w-full mx-auto p-6 bg-white shadow rounded border border-black-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold mb-1">Input data harian</h2>
           <p className="text-lg ">{getTodayDateInBahasa()}</p>
         </div>
 
-        {/* Pilih kandang */}
         <label className="block font-medium  mb-1">Pilih kandang</label>
         {isEditMode ? (
           <select
@@ -233,16 +230,6 @@ const InputAyam = () => {
                   : `-`}
               </p>
             </div>
-
-            {/* <select
-              className="w-full border border-black-6 cursor-pointer  bg-black-4 rounded p-2"
-              value={selectedChikenCategory}
-              onChange={(e) => setSelectedChikenCategory(e.target.value)}
-            >
-              {kategoriAyam.map((kategori, index) => {
-                return <option key={index}>{kategori}</option>;
-              })}
-            </select> */}
           </div>
           <div>
             <label className="block font-medium mb-1">Usia ayam (Minggu)</label>
@@ -253,18 +240,9 @@ const InputAyam = () => {
                   : `0`}
               </p>
             </div>
-            {/* <input
-              type="number"
-              value={getDisplayValue(ageChiken)}
-              className="bg-black-4 w-full border border-black-6 rounded p-2"
-              onChange={(e) => {
-                setAgeChiken(e.target.value);
-              }}
-            /> */}
           </div>
         </div>
 
-        {/* Jumlah ayam */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
           <div>
             <label className="block font-medium mb-1">Jumlah ayam hidup</label>
@@ -275,14 +253,6 @@ const InputAyam = () => {
                   : `-`}
               </p>
             </div>
-            {/* <input
-              type="number"
-              value={getDisplayValue(totalLiveChicken)}
-              className="w-full bg-black-4 border border-black-6 rounded p-2"
-              onChange={(e) => {
-                setTotalLiveChicken(e.target.value);
-              }}
-            /> */}
           </div>
         </div>
 
@@ -364,9 +334,6 @@ const InputAyam = () => {
           </div>
         </div>
 
-        {/* Jumlah pakan */}
-
-        {/* Catatan pekerja */}
         <div className="mt-4">
           <label className="block font-medium mb-1">Catatan Pekerja</label>
           {isEditMode ? (
@@ -385,206 +352,6 @@ const InputAyam = () => {
             </div>
           )}
         </div>
-
-        {/* Vaksin Section */}
-        {/* <div className="mt-6 border border-black-6 rounded p-4 ">
-          <div
-            className="flex items-center cursor-pointer mb-3"
-            onClick={() => setVaksinExpanded(!vaksinExpanded)}
-          >
-            <span className="mr-2">{vaksinExpanded ? "▼" : "▶"}</span>
-            <strong>Vaksin</strong>
-          </div>
-
-          {vaksinExpanded &&
-            vaksinList.map((vaksin, index) => (
-              <div
-                key={index}
-                className="mb-6 border rounded-[4px] px-4 py-6 border-black-6 bg-black-4"
-              >
-                <div className="flex underline   justify-end p-2">
-                  <div
-                    onClick={() => {
-                      if (vaksin.id) {
-                        const isDeleted = deleteVaccineHandle(id, vaksin.id);
-                        console.log("isDeleted: ", isDeleted);
-
-                        if (isDeleted) {
-                          const newList = [...vaksinList];
-                          newList.splice(index, 1);
-                          setVaksinList(newList);
-                        }
-                      } else {
-                        const newList = [...vaksinList];
-                        newList.splice(index, 1);
-                        setVaksinList(newList);
-                      }
-                    }}
-                    className="flex hover:text-black-7 cursor-pointer"
-                  >
-                    <p>Hapus Vaksin</p>
-                    <button>
-                      <MdDelete size={24} />
-                    </button>
-                  </div>
-                </div>
-
-                <label className="block font-medium mb-1">Jenis Vaksin</label>
-                <input
-                  type="text"
-                  className="w-full border rounded p-2 mb-4 bg-white"
-                  value={getDisplayValue(vaksin.jenis)}
-                  onChange={(e) =>
-                    handleVaksinChange(index, "jenis", e.target.value)
-                  }
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block font-medium mb-1">Dosis</label>
-                    <input
-                      type="number"
-                      className="w-full border rounded p-2 bg-white"
-                      value={getDisplayValue(vaksin.dosis)}
-                      onChange={(e) =>
-                        handleVaksinChange(index, "dosis", e.target.value)
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-medium mb-1">
-                      Satuan Dosis
-                    </label>
-                    <select
-                      className="w-full border rounded p-2 bg-white"
-                      value={vaksin.satuan}
-                      onChange={(e) =>
-                        handleVaksinChange(index, "satuan", e.target.value)
-                      }
-                    >
-                      <option value="mililiter">mililiter</option>
-                      <option value="liter">liter</option>
-                      <option value="gram">gram</option>
-                      <option value="kilogram">kilogram</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            ))}
-          <button
-            onClick={addVaksinInput}
-            className="mt-2 bg-emerald-700 text-white py-2 px-4 rounded hover:bg-emerald-600 cursor-pointer"
-          >
-            Tambah vaksin
-          </button>
-        </div> */}
-
-        {/* Obat Section */}
-        {/* <div className="mt-6 border border-black-6 rounded p-4">
-          <div
-            className="flex items-center cursor-pointer mb-3"
-            onClick={() => setObatExpanded(!obatExpanded)}
-          >
-            <span className="mr-2">{obatExpanded ? "▼" : "▶"}</span>
-            <strong>Obat</strong>
-          </div>
-
-          {obatExpanded &&
-            obatList.map((obat, index) => (
-              <div
-                key={index}
-                className="mb-6 border  rounded-[4px] px-4 py-6 border-black-6 bg-black-4"
-              >
-                <div className="flex underline   justify-end p-2">
-                  <div
-                    onClick={() => {
-                      if (obat.id) {
-                        const isDeleted = deleteDiseaseHandle(id, obat.id);
-                        console.log("isDeleted: ", isDeleted);
-
-                        if (isDeleted) {
-                          const newList = [...obatList];
-                          newList.splice(index, 1);
-                          setObatList(newList);
-                        }
-                      } else {
-                        const newList = [...obatList];
-                        newList.splice(index, 1);
-                        setObatList(newList);
-                      }
-                    }}
-                    className="flex hover:text-black-7 cursor-pointer"
-                  >
-                    <p>Hapus Obat</p>
-                    <button>
-                      <MdDelete size={24} />
-                    </button>
-                  </div>
-                </div>
-
-                <label className="block font-medium mb-1">Penyakit</label>
-                <input
-                  type="text"
-                  className="w-full border rounded p-2 mb-4 bg-white"
-                  value={getDisplayValue(obat.penyakit)}
-                  onChange={(e) =>
-                    handleObatChange(index, "penyakit", e.target.value)
-                  }
-                />
-
-                <label className="block font-medium mb-1">Jenis Obat</label>
-                <input
-                  type="text"
-                  className="w-full border rounded p-2 mb-4 bg-white"
-                  value={getDisplayValue(obat.jenis)}
-                  onChange={(e) =>
-                    handleObatChange(index, "jenis", e.target.value)
-                  }
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block font-medium mb-1">Dosis</label>
-                    <input
-                      type="number"
-                      className="w-full border rounded p-2 bg-white"
-                      value={getDisplayValue(obat.dosis)}
-                      onChange={(e) =>
-                        handleObatChange(index, "dosis", e.target.value)
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-medium mb-1">
-                      Satuan Dosis
-                    </label>
-                    <select
-                      className="w-full border rounded p-2 bg-white"
-                      value={getDisplayValue(obat.satuan)}
-                      onChange={(e) =>
-                        handleObatChange(index, "satuan", e.target.value)
-                      }
-                    >
-                      <option value="mililiter">mililiter</option>
-                      <option value="liter">liter</option>
-                      <option value="gram">gram</option>
-                      <option value="kilogram">kilogram</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-          <button
-            onClick={addObatInput}
-            className="mt-2 bg-green-700 text-white py-2 px-4 rounded hover:bg-green-900 cursor-pointer"
-          >
-            Tambah Obat
-          </button>
-        </div> */}
-
-        {/* Simpan Button */}
         <div className="mt-6 flex justify-between text-right">
           <div></div>
           <div className="flex gap-3">
@@ -606,7 +373,6 @@ const InputAyam = () => {
               <button
                 onClick={() => {
                   simpanAyamHandle();
-                  // console.log("selectedCage: ", selectedChickenCage);
                 }}
                 className="bg-green-700 text-white py-3 px-8 rounded hover:bg-green-900 cursor-pointer"
               >
@@ -626,8 +392,6 @@ const InputAyam = () => {
             )}
           </div>
         </div>
-
-        {/* Simpan Button */}
         <div className="mt-6 text-right ">
           <button
             onClick={() => {
@@ -650,6 +414,7 @@ const InputAyam = () => {
           </button>
         </div>
       </div>
+      
       <DeleteModal
         isOpen={showDeleteModal}
         onCancel={() => setShowDeleteModal(false)}
