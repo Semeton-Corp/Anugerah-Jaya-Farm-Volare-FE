@@ -15,7 +15,7 @@ import {
   GiChicken,
   GiDeathSkull,
 } from "react-icons/gi";
-import { FaPercentage } from "react-icons/fa";
+import { FaCalendarAlt, FaPercentage } from "react-icons/fa";
 
 const COLORS = ["#06b6d4", "#facc15", "#f97316", "#10b981", "#ef4444"];
 
@@ -77,6 +77,13 @@ const Kinerja = () => {
     location.pathname.includes(segment)
   );
   const navigate = useNavigate();
+
+  const [graphFilterOptions, setGraphFilterOptions] = useState([
+    "Minggu Ini",
+    "Bulan Ini",
+    "Tahun Ini",
+  ]);
+  const [graphFilter, setGraphFilter] = useState("Minggu Ini");
 
   const detailKinerjaAyamHandle = () => {
     const currentPath = location.pathname;
@@ -228,13 +235,24 @@ const Kinerja = () => {
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-bold">Kinerja perusahaan</h2>
                 <div className="flex gap-2">
-                  <select className="border text-sm rounded px-2 py-1 text-gray-700">
+                  <select className="text-sm rounded bg-[#BFBFBF] px-2 py-1 text-gray-700">
                     <option>Rentabilitas</option>
                     <option>Produktivitas</option>
                   </select>
-                  <button className="flex items-center gap-1 bg-yellow-500 text-white px-3 py-1 rounded text-sm">
-                    📅 Minggu ini
-                  </button>
+                  <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 ">
+                    <FaCalendarAlt size={18} />
+                    <select
+                      value={graphFilter}
+                      onChange={(e) => setGraphFilter(e.target.value)}
+                      className="ml-2 bg-transparent text-base font-medium outline-none cursor-pointer"
+                    >
+                      {graphFilterOptions.map((choice, index) => (
+                        <option key={index} value={choice}>
+                          {choice}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
               <ResponsiveContainer width="100%" height={370}>

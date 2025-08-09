@@ -52,7 +52,7 @@ const DraftPenjualanAyam = () => {
         <div className="flex justify-end mb-3">
           <button
             onClick={inputDraftPesanDocHandle}
-            className="bg-yellow-400 hover:bg-yellow-500 px-4 py-2 rounded text-sm font-medium"
+            className="bg-orange-300 hover:bg-orange-500 px-4 py-2 rounded text-sm font-medium cursor-pointer"
           >
             + Draft Penjualan Ayam
           </button>
@@ -99,10 +99,10 @@ const DraftPenjualanAyam = () => {
                       >
                         <IoLogoWhatsapp />
                       </button>
-                      <button className="px-3 py-1 bg-green-700 text-white rounded hover:bg-green-900 text-sm">
+                      <button className="px-3 py-1 bg-green-700 text-white rounded hover:bg-green-900 text-sm cursor-pointer">
                         Konfirmasi
                       </button>
-                      <button className="px-3 py-1 bg-red-400 text-white rounded hover:bg-red-500 text-sm">
+                      <button className="px-3 py-1 bg-red-400 text-white rounded hover:bg-red-500 text-sm cursor-pointer">
                         Batalkan
                       </button>
                     </div>

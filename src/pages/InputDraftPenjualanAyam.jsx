@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const kandangList = [
   { id: 1, name: "Sidodadi 04", jumlah: 4000, umur: 30 },
@@ -6,29 +7,41 @@ const kandangList = [
 ];
 
 const InputDraftPenjualanAyam = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [selectedKandang, setSelectedKandang] = useState(null);
   const [jumlahTerjual, setJumlahTerjual] = useState("");
   const [hargaPerEkor, setHargaPerEkor] = useState("");
   const [totalHarga, setTotalHarga] = useState(0);
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
+
+  const detailPages = ["pilih-pembeli-ayam"];
+  const isDetailPage = detailPages.some((segment) =>
+    location.pathname.includes(segment)
+  );
+
+  const pilihPembeliAyamHandle = () => {
+    navigate(`${location.pathname}/pilih-pembeli-ayam`);
+  };
 
   useEffect(() => {
     const total = parseInt(jumlahTerjual || 0) * parseInt(hargaPerEkor || 0);
     setTotalHarga(total);
   }, [jumlahTerjual, hargaPerEkor]);
 
+  if (isDetailPage) {
+    return <Outlet />;
+  }
+
   return (
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-4">Tambah Draft Penjualan Ayam</h2>
 
       <div className="bg-white border rounded p-6 space-y-6">
-        {/* Tanggal */}
         <div>
           <p className="text-sm text-gray-600">Tanggal Input</p>
           <p className="font-semibold">20 Maret 2025</p>
         </div>
-
-        {/* Kandang */}
         <div className="grid grid-cols-3 gap-6">
           <div>
             <label className="text-sm text-gray-600 block mb-1">Kandang</label>
@@ -69,17 +82,16 @@ const InputDraftPenjualanAyam = () => {
             </p>
           </div>
         </div>
-
-        {/* Pelanggan */}
         <div>
           <label className="text-sm text-gray-600 block mb-1">Pelanggan</label>
-          <button className="bg-yellow-400 hover:bg-yellow-500 px-4 py-2 rounded text-black font-semibold">
+          <button
+            onClick={pilihPembeliAyamHandle}
+            className="bg-yellow-400 hover:bg-yellow-500 px-4 py-2 rounded text-black cursor-pointer"
+          >
             Pilih Pelanggan
           </button>
-          {/* Nanti tambahkan modal pilih pelanggan */}
         </div>
 
-        {/* Jumlah dan Harga */}
         <div className="grid grid-cols-2 gap-6 items-end">
           <div>
             <label className="text-sm text-gray-600 block mb-1">
@@ -96,7 +108,6 @@ const InputDraftPenjualanAyam = () => {
               <span className="ml-2">Ekor</span>
             </div>
           </div>
-
           <div>
             <label className="text-sm text-gray-600 block mb-1">
               Harga Jual / Ekor
@@ -113,8 +124,6 @@ const InputDraftPenjualanAyam = () => {
             </div>
           </div>
         </div>
-
-        {/* Total Harga */}
         <div className="flex items-center">
           <label className="text-sm text-gray-600 block mb-1 w-1/3">
             Harga Jual Total
@@ -123,8 +132,6 @@ const InputDraftPenjualanAyam = () => {
             Rp {totalHarga.toLocaleString("id-ID") || "-"}
           </p>
         </div>
-
-        {/* Tombol Simpan */}
         <div className="flex justify-end">
           <button className="bg-green-700 text-white px-6 py-2 rounded hover:bg-green-900">
             Simpan

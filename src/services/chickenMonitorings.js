@@ -180,3 +180,21 @@ export const deleteChickenHealthMonitoring = (payload, id) => {
     },
   });
 };
+
+export const createChickenProcurementDraft = (payload) => {
+  return api.post(`/chickens/procurements/drafts`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const getChickenProcurementDrafts = () => {
+  return api.get(`/chickens/procurements/drafts`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};

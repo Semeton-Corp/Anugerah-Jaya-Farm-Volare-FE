@@ -20,6 +20,11 @@ import { getItems } from "../services/item";
 
 const TambahSupplier = () => {
   const [warehouseItems, setWarehouseItems] = useState([]);
+  const [supplierTypeOptions, setSupplierTypeOptions] = useState([
+    "Barang",
+    "Ayam DOC",
+  ]);
+  const [supplierType, setSupplierType] = useState("");
   const [selectedItem, setSelectedItem] = useState("");
   const [selectedItems, setSelectedItems] = useState([0]);
 
@@ -50,11 +55,11 @@ const TambahSupplier = () => {
       console.log("supplierDetailResponse: ", supplierDetailResponse);
       if (supplierDetailResponse.status == 200) {
         const items = supplierDetailResponse.data.data.items || [];
-
         setName(supplierDetailResponse.data.data.name);
         setAddress(supplierDetailResponse.data.data.address);
         setPhoneNumber(supplierDetailResponse.data.data.phoneNumber);
         setSelectedItems(items.map((item) => item.id));
+        setSupplierType(supplierDetailResponse.data.data.supplierType);
       }
       //   console.log("itemsResponse: ", itemsResponse);
     } catch (error) {
@@ -77,6 +82,7 @@ const TambahSupplier = () => {
       name: name,
       phoneNumber: phoneNumber,
       address: address,
+      supplierType: supplierType,
     };
 
     if (id) {
@@ -135,6 +141,21 @@ const TambahSupplier = () => {
         </div>
 
         <div>
+          <label className="block font-medium mb-1">Tipe Supplier</label>
+          <select
+            value={supplierType}
+            onChange={(e) => setSupplierType(e.target.value)}
+            className="w-full border rounded p-2 mb-6 bg-black-4"
+          >
+            {supplierTypeOptions.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
           <label className="block font-medium mb-1">Alamat Supplier</label>
           <input
             type="text"
@@ -158,53 +179,58 @@ const TambahSupplier = () => {
           />
         </div>
 
-        <div className="mt-6 border rounded p-4">
-          <h3 className="font-semibold mb-2">Daftar barang yang disupply</h3>
+        {supplierType === "Barang" && (
+          <div className="mt-6 border rounded p-4">
+            <h3 className="font-semibold mb-2">Daftar barang yang disupply</h3>
 
-          {selectedItems.map((itemId, index) => (
-            <div key={index} className="flex gap-2 items-center mb-2">
-              <select
-                className="w-full border bg-black-4 cursor-pointer rounded p-2"
-                value={itemId}
-                onChange={(e) => {
-                  const updatedItems = [...selectedItems];
-                  updatedItems[index] = Number(e.target.value);
-                  setSelectedItems(updatedItems);
-                }}
-              >
-                {warehouseItems.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-              {selectedItems.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedItems(
-                      selectedItems.filter((_, i) => i !== index)
-                    );
+            {selectedItems.map((itemId, index) => (
+              <div key={index} className="flex gap-2 items-center mb-2">
+                <select
+                  className="w-full border bg-black-4 cursor-pointer rounded p-2"
+                  value={itemId}
+                  onChange={(e) => {
+                    const updatedItems = [...selectedItems];
+                    updatedItems[index] = Number(e.target.value);
+                    setSelectedItems(updatedItems);
                   }}
-                  className="text-red-500 hover:text-red-300 cursor-pointer"
                 >
-                  <MdDelete size={32} />
-                </button>
-              )}
+                  {warehouseItems.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+                {selectedItems.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedItems(
+                        selectedItems.filter((_, i) => i !== index)
+                      );
+                    }}
+                    className="text-red-500 hover:text-red-300 cursor-pointer"
+                  >
+                    <MdDelete size={32} />
+                  </button>
+                )}
+              </div>
+            ))}
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() =>
+                  setSelectedItems([
+                    ...selectedItems,
+                    warehouseItems[0]?.id || 0,
+                  ])
+                }
+                className="bg-orange-300 hover:bg-orange-500  text-sm px-4 py-2 rounded cursor-pointer"
+              >
+                + Tambah Barang
+              </button>
             </div>
-          ))}
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={() =>
-                setSelectedItems([...selectedItems, warehouseItems[0]?.id || 0])
-              }
-              className="bg-orange-300 hover:bg-orange-500  text-sm px-4 py-2 rounded cursor-pointer"
-            >
-              + Tambah Barang
-            </button>
           </div>
-        </div>
+        )}
 
         <div className="mt-6 text-right">
           <div>

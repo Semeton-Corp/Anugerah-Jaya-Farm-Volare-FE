@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
+import { useEffect } from "react";
+import { getCage, getChickenCage } from "../services/cages";
+import { getSuppliers } from "../services/supplier";
+import { createChickenProcurementDraft } from "../services/chickenMonitorings";
 
 const kandangOptions = [
   { id: 1, name: "Sidodadi DOC", kapasitas: 11000 },
@@ -17,22 +21,73 @@ const hargaOptions = [
 ];
 
 const InputDraftPemesananDoc = () => {
-  const [selectedKandang, setSelectedKandang] = useState(kandangOptions[0]);
-  const [supplier, setSupplier] = useState("");
-  const [jumlah, setJumlah] = useState("");
-  const [harga, setHarga] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [price, setPrice] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log({
-      tanggalInput: "20 Maret 2025",
-      kandang: selectedKandang.name,
-      kapasitas: selectedKandang.kapasitas,
-      supplier,
-      jumlah,
-      harga,
-    });
+  const [suppliers, setSuppliers] = useState([]);
+  const [selectedSupplier, setSelectedSupplier] = useState(null);
+
+  const [cages, setCages] = useState([]);
+  const [selectedCage, setSelectedCage] = useState(null);
+
+  const fetchCages = async () => {
+    try {
+      const chickenCageResponse = await getCage();
+      // console.log("chickenCageResponse: ", chickenCageResponse);
+      if (chickenCageResponse.status === 200) {
+        setCages(chickenCageResponse.data.data);
+        if (chickenCageResponse.data.data.length > 0) {
+          setSelectedCage(chickenCageResponse.data.data[0]);
+        }
+      }
+    } catch (error) {
+      console.error("Gagal memuat data kandang:", error);
+    }
   };
+
+  const fetchSuppliers = async () => {
+    try {
+      const suppliersResponse = await getSuppliers("Ayam DOC");
+      console.log("suppliersResponse: ", suppliersResponse);
+      if (suppliersResponse.status === 200) {
+        setSuppliers(suppliersResponse.data.data);
+      }
+    } catch (error) {
+      console.error("Gagal memuat data kandang:", error);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!selectedCage || !selectedSupplier || !quantity || !price) {
+      alert("❌ Semua field harus diisi!");
+      return;
+    }
+
+    const payload = {
+      cageId: selectedCage?.id,
+      supplierId: selectedSupplier.id,
+      quantity: parseInt(quantity),
+      price: price,
+    };
+
+    try {
+      const submitResponse = await createChickenProcurementDraft(payload);
+      console.log("submitResponse: ", submitResponse);
+      if (submitResponse.status === 201) {
+        alert("✅ Draft pemesanan berhasil disimpan!");
+        navigate(-1, { state: { refetch: true } });
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCages();
+    fetchSuppliers();
+  }, []);
 
   return (
     <div className="p-6">
@@ -50,18 +105,16 @@ const InputDraftPemesananDoc = () => {
               <label className="block mb-2">Kandang</label>
               <select
                 className="w-full border rounded px-4 py-2"
-                value={selectedKandang.id}
+                value={selectedCage?.id ?? ""}
                 onChange={(e) =>
-                  setSelectedKandang(
-                    kandangOptions.find(
-                      (k) => k.id === parseInt(e.target.value)
-                    )
+                  setSelectedCage(
+                    cages?.find((k) => k.id === parseInt(e.target.value))
                   )
                 }
               >
-                {kandangOptions.map((k) => (
-                  <option key={k.id} value={k.id}>
-                    {k.name}
+                {cages?.map((k) => (
+                  <option key={k?.id} value={k?.id}>
+                    {k?.name}
                   </option>
                 ))}
               </select>
@@ -69,7 +122,7 @@ const InputDraftPemesananDoc = () => {
 
             <div className="w-1/2 text-left flex flex-col justify-center">
               <p className=" text-gray-600 mb-2">Kapasitas Maksimum Kandang</p>
-              <p className="font-bold">{selectedKandang.kapasitas} ekor</p>
+              <p className="font-bold">{selectedCage?.capacity ?? "-"} ekor</p>
             </div>
           </div>
 
@@ -77,51 +130,48 @@ const InputDraftPemesananDoc = () => {
             <label className="block mb-1">Supplier DOC</label>
             <select
               className="w-full border rounded px-4 py-2 bg-gray-100"
-              value={supplier}
-              onChange={(e) => setSupplier(e.target.value)}
+              value={selectedSupplier?.id ?? ""}
+              onChange={(e) => {
+                const selectedSupplier = suppliers.find(
+                  (supplier) => supplier?.id === parseInt(e.target.value)
+                );
+                setSelectedSupplier(selectedSupplier);
+              }}
             >
               <option value="">Pilih nama suplier</option>
-              {supplierOptions.map((s) => (
-                <option key={s.id} value={s.name}>
-                  {s.name}
+              {suppliers?.map((supplier) => (
+                <option key={supplier?.id} value={supplier?.id}>
+                  {supplier?.name}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Jumlah */}
           <div>
             <label className="block mb-1">Jumlah Pemesanan</label>
             <input
               type="number"
               placeholder="Masukkan jumlah barang..."
               className="w-full border rounded px-4 py-2"
-              value={jumlah}
-              onChange={(e) => setJumlah(e.target.value)}
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
             />
           </div>
 
-          {/* Harga */}
           <div>
             <label className="block mb-1">Harga</label>
-            <select
-              className="w-full border rounded px-4 py-2 bg-gray-100"
-              value={harga}
-              onChange={(e) => setHarga(e.target.value)}
-            >
-              <option value="">Pilih barang...</option>
-              {hargaOptions.map((h) => (
-                <option key={h.id} value={h.label}>
-                  {h.label}
-                </option>
-              ))}
-            </select>
+            <input
+              type="number"
+              placeholder="Masukkan jumlah barang..."
+              className="w-full border rounded px-4 py-2"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+            />
           </div>
 
-          {/* Submit Button */}
           <div className="text-right">
             <button
-              type="submit"
+              // onClick={handleSubmit}
               className="bg-green-700 text-white px-6 py-2 rounded hover:bg-green-900 cursor-pointer"
             >
               Simpan
@@ -129,6 +179,14 @@ const InputDraftPemesananDoc = () => {
           </div>
         </form>
       </div>
+
+      <button
+        onClick={() => {
+          console.log("selectedSupplier: ", selectedSupplier);
+        }}
+      >
+        CHECK
+      </button>
     </div>
   );
 };

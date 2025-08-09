@@ -62,6 +62,11 @@ export const formatDate = (date) => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
+const formatDateForInput = (dateStr) => {
+  const date = new Date(dateStr);
+  return date.toISOString().split("T")[0];
+};
+
 export const formatTanggalIndonesia = (tanggal) => {
   const bulanIndonesia = [
     "Januari",

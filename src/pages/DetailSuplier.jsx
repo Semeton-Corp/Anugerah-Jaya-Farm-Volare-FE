@@ -58,6 +58,9 @@ const DetailSupplier = () => {
         <p className="text-sm text-gray-600">Nama Supplier</p>
         <p className="font-bold">{supplierData?.name}</p>
 
+        <p className="text-sm text-gray-600 mt-4">Tipe Supplier</p>
+        <p className="font-bold">{supplierData?.supplierType}</p>
+
         <p className="text-sm text-gray-600 mt-4">Alamat Supplier</p>
         <p className="font-bold">{supplierData?.address}</p>
 
@@ -65,21 +68,23 @@ const DetailSupplier = () => {
         <p className="font-bold">{supplierData?.phoneNumber}</p>
       </div>
 
-      <div className="bg-white border rounded p-4">
-        <p className="text-sm font-semibold mb-4">
-          Daftar barang yang disupply
-        </p>
-        {supplierData?.items?.map((item, index) => (
-          <div className="mb-2" key={index}>
-            <p className="text-sm text-gray-600">
-              {`Nama Barang ${index + 1}`}.
-            </p>
-            <p key={index} className="font-bold">
-              {item.name}
-            </p>
-          </div>
-        ))}
-      </div>
+      {supplierData?.supplierType == "Barang" && (
+        <div className="bg-white border rounded p-4">
+          <p className="text-sm font-semibold mb-4">
+            Daftar barang yang disupply
+          </p>
+          {supplierData?.items?.map((item, index) => (
+            <div className="mb-2" key={index}>
+              <p className="text-sm text-gray-600">
+                {`Nama Barang ${index + 1}`}.
+              </p>
+              <p key={index} className="font-bold">
+                {item.name}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="flex gap-2 justify-end">
         <button

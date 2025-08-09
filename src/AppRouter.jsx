@@ -89,6 +89,7 @@ import InputDraftPemesananDoc from "./pages/InputDraftPemesananDoc";
 import JualAyamAfkir from "./pages/JualAyamAfkir";
 import DraftPenjualanAyam from "./pages/DraftPenjualanAyam";
 import InputDraftPenjualanAyam from "./pages/InputDraftPenjualanAyam";
+import PilihPembeliAyam from "./pages/PilihPembeliAyam";
 
 const AppRouter = createBrowserRouter([
   {
@@ -258,6 +259,19 @@ const AppRouter = createBrowserRouter([
                       {
                         path: "input-draft-penjualan-ayam",
                         element: <InputDraftPenjualanAyam />,
+                        children: [
+                          {
+                            path: "pilih-pembeli-ayam",
+                            element: <PilihPembeliAyam />,
+                            children: [
+                              {
+                                path: "input-draft-penjualan-ayam",
+                                element: <InputDraftPenjualanAyam />,
+                                children: [],
+                              },
+                            ],
+                          },
+                        ],
                       },
                     ],
                   },

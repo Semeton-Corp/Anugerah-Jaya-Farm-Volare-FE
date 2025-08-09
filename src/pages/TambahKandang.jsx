@@ -39,8 +39,8 @@ const TambahKandang = () => {
 
     try {
       const createResponse = await createCage(form);
-      console.log("form: ", form);
-      console.log("createResponse: ", createResponse);
+      // console.log("form: ", form);
+      // console.log("createResponse: ", createResponse);
 
       if (createResponse.status === 201) {
         navigate(-1, { state: { refetch: true } });

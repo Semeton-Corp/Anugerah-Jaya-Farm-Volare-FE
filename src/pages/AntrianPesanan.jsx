@@ -151,34 +151,28 @@ const AntrianPesanan = () => {
       if (placementResponse.status == 200) {
         const storeId = placementResponse.data.data[0].store.id;
         const summaryResponse = await getEggStoreItemSummary(storeId);
-        // console.log("summaryResponse: ", summaryResponse);
         if (summaryResponse.status == 200) {
           const eggSummaries = summaryResponse.data.data;
           const okKg =
             eggSummaries.find(
               (item) => item.name === "Telur OK" && item.unit === "Kg"
             )?.quantity ?? 0;
-
           const okIkat =
             eggSummaries.find(
               (item) => item.name === "Telur OK" && item.unit === "Ikat"
             )?.quantity ?? 0;
-
           const retakKg =
             eggSummaries.find(
               (item) => item.name === "Telur Retak" && item.unit === "Kg"
             )?.quantity ?? 0;
-
           const retakIkat =
             eggSummaries.find(
               (item) => item.name === "Telur Retak" && item.unit === "Ikat"
             )?.quantity ?? 0;
-
           const bonyokPlastik =
             eggSummaries.find(
               (item) => item.name === "Telur Bonyok" && item.unit === "Plastik"
             )?.quantity ?? 0;
-
           setTelurOkKg(okKg);
           setTelurOkIkat(okIkat);
           setTelurRetakKg(retakKg);

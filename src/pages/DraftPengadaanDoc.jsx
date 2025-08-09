@@ -3,28 +3,39 @@ import { useState } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 import { IoLogoWhatsapp } from "react-icons/io";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { getChickenProcurementDrafts } from "../services/chickenMonitorings";
+import { useEffect } from "react";
+import KonfirmasiPemesananDocModal from "../components/KonfirmasiPemesananDocModal";
+import { getCage, getChickenCage } from "../services/cages";
 
-const draftData = [
-  {
-    date: "20 Mar 2025",
-    supplier: "Dagang A",
-    quantity: "4000 Ekor",
-    price: "Rp 1.000.000",
-    status: "Belum Konfirmasi",
-  },
-  {
-    date: "20 Mar 2025",
-    supplier: "Dagang B",
-    quantity: "4000 Ekor",
-    price: "Rp 1.000.000",
-    status: "Belum Konfirmasi",
-  },
-];
+// const draftData = [
+//   {
+//     date: "20 Mar 2025",
+//     supplier: "Dagang A",
+//     quantity: "4000 Ekor",
+//     price: "Rp 1.000.000",
+//     status: "Belum Konfirmasi",
+//   },
+//   {
+//     date: "20 Mar 2025",
+//     supplier: "Dagang B",
+//     quantity: "4000 Ekor",
+//     price: "Rp 1.000.000",
+//     status: "Belum Konfirmasi",
+//   },
+// ];
 
 const DraftPengadaanDoc = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
   const [showBatalModal, setShowBatalModal] = useState(false);
+  const [showAlokasiModal, setShowAlokasiModal] = useState(false);
+  const [kandangOptions, setKandangOptions] = useState(false);
+
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const [draftData, setDraftData] = useState([]);
 
   const detailPages = ["input-draft-pesan-doc"];
   const isDetailPage = detailPages.some((segment) =>
@@ -35,6 +46,35 @@ const DraftPengadaanDoc = () => {
     navigate(`${location.pathname}/input-draft-pesan-doc`);
   };
 
+  const fetchDraftData = async () => {
+    try {
+      const draftResponse = await getChickenProcurementDrafts();
+      console.log("draftResponse: ", draftResponse);
+      if (draftResponse.status == 200) {
+        setDraftData(draftResponse.data.data);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const fetchCages = async () => {
+    try {
+      const chickenCageResponse = await getCage();
+      // console.log("chickenCageResponse: ", chickenCageResponse);
+      if (chickenCageResponse.status === 200) {
+        setKandangOptions(chickenCageResponse.data.data);
+      }
+    } catch (error) {
+      console.error("Gagal memuat data kandang:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCages();
+    fetchDraftData();
+  }, []);
+
   if (isDetailPage) {
     return <Outlet />;
   }
@@ -44,7 +84,6 @@ const DraftPengadaanDoc = () => {
       <div className="mb-6">
         <h2 className="text-3xl font-bold">Draft Pengadaan DOC</h2>
       </div>
-
       <div className="bg-white p-4 rounded border shadow">
         <div className="flex justify-end items-center mb-3">
           <button
@@ -54,7 +93,6 @@ const DraftPengadaanDoc = () => {
             + Draft Pemesanan DOC
           </button>
         </div>
-
         <div className="overflow-x-auto">
           <table className="min-w-full table-auto border-collapse">
             <thead>
@@ -63,22 +101,24 @@ const DraftPengadaanDoc = () => {
                 <th className="p-3">Suplier</th>
                 <th className="p-3">Jumlah</th>
                 <th className="p-3">Harga</th>
-                <th className="p-3">Status</th>
+                {/* <th className="p-3">Status</th> */}
                 <th className="p-3">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {draftData.map((item, index) => (
                 <tr key={index} className="border-t">
-                  <td className="p-3">{item.date}</td>
-                  <td className="p-3">{item.supplier}</td>
-                  <td className="p-3">{item.quantity}</td>
-                  <td className="p-3">{item.price}</td>
+                  <td className="p-3">{item.inputDate}</td>
+                  <td className="p-3">{item.supplier.name}</td>
+                  <td className="p-3">{`${item.quantity} Ekor`}</td>
                   <td className="p-3">
+                    {`Rp ${Number(item.price).toLocaleString("id-ID", {})}`}
+                  </td>
+                  {/* <td className="p-3">
                     <span className="px-2 py-1 text-sm rounded bg-orange-200 text-orange-900 font-medium">
                       {item.status}
                     </span>
-                  </td>
+                  </td> */}
                   <td className="p-3 flex items-center gap-2">
                     <div className="flex gap-3 justify-center">
                       <button
@@ -101,7 +141,8 @@ const DraftPengadaanDoc = () => {
                       </button>
                       <button
                         onClick={() => {
-                          // setSelectedItemHandle(item);
+                          setSelectedItem(item);
+                          console.log("item: ", item);
                           setShowAlokasiModal(true);
                         }}
                         className="px-3 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer"
@@ -146,6 +187,22 @@ const DraftPengadaanDoc = () => {
             </div>
           </div>
         </div>
+      )}
+      {showAlokasiModal && (
+        <KonfirmasiPemesananDocModal
+          onClose={() => setShowAlokasiModal(false)}
+          onConfirm={(payload) => {
+            console.log("CONFIRMED:", payload);
+          }}
+          order={{
+            orderDate: selectedItem.inputDate,
+            supplier: selectedItem.supplier.name,
+            kandang: selectedItem.cage,
+            kandangOptions: kandangOptions,
+            quantity: selectedItem.quantity,
+            price: selectedItem.price,
+          }}
+        />
       )}
     </div>
   );

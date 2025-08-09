@@ -1,10 +1,13 @@
 import api from "./api";
 const token = localStorage.getItem("token");
 
-export const getSuppliers = () => {
+export const getSuppliers = (supplierType) => {
   return api.get("/suppliers", {
     headers: {
       Authorization: `Bearer ${token}`,
+    },
+    params: {
+      supplierType: supplierType,
     },
   });
 };
