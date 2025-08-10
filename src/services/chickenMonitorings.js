@@ -198,3 +198,43 @@ export const getChickenProcurementDrafts = () => {
     },
   });
 };
+
+export const confirmationChickenProcurementDraft = (payload, id) => {
+  return api.post(
+    `/chickens/procurements/drafts/${id}/confirmations`,
+    payload,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    }
+  );
+};
+
+export const deleteChickenProcurementDraft = (id) => {
+  return api.delete(`/chickens/procurements/drafts/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const getChickenProcurements = () => {
+  return api.get(`/chickens/procurements`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const arrivalConfirmationChickenProcurement = (payload, id) => {
+  return api.post(`/chickens/procurements/${id}/arrivals`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};

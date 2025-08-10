@@ -4,6 +4,11 @@ import { FaMoneyBillWave } from "react-icons/fa6";
 import { IoLogoWhatsapp } from "react-icons/io";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import KonfirmasiPengadaanDocModal from "../components/KonfirmasiPengadaanDocModal";
+import {
+  arrivalConfirmationChickenProcurement,
+  getChickenProcurements,
+} from "../services/chickenMonitorings";
+import { useEffect } from "react";
 
 const dummyOrders = [
   {
@@ -34,7 +39,7 @@ const dummyOrders = [
 
 const getPaymentClass = (status) => {
   switch (status) {
-    case "Dibayar Setengah":
+    case "Belum Lunas":
       return "bg-orange-200 text-orange-900";
     case "Belum Dibayar":
       return "bg-[#FF5E5E] text-[#640404]";
@@ -47,9 +52,9 @@ const getPaymentClass = (status) => {
 
 const getShippingClass = (status) => {
   switch (status) {
-    case "Sedang Dikirim":
+    case false:
       return "bg-orange-200 text-orange-900";
-    case "Selesai":
+    case true:
       return "bg-[#87FF8B] text-[#066000]";
     default:
       return "";
@@ -61,6 +66,9 @@ const PengadaanDoc = () => {
   const navigate = useNavigate();
 
   const [status, setStatus] = useState("Semua Status Pembayaran");
+  const [orderData, setOrderData] = useState([]);
+  const [selectedItem, setSelectedItem] = useState(null);
+
   const options = [
     "Semua Status Pembayaran",
     "Belum Dibayar",
@@ -78,6 +86,45 @@ const PengadaanDoc = () => {
   const draftPesanDocHandle = () => {
     navigate(`${location.pathname}/draft-pesan-doc`);
   };
+
+  const fetchOrderData = async () => {
+    try {
+      const ordersResponse = await getChickenProcurements();
+      // console.log("ordersResponse: ", ordersResponse);
+      if (ordersResponse.status === 200) {
+        setOrderData(ordersResponse.data.data.chickenProcurements);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const handleSubmitArrivalConfiramation = async (result) => {
+    try {
+      const payload = {
+        quantity: result.quantity,
+        ...(result.catatan?.trim() ? { note: result.catatan } : {}),
+      };
+
+      const arrivalResponse = await arrivalConfirmationChickenProcurement(
+        payload,
+        selectedItem.id
+      );
+
+      if (arrivalResponse.status === 200) {
+        alert("✅ Konfirmasi pengadaan berhasil");
+        setShowBarangSampaiModal(false);
+        fetchOrderData();
+      }
+      console.log("arrivalResponse: ", arrivalResponse);
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrderData();
+  }, []);
 
   if (isDetailPage) {
     return <Outlet />;
@@ -127,12 +174,12 @@ const PengadaanDoc = () => {
               </tr>
             </thead>
             <tbody>
-              {dummyOrders.map((order, index) => (
+              {orderData.map((order, index) => (
                 <tr key={index} className="border-t">
                   <td className="p-3">{order.orderDate}</td>
                   <td className="p-3">{order.quantity}</td>
-                  <td className="p-3">{order.supplier}</td>
-                  <td className="p-3">{order.estimatedArrival}</td>
+                  <td className="p-3">{order.supplier.name}</td>
+                  <td className="p-3">{order.estimationArrivalDate}</td>
                   <td className="p-3">
                     <span
                       className={`px-2 py-1 text-sm font-medium rounded ${getPaymentClass(
@@ -145,17 +192,19 @@ const PengadaanDoc = () => {
                   <td className="p-3">
                     <span
                       className={`px-2 py-1 text-sm font-medium rounded ${getShippingClass(
-                        order.shippingStatus
+                        order.IsArrived
                       )}`}
                     >
-                      {order.shippingStatus}
+                      {order.IsArrived ? "Selesai" : "Sedang Dikirim"}
                     </span>
                   </td>
                   <td className="p-3 flex gap-2">
-                    {order.shippingStatus !== "Selesai" && (
+                    {!order.IsArrived && (
                       <button
                         onClick={() => {
                           setShowBarangSampaiModal(true);
+                          setSelectedItem(order);
+                          console.log("order: ", order);
                         }}
                         className="bg-orange-300 hover:bg-orange-500 text-sm px-3 py-1 rounded cursor-pointer"
                       >
@@ -196,8 +245,8 @@ const PengadaanDoc = () => {
           }}
           onClose={() => setShowBarangSampaiModal(false)}
           onConfirm={(result) => {
-            console.log("Hasil konfirmasi:", result);
-            setShowModal(false);
+            handleSubmitArrivalConfiramation(result);
+            // console.log("Hasil konfirmasi:", result);
           }}
         />
       )}

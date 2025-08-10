@@ -1,190 +1,154 @@
-// KonfirmasiPemesananDocModal.jsx
-import React, { useMemo, useRef, useState } from "react";
-import { useEffect } from "react";
+// KonfirmasiPenjualanAyamModal.jsx
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import { BiSolidEditAlt } from "react-icons/bi";
-import { MdDelete } from "react-icons/md";
-import { convertToInputDateFormat } from "../utils/dateFormat";
 
+// Pakai util kamu kalau ada; kalau tidak, fallback sederhana:
+const toInputDate = (d) => {
+  try {
+    if (!d) return "";
+    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
+    const parsed = new Date(d);
+    return isNaN(parsed) ? "" : parsed.toISOString().slice(0, 10);
+  } catch {
+    return "";
+  }
+};
 const rupiah = (n) => `Rp ${Number(n || 0).toLocaleString("id-ID")}`;
 
-const KonfirmasiPemesananDocModal = ({
+const KonfirmasiPenjualanAyamModal = ({
   onClose,
   onConfirm,
-  order = {
-    orderDate: "20 Maret 2025",
-    supplier: "Dagang A",
-    kandang: "Sidodadi DOC",
-    kandangOptions: ["Sidodadi DOC", "Kediri DOC", "Blitar DOC"],
-    quantity: 1100,
-    price: 5000000,
+  sale = {
+    saleDate: "20 Maret 2025",
+    kandang: { id: 1, name: "Sidodadi 04" },
+    kandangOptions: [
+      { id: 1, name: "Sidodadi 04" },
+      { id: 2, name: "Kediri 02" },
+    ],
+    customer: { id: 1, name: "Pelanggan 01" },
+    quantity: 1100, // ekor
+    pricePerUnit: 5000000, // harga per ekor
   },
 }) => {
-  const [kandang, setKandang] = useState(order.kandang);
-  const [qty, setQty] = useState(order.quantity);
-  const [price, setPrice] = useState(order.price);
-  const [estimationArrivalDate, setEtaDate] = useState("");
-  const orderTotal = useMemo(() => Number(price || 0), [price]);
+  // Editable fields
+  const [kandang, setKandang] = useState(sale.kandang);
+  const [qty, setQty] = useState(sale.quantity);
+  const [pricePerUnit, setPricePerUnit] = useState(sale.pricePerUnit);
+  const [saleDate] = useState(sale.saleDate); // tampil saja
+  const [estimationArrivalDate] = useState(""); // tidak dipakai di penjualan
 
-  const [editKandang, setEditKandang] = useState(false);
   const [editQty, setEditQty] = useState(false);
   const [editPrice, setEditPrice] = useState(false);
 
-  const [payments, setPayments] = useState([]);
+  // Global payment method (dipilih di luar modal)
+  const [paymentMethod, setPaymentMethod] = useState("Tunai");
+
+  // Payments
+  const [payments, setPayments] = useState([]); // {paymentDate, paymentMethod, nominal:string, proof}
+  const orderTotal = useMemo(
+    () => Number(qty || 0) * Number(pricePerUnit || 0),
+    [qty, pricePerUnit]
+  );
+
   const totalPaid = useMemo(
-    () => payments.reduce((acc, p) => acc + Number(p.nominal || 0), 0),
+    () => payments.reduce((a, p) => a + Number(p.nominal || 0), 0),
     [payments]
   );
-  const remaining = Math.max(Number(price || 0) - totalPaid, 0);
+  const remaining = Math.max(orderTotal - totalPaid, 0);
   const paymentStatus =
     remaining === 0 && payments.length > 0 ? "Lunas" : "Belum Lunas";
 
+  // Modal state (satu pembayaran per buka modal)
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paymentType, setPaymentType] = useState("Penuh");
-  const [paymentMethod, setPaymentMethod] = useState("Tunai");
   const [paymentDate, setPaymentDate] = useState(
     new Date().toISOString().slice(0, 10)
   );
   const [nominal, setNominal] = useState("");
   const [paymentProof, setPaymentProof] = useState(null);
-
-  const [draftPayments, setDraftPayments] = useState([]);
-
   const dateRef = useRef(null);
 
-  const recomputeRemaining = (list) => {
-    let sisa = orderTotal;
-    return list.map((p) => {
-      const n = Number(p.nominal || 0);
-      sisa = Math.max(sisa - n, 0);
-      return {
-        ...p,
-        nominal: String(n), // <- langsung simpan string
-        remaining: String(sisa), // kalau mau sisa juga string
-      };
-    });
-  };
-
-  const addPayment = () => {
-    const n = Number(nominal || 0);
-    const newPay = {
-      paymentDate: convertToInputDateFormat(paymentDate),
-      paymentMethod,
-      nominal: String(n),
-      paymentProof: paymentProof ? paymentProof.name : "-",
-    };
-    setPayments((prev) => recomputeRemaining([...prev, newPay]));
-    resetPaymentForm();
-  };
-
-  const resetPaymentForm = () => {
-    setShowPaymentModal(false);
-    setPaymentMethod("Tunai");
-    setNominal("");
-    setPaymentProof(null);
-    setPaymentDate(new Date().toISOString().slice(0, 10));
-  };
-  const deletePayment = (idx) => {
-    setPayments((p) => p.filter((_, i) => i !== idx));
-  };
-
-  const confirmOrder = () => {
-    const cleanedPayments = payments.map(({ remaining, ...rest }) => rest);
-
-    onConfirm?.({
-      quantity: Number(qty || 0),
-      price: price,
-      estimationArrivalDate: convertToInputDateFormat(estimationArrivalDate),
-      payments: cleanedPayments,
-      paymentType: paymentType,
-    });
-  };
-
+  // Hitung sisa bayar per baris berdasarkan urutan
   const remainingAfterIdx = (idx) => {
     const paidToIdx = payments
       .slice(0, idx + 1)
       .reduce((acc, p) => acc + Number(p.nominal || 0), 0);
-    return Math.max(Number(price || 0) - paidToIdx, 0);
+    return Math.max(orderTotal - paidToIdx, 0);
   };
 
-  useEffect(() => {
-    setPayments(recomputeRemaining(payments));
-  }, [price]);
+  const addPayment = () => {
+    // Ambil metode dari global select
+    const amount = Number(nominal || 0);
+    const newPay = {
+      paymentDate: toInputDate(paymentDate),
+      paymentMethod,
+      nominal: String(amount), // <- string untuk backend Go
+      proof: paymentProof ? paymentProof.name : "-",
+    };
+    setPayments((prev) => [...prev, newPay]);
+    // reset form
+    setShowPaymentModal(false);
+    setNominal("");
+    setPaymentProof(null);
+    setPaymentDate(new Date().toISOString().slice(0, 10));
+  };
+
+  const deletePayment = (idx) => {
+    setPayments((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  // Recalculate nothing needed on qty/price change, because we compute sisa on the fly
+
+  const handleConfirm = () => {
+    const cleanedPayments = payments.map(({ ...p }) => {
+      return {
+        paymentDate: p.paymentDate,
+        paymentMethod: p.paymentMethod,
+        nominal: String(p.nominal || "0"),
+        proof: p.proof,
+      };
+    });
+
+    onConfirm?.({
+      saleDate,
+      kandangId: kandang?.id,
+      customerId: sale.customer?.id,
+      quantity: Number(qty || 0),
+      pricePerUnit: Number(pricePerUnit || 0),
+      totalPrice: orderTotal,
+      payments: cleanedPayments,
+      paymentStatus,
+      remaining,
+    });
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <div className="bg-white w-[95%] max-w-3xl p-6 rounded shadow-lg">
+      <div className="bg-white w-[95%] max-w-4xl p-6 rounded shadow-lg">
         <h2 className="text-2xl font-semibold mb-6">
-          Konfirmasi Pemesanan DOC
+          Konfirmasi Penjualan Ayam
         </h2>
-        <div className="mb-4 grid grid-cols-2 gap-4">
+
+        {/* Info atas */}
+        <div className="mb-4 grid grid-cols-3 gap-6">
           <div>
-            <p className="text-sm text-gray-600">Tanggal Pemesanan</p>
-            <p className="font-semibold">{order.orderDate}</p>
+            <p className="text-sm text-gray-600">Tanggal Penjualan</p>
+            <p className="font-semibold">{saleDate}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-600">Supplier</p>
-            <p className="font-semibold">{order.supplier}</p>
+            <p className="text-sm text-gray-600">Kandang</p>
+            <p className="font-semibold">{kandang?.name}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Pelanggan</p>
+            <p className="font-semibold">{sale.customer?.name}</p>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="mb-4">
-            <div className="flex items-center gap-2">
-              <p className="text-sm text-gray-600">Kandang</p>
-              <button
-                className="p-1 rounded border hover:bg-gray-100"
-                onClick={() => setEditKandang((v) => !v)}
-                title="Edit Kandang"
-              >
-                <BiSolidEditAlt size={16} />
-              </button>
-            </div>
-            {editKandang ? (
-              <select
-                className="border rounded px-3 py-2 mt-1 w-full"
-                value={kandang.id}
-                onChange={(e) => {
-                  const selectedCage = order.kandangOptions?.find(
-                    (k) => k.id === parseInt(e.target.value)
-                  );
-                  setKandang(selectedCage);
-                }}
-              >
-                {order.kandangOptions?.map((kandang) => (
-                  <option key={kandang.id} value={kandang.id}>
-                    {kandang.name}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <p className="font-bold mt-1">{kandang.name}</p>
-            )}
-          </div>
-          <div className="mb-4">
-            <div className="flex items-center gap-2">
-              <p className="text-sm text-gray-600">Harga</p>
-              <button
-                className="p-1 rounded border hover:bg-gray-100"
-                onClick={() => setEditPrice((v) => !v)}
-                title="Edit Harga"
-              >
-                <BiSolidEditAlt size={16} />
-              </button>
-            </div>
-            {editPrice ? (
-              <input
-                type="number"
-                className="border rounded px-3 py-2 mt-1 w-full"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-              />
-            ) : (
-              <p className="font-bold mt-1">{rupiah(price)}</p>
-            )}
-          </div>
 
-          <div className="mb-4">
+        <div className="grid grid-cols-3 gap-6 mb-2">
+          {/* Qty */}
+          <div>
             <div className="flex items-center gap-2">
-              <p className="text-sm text-gray-600">Jumlah Pemesanan</p>
+              <p className="text-sm text-gray-600">Jumlah ayam terjual</p>
               <button
                 className="p-1 rounded border hover:bg-gray-100"
                 onClick={() => setEditQty((v) => !v)}
@@ -208,26 +172,44 @@ const KonfirmasiPemesananDocModal = ({
             )}
           </div>
 
-          <div className="mb-4">
-            <p className="text-sm text-gray-600">Tanggal Estimasi Tiba</p>
-            <div className="relative mt-1">
-              <input
-                type="date"
-                value={estimationArrivalDate || ""}
-                onChange={(e) => setEtaDate(e.target.value)}
-                className="border rounded px-3 py-2 w-full"
-                style={{ appearance: "auto" }}
-              />
+          {/* Price per unit */}
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="text-sm text-gray-600">Harga Jual / Ekor</p>
+              <button
+                className="p-1 rounded border hover:bg-gray-100"
+                onClick={() => setEditPrice((v) => !v)}
+                title="Edit Harga"
+              >
+                <BiSolidEditAlt size={16} />
+              </button>
             </div>
+            {editPrice ? (
+              <input
+                type="number"
+                className="border rounded px-3 py-2 mt-1 w-full"
+                value={pricePerUnit}
+                onChange={(e) => setPricePerUnit(e.target.value)}
+              />
+            ) : (
+              <p className="font-bold mt-1">{rupiah(pricePerUnit)} / Ekor</p>
+            )}
+          </div>
+
+          {/* Total */}
+          <div>
+            <p className="text-sm text-gray-600">Harga Jual Total</p>
+            <p className="font-bold mt-1">{rupiah(orderTotal)}</p>
           </div>
         </div>
 
-        <div className="flex flex-col">
-          <label className="text-sm">Tipe Pembayaran</label>
+        {/* Global payment controls */}
+        <div className="flex flex-col mt-4 mb-2">
+          <label className="text-sm text-gray-600">Tipe Pembayaran</label>
           <select
-            className="border rounded p-2"
-            value={paymentType}
-            onChange={(e) => setPaymentType(e.target.value)}
+            className="border rounded p-2 ml-2"
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value)}
           >
             <option value="Penuh">Penuh</option>
             <option value="Cicil">Cicil</option>
@@ -326,7 +308,7 @@ const KonfirmasiPemesananDocModal = ({
             Batal
           </button>
           <button
-            onClick={confirmOrder}
+            onClick={handleConfirm}
             className="px-4 py-2 rounded bg-green-700 hover:bg-green-900 text-white cursor-pointer"
           >
             Konfirmasi
@@ -339,16 +321,6 @@ const KonfirmasiPemesananDocModal = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white w-full max-w-lg p-6 rounded shadow-xl">
             <h3 className="text-lg font-bold mb-4">Pembayaran</h3>
-
-            <label className="block mb-1 font-medium">Metode Pembayaran</label>
-            <select
-              className="w-full border rounded p-2 mb-3"
-              value={paymentMethod}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-            >
-              <option value="Tunai">Tunai</option>
-              <option value="Non Tunai">Non Tunai</option>
-            </select>
 
             <label className="block mb-1 font-medium">Nominal Pembayaran</label>
             <input
@@ -363,16 +335,18 @@ const KonfirmasiPemesananDocModal = ({
             <input
               type="date"
               className="w-full border rounded p-2 mb-3"
-              value={paymentDate}
+              value={toInputDate(paymentDate)}
               onChange={(e) => setPaymentDate(e.target.value)}
               ref={dateRef}
             />
+
             <label className="block mb-1 font-medium">Bukti Pembayaran</label>
             <input
               type="file"
               className="w-full border rounded p-2 mb-4"
               onChange={(e) => setPaymentProof(e.target.files?.[0] || null)}
             />
+
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowPaymentModal(false)}
@@ -394,4 +368,4 @@ const KonfirmasiPemesananDocModal = ({
   );
 };
 
-export default KonfirmasiPemesananDocModal;
+export default KonfirmasiPenjualanAyamModal;

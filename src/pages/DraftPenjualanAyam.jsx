@@ -1,6 +1,8 @@
 import React from "react";
+import { useState } from "react";
 import { IoLogoWhatsapp } from "react-icons/io";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import KonfirmasiPenjualanAyamModal from "../components/KonfirmasiPenjualanAyamModal";
 
 const draftSalesData = [
   {
@@ -31,6 +33,8 @@ const DraftPenjualanAyam = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
   const detailPages = ["input-draft-penjualan-ayam"];
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
@@ -38,6 +42,10 @@ const DraftPenjualanAyam = () => {
 
   const inputDraftPesanDocHandle = () => {
     navigate(`${location.pathname}/input-draft-penjualan-ayam`);
+  };
+
+  const handleConfirm = (payload) => {
+    console.log("payload: ", payload);
   };
 
   if (isDetailPage) {
@@ -99,7 +107,12 @@ const DraftPenjualanAyam = () => {
                       >
                         <IoLogoWhatsapp />
                       </button>
-                      <button className="px-3 py-1 bg-green-700 text-white rounded hover:bg-green-900 text-sm cursor-pointer">
+                      <button
+                        onClick={() => {
+                          setShowConfirmModal(true);
+                        }}
+                        className="px-3 py-1 bg-green-700 text-white rounded hover:bg-green-900 text-sm cursor-pointer"
+                      >
                         Konfirmasi
                       </button>
                       <button className="px-3 py-1 bg-red-400 text-white rounded hover:bg-red-500 text-sm cursor-pointer">
@@ -113,6 +126,23 @@ const DraftPenjualanAyam = () => {
           </table>
         </div>
       </div>
+      {showConfirmModal && (
+        <KonfirmasiPenjualanAyamModal
+          onClose={() => setShowConfirmModal(false)}
+          onConfirm={handleConfirm}
+          sale={{
+            saleDate: "09 Aug 2025",
+            kandang: { id: 2, name: "Kandang B" },
+            kandangOptions: [
+              { id: 1, name: "Kandang A" },
+              { id: 2, name: "Kandang B" },
+            ],
+            customer: { id: 5, name: "PT Ayam Sejahtera" },
+            quantity: 10000,
+            pricePerUnit: 300000,
+          }}
+        />
+      )}
     </div>
   );
 };

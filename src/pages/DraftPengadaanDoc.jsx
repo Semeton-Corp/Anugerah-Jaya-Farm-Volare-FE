@@ -3,27 +3,15 @@ import { useState } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 import { IoLogoWhatsapp } from "react-icons/io";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { getChickenProcurementDrafts } from "../services/chickenMonitorings";
+import {
+  confirmationChickenProcurementDraft,
+  deleteChickenProcurementDraft,
+  getChickenProcurementDrafts,
+} from "../services/chickenMonitorings";
 import { useEffect } from "react";
 import KonfirmasiPemesananDocModal from "../components/KonfirmasiPemesananDocModal";
 import { getCage, getChickenCage } from "../services/cages";
-
-// const draftData = [
-//   {
-//     date: "20 Mar 2025",
-//     supplier: "Dagang A",
-//     quantity: "4000 Ekor",
-//     price: "Rp 1.000.000",
-//     status: "Belum Konfirmasi",
-//   },
-//   {
-//     date: "20 Mar 2025",
-//     supplier: "Dagang B",
-//     quantity: "4000 Ekor",
-//     price: "Rp 1.000.000",
-//     status: "Belum Konfirmasi",
-//   },
-// ];
+import { TbBatteryEco } from "react-icons/tb";
 
 const DraftPengadaanDoc = () => {
   const location = useLocation();
@@ -70,10 +58,48 @@ const DraftPengadaanDoc = () => {
     }
   };
 
+  const handleSubmit = async (payload) => {
+    try {
+      console.log("selectedItem: ", selectedItem);
+      const submitResponse = await confirmationChickenProcurementDraft(
+        payload,
+        selectedItem.id
+      );
+      if (submitResponse.status === 201) {
+        alert("✅ Berhasil mengonfirmasi pesanan");
+        setShowAlokasiModal(false);
+        fetchDraftData();
+      }
+    } catch (error) {
+      alert("Gagal mengonfirmasi pesanan: " + error.message);
+      console.log("error :", error);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      const deleteResponse = await deleteChickenProcurementDraft(
+        selectedItem.id
+      );
+      if (deleteResponse.status === 204) {
+        alert("✅ Berhasil membatalkan pesanan");
+        setSelectedItem(null);
+        setShowBatalModal(false);
+        fetchDraftData();
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
   useEffect(() => {
     fetchCages();
     fetchDraftData();
-  }, []);
+    if (location.state?.refetch) {
+      fetchDraftData();
+      window.history.replace({}, document.title);
+    }
+  }, [location]);
 
   if (isDetailPage) {
     return <Outlet />;
@@ -142,7 +168,7 @@ const DraftPengadaanDoc = () => {
                       <button
                         onClick={() => {
                           setSelectedItem(item);
-                          console.log("item: ", item);
+                          // console.log("item: ", item);
                           setShowAlokasiModal(true);
                         }}
                         className="px-3 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer"
@@ -151,6 +177,7 @@ const DraftPengadaanDoc = () => {
                       </button>
                       <button
                         onClick={() => {
+                          setSelectedItem(item);
                           setShowBatalModal(true);
                         }}
                         className="px-3 py-1 bg-kritis-box-surface-color rounded-[4px] text-white hover:bg-kritis-text-color cursor-pointer"
@@ -179,7 +206,9 @@ const DraftPengadaanDoc = () => {
                 Tidak
               </button>
               <button
-                onClick={() => {}}
+                onClick={() => {
+                  handleDelete();
+                }}
                 className="bg-red-400 hover:bg-red-500 cursor-pointer text-white font-semibold px-6 py-2 rounded-lg"
               >
                 Ya, Lanjutkan
@@ -192,7 +221,8 @@ const DraftPengadaanDoc = () => {
         <KonfirmasiPemesananDocModal
           onClose={() => setShowAlokasiModal(false)}
           onConfirm={(payload) => {
-            console.log("CONFIRMED:", payload);
+            handleSubmit(payload);
+            // console.log("CONFIRMED:", payload);
           }}
           order={{
             orderDate: selectedItem.inputDate,

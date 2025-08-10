@@ -5,13 +5,6 @@ import { getLocations } from "../services/location";
 
 const EditKandang = () => {
   const navigate = useNavigate();
-  const dummyData = {
-    nama: "Sidodadi DOC",
-    lokasi: "Sidodadi",
-    jenis: "Kandang DOC",
-    kapasitas: 11000,
-  };
-
   const { id, cageId } = useParams();
 
   const [locationOptions, setLocationOptions] = useState([
@@ -19,14 +12,13 @@ const EditKandang = () => {
     "Mojopahit",
     "Gajah Mada",
   ]);
-
   const jenisOptions = ["DOC", "Grower", "Pre Layer", "Layer", "Afkir"];
-
   const [formData, setFormData] = useState({
     name: "",
     locationId: "",
     chickenCategory: "",
     capacity: "",
+    isUsed: false,
   });
 
   const fetchDetailData = async () => {
@@ -35,12 +27,12 @@ const EditKandang = () => {
       console.log("detailResponse: ", detailResponse);
       if (detailResponse.status == 200) {
         const chickenCage = detailResponse.data.data;
-
         setFormData({
           name: chickenCage.cage.name || "",
           locationId: chickenCage.cage.location?.id || "",
           chickenCategory: chickenCage.cage.chickenCategory || "",
           capacity: chickenCage.cage.capacity || "",
+          isUsed: chickenCage.cage.isUsed || false,
         });
       }
     } catch (error) {
@@ -84,24 +76,23 @@ const EditKandang = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Data yang dikirim:", formData);
     const payload = {
       name: formData.name,
       locationId: parseInt(formData.locationId),
       chickenCategory: formData.chickenCategory,
       capacity: parseInt(formData.capacity),
+      isUsed: formData.isUsed,
     };
 
-    console.log("payload: ", payload);
+    // console.log("payload: ", payload);
 
     try {
-      // console.log("cageId: ", cageId);
       const updateResponse = await updateCage(payload, cageId);
-      // console.log("updateResponse: ", updateResponse);
       if (updateResponse.status == 200) {
         navigate(-1, { state: { refetch: true } });
       }
     } catch (error) {
+      alert("Gagal mengupdate kandang: " + error.message);
       console.log("error :", error);
     }
     // Simpan ke API di sini

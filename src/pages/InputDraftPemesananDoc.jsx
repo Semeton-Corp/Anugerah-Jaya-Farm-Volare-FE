@@ -4,23 +4,10 @@ import { useEffect } from "react";
 import { getCage, getChickenCage } from "../services/cages";
 import { getSuppliers } from "../services/supplier";
 import { createChickenProcurementDraft } from "../services/chickenMonitorings";
-
-const kandangOptions = [
-  { id: 1, name: "Sidodadi DOC", kapasitas: 11000 },
-  { id: 2, name: "Kandang B", kapasitas: 9000 },
-];
-
-const supplierOptions = [
-  { id: 1, name: "Dagang A" },
-  { id: 2, name: "Dagang B" },
-];
-
-const hargaOptions = [
-  { id: 1, label: "Rp 1.000.000" },
-  { id: 2, label: "Rp 1.500.000" },
-];
+import { useNavigate } from "react-router-dom";
 
 const InputDraftPemesananDoc = () => {
+  const navigate = useNavigate();
   const [quantity, setQuantity] = useState("");
   const [price, setPrice] = useState("");
 
@@ -33,11 +20,15 @@ const InputDraftPemesananDoc = () => {
   const fetchCages = async () => {
     try {
       const chickenCageResponse = await getCage();
-      // console.log("chickenCageResponse: ", chickenCageResponse);
+      console.log("chickenCageResponse: ", chickenCageResponse);
       if (chickenCageResponse.status === 200) {
-        setCages(chickenCageResponse.data.data);
-        if (chickenCageResponse.data.data.length > 0) {
-          setSelectedCage(chickenCageResponse.data.data[0]);
+        const allCages = chickenCageResponse.data.data;
+        const filteredCages = allCages.filter(
+          (cage) => !cage.isUsed && cage.chickenCategory === "DOC"
+        );
+        setCages(filteredCages);
+        if (filteredCages.length > 0) {
+          setSelectedCage(filteredCages[0]);
         }
       }
     } catch (error) {
@@ -48,7 +39,7 @@ const InputDraftPemesananDoc = () => {
   const fetchSuppliers = async () => {
     try {
       const suppliersResponse = await getSuppliers("Ayam DOC");
-      console.log("suppliersResponse: ", suppliersResponse);
+      // console.log("suppliersResponse: ", suppliersResponse);
       if (suppliersResponse.status === 200) {
         setSuppliers(suppliersResponse.data.data);
       }

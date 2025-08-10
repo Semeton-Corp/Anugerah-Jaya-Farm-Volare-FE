@@ -24,7 +24,7 @@ const TambahSupplier = () => {
     "Barang",
     "Ayam DOC",
   ]);
-  const [supplierType, setSupplierType] = useState("");
+  const [supplierType, setSupplierType] = useState(supplierTypeOptions[0]);
   const [selectedItem, setSelectedItem] = useState("");
   const [selectedItems, setSelectedItems] = useState([0]);
 

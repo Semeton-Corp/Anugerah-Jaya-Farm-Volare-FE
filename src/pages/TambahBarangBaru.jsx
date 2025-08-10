@@ -31,6 +31,7 @@ const TambahBarangBaru = () => {
   ]);
   const [selectedCategory, setSelectedCategory] = useState(category[0]);
   const [unit, setUnit] = useState("");
+  const [dailySpending, setDailySpending] = useState("");
 
   const navigate = useNavigate();
 
@@ -59,6 +60,7 @@ const TambahBarangBaru = () => {
         setName(detailResponse.data.data.name);
         setSelectedCategory(detailResponse.data.data.category);
         setUnit(detailResponse.data.data.unit);
+        setDailySpending(detailResponse.data.data.dailySpending);
       }
     } catch (error) {
       console.log("error :", error);
@@ -77,6 +79,7 @@ const TambahBarangBaru = () => {
       name: name,
       unit: unit,
       category: selectedCategory,
+      dailySpending: parseInt(dailySpending),
     };
 
     if (id) {
@@ -158,13 +161,13 @@ const TambahBarangBaru = () => {
             </label>
             <div className="flex gap-4 items-center">
               <input
-                type="text"
+                type="number"
                 className="w-full border rounded p-2 bg-black-4"
                 placeholder="Tulis jumlah penggunaan harian (cth : Karung)"
-                value={getDisplayValue(unit)}
-                onChange={(e) => setUnit(e.target.value)}
+                value={getDisplayValue(dailySpending)}
+                onChange={(e) => setDailySpending(e.target.value)}
               />
-              <p className="text-lg font-bold">-</p>
+              <p className="text-lg font-bold">{unit ?? "-"}</p>
             </div>
           </div>
           <div>

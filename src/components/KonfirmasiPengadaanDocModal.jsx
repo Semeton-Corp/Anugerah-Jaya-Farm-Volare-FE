@@ -7,6 +7,7 @@ const KonfirmasiPengadaanDocModal = ({ onClose, data, onConfirm }) => {
 
   const handleConfirm = () => {
     onConfirm({
+      quantity: jumlah,
       status: isSesuai ? "Sesuai" : "Tidak Sesuai",
       catatan: catatan,
     });
@@ -18,14 +19,17 @@ const KonfirmasiPengadaanDocModal = ({ onClose, data, onConfirm }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/25 bg-opacity-40">
-      <div className="bg-white w-[90%] max-w-md p-6 rounded shadow-md border-2">
+      <div className="bg-white w-[90%] max-w-md p-6 rounded shadow-md border">
         <h2 className="text-xl font-bold mb-4">
           Konfirmasi pengadaan DOC sampai
         </h2>
 
         <div className="flex space-x-2 mb-4">
           <button
-            onClick={() => setIsSesuai(true)}
+            onClick={() => {
+              setCatatan("");
+              setIsSesuai(true);
+            }}
             className={`w-1/2 py-2 rounded border hover:bg-green-100 cursor-pointer ${
               isSesuai === true ? "bg-green-100 border-green-400" : ""
             }`}
