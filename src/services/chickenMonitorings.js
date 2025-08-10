@@ -230,8 +230,26 @@ export const getChickenProcurements = () => {
   });
 };
 
+export const getChickenProcurement = (id) => {
+  return api.get(`/chickens/procurements/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
 export const arrivalConfirmationChickenProcurement = (payload, id) => {
   return api.post(`/chickens/procurements/${id}/arrivals`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const createChickenProcurementPayment = (payload, id) => {
+  return api.post(`/chickens/procurements/${id}/payments`, payload, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",

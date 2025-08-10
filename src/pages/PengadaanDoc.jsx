@@ -78,14 +78,11 @@ const PengadaanDoc = () => {
 
   const [showBarangsampaiModal, setShowBarangSampaiModal] = useState(false);
 
-  const detailPages = ["draft-pesan-doc"];
+  // ---- Dummy Data ----
+  const detailPages = ["draft-pesan-doc", "detail-pengadaan-doc"];
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
-
-  const draftPesanDocHandle = () => {
-    navigate(`${location.pathname}/draft-pesan-doc`);
-  };
 
   const fetchOrderData = async () => {
     try {
@@ -120,6 +117,14 @@ const PengadaanDoc = () => {
     } catch (error) {
       console.log("error :", error);
     }
+  };
+
+  const draftPesanDocHandle = () => {
+    navigate(`${location.pathname}/draft-pesan-doc`);
+  };
+
+  const handleDetailProcurement = (id) => {
+    navigate(`${location.pathname}/detail-pengadaan-doc/${id}`);
   };
 
   useEffect(() => {
@@ -211,7 +216,12 @@ const PengadaanDoc = () => {
                         Barang Sampai
                       </button>
                     )}
-                    <button className="bg-green-700 hover:bg-green-900 text-white text-sm px-3 py-1 rounded cursor-pointer">
+                    <button
+                      onClick={() => {
+                        handleDetailProcurement(order.id);
+                      }}
+                      className="bg-green-700 hover:bg-green-900 text-white text-sm px-3 py-1 rounded cursor-pointer"
+                    >
                       Detail
                     </button>
                   </td>

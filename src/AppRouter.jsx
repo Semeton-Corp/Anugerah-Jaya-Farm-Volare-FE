@@ -90,6 +90,7 @@ import JualAyamAfkir from "./pages/JualAyamAfkir";
 import DraftPenjualanAyam from "./pages/DraftPenjualanAyam";
 import InputDraftPenjualanAyam from "./pages/InputDraftPenjualanAyam";
 import PilihPembeliAyam from "./pages/PilihPembeliAyam";
+import DetailPengadaanDoc from "./pages/DetailPengadaanDoc";
 
 const AppRouter = createBrowserRouter([
   {
@@ -241,6 +242,10 @@ const AppRouter = createBrowserRouter([
                         element: <InputDraftPemesananDoc />,
                       },
                     ],
+                  },
+                  {
+                    path: "detail-pengadaan-doc/:id",
+                    element: <DetailPengadaanDoc />,
                   },
                 ],
               },
