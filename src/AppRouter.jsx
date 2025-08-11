@@ -91,6 +91,8 @@ import DraftPenjualanAyam from "./pages/DraftPenjualanAyam";
 import InputDraftPenjualanAyam from "./pages/InputDraftPenjualanAyam";
 import PilihPembeliAyam from "./pages/PilihPembeliAyam";
 import DetailPengadaanDoc from "./pages/DetailPengadaanDoc";
+import TambahPelangganAyam from "./pages/TambahPelangganAyam";
+import DetailPelangganAfkir from "./pages/DetailPelangganAfkir";
 
 const AppRouter = createBrowserRouter([
   {
@@ -254,8 +256,24 @@ const AppRouter = createBrowserRouter([
                 element: <JualAyamAfkir />,
                 children: [
                   {
-                    path: "draft-pelanggan-ayam",
-                    // element: <DraftPenjualanAyam />,
+                    path: "daftar-pelanggan-ayam",
+                    element: <PilihPembeliAyam mode={"detail"} />,
+                    children: [
+                      {
+                        path: "tambah-pelanggan-ayam",
+                        element: <TambahPelangganAyam />,
+                      },
+                      {
+                        path: "detail-pelanggan-afkir/:id",
+                        element: <DetailPelangganAfkir />,
+                        children: [
+                          {
+                            path: "edit-pelanggan-ayam",
+                            element: <TambahPelangganAyam />,
+                          },
+                        ],
+                      },
+                    ],
                   },
                   {
                     path: "draft-penjualan-ayam",
@@ -267,14 +285,7 @@ const AppRouter = createBrowserRouter([
                         children: [
                           {
                             path: "pilih-pembeli-ayam",
-                            element: <PilihPembeliAyam />,
-                            children: [
-                              {
-                                path: "input-draft-penjualan-ayam",
-                                element: <InputDraftPenjualanAyam />,
-                                children: [],
-                              },
-                            ],
+                            element: <PilihPembeliAyam mode={"detail"} />,
                           },
                         ],
                       },

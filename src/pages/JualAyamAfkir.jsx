@@ -59,7 +59,7 @@ const JualAyamAfkir = () => {
   };
 
   const draftPelangganAyamHandle = () => {
-    navigate(`${location.pathname}/draft-pelanggan-ayam`);
+    navigate(`${location.pathname}/daftar-pelanggan-ayam`);
   };
 
   if (isDetailPage) {

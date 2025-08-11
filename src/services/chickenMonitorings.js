@@ -256,3 +256,48 @@ export const createChickenProcurementPayment = (payload, id) => {
     },
   });
 };
+
+export const createAfkirCustomer = (payload) => {
+  return api.post(`/chickens/afkir/customers`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const getAfkirCustomers = () => {
+  return api.get(`/chickens/afkir/customers`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const getAfkirCustomer = (id) => {
+  return api.get(`/chickens/afkir/customers/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const updateAfkirCustomer = (payload, id) => {
+  return api.put(`/chickens/afkir/customers/${id}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const deleteAfkirCustomer = (id) => {
+  return api.delete(`/chickens/afkir/customers/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};

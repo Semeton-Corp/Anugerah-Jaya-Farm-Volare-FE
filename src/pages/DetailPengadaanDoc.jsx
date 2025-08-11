@@ -137,7 +137,6 @@ export default function DetailPengadaanDoc() {
   return (
     <div className="border rounded p-4">
       <h2 className="text-2xl font-semibold mb-4">Detail Pengadaan DOC</h2>
-
       <div className="grid grid-cols-2 md:grid-cols-2 gap-6 mb-2">
         <div>
           <p className=" text-gray-600">Tanggal Pemesanan</p>
@@ -171,8 +170,6 @@ export default function DetailPengadaanDoc() {
           <p className="text-lg font-semibold">{rupiah(data?.totalPrice)}</p>
         </div>
       </div>
-
-      {/* Pembayaran */}
       <div className="border rounded mt-3">
         <div className="flex items-center justify-between p-4">
           <p className="font-semibold text-lg">Pembayaran</p>
