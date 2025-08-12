@@ -1,18 +1,23 @@
-// KonfirmasiPenjualanAyamModal.jsx
 import React, { useMemo, useRef, useState, useEffect } from "react";
 import { BiSolidEditAlt } from "react-icons/bi";
+import { MdDelete } from "react-icons/md";
 
-// Pakai util kamu kalau ada; kalau tidak, fallback sederhana:
 const toInputDate = (d) => {
   try {
     if (!d) return "";
-    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
-    const parsed = new Date(d);
-    return isNaN(parsed) ? "" : parsed.toISOString().slice(0, 10);
+    const parsed = /^\d{4}-\d{2}-\d{2}$/.test(d) ? new Date(d) : new Date(d);
+    if (isNaN(parsed)) return "";
+
+    const day = String(parsed.getDate()).padStart(2, "0");
+    const month = String(parsed.getMonth() + 1).padStart(2, "0");
+    const year = parsed.getFullYear();
+
+    return `${day}-${month}-${year}`;
   } catch {
     return "";
   }
 };
+
 const rupiah = (n) => `Rp ${Number(n || 0).toLocaleString("id-ID")}`;
 
 const KonfirmasiPenjualanAyamModal = ({
@@ -20,34 +25,30 @@ const KonfirmasiPenjualanAyamModal = ({
   onConfirm,
   sale = {
     saleDate: "20 Maret 2025",
-    kandang: { id: 1, name: "Sidodadi 04" },
-    kandangOptions: [
-      { id: 1, name: "Sidodadi 04" },
-      { id: 2, name: "Kediri 02" },
-    ],
+    chickenCage: { id: 1, name: "Sidodadi 04" },
     customer: { id: 1, name: "Pelanggan 01" },
-    quantity: 1100, // ekor
-    pricePerUnit: 5000000, // harga per ekor
+    totalSellChicken: 1100,
+    pricePerChicken: 5000000,
   },
 }) => {
-  // Editable fields
-  const [kandang, setKandang] = useState(sale.kandang);
-  const [qty, setQty] = useState(sale.quantity);
-  const [pricePerUnit, setPricePerUnit] = useState(sale.pricePerUnit);
-  const [saleDate] = useState(sale.saleDate); // tampil saja
-  const [estimationArrivalDate] = useState(""); // tidak dipakai di penjualan
+  const [chickenCage, setChickenCage] = useState(sale.chickenCage);
+  const [totalSellChicken, setTotalSellChicken] = useState(
+    sale.totalSellChicken
+  );
+  const [pricePerChicken, setPricePerChicken] = useState(sale.pricePerChicken);
+  const [saleDate] = useState(sale.saleDate);
+  const [estimationArrivalDate] = useState("");
 
   const [editQty, setEditQty] = useState(false);
   const [editPrice, setEditPrice] = useState(false);
 
-  // Global payment method (dipilih di luar modal)
+  const [paymentType, setPaymentType] = useState("Penuh");
   const [paymentMethod, setPaymentMethod] = useState("Tunai");
 
-  // Payments
-  const [payments, setPayments] = useState([]); // {paymentDate, paymentMethod, nominal:string, proof}
+  const [payments, setPayments] = useState([]);
   const orderTotal = useMemo(
-    () => Number(qty || 0) * Number(pricePerUnit || 0),
-    [qty, pricePerUnit]
+    () => Number(totalSellChicken || 0) * Number(pricePerChicken || 0),
+    [totalSellChicken, pricePerChicken]
   );
 
   const totalPaid = useMemo(
@@ -58,8 +59,14 @@ const KonfirmasiPenjualanAyamModal = ({
   const paymentStatus =
     remaining === 0 && payments.length > 0 ? "Lunas" : "Belum Lunas";
 
-  // Modal state (satu pembayaran per buka modal)
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const today = (() => {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, "0");
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const year = now.getFullYear();
+    return `${year}-${month}-${day}`;
+  })();
   const [paymentDate, setPaymentDate] = useState(
     new Date().toISOString().slice(0, 10)
   );
@@ -67,7 +74,6 @@ const KonfirmasiPenjualanAyamModal = ({
   const [paymentProof, setPaymentProof] = useState(null);
   const dateRef = useRef(null);
 
-  // Hitung sisa bayar per baris berdasarkan urutan
   const remainingAfterIdx = (idx) => {
     const paidToIdx = payments
       .slice(0, idx + 1)
@@ -76,16 +82,14 @@ const KonfirmasiPenjualanAyamModal = ({
   };
 
   const addPayment = () => {
-    // Ambil metode dari global select
     const amount = Number(nominal || 0);
     const newPay = {
       paymentDate: toInputDate(paymentDate),
-      paymentMethod,
-      nominal: String(amount), // <- string untuk backend Go
+      paymentMethod: paymentMethod,
+      nominal: String(amount),
       proof: paymentProof ? paymentProof.name : "-",
     };
     setPayments((prev) => [...prev, newPay]);
-    // reset form
     setShowPaymentModal(false);
     setNominal("");
     setPaymentProof(null);
@@ -96,29 +100,45 @@ const KonfirmasiPenjualanAyamModal = ({
     setPayments((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  // Recalculate nothing needed on qty/price change, because we compute sisa on the fly
-
   const handleConfirm = () => {
-    const cleanedPayments = payments.map(({ ...p }) => {
-      return {
-        paymentDate: p.paymentDate,
-        paymentMethod: p.paymentMethod,
-        nominal: String(p.nominal || "0"),
-        proof: p.proof,
-      };
-    });
+    const totalPrice =
+      Number(totalSellChicken || 0) * Number(pricePerChicken || 0);
 
-    onConfirm?.({
-      saleDate,
-      kandangId: kandang?.id,
-      customerId: sale.customer?.id,
-      quantity: Number(qty || 0),
-      pricePerUnit: Number(pricePerUnit || 0),
-      totalPrice: orderTotal,
-      payments: cleanedPayments,
-      paymentStatus,
-      remaining,
-    });
+    const cleanedPayments = payments.map((p) => ({
+      paymentDate: p.paymentDate ?? "",
+      paymentMethod: p.paymentMethod ?? "",
+      nominal: Number(p.nominal ?? 0),
+      proof: p.proof ?? null,
+    }));
+
+    const totalPaid = cleanedPayments.reduce(
+      (sum, p) => sum + Number(p.nominal || 0),
+      0
+    );
+    console.log("paymentType: ", paymentType);
+    console.log("totalPaid: ", totalPaid);
+    console.log("totalPrice: ", totalPrice);
+
+    if (paymentType === "Penuh" && totalPaid !== totalPrice) {
+      alert(
+        "❌ Total pembayaran harus sama dengan harga total penjualan untuk pembayaran penuh."
+      );
+      return;
+    }
+
+    const payload = {
+      chickenCageId: chickenCage?.id ?? null,
+      afkirChickenCustomerId: sale.customer?.id ?? null,
+      totalSellChicken: Number(totalSellChicken || 0),
+      pricePerChicken: pricePerChicken || "0",
+      payments: cleanedPayments.map((p) => ({
+        ...p,
+        nominal: String(p.nominal),
+      })),
+      paymentType: paymentType ?? "",
+    };
+
+    onConfirm?.(payload);
   };
 
   return (
@@ -136,7 +156,7 @@ const KonfirmasiPenjualanAyamModal = ({
           </div>
           <div>
             <p className="text-sm text-gray-600">Kandang</p>
-            <p className="font-semibold">{kandang?.name}</p>
+            <p className="font-semibold">{chickenCage?.cage?.name}</p>
           </div>
           <div>
             <p className="text-sm text-gray-600">Pelanggan</p>
@@ -162,13 +182,13 @@ const KonfirmasiPenjualanAyamModal = ({
                 <input
                   type="number"
                   className="border rounded px-3 py-2 w-full"
-                  value={qty}
-                  onChange={(e) => setQty(e.target.value)}
+                  value={totalSellChicken}
+                  onChange={(e) => setTotalSellChicken(e.target.value)}
                 />
                 <span className="font-semibold">Ekor</span>
               </div>
             ) : (
-              <p className="font-bold mt-1">{qty} Ekor</p>
+              <p className="font-bold mt-1">{totalSellChicken} Ekor</p>
             )}
           </div>
 
@@ -188,11 +208,11 @@ const KonfirmasiPenjualanAyamModal = ({
               <input
                 type="number"
                 className="border rounded px-3 py-2 mt-1 w-full"
-                value={pricePerUnit}
-                onChange={(e) => setPricePerUnit(e.target.value)}
+                value={pricePerChicken}
+                onChange={(e) => setPricePerChicken(e.target.value)}
               />
             ) : (
-              <p className="font-bold mt-1">{rupiah(pricePerUnit)} / Ekor</p>
+              <p className="font-bold mt-1">{rupiah(pricePerChicken)} / Ekor</p>
             )}
           </div>
 
@@ -207,9 +227,9 @@ const KonfirmasiPenjualanAyamModal = ({
         <div className="flex flex-col mt-4 mb-2">
           <label className="text-sm text-gray-600">Tipe Pembayaran</label>
           <select
-            className="border rounded p-2 ml-2"
-            value={paymentMethod}
-            onChange={(e) => setPaymentMethod(e.target.value)}
+            className="border rounded p-2"
+            value={paymentType}
+            onChange={(e) => setPaymentType(e.target.value)}
           >
             <option value="Penuh">Penuh</option>
             <option value="Cicil">Cicil</option>
@@ -331,11 +351,21 @@ const KonfirmasiPenjualanAyamModal = ({
               onChange={(e) => setNominal(e.target.value)}
             />
 
+            <label className="text-sm text-gray-600">Metode Pembayaran</label>
+            <select
+              className="w-full border rounded p-2 mb-3 "
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+            >
+              <option value="Tunai">Tunai</option>
+              <option value="Non Tunai">Non Tunai</option>
+            </select>
+
             <label className="block mb-1 font-medium">Tanggal Bayar</label>
             <input
               type="date"
               className="w-full border rounded p-2 mb-3"
-              value={toInputDate(paymentDate)}
+              value={paymentDate}
               onChange={(e) => setPaymentDate(e.target.value)}
               ref={dateRef}
             />

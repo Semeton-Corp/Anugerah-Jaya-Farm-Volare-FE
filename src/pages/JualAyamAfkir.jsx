@@ -1,27 +1,8 @@
 import React, { useState } from "react";
 import { FaMoneyBillWave } from "react-icons/fa6";
 import { Outlet, useNavigate } from "react-router-dom";
-
-const salesData = [
-  {
-    date: "20 Mar 2025",
-    customer: "Pembeli 01",
-    quantity: "1000 Ekor",
-    status: "Belum Lunas",
-  },
-  {
-    date: "20 Mar 2025",
-    customer: "Pembeli 02",
-    quantity: "12 Ekor",
-    status: "Belum Dibayar",
-  },
-  {
-    date: "20 Mar 2025",
-    customer: "Pembeli 03",
-    quantity: "12 Ekor",
-    status: "Lunas",
-  },
-];
+import { getAfkirChickenSales } from "../services/chickenMonitorings";
+import { useEffect } from "react";
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -39,6 +20,7 @@ const getStatusColor = (status) => {
 const JualAyamAfkir = () => {
   const navigate = useNavigate();
 
+  const [salesData, setSalesData] = useState([]);
   const [status, setStatus] = useState("Semua Status Pembayaran");
   const options = [
     "Semua Status Pembayaran",
@@ -51,7 +33,6 @@ const JualAyamAfkir = () => {
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
-
   const [showBarangsampaiModal, setShowBarangSampaiModal] = useState(false);
 
   const draftPenjualanAyamHandle = () => {
@@ -61,6 +42,22 @@ const JualAyamAfkir = () => {
   const draftPelangganAyamHandle = () => {
     navigate(`${location.pathname}/daftar-pelanggan-ayam`);
   };
+
+  const fetchSalesData = async () => {
+    try {
+      const saleResponse = await getAfkirChickenSales();
+      console.log("saleResponse: ", saleResponse);
+      if (saleResponse.status == 200) {
+        setSalesData(saleResponse.data.data.afkirChickenSales);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSalesData();
+  }, []);
 
   if (isDetailPage) {
     return <Outlet />;
@@ -117,16 +114,16 @@ const JualAyamAfkir = () => {
             <tbody>
               {salesData.map((item, index) => (
                 <tr key={index} className="border-t">
-                  <td className="p-3">{item.date}</td>
-                  <td className="p-3">{item.customer}</td>
-                  <td className="p-3">{item.quantity}</td>
+                  <td className="p-3">{item.sellDate}</td>
+                  <td className="p-3">{item.afkirChickenCustomer.name}</td>
+                  <td className="p-3">{`${item.totalSellChicken} Ekor`}</td>
                   <td className="p-3">
                     <span
                       className={`text-sm px-3 py-1 rounded font-medium ${getStatusColor(
-                        item.status
+                        item.paymentStatus
                       )}`}
                     >
-                      {item.status}
+                      {item.paymentStatus}
                     </span>
                   </td>
                   <td className="p-3">

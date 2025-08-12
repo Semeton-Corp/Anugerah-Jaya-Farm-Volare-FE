@@ -3,23 +3,11 @@ import { useState } from "react";
 import { IoLogoWhatsapp } from "react-icons/io";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import KonfirmasiPenjualanAyamModal from "../components/KonfirmasiPenjualanAyamModal";
-
-const draftSalesData = [
-  {
-    date: "20 Mar 2025",
-    customer: "Dagang A",
-    quantity: "4000 Ekor",
-    pricePerUnit: 5000,
-    totalPrice: 1000000,
-  },
-  {
-    date: "20 Mar 2025",
-    customer: "Dagang B",
-    quantity: "4000 Ekor",
-    pricePerUnit: 5000,
-    totalPrice: 1000000,
-  },
-];
+import {
+  confirmationAfkirChickenSaleDraft,
+  getAfkirChickenSaleDrafts,
+} from "../services/chickenMonitorings";
+import { useEffect } from "react";
 
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat("id-ID", {
@@ -34,6 +22,8 @@ const DraftPenjualanAyam = () => {
   const navigate = useNavigate();
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [draftSalesData, setDraftSalesData] = useState([]);
+  const [selectedConfirmItem, setSelectedConfirmItem] = useState();
 
   const detailPages = ["input-draft-penjualan-ayam"];
   const isDetailPage = detailPages.some((segment) =>
@@ -44,9 +34,39 @@ const DraftPenjualanAyam = () => {
     navigate(`${location.pathname}/input-draft-penjualan-ayam`);
   };
 
-  const handleConfirm = (payload) => {
+  const handleConfirm = async (payload) => {
     console.log("payload: ", payload);
+    try {
+      const confirmResponse = await confirmationAfkirChickenSaleDraft(
+        payload,
+        selectedConfirmItem.id
+      );
+      // console.log("confirmResponse: ", confirmResponse);
+      if (confirmResponse.status == 201) {
+        setSelectedConfirmItem();
+        setShowConfirmModal(false);
+        fetchDraftData();
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
   };
+
+  const fetchDraftData = async () => {
+    try {
+      const draftResponse = await getAfkirChickenSaleDrafts();
+      console.log("draftResponse: ", draftResponse);
+      if (draftResponse.status == 200) {
+        setDraftSalesData(draftResponse.data.data);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDraftData();
+  }, []);
 
   if (isDetailPage) {
     return <Outlet />;
@@ -83,9 +103,11 @@ const DraftPenjualanAyam = () => {
               {draftSalesData.map((item, index) => (
                 <tr key={index} className="border-t">
                   <td className="p-3">{item.date}</td>
-                  <td className="p-3">{item.customer}</td>
-                  <td className="p-3">{item.quantity}</td>
-                  <td className="p-3">{formatCurrency(item.pricePerUnit)}</td>
+                  <td className="p-3">{item.afkirChickenCustomer.name}</td>
+                  <td className="p-3">{`${item.totalSellChicken} Ekor`}</td>
+                  <td className="p-3">
+                    {formatCurrency(item.pricePerChicken)}
+                  </td>
                   <td className="p-3">{formatCurrency(item.totalPrice)}</td>
                   <td className="p-3">
                     <div className="flex gap-2">
@@ -110,6 +132,8 @@ const DraftPenjualanAyam = () => {
                       <button
                         onClick={() => {
                           setShowConfirmModal(true);
+                          setSelectedConfirmItem(item);
+                          console.log("item: ", item);
                         }}
                         className="px-3 py-1 bg-green-700 text-white rounded hover:bg-green-900 text-sm cursor-pointer"
                       >
@@ -132,14 +156,11 @@ const DraftPenjualanAyam = () => {
           onConfirm={handleConfirm}
           sale={{
             saleDate: "09 Aug 2025",
-            kandang: { id: 2, name: "Kandang B" },
-            kandangOptions: [
-              { id: 1, name: "Kandang A" },
-              { id: 2, name: "Kandang B" },
-            ],
-            customer: { id: 5, name: "PT Ayam Sejahtera" },
-            quantity: 10000,
-            pricePerUnit: 300000,
+            chickenCage: selectedConfirmItem.chickenCage,
+
+            customer: selectedConfirmItem.afkirChickenCustomer,
+            totalSellChicken: selectedConfirmItem.totalSellChicken,
+            pricePerChicken: selectedConfirmItem.pricePerChicken,
           }}
         />
       )}

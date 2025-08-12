@@ -310,3 +310,30 @@ export const createAfkirChickenDraft = (payload) => {
     },
   });
 };
+
+export const getAfkirChickenSaleDrafts = () => {
+  return api.get(`/chickens/afkir/sales/drafts`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const confirmationAfkirChickenSaleDraft = (payload, id) => {
+  return api.post(`/chickens/afkir/sales/drafts/${id}/confirmations`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const getAfkirChickenSales = () => {
+  return api.get(`/chickens/afkir/sales`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
