@@ -301,3 +301,12 @@ export const deleteAfkirCustomer = (id) => {
     },
   });
 };
+
+export const createAfkirChickenDraft = (payload) => {
+  return api.post(`/chickens/afkir/sales/drafts`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};

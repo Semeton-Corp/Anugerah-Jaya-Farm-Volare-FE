@@ -36,9 +36,15 @@ const PilihPembeliAyam = ({ mode }) => {
   };
 
   const handlePilih = (pelanggan) => {
-    alert(`Pilih: ${pelanggan.name}`);
+    const parentPath = location.pathname.replace(
+      /\/pilih-pembeli-ayam\/?$/,
+      ""
+    );
+    navigate(parentPath, {
+      state: { selectedCustomer: pelanggan },
+      replace: true,
+    });
   };
-
   useEffect(() => {
     fetchCustomerData();
     if (location?.state?.refetch) {
@@ -74,17 +80,17 @@ const PilihPembeliAyam = ({ mode }) => {
             </tr>
           </thead>
           <tbody>
-            {customerList.map((p) => (
-              <tr key={p.id} className="border-t">
-                <td className="px-4 py-2">{p?.name}</td>
-                <td className="px-4 py-2">{p?.phoneNumber}</td>
-                <td className="px-4 py-2">{p?.address}</td>
-                <td className="px-4 py-2">{p?.latestPrice}</td>
+            {customerList.map((customer) => (
+              <tr key={customer.id} className="border-t">
+                <td className="px-4 py-2">{customer?.name}</td>
+                <td className="px-4 py-2">{customer?.phoneNumber}</td>
+                <td className="px-4 py-2">{customer?.address}</td>
+                <td className="px-4 py-2">{customer?.latestPrice}</td>
 
                 <td className="px-4 py-2">
                   {mode === "pilih" && (
                     <button
-                      onClick={() => handlePilih(p)}
+                      onClick={() => handlePilih(customer)}
                       className="bg-orange-300 px-4 py-2 rounded hover:bg-orange-500 cursor-pointer"
                     >
                       Pilih
@@ -93,7 +99,7 @@ const PilihPembeliAyam = ({ mode }) => {
                   {mode === "detail" && (
                     <button
                       onClick={() => {
-                        handleDetailPelanggan(p?.id);
+                        handleDetailPelanggan(customer?.id);
                       }}
                       className="bg-green-700 px-4 py-2 text-white rounded hover:bg-green-900 cursor-pointer"
                     >

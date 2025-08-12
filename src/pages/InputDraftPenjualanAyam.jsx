@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { MdDelete } from "react-icons/md";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { getChickenCage } from "../services/cages";
+import { createAfkirChickenDraft } from "../services/chickenMonitorings";
 
 const kandangList = [
   { id: 1, name: "Sidodadi 04", jumlah: 4000, umur: 30 },
@@ -10,10 +13,13 @@ const InputDraftPenjualanAyam = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [selectedKandang, setSelectedKandang] = useState(null);
-  const [jumlahTerjual, setJumlahTerjual] = useState("");
-  const [hargaPerEkor, setHargaPerEkor] = useState("");
+  const [chickenCages, setCages] = useState();
+  const [selectedChickenCage, setSelectedChickenCage] = useState(null);
+  const [totalSellChicken, setJumlahTerjual] = useState("");
+  const [pricePerChicken, setHargaPerEkor] = useState("");
   const [totalHarga, setTotalHarga] = useState(0);
+
+  const [selectedCustomer, setSelectedCustomer] = useState();
 
   const detailPages = ["pilih-pembeli-ayam"];
   const isDetailPage = detailPages.some((segment) =>
@@ -24,10 +30,74 @@ const InputDraftPenjualanAyam = () => {
     navigate(`${location.pathname}/pilih-pembeli-ayam`);
   };
 
+  const clearCustomer = () => {
+    setSelectedCustomer();
+  };
+
+  const fetchCages = async () => {
+    try {
+      const cagesResponse = await getChickenCage();
+      // console.log("cagesResponse: ", cagesResponse);
+      if (cagesResponse.status == 200) {
+        const cagesData = cagesResponse.data.data;
+        const filteredCages = cagesData.filter((cage) => cage.batchId != "");
+        console.log("filteredCages: ", filteredCages);
+        setCages(filteredCages);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (
+      !selectedChickenCage ||
+      !selectedCustomer ||
+      !totalSellChicken ||
+      !pricePerChicken
+    ) {
+      alert("❌ Mohon isi semua field dengan benar!");
+      return;
+    }
+
+    try {
+      const payload = {
+        chickenCageId: selectedChickenCage.id,
+        afkirChickenCustomerId: selectedCustomer.id,
+        totalSellChicken: parseInt(totalSellChicken),
+        pricePerChicken: pricePerChicken,
+      };
+      console.log("payload: ", payload);
+      const submitResponse = await createAfkirChickenDraft(payload);
+      console.log("submitResponse: ", submitResponse);
+
+      if (submitResponse.status == 201) {
+        const newPath = location.pathname.replace(
+          "/input-draft-penjualan-ayam",
+          ""
+        );
+        navigate(newPath, { state: { refetch: true } });
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
   useEffect(() => {
-    const total = parseInt(jumlahTerjual || 0) * parseInt(hargaPerEkor || 0);
+    const total =
+      parseInt(totalSellChicken || 0) * parseInt(pricePerChicken || 0);
     setTotalHarga(total);
-  }, [jumlahTerjual, hargaPerEkor]);
+  }, [totalSellChicken, pricePerChicken]);
+
+  useEffect(() => {
+    fetchCages();
+    const picked = location?.state?.selectedCustomer;
+    console.log("picked: ", picked);
+    if (picked) {
+      setSelectedCustomer(picked);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   if (isDetailPage) {
     return <Outlet />;
@@ -47,20 +117,20 @@ const InputDraftPenjualanAyam = () => {
             <label className="text-sm text-gray-600 block mb-1">Kandang</label>
             <select
               className="border rounded px-3 py-2 w-full"
-              value={selectedKandang?.id || ""}
+              value={selectedChickenCage?.id || ""}
               onChange={(e) => {
-                const kandang = kandangList.find(
-                  (k) => k.id === parseInt(e.target.value)
+                const kandang = chickenCages.find(
+                  (chickenCage) => chickenCage.id === parseInt(e.target.value)
                 );
-                setSelectedKandang(kandang);
+                setSelectedChickenCage(kandang);
               }}
             >
               <option value="" disabled>
                 Pilih Kandang
               </option>
-              {kandangList.map((k) => (
-                <option key={k.id} value={k.id}>
-                  {k.name}
+              {chickenCages?.map((chickenCage) => (
+                <option key={chickenCage.id} value={chickenCage.id}>
+                  {chickenCage.cage.name}
                 </option>
               ))}
             </select>
@@ -70,7 +140,8 @@ const InputDraftPenjualanAyam = () => {
               Total Jumlah Ayam di Kandang
             </label>
             <p className="font-bold">
-              {selectedKandang ? selectedKandang.jumlah : "-"} Ekor
+              {selectedChickenCage ? selectedChickenCage.totalChicken : "-"}{" "}
+              Ekor
             </p>
           </div>
           <div>
@@ -78,18 +149,39 @@ const InputDraftPenjualanAyam = () => {
               Umur Ayam
             </label>
             <p className="font-bold">
-              {selectedKandang ? selectedKandang.umur : "-"} Minggu
+              {selectedChickenCage ? selectedChickenCage.chickenAge : "-"}{" "}
+              Minggu
             </p>
           </div>
         </div>
         <div>
           <label className="text-sm text-gray-600 block mb-1">Pelanggan</label>
-          <button
-            onClick={pilihPembeliAyamHandle}
-            className="bg-yellow-400 hover:bg-yellow-500 px-4 py-2 rounded text-black cursor-pointer"
-          >
-            Pilih Pelanggan
-          </button>
+          {!selectedCustomer ? (
+            <button
+              onClick={() =>
+                navigate(`${location.pathname}/pilih-pembeli-ayam`)
+              }
+              className="bg-yellow-400 hover:bg-yellow-500 px-4 py-2 rounded text-black"
+            >
+              Pilih Pelanggan
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                readOnly
+                value={selectedCustomer?.name ?? ""}
+                className="flex-1 border rounded px-3 py-2 bg-gray-100 text-sm"
+              />
+              <button
+                onClick={clearCustomer}
+                className="border rounded p-2 hover:bg-gray-100"
+                title="Hapus"
+              >
+                <MdDelete size={16} />
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-6 items-end">
@@ -100,14 +192,24 @@ const InputDraftPenjualanAyam = () => {
             <div className="flex items-center">
               <input
                 type="number"
-                value={jumlahTerjual}
-                onChange={(e) => setJumlahTerjual(e.target.value)}
+                value={totalSellChicken}
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+                  if (value <= (selectedChickenCage?.totalChicken || 0)) {
+                    setJumlahTerjual(value);
+                  } else {
+                    setJumlahTerjual(selectedChickenCage?.totalChicken || 0);
+                  }
+                }}
                 placeholder="Masukkan jumlah ayam yang akan dijual"
                 className="w-full border px-3 py-2 rounded bg-gray-100"
               />
               <span className="ml-2">Ekor</span>
             </div>
           </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+          {/* Harga Jual / Ekor */}
           <div>
             <label className="text-sm text-gray-600 block mb-1">
               Harga Jual / Ekor
@@ -116,28 +218,41 @@ const InputDraftPenjualanAyam = () => {
               <span className="mr-2">Rp</span>
               <input
                 type="number"
-                value={hargaPerEkor}
+                value={pricePerChicken}
                 onChange={(e) => setHargaPerEkor(e.target.value)}
                 className="w-full border px-3 py-2 rounded bg-gray-100"
               />
-              <span className="ml-2">/ Ekor</span>
+            </div>
+          </div>
+
+          {/* Harga Jual Total */}
+          <div>
+            <label className="text-sm text-gray-600 block mb-1">
+              Harga Jual Total
+            </label>
+            <div className="h-[42px] flex items-center font-bold">
+              Rp {totalHarga.toLocaleString("id-ID") || "-"}
             </div>
           </div>
         </div>
-        <div className="flex items-center">
-          <label className="text-sm text-gray-600 block mb-1 w-1/3">
-            Harga Jual Total
-          </label>
-          <p className="font-bold">
-            Rp {totalHarga.toLocaleString("id-ID") || "-"}
-          </p>
-        </div>
         <div className="flex justify-end">
-          <button className="bg-green-700 text-white px-6 py-2 rounded hover:bg-green-900">
+          <button
+            onClick={handleSubmit}
+            className="bg-green-700 text-white px-6 py-2 rounded hover:bg-green-900"
+          >
             Simpan
           </button>
         </div>
       </div>
+      <button
+        onClick={() => {
+          console.log("selectedCustomer: ", selectedCustomer);
+          console.log("jumlahTerjual: ", totalSellChicken);
+          console.log("hargaPerEkor: ", pricePerChicken);
+        }}
+      >
+        CHECK
+      </button>
     </div>
   );
 };

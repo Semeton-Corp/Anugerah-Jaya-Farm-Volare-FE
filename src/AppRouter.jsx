@@ -285,7 +285,23 @@ const AppRouter = createBrowserRouter([
                         children: [
                           {
                             path: "pilih-pembeli-ayam",
-                            element: <PilihPembeliAyam mode={"detail"} />,
+                            element: <PilihPembeliAyam mode={"pilih"} />,
+                            children: [
+                              {
+                                path: "tambah-pelanggan-ayam",
+                                element: <TambahPelangganAyam />,
+                              },
+                              {
+                                path: "detail-pelanggan-afkir/:id",
+                                element: <DetailPelangganAfkir />,
+                                children: [
+                                  {
+                                    path: "edit-pelanggan-ayam",
+                                    element: <TambahPelangganAyam />,
+                                  },
+                                ],
+                              },
+                            ],
                           },
                         ],
                       },
