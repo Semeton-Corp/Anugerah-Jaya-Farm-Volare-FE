@@ -49,6 +49,16 @@ export const formatDateToDDMMYYYY = (dateString) => {
   return `${day}-${month}-${year}`;
 };
 
+export const toYMD = (d) => {
+  const today = new Date().toISOString().slice(0, 10);
+  const dt = new Date(d);
+  if (isNaN(dt)) return today;
+  const y = dt.getFullYear();
+  const m = String(dt.getMonth() + 1).padStart(2, "0");
+  const dd = String(dt.getDate()).padStart(2, "0");
+  return `${y}-${m}-${dd}`;
+};
+
 export const convertToInputDateFormat = (dateStr) => {
   const [day, month, year] = dateStr.split("-");
   return `${year}-${month}-${day}`;

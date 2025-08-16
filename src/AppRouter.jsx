@@ -93,6 +93,7 @@ import PilihPembeliAyam from "./pages/PilihPembeliAyam";
 import DetailPengadaanDoc from "./pages/DetailPengadaanDoc";
 import TambahPelangganAyam from "./pages/TambahPelangganAyam";
 import DetailPelangganAfkir from "./pages/DetailPelangganAfkir";
+import DetailPenjualanAyam from "./pages/DetailPenjualanAyam";
 
 const AppRouter = createBrowserRouter([
   {
@@ -255,6 +256,10 @@ const AppRouter = createBrowserRouter([
                 path: "jual-ayam-afkir",
                 element: <JualAyamAfkir />,
                 children: [
+                  {
+                    path: "detail-penjualan-ayam/:id",
+                    element: <DetailPenjualanAyam />,
+                  },
                   {
                     path: "daftar-pelanggan-ayam",
                     element: <PilihPembeliAyam mode={"detail"} />,

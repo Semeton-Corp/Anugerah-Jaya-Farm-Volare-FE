@@ -138,7 +138,10 @@ const DraftPengadaanDoc = () => {
                   <td className="p-3">{item.supplier.name}</td>
                   <td className="p-3">{`${item.quantity} Ekor`}</td>
                   <td className="p-3">
-                    {`Rp ${Number(item.price).toLocaleString("id-ID", {})}`}
+                    {`Rp ${Number(item.totalPrice).toLocaleString(
+                      "id-ID",
+                      {}
+                    )}`}
                   </td>
                   {/* <td className="p-3">
                     <span className="px-2 py-1 text-sm rounded bg-orange-200 text-orange-900 font-medium">

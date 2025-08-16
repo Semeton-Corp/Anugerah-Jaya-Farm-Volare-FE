@@ -29,7 +29,11 @@ const JualAyamAfkir = () => {
     "Lunas",
   ];
 
-  const detailPages = ["draft-penjualan-ayam", "daftar-pelanggan-ayam"];
+  const detailPages = [
+    "draft-penjualan-ayam",
+    "daftar-pelanggan-ayam",
+    "detail-penjualan-ayam",
+  ];
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
@@ -128,7 +132,9 @@ const JualAyamAfkir = () => {
                   </td>
                   <td className="p-3">
                     <button
-                      onClick={() => navigate("detail")}
+                      onClick={() =>
+                        navigate(`detail-penjualan-ayam/${item.id}`)
+                      }
                       className="bg-green-700 hover:bg-green-900 cursor-pointer text-white px-3 py-1 rounded text-sm"
                     >
                       Lihat Detail

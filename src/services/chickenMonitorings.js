@@ -337,3 +337,53 @@ export const getAfkirChickenSales = () => {
     },
   });
 };
+
+export const getAfkirChickenSale = (id) => {
+  return api.get(`/chickens/afkir/sales/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const createAfkirChickenSalePayment = (payload, id) => {
+  return api.post(`/chickens/afkir/sales/${id}/payments`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const updateAfkirChickenSalePayment = (
+  payload,
+  paymentId,
+  afkirChickenSaleId
+) => {
+  return api.put(
+    `/chickens/afkir/sales/${afkirChickenSaleId}/payments/${paymentId}`,
+    payload,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    }
+  );
+};
+
+export const deleteAfkirChickenSalePayment = (
+  paymentId,
+  afkirChickenSaleId
+) => {
+  return api.delete(
+    `/chickens/afkir/sales/${afkirChickenSaleId}/payments/${paymentId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    }
+  );
+};
