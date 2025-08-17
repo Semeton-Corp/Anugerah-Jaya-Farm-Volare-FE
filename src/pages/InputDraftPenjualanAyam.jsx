@@ -161,7 +161,7 @@ const InputDraftPenjualanAyam = () => {
               onClick={() =>
                 navigate(`${location.pathname}/pilih-pembeli-ayam`)
               }
-              className="bg-yellow-400 hover:bg-yellow-500 px-4 py-2 rounded text-black"
+              className="bg-orange-300 hover:bg-orange-500 px-4 py-2 rounded text-black cursor-pointer"
             >
               Pilih Pelanggan
             </button>

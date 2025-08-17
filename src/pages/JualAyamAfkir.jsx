@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { FaMoneyBillWave } from "react-icons/fa6";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { getAfkirChickenSales } from "../services/chickenMonitorings";
 import { useEffect } from "react";
+import { LiaOilCanSolid } from "react-icons/lia";
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -19,6 +20,7 @@ const getStatusColor = (status) => {
 
 const JualAyamAfkir = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [salesData, setSalesData] = useState([]);
   const [status, setStatus] = useState("Semua Status Pembayaran");
@@ -61,7 +63,11 @@ const JualAyamAfkir = () => {
 
   useEffect(() => {
     fetchSalesData();
-  }, []);
+    if (location?.state?.refetch) {
+      fetchSalesData();
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   if (isDetailPage) {
     return <Outlet />;

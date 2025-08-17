@@ -143,18 +143,31 @@ const usiaAyamData = [
 
 const DetailKinerjaAyam = () => {
   const location = useLocation();
-  const detailPages = ["fill it with the detail"];
+  const detailPages = ["pindah-ayam"];
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
   const navigate = useNavigate();
 
-  const detailKinerjaAyamHandle = () => {
-    const currentPath = location.pathname;
-    const detailPath = currentPath + "/detail-kinerja-ayam";
+  const handlePindahAyam = () => {
+    navigate(`${location.pathname}/pindah-ayam`);
+  };
 
-    navigate(detailPath);
+  const handlePengadaanDoc = () => {
+    const newUrl = location.pathname.replace(
+      "detail-kinerja-ayam",
+      "pengadaan-doc"
+    );
+    navigate(newUrl);
+  };
+
+  const handleJualAyamAfkir = () => {
+    const newUrl = location.pathname.replace(
+      "detail-kinerja-ayam",
+      "jual-ayam-afkir"
+    );
+    navigate(newUrl);
   };
 
   const [selectedFilter, setSelectedFilter] = useState("Rentabilitas");
@@ -173,19 +186,19 @@ const DetailKinerjaAyam = () => {
             <div className="flex justify-end items-center mb-4">
               <div className="flex gap-3">
                 <div
-                  onClick={() => {}}
+                  onClick={handlePindahAyam}
                   className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
                 >
                   <div className="text-base font-medium ">Pindah Ayam</div>
                 </div>
                 <div
-                  onClick={() => {}}
+                  onClick={handlePengadaanDoc}
                   className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
                 >
                   <div className="text-base font-medium ">Pengadaan DOC</div>
                 </div>
                 <div
-                  onClick={() => {}}
+                  onClick={handleJualAyamAfkir}
                   className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
                 >
                   <div className="text-base font-medium ">Jual Ayam Afkir</div>

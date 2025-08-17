@@ -94,6 +94,7 @@ import DetailPengadaanDoc from "./pages/DetailPengadaanDoc";
 import TambahPelangganAyam from "./pages/TambahPelangganAyam";
 import DetailPelangganAfkir from "./pages/DetailPelangganAfkir";
 import DetailPenjualanAyam from "./pages/DetailPenjualanAyam";
+import PembagianPakan from "./pages/PembagianPakan";
 
 const AppRouter = createBrowserRouter([
   {
@@ -231,7 +232,11 @@ const AppRouter = createBrowserRouter([
             path: "kinerja",
             children: [
               { path: "overview-kinerja", element: <Kinerja /> },
-              { path: "detail-kinerja-ayam", element: <DetailKinerjaAyam /> },
+              {
+                path: "detail-kinerja-ayam",
+                element: <DetailKinerjaAyam />,
+                children: [{ path: "pindah-ayam", element: <PindahAyam /> }],
+              },
               {
                 path: "pengadaan-doc",
                 element: <PengadaanDoc />,
@@ -313,6 +318,19 @@ const AppRouter = createBrowserRouter([
                     ],
                   },
                 ],
+              },
+            ],
+          },
+          {
+            path: "pakan",
+            children: [
+              {
+                path: "pembagian-pakan",
+                element: <PembagianPakan />,
+              },
+              {
+                path: "formula-pakan",
+                element: <OverviewStok />,
               },
             ],
           },

@@ -14,6 +14,7 @@ import Penjualan from "../pages/Penjualan";
 import ProduksiTelur from "../pages/ProduksiTelur";
 import { BsPersonSquare } from "react-icons/bs";
 import { GiTempleDoor } from "react-icons/gi";
+import { FaJarWheat } from "react-icons/fa6";
 
 export const sidebarMenus = {
   Owner: [
@@ -55,6 +56,15 @@ export const sidebarMenus = {
         { tabName: "Detail Kinerja Ayam", path: "detail-kinerja-ayam" },
         { tabName: "Pengadaan DOC", path: "detail-kinerja-ayam" },
         { tabName: "Jual Ayam Afkir", path: "detail-kinerja-ayam" },
+      ],
+    },
+    {
+      icon: <FaJarWheat size={20} />,
+      tabName: "Pakan",
+      element: <OverviewOwner />,
+      subTabs: [
+        { tabName: "Pembagian Pakan", path: "pembagian-pakan" },
+        { tabName: "Formula Pakan", path: "formula-pakan" },
       ],
     },
     {

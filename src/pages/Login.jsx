@@ -28,8 +28,8 @@ const Login = () => {
 
       if (response.status === 200) {
         console.log("response: ", response);
-        
-        const { accessToken, role, photoProfile, name, location } =
+
+        const { accessToken, role, photoProfile, name, location, id } =
           response.data.data;
         localStorage.setItem("token", accessToken);
         localStorage.setItem("role", role.name);
@@ -37,6 +37,7 @@ const Login = () => {
         localStorage.setItem("photoProfile", photoProfile);
         localStorage.setItem("locationId", location.id);
         localStorage.setItem("locationName", location.name);
+        localStorage.setItem("userId", id);
 
         const rolePath = role.name.toLowerCase().replace(/\s+/g, "-");
         navigate(`/${rolePath}`);

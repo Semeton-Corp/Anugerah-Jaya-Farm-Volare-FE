@@ -24,6 +24,7 @@ import {
 import { FiMaximize2 } from "react-icons/fi";
 import { formatRupiah } from "../utils/moneyFormat";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { getListUser, getUserById } from "../services/user";
 
 const data = [
   { date: "29 Mar", red: 300, yellow: 20 },
@@ -49,6 +50,7 @@ const Profile = () => {
   const photoProfile = localStorage.getItem("photoProfile");
   const userName = localStorage.getItem("userName");
   const userRole = localStorage.getItem("role");
+  const userId = localStorage.getItem("userId");
 
   const detailPages = ["detail-absensi", "detail-penyelesaian-pekerjaan"];
 
@@ -66,14 +68,10 @@ const Profile = () => {
 
   const fetchMyData = async () => {
     try {
-      const allStaffResponse = await getListStaff();
-      console.log("allStaffResponse: ", allStaffResponse);
-      if (allStaffResponse.status == 200) {
-        const selectedData = allStaffResponse.data.data.staffs.find(
-          (staff) => staff.name === userName
-        );
-        setMyData(selectedData);
-        console.log("selectedData: ", selectedData);
+      const userResponse = await getUserById(userId);
+      console.log("userResponse: ", userResponse);
+      if (userResponse.status == 200) {
+        setMyData(userResponse.data.data);
       }
     } catch (error) {
       console.log("error :", error);
@@ -127,7 +125,7 @@ const Profile = () => {
                 <p className="text-base font-medium">Email </p>
               </div>
               <div>
-                <p className="max-w-60 text-base text-[#565656] break-words text-right">
+                <p className=" text-base text-[#565656] break-words text-right">
                   {myData?.email}{" "}
                 </p>
               </div>

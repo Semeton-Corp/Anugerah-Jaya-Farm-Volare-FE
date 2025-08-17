@@ -14,3 +14,11 @@ export const getListUser = (roleId, locationId, page, keyword) => {
     },
   });
 };
+
+export const getUserById = (id) => {
+  return api.get(`users/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

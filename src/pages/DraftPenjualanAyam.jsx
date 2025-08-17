@@ -35,7 +35,7 @@ const DraftPenjualanAyam = () => {
   };
 
   const handleConfirm = async (payload) => {
-    console.log("payload: ", payload);
+    // console.log("payload: ", payload);
     try {
       const confirmResponse = await confirmationAfkirChickenSaleDraft(
         payload,
@@ -43,6 +43,8 @@ const DraftPenjualanAyam = () => {
       );
       // console.log("confirmResponse: ", confirmResponse);
       if (confirmResponse.status == 201) {
+        const newPath = location.pathname.replace("/draft-penjualan-ayam", "");
+        navigate(newPath, { state: { refetch: true } });
         setSelectedConfirmItem();
         setShowConfirmModal(false);
         fetchDraftData();

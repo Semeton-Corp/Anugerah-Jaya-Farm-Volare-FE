@@ -3,7 +3,7 @@ import React, { useMemo, useState } from "react";
 import { useEffect } from "react";
 import { BiSolidEditAlt } from "react-icons/bi";
 import { MdDelete } from "react-icons/md";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   createAfkirChickenSalePayment,
   deleteAfkirChickenSalePayment,
@@ -39,6 +39,7 @@ const Badge = ({ tone = "neutral", children }) => {
 };
 
 export default function DetailPenjualanAyam() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [sale, setSale] = useState({
     saleDate: "20 Maret 2025",
@@ -160,17 +161,17 @@ export default function DetailPenjualanAyam() {
   };
 
   const handleSave = () => {
-    const payload = {
-      ...sale,
-      payments: sale.payments.map((p) => ({
-        paymentDate: p.paymentDate,
-        paymentMethod: p.paymentMethod,
-        nominal: String(p.nominal ?? "0"), // kalau backend butuh string
-        proof: p.proof ?? null,
-      })),
-    };
-    console.log("SAVE payload:", payload);
-    alert("Data disimpan (dummy). Lihat console untuk payload.");
+    navigate(-1, { state: { refetch: true } });
+    // const payload = {
+    //   ...sale,
+    //   payments: sale.payments.map((p) => ({
+    //     paymentDate: p.paymentDate,
+    //     paymentMethod: p.paymentMethod,
+    //     nominal: String(p.nominal ?? "0"),
+    //     proof: p.proof ?? null,
+    //   })),
+    // };
+    // console.log("SAVE payload:", payload);
   };
 
   const handleDeletePayment = async () => {
@@ -363,13 +364,14 @@ export default function DetailPenjualanAyam() {
                 </Badge>
               </div>
               <div className="text-right">
-                <p className="text-sm">Sisa Bayar : {rupiah(finalRemaining)}</p>
+                <p className="font-medium">
+                  Sisa Bayar : {rupiah(finalRemaining)}
+                </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Footer */}
         <div className="flex justify-end mt-4">
           <button
             onClick={handleSave}
