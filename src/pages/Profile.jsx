@@ -24,7 +24,8 @@ import {
 import { FiMaximize2 } from "react-icons/fi";
 import { formatRupiah } from "../utils/moneyFormat";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { getListUser, getUserById } from "../services/user";
+import { getListUser, getOverviewUser, getUserById } from "../services/user";
+import MonthYearSelector from "../components/MonthYearSelector";
 
 const data = [
   { date: "29 Mar", red: 300, yellow: 20 },
@@ -51,6 +52,13 @@ const Profile = () => {
   const userName = localStorage.getItem("userName");
   const userRole = localStorage.getItem("role");
   const userId = localStorage.getItem("userId");
+  const [note, setNote] = useState("Lebih di perhatikan kesehatan ayamnya ya!");
+
+  const [month, setMonth] = useState(new Date().getMonth());
+  const [year, setYear] = useState(new Date().getFullYear());
+  const [monthName, setMonthName] = useState(
+    new Intl.DateTimeFormat("id-ID", { month: "long" }).format(new Date())
+  );
 
   const detailPages = ["detail-absensi", "detail-penyelesaian-pekerjaan"];
 
@@ -69,7 +77,7 @@ const Profile = () => {
   const fetchMyData = async () => {
     try {
       const userResponse = await getUserById(userId);
-      console.log("userResponse: ", userResponse);
+      // console.log("userResponse: ", userResponse);
       if (userResponse.status == 200) {
         setMyData(userResponse.data.data);
       }
@@ -77,9 +85,20 @@ const Profile = () => {
       console.log("error :", error);
     }
   };
+
+  const fetchOverviewData = async () => {
+    try {
+      const overviewData = await getOverviewUser(userId, year, month + 1);
+      console.log("overviewData: ", overviewData);
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
   useEffect(() => {
     fetchMyData();
-  }, []);
+    fetchOverviewData();
+  }, [userId, year, month]);
 
   const detailAbsensiHandle = () => {
     navigate(`${location.pathname}/detail-absensi`);
@@ -95,7 +114,16 @@ const Profile = () => {
 
   return (
     <div className="flex flex-col px-4 py-3 gap-4">
-      <h1 className="text-3xl font-bold">Profile</h1>
+      <div className="flex justify-between">
+        <h1 className="text-3xl font-bold">Profile</h1>
+        <MonthYearSelector
+          month={month}
+          year={year}
+          setMonth={setMonth}
+          setMonthName={setMonthName}
+          setYear={setYear}
+        />
+      </div>
 
       <div className="flex gap-4">
         <div className="w-3/8">
@@ -162,10 +190,28 @@ const Profile = () => {
               </div>
             </button>
           </div>
+          <button
+          // onClick={() => {
+          //   console.log("userId: ", userId);
+          //   console.log("year: ", year);
+          //   console.log("month: ", month);
+          // }}
+          >
+            CHECK
+          </button>
         </div>
 
         {userRole !== "Owner" && (
           <div className="w-5/8">
+            <div className="bg-white p-6 rounded border border-black-6 w-full mb-4">
+              <h2 className="text-xl font-bold text-gray-800 mb-4">
+                Catatan Kinerja
+              </h2>
+
+              <div className="bg-amber-100/60 p-4 rounded-lg">
+                <p className="text-gray-700">{note}</p>
+              </div>
+            </div>
             <div className="flex md:grid-cols-2 gap-4 justify-between">
               {/* telur OK */}
               <div className="p-4 w-full rounded-md bg-green-100">
@@ -226,7 +272,6 @@ const Profile = () => {
                 </div>
               </div>
             </div>
-
             <div className="p-4 border border-black-6 bg-white rounded-md mt-4 ">
               <h2 className="text-lg font-semibold mb-4">Performa KPI</h2>
               <ResponsiveContainer width="100%" height={300}>
@@ -249,7 +294,6 @@ const Profile = () => {
                 </LineChart>
               </ResponsiveContainer>
             </div>
-
             <div className="flex gap-4 mt-4">
               {/* stok gudang */}
               <div className="bg-white flex-1 p-4 border border-black-6 rounded-lg">
@@ -333,7 +377,6 @@ const Profile = () => {
                 </div>
               </div>
             </div>
-
             <div className="p-4 border border-black-6 mt-4 rounded-[4px] w-full bg-white">
               <h2 className="text-lg font-semibold mb-4">Rincian gaji</h2>
               <div className="space-y-2 text-sm">

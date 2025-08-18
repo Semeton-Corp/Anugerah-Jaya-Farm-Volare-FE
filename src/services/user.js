@@ -22,3 +22,15 @@ export const getUserById = (id) => {
     },
   });
 };
+
+export const getOverviewUser = (id, year, month) => {
+  return api.get(`users/overview/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    params: {
+      year: year,
+      month: month,
+    },
+  });
+};

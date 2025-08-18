@@ -1,5 +1,7 @@
 // src/pages/PembagianPakan.jsx
 import React, { useMemo, useState } from "react";
+import { getChickenCageFeeds } from "../services/cages";
+import { useEffect } from "react";
 
 const rupiahKg = (n) =>
   `${Number(n || 0).toLocaleString("id-ID", { maximumFractionDigits: 0 })} Kg`;
@@ -12,8 +14,8 @@ const rowsDummy = [
     usiaMinggu: 1,
     jumlahAyam: 100,
     jenisPakan: "Adukan",
-    jumlahPakan: 110, // kg yang disarankan hari ini
-    sisaKemarin: 10, // kg
+    jumlahPakan: 110,
+    sisaKemarin: 10,
   },
   {
     id: 2,
@@ -47,12 +49,10 @@ const rowsDummy = [
   },
 ];
 
-// Hard-coded formula per kategori (contoh)
 const formulaByKategori = {
   DOC: [
     { bahan: "Konsentrat", persen: 65 },
     { bahan: "Premix", persen: 15 },
-    // sisanya bisa “Dedak”/“Jagung” dll; contoh kosong supaya mirip screenshot
   ],
   Grower: [
     { bahan: "Konsentrat", persen: 60 },
@@ -71,7 +71,6 @@ const formulaByKategori = {
   ],
 };
 
-// Dummy gudang
 const gudangList = [
   { id: "G1", name: "Gudang Utama" },
   { id: "G2", name: "Gudang Timur" },
@@ -79,7 +78,11 @@ const gudangList = [
 ];
 
 export default function PembagianPakan() {
+  const locationId = localStorage.getItem("locationId");
+  const userRole = localStorage.getItem("role");
+
   const [rows] = useState(rowsDummy);
+  const [kandangList, setKandangList] = useState([]);
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(null);
   const [gudangId, setGudangId] = useState("");
@@ -128,9 +131,33 @@ export default function PembagianPakan() {
       })),
     };
     console.log("KONFIRMASI PEMBAGIAN PAKAN -> payload:", payload);
-    // TODO: ganti console.log dengan request API
     closeModal();
   };
+
+  const fetchKandangList = async () => {
+    try {
+      const kandangResponse = await getChickenCageFeeds();
+      if (kandangResponse.status == 200) {
+        const list = kandangResponse.data.data;
+        let filteredList;
+        if (userRole != "Owner") {
+          filteredList = list.filter(
+            (item) => item.cage.location.id == locationId
+          );
+        } else {
+          filteredList = list;
+        }
+        setKandangList(filteredList);
+        console.log("filteredList: ", filteredList);
+      }
+      // console.log("kandangResponse: ", kandangResponse);
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+  useEffect(() => {
+    fetchKandangList();
+  }, []);
 
   return (
     <div className="p-6">
@@ -150,28 +177,30 @@ export default function PembagianPakan() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((r) => (
+            {kandangList.map((r) => (
               <tr key={r.id} className="border-t">
-                <td className="p-3">{r.kandang}</td>
-                <td className="p-3">{r.kategori}</td>
-                <td className="p-3">{r.usiaMinggu}</td>
+                <td className="p-3">{r.cage.name}</td>
+                <td className="p-3">{r.chickenCategory}</td>
+                <td className="p-3">{r.chickenAge}</td>
                 <td className="p-3">
-                  {r.jumlahAyam.toLocaleString("id-ID")} Ekor
+                  {r.totalChicken.toLocaleString("id-ID")} Ekor
                 </td>
                 <td className="p-3">{r.jenisPakan}</td>
-                <td className="p-3">{rupiahKg(r.jumlahPakan)}</td>
+                <td className="p-3">{rupiahKg(r.totalFeed)}</td>
                 <td className="p-3">
-                  <button
-                    disabled={!canConfirmRow(r)}
-                    onClick={() => openModal(r)}
-                    className={`px-4 py-1 rounded ${
-                      canConfirmRow(r)
-                        ? "bg-orange-300 hover:bg-orange-500 cursor-pointer"
-                        : "bg-gray-300 text-gray-600 cursor-not-allowed"
-                    }`}
-                  >
-                    Konfirmasi
-                  </button>
+                  {r.chickenCategory && (
+                    <button
+                      disabled={!canConfirmRow(r)}
+                      onClick={() => openModal(r)}
+                      className={`px-4 py-1 rounded ${
+                        canConfirmRow(r)
+                          ? "bg-orange-300 hover:bg-orange-500 cursor-pointer"
+                          : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                      }`}
+                    >
+                      Konfirmasi
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
@@ -198,28 +227,28 @@ export default function PembagianPakan() {
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <p className="text-sm text-gray-600">Kandang</p>
-                  <p className="font-semibold">{selected.kandang}</p>
+                  <p className="font-semibold">{selected.cage.name}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Usia Ayam</p>
-                  <p className="font-semibold">{selected.usiaMinggu} Minggu</p>
+                  <p className="font-semibold">{selected.chickenAge} Minggu</p>
                 </div>
 
                 <div>
                   <p className="text-sm text-gray-600">Kategori Ayam</p>
-                  <p className="font-semibold">{selected.kategori}</p>
+                  <p className="font-semibold">{selected.chickenCategory}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Jumlah Ayam</p>
                   <p className="font-semibold">
-                    {selected.jumlahAyam.toLocaleString("id-ID")} Ekor
+                    {selected.totalChicken.toLocaleString("id-ID")} Ekor
                   </p>
                 </div>
 
                 <div>
                   <p className="text-sm text-gray-600">Sisa Pakan Kemarin</p>
                   <p className="font-semibold">
-                    {rupiahKg(selected.sisaKemarin)}
+                    {rupiahKg(selected.remainingFeed)}
                   </p>
                 </div>
                 <div>
@@ -227,7 +256,7 @@ export default function PembagianPakan() {
                     Jumlah yang akan dibuat
                   </p>
                   <p className="font-semibold">
-                    {rupiahKg(selected.jumlahPakan)}
+                    {rupiahKg(selected.expectedTotalFeed)}
                   </p>
                 </div>
               </div>

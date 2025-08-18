@@ -44,19 +44,11 @@ const PengadaanBarang = () => {
 
   const [selectedItem, setSelectedItem] = useState(null);
 
-  const detailPages = ["input-pengadaan-barang"];
+  const detailPages = ["draft-pengadaan-barang"];
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
-
-  const tambahBarangHandle = () => {
-    navigate(`${location.pathname}/input-pengadaan-barang`);
-  };
-
-  const detailVaksinObatHandle = () => {
-    navigate(`${location.pathname}/detail-vaksin-obat`);
-  };
 
   const fetchBarangData = async () => {
     try {
@@ -65,16 +57,6 @@ const PengadaanBarang = () => {
       if (dataResponse.status == 200) {
         setDaftarBarangData(dataResponse.data.data);
       }
-    } catch (error) {
-      console.log("error :", error);
-    }
-  };
-
-  const takeOrderHandle = async (id) => {
-    try {
-      const takeResponse = await takeWarehouseOrderItem(id);
-      // console.log("takeResponse: ", takeResponse);
-      if (takeResponse.status == 200) [fetchBarangData()];
     } catch (error) {
       console.log("error :", error);
     }
@@ -93,17 +75,20 @@ const PengadaanBarang = () => {
     console.log("test:");
     setIsShowBatalModal(false);
   };
+
   const confirmBarangSampaiHandle = () => {
     console.log("test:");
     setIsShowConfirmModal(false);
   };
 
-  // Render detail input page only
+  const handleDraftPengadaanBarang = () => {
+    navigate(`${location.pathname}/draft-pengadaan-barang`);
+  };
+
   if (isDetailPage) {
     return <Outlet />;
   }
 
-  // Render main table page
   return (
     <div className="flex flex-col px-4 py-3 gap-4">
       {/* Header */}
@@ -124,11 +109,11 @@ const PengadaanBarang = () => {
           (userRole === "Kepala Kandang" && (
             <div className="flex justify-end items-center mb-4">
               <div
-                onClick={tambahBarangHandle}
+                onClick={handleDraftPengadaanBarang}
                 className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
               >
                 <div className="text-base font-medium ms-2 text-black">
-                  + Tambah Data Pesan Barang
+                  Draft Pengadaan Barang
                 </div>
               </div>
             </div>

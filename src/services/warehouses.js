@@ -158,3 +158,31 @@ export const createWarehouseOrderItem = (payload) => {
     },
   });
 };
+
+export const getWarehouseItemProcurementDrafts = () => {
+  return api.get("/warehouses/items/procurements/drafts", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const createWarehouseItemProcurementDraft = (payload) => {
+  return api.post("/warehouses/items/procurements/drafts", payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const confirmationWarehouseItemProcurementDraft = (payload, id) => {
+  return api.post(
+    `/warehouses/items/procurements/drafts/${id}/confirmations`,
+    payload,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};

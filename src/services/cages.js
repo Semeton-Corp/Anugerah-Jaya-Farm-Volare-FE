@@ -67,3 +67,12 @@ export const deleteCage = (id) => {
     },
   });
 };
+
+export const getChickenCageFeeds = () => {
+  return api.get(`/cages/chickens/feeds`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};

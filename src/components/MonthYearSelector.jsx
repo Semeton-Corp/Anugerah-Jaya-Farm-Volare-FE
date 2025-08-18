@@ -30,7 +30,7 @@ const MonthYearSelector = ({
     <div className="relative inline-block text-left">
       <button
         onClick={() => setOpen(!open)}
-        className="bg-orange-300 hover:bg-orange-500 text-black px-4 py-2 rounded flex items-center gap-2"
+        className="bg-orange-300 hover:bg-orange-500 cursor-pointer text-black px-4 py-2 rounded flex items-center gap-2"
       >
         <FaCalendarAlt size={18} /> {months[month]} {year}
       </button>
@@ -47,6 +47,7 @@ const MonthYearSelector = ({
                 const selectedIndex = parseInt(e.target.value);
                 setMonth(selectedIndex);
                 setMonthName(months[selectedIndex]);
+                setOpen(!open);
               }}
               className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
             >
@@ -64,7 +65,10 @@ const MonthYearSelector = ({
             </label>
             <select
               value={year}
-              onChange={(e) => setYear(parseInt(e.target.value))}
+              onChange={(e) => {
+                setYear(parseInt(e.target.value));
+                setOpen(!open);
+              }}
               className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
             >
               {Array.from(

@@ -227,6 +227,15 @@ export const sidebarMenus = {
       ],
     },
     {
+      icon: <FaJarWheat size={20} />,
+      tabName: "Pakan",
+      element: <OverviewOwner />,
+      subTabs: [
+        { tabName: "Pembagian Pakan", path: "pembagian-pakan" },
+        { tabName: "Formula Pakan", path: "formula-pakan" },
+      ],
+    },
+    {
       icon: <img src={gudang} alt="ayam Icon" className="h-4 w-4" />,
       tabName: "Gudang",
       element: <OverviewOwner />,

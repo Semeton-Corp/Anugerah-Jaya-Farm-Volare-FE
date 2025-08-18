@@ -95,6 +95,9 @@ import TambahPelangganAyam from "./pages/TambahPelangganAyam";
 import DetailPelangganAfkir from "./pages/DetailPelangganAfkir";
 import DetailPenjualanAyam from "./pages/DetailPenjualanAyam";
 import PembagianPakan from "./pages/PembagianPakan";
+import FormulaPakan from "./pages/FormulaPakan";
+import DraftPengadaanBarang from "./pages/DraftPengadaanBarang";
+import InputDraftPengadaanBarang from "./pages/InputDraftPengadaanBarang";
 
 const AppRouter = createBrowserRouter([
   {
@@ -330,7 +333,8 @@ const AppRouter = createBrowserRouter([
               },
               {
                 path: "formula-pakan",
-                element: <OverviewStok />,
+                element: <FormulaPakan />,
+                children: [{ path: "edit-" }],
               },
             ],
           },
@@ -342,9 +346,27 @@ const AppRouter = createBrowserRouter([
                 element: <Gudang />,
               },
               {
+                path: "pakan",
+                children: [
+                  {
+                    path: "pembagian-pakan",
+                    element: <PembagianPakan />,
+                  },
+                  {
+                    path: "formula-pakan",
+                    element: <FormulaPakan />,
+                    children: [{ path: "edit" }],
+                  },
+                ],
+              },
+              {
                 path: "pengadaan-barang",
                 element: <PengadaanBarang />,
                 children: [
+                  {
+                    path: "draft-pengadaan-barang",
+                    element: <DraftPengadaanBarang />,
+                  },
                   {
                     path: "input-pengadaan-barang",
                     element: <InputPengadaanBarang />,
@@ -883,6 +905,20 @@ const AppRouter = createBrowserRouter([
             ],
           },
           {
+            path: "pakan",
+            children: [
+              {
+                path: "pembagian-pakan",
+                element: <PembagianPakan />,
+              },
+              {
+                path: "formula-pakan",
+                element: <FormulaPakan />,
+                children: [{ path: "edit-" }],
+              },
+            ],
+          },
+          {
             path: "gudang",
             children: [
               {
@@ -903,6 +939,16 @@ const AppRouter = createBrowserRouter([
                 path: "pengadaan-barang",
                 element: <PengadaanBarang />,
                 children: [
+                  {
+                    path: "draft-pengadaan-barang",
+                    element: <DraftPengadaanBarang />,
+                    children: [
+                      {
+                        path: "input-draft-pengadaan-barang",
+                        element: <InputDraftPengadaanBarang />,
+                      },
+                    ],
+                  },
                   {
                     path: "input-pengadaan-barang",
                     element: <InputPengadaanBarang />,
