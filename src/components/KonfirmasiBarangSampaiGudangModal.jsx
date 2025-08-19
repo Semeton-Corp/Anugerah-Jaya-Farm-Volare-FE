@@ -3,20 +3,19 @@ import React, { useState } from "react";
 const KonfirmasiBarangSampaiGudangModal = ({
   isOpen,
   onClose,
-  onSubmit,
+  onConfirm,
   data,
 }) => {
   const [mode, setMode] = useState("Sesuai");
-  const [jumlah, setJumlah] = useState(data?.jumlah || "");
+  const [jumlah, setJumlah] = useState(data?.quantity || "");
   const [catatan, setCatatan] = useState("");
 
   if (!isOpen) return null;
 
   const handleSubmit = () => {
-    onSubmit({
-      mode,
-      jumlah,
-      catatan: mode === "Tidak Sesuai" ? catatan : "",
+    onConfirm({
+      quantity: jumlah,
+      note: mode === "Tidak Sesuai" ? catatan : "",
     });
     onClose();
   };
@@ -52,11 +51,11 @@ const KonfirmasiBarangSampaiGudangModal = ({
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <p className="text-sm text-gray-600">Nama Barang</p>
-            <p className="font-bold">{data?.namaBarang}</p>
+            <p className="font-bold">{data?.item?.name}</p>
           </div>
           <div>
             <p className="text-sm text-gray-600">Supplier</p>
-            <p className="font-bold">{data?.supplier}</p>
+            <p className="font-bold">{data?.supplier?.name}</p>
           </div>
         </div>
 

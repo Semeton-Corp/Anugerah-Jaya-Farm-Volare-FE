@@ -98,6 +98,7 @@ import PembagianPakan from "./pages/PembagianPakan";
 import FormulaPakan from "./pages/FormulaPakan";
 import DraftPengadaanBarang from "./pages/DraftPengadaanBarang";
 import InputDraftPengadaanBarang from "./pages/InputDraftPengadaanBarang";
+import DetailPengadaanBarang from "./pages/DetailPengadaanBarang";
 
 const AppRouter = createBrowserRouter([
   {
@@ -947,7 +948,15 @@ const AppRouter = createBrowserRouter([
                         path: "input-draft-pengadaan-barang",
                         element: <InputDraftPengadaanBarang />,
                       },
+                      {
+                        path: "input-draft-pengadaan-barang/:id",
+                        element: <InputDraftPengadaanBarang />,
+                      },
                     ],
+                  },
+                  {
+                    path: "detail-pengadaan-barang/:id",
+                    element: <DetailPengadaanBarang />,
                   },
                   {
                     path: "input-pengadaan-barang",

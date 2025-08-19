@@ -139,18 +139,9 @@ const KonfirmasiPemesananBarangModal = ({
       dailySpending: parseInt(dailyNeed),
       daysNeed: parseInt(daysNeed),
       price: String(pricePerUnit),
-      estimationArrivalDate: etaDate
-        ? new Date(etaDate).toLocaleDateString("id-ID").split("/").join("-")
-        : null,
-      expiredAt: expiredAt
-        ? new Date(expiredAt).toLocaleDateString("id-ID").split("/").join("-")
-        : null,
-      deadlinePaymentDate: deadlinePaymentDate
-        ? new Date(deadlinePaymentDate)
-            .toLocaleDateString("id-ID")
-            .split("/")
-            .join("-")
-        : null,
+      estimationArrivalDate: toDDMMYYYY(etaDate),
+      expiredAt: toDDMMYYYY(expiredAt),
+      deadlinePaymentDate: toDDMMYYYY(deadlinePaymentDate),
       payments: payments.map((p) => ({
         paymentDate: toDDMMYYYY(p.paymentDate),
         nominal: String(p.nominal ?? "0"),

@@ -167,6 +167,14 @@ export const getWarehouseItemProcurementDrafts = () => {
   });
 };
 
+export const getWarehouseItemProcurementDraft = (id) => {
+  return api.get(`/warehouses/items/procurements/drafts/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export const createWarehouseItemProcurementDraft = (payload) => {
   return api.post("/warehouses/items/procurements/drafts", payload, {
     headers: {
@@ -185,4 +193,44 @@ export const confirmationWarehouseItemProcurementDraft = (payload, id) => {
       },
     }
   );
+};
+
+export const deleteWarehouseItemProcurementDraft = (id) => {
+  return api.delete(`/warehouses/items/procurements/drafts/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const getWarehouseItemProcurements = () => {
+  return api.get("/warehouses/items/procurements", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const getWarehouseItemProcurement = (id) => {
+  return api.get(`/warehouses/items/procurements/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const createWarehouseItemProcurementPayment = (payload, id) => {
+  return api.post(`/warehouses/items/procurements/${id}/payments`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const arrivalConfirmationWarehouseItemProcurement = (payload, id) => {
+  return api.put(`/warehouses/items/procurements/${id}/arrivals`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 };

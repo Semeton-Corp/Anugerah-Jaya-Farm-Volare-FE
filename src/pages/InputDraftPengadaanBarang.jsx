@@ -2,31 +2,18 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   createWarehouseItemProcurementDraft,
+  getWarehouseItemProcurementDraft,
   getWarehouses,
 } from "../services/warehouses";
 import { getItems } from "../services/item";
 import { getSuppliers } from "../services/supplier";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const fmtIDR = (n) =>
   n == null || n === "" ? "-" : `Rp ${Number(n || 0).toLocaleString("id-ID")}`;
 
-// ----- dummy data -----
-const GUDANGS = [
-  { id: 1, name: "Gudang Utama" },
-  { id: 2, name: "Gudang Timur" },
-];
-const BARANGS = [
-  { id: 10, name: "Dedak", unit: "Kg", dailyNeed: 100 }, // 100 Kg / day
-  { id: 11, name: "Konsentrat", unit: "Kg", dailyNeed: 80 },
-  { id: 12, name: "Karpet", unit: "Pcs", dailyNeed: 0 }, // non-feed item
-];
-const SUPPLIERS = [
-  { id: 100, name: "Dagang Dedak" },
-  { id: 101, name: "Super Jagung" },
-];
-
 export default function InputDraftPengadaanBarang() {
+  const { id } = useParams();
   const userRole = localStorage.getItem("role");
   const locationId = localStorage.getItem("locationId");
   const navigate = useNavigate();
@@ -37,7 +24,7 @@ export default function InputDraftPengadaanBarang() {
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [warehouse, setWarehouse] = useState(null);
 
-  const [dailySpending, setDailySpending] = useState(5);
+  const [dailySpending, setDailySpending] = useState(0);
 
   const [itemOptions, setItemOptions] = useState([]);
   const [item, setItem] = useState(null);
@@ -46,8 +33,8 @@ export default function InputDraftPengadaanBarang() {
   const [supplier, setSupplier] = useState(null);
 
   // inputs
-  const [days, setDays] = useState(""); // kebutuhan (hari)
-  const [pricePerUnit, setPricePerUnit] = useState(""); // harga / unit
+  const [days, setDays] = useState("");
+  const [pricePerUnit, setPricePerUnit] = useState("");
 
   // derived
   const perHari = useMemo(() => Number(item?.dailyNeed || 0), [item]);
@@ -62,7 +49,7 @@ export default function InputDraftPengadaanBarang() {
 
   // today (pretty)
   const todayLabel = useMemo(() => {
-    const d = new Date("2025-03-20"); // keep like screenshot; replace with new Date() for real today
+    const d = new Date("2025-03-20");
     return d.toLocaleDateString("id-ID", {
       day: "2-digit",
       month: "long",
@@ -71,6 +58,11 @@ export default function InputDraftPengadaanBarang() {
   }, []);
 
   const saveDraft = async () => {
+    if (!warehouse || !item || !supplier || !pricePerUnit || !days) {
+      alert("❌ Mohon isi semua field dengan benar");
+      return;
+    }
+
     const payload = {
       warehouseId: warehouse?.id,
       itemId: item?.id,
@@ -143,24 +135,51 @@ export default function InputDraftPengadaanBarang() {
     }
   };
 
+  const fetchDetail = async () => {
+    try {
+      const detailResponse = await getWarehouseItemProcurementDraft(id);
+      console.log("detailResponse: ", detailResponse);
+      if (detailResponse.status == 200) {
+        const detailData = detailResponse.data.data;
+        setWarehouse(detailData.warehouse);
+        setItem(detailData.item);
+        setSupplier(detailData.supplier);
+        setDailySpending(detailData.dailySpending);
+        setDays(detailData.daysNeed);
+        setPricePerUnit(detailData.price);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
   useEffect(() => {
     fetchWarehouses();
     fetchItems();
     fetchSupplier();
   }, []);
 
+  useEffect(() => {
+    if (warehouseOptions && itemOptions && supplierOptions) {
+      fetchDetail();
+    }
+  }, [id]);
+
+  useEffect(() => {
+    setDailySpending(item?.dailySpending);
+  }, [item]);
+
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-4">Input Draft Pengadaan Barang</h1>
 
       <div className="bg-white border rounded p-6 space-y-6">
-        {/* Tanggal Input */}
-        <div>
-          <p className="text-sm text-gray-600">Tanggal Input</p>
-          <p className="font-semibold">{todayLabel}</p>
-        </div>
-
-        {/* Gudang */}
+        {!id && (
+          <div>
+            <p className="text-sm text-gray-600">Tanggal Input</p>
+            <p className="font-semibold">{todayLabel}</p>
+          </div>
+        )}
         <div>
           <label className="text-sm text-gray-600 block mb-1">
             Gudang Penyimpanan
@@ -185,7 +204,6 @@ export default function InputDraftPengadaanBarang() {
           </select>
         </div>
 
-        {/* Nama Barang */}
         <div>
           <label className="text-sm text-gray-600 block mb-1">
             Nama Barang
@@ -208,7 +226,6 @@ export default function InputDraftPengadaanBarang() {
           </select>
         </div>
 
-        {/* Supplier */}
         <div>
           <label className="text-sm text-gray-600 block mb-1">Supplier</label>
           <select
@@ -231,7 +248,6 @@ export default function InputDraftPengadaanBarang() {
           </select>
         </div>
 
-        {/* Kebutuhan per-hari */}
         <div>
           <p className="text-sm text-gray-600">Kebutuhan per-hari</p>
           <p className="font-semibold">
@@ -241,7 +257,6 @@ export default function InputDraftPengadaanBarang() {
           </p>
         </div>
 
-        {/* Kebutuhan (Hari) + Total Pesan */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
           <div>
             <label className="text-sm text-gray-600 block mb-1">
@@ -316,13 +331,13 @@ export default function InputDraftPengadaanBarang() {
           </button>
         </div>
       </div>
-      <button
+      {/* <button
         onClick={() => {
           console.log("item: ", item);
         }}
       >
         CHECK
-      </button>
+      </button> */}
     </div>
   );
 }

@@ -4,11 +4,12 @@ import { IoCalendarOutline, IoLogoWhatsapp } from "react-icons/io5";
 import KonfirmasiPemesananDocModal from "../components/KonfirmasiPemesananDocModal";
 import {
   confirmationWarehouseItemProcurementDraft,
+  deleteWarehouseItemProcurementDraft,
   getWarehouseItemProcurementDrafts,
   getWarehouses,
 } from "../services/warehouses";
 import { useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import KonfirmasiPemesananBarangModal from "../components/KonfirmasiPemesananBarangModal";
 
 const toRupiah = (n) =>
@@ -16,6 +17,7 @@ const toRupiah = (n) =>
 
 const DraftPengadaanBarang = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [draftData, setDraftData] = useState([]);
 
@@ -49,6 +51,10 @@ const DraftPengadaanBarang = () => {
     navigate(`${location.pathname}/input-draft-pengadaan-barang`);
   };
 
+  const editDraftPesanBarangHandle = (id) => {
+    navigate(`${location.pathname}/input-draft-pengadaan-barang/${id}`);
+  };
+
   const fetchDraftData = async () => {
     try {
       const draftResponse = await getWarehouseItemProcurementDrafts();
@@ -68,8 +74,23 @@ const DraftPengadaanBarang = () => {
         selectedItem.id
       );
       console.log("submitResponse: ", submitResponse);
-      if (submitResponse.status == 200) {
-        setDraftData(submitResponse.data.data);
+      if (submitResponse.status == 201) {
+        fetchDraftData();
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      const deleteResponse = await deleteWarehouseItemProcurementDraft(
+        selectedItem.id
+      );
+      console.log("deleteResponse: ", deleteResponse);
+      if (deleteResponse.status == 204) {
+        fetchDraftData();
+        setShowBatalModal(false);
       }
     } catch (error) {
       console.log("error :", error);
@@ -78,7 +99,11 @@ const DraftPengadaanBarang = () => {
 
   useEffect(() => {
     fetchDraftData();
-  }, []);
+    if (location?.state?.refetch) {
+      fetchDraftData();
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   if (isDetailPage) {
     return <Outlet />;
@@ -161,7 +186,9 @@ const DraftPengadaanBarang = () => {
                         Pesan
                       </button>
                       <button
-                        onClick={() => {}}
+                        onClick={() => {
+                          editDraftPesanBarangHandle(item.id);
+                        }}
                         className="px-3 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer"
                       >
                         Edit
