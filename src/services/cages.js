@@ -76,3 +76,30 @@ export const getChickenCageFeeds = () => {
     },
   });
 };
+
+export const getCageFeeds = () => {
+  return api.get(`/cages/feeds`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const getCageFeed = (id) => {
+  return api.get(`/cages/feeds/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const updateCageFeed = (payload, id) => {
+  return api.put(`/cages/feeds/${id}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};

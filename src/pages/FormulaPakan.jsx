@@ -1,37 +1,47 @@
 import React from "react";
-
-const feedFormulaData = [
-  {
-    kategori: "DOC",
-    usia: "1 Minggu",
-    jenis: "Adukan",
-    jumlah: "100gr/ayam",
-    formula: ["65% Konsentrat", "15 % Premix"],
-  },
-  {
-    kategori: "Grower",
-    usia: "1 Minggu",
-    jenis: "Adukan",
-    jumlah: "100gr/ayam",
-    formula: ["50% Konsentrat", "50 % Premix"],
-  },
-  {
-    kategori: "Pre-Layer",
-    usia: "1 Minggu",
-    jenis: "Jadi",
-    jumlah: "100gr/ayam",
-    formula: ["50% Konsentrat", "50 % Premix"],
-  },
-  {
-    kategori: "Layer",
-    usia: "1 Minggu",
-    jenis: "Jadi",
-    jumlah: "100gr/ayam",
-    formula: ["50% Konsentrat", "50 % Premix"],
-  },
-];
+import { getCageFeeds } from "../services/cages";
+import { useEffect } from "react";
+import { useState } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const FormulaPakan = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [feedFormulaData, setFeedFormulaData] = useState([]);
+
+  const detailPages = ["edit-formula-pakan"];
+  const isDetailPage = detailPages.some((segment) =>
+    location.pathname.includes(segment)
+  );
+
+  const handleEditFormulaPakan = (id) => {
+    navigate(`${location.pathname}/edit-formula-pakan/${id}`);
+  };
+
+  const fetchFormulaData = async () => {
+    try {
+      const formulaResponse = await getCageFeeds();
+      // console.log("formulaResponse: ", formulaResponse);
+      if (formulaResponse.status == 200) {
+        setFeedFormulaData(formulaResponse.data.data);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchFormulaData();
+    if (location?.state?.refetch) {
+      fetchFormulaData();
+      window?.history?.replaceState({}, document.title);
+    }
+  }, [location]);
+
+  if (isDetailPage) {
+    return <Outlet />;
+  }
+
   return (
     <div className="p-4">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Formula Pakan</h1>
@@ -80,29 +90,42 @@ const FormulaPakan = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {feedFormulaData.map((item, index) => (
+              {feedFormulaData?.map((item, index) => (
                 <tr key={index} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap  font-medium text-gray-900">
-                    {item.kategori}
+                    {item.chickenCategory}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap  text-gray-600">
-                    {item.usia}
+                    {item.chickenAgeInterval}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap  text-gray-600">
-                    {item.jenis}
+                    {item.feedType}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap  text-gray-600">
-                    {item.jumlah}
+                    {item.totalFeed}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap  text-gray-600">
-                    {item.formula.map((line, i) => (
-                      <span key={i} className="block">
-                        {line}
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                    {item.cageFeedDetails && item.cageFeedDetails.length > 0 ? (
+                      item.cageFeedDetails.map((line, i) =>
+                        line ? (
+                          <span key={i} className="block">
+                            {`${line.percentage}% ${line.item.name}`}
+                          </span>
+                        ) : (
+                          <span key={i}>Belum terdapat formula</span>
+                        )
+                      )
+                    ) : (
+                      <span className="italic text-gray-300">
+                        Belum terdapat formula
                       </span>
-                    ))}
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="bg-green-700 hover:bg-green-900 cursor-pointer text-white font-semibold py-2 px-4 rounded transition-colors ">
+                    <button
+                      onClick={() => handleEditFormulaPakan(item.id)}
+                      className="bg-green-700 hover:bg-green-900 cursor-pointer text-white font-semibold py-2 px-4 rounded transition-colors "
+                    >
                       Edit
                     </button>
                   </td>
@@ -112,6 +135,13 @@ const FormulaPakan = () => {
           </table>
         </div>
       </div>
+      <button
+        onClick={() => {
+          console.log("feedFormulaData: ", feedFormulaData);
+        }}
+      >
+        CHECK
+      </button>
     </div>
   );
 };

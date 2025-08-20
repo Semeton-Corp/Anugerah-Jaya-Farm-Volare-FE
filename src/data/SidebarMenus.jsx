@@ -241,7 +241,9 @@ export const sidebarMenus = {
       element: <OverviewOwner />,
       subTabs: [
         { tabName: "Stok Gudang", path: "overview-gudang" },
-        { tabName: "Pengadaan Barang", path: "overview-gudang" },
+        { tabName: "Perbandingan Pakan", path: "perbandingan-pakan" },
+        { tabName: "Pengadaan Barang", path: "pengadaan-barang" },
+        { tabName: "Pengadaan Jagung", path: "pengadaan-jagung" },
         { tabName: "Pesanan Toko", path: "pesanan-toko" },
         { tabName: "Daftar Barang", path: "daftar-barang" },
         { tabName: "Daftar Suplier", path: "daftar-suplier" },

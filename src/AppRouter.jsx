@@ -99,6 +99,7 @@ import FormulaPakan from "./pages/FormulaPakan";
 import DraftPengadaanBarang from "./pages/DraftPengadaanBarang";
 import InputDraftPengadaanBarang from "./pages/InputDraftPengadaanBarang";
 import DetailPengadaanBarang from "./pages/DetailPengadaanBarang";
+import EditFormulaPakan from "./pages/EditFormulaPakan";
 
 const AppRouter = createBrowserRouter([
   {
@@ -335,7 +336,12 @@ const AppRouter = createBrowserRouter([
               {
                 path: "formula-pakan",
                 element: <FormulaPakan />,
-                children: [{ path: "edit-" }],
+                children: [
+                  {
+                    path: "edit-formula-pakan/:id",
+                    element: <EditFormulaPakan />,
+                  },
+                ],
               },
             ],
           },
@@ -356,7 +362,12 @@ const AppRouter = createBrowserRouter([
                   {
                     path: "formula-pakan",
                     element: <FormulaPakan />,
-                    children: [{ path: "edit" }],
+                    children: [
+                      {
+                        path: "edit-formula-pakan/:id",
+                        element: <EditFormulaPakan />,
+                      },
+                    ],
                   },
                 ],
               },
@@ -915,7 +926,12 @@ const AppRouter = createBrowserRouter([
               {
                 path: "formula-pakan",
                 element: <FormulaPakan />,
-                children: [{ path: "edit-" }],
+                children: [
+                  {
+                    path: "edit-formula-pakan/:id",
+                    element: <EditFormulaPakan />,
+                  },
+                ],
               },
             ],
           },
