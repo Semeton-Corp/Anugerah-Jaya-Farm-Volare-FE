@@ -234,3 +234,11 @@ export const arrivalConfirmationWarehouseItemProcurement = (payload, id) => {
     },
   });
 };
+
+export const getWarehouseItemCornProcurementDrafts = () => {
+  return api.get(`/warehouses/items/corns/procurements/drafts`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

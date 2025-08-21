@@ -77,6 +77,15 @@ export const getChickenCageFeeds = () => {
   });
 };
 
+export const getChickenCageFeed = (id) => {
+  return api.get(`/cages/chickens/feeds/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
 export const getCageFeeds = () => {
   return api.get(`/cages/feeds`, {
     headers: {

@@ -16,6 +16,7 @@ const TambahGudang = () => {
 
   const [namaGudang, setNamaGudang] = useState("");
   const [lokasiGudang, setLokasiGudang] = useState("");
+  const [maxCornCapacity, setMaxCornCapacity] = useState("");
 
   const [locationOptions, setLocationOptions] = useState([]);
 
@@ -25,6 +26,7 @@ const TambahGudang = () => {
     const data = {
       name: namaGudang,
       locationId: parseInt(lokasiGudang),
+      cornCapacity: parseInt(maxCornCapacity),
     };
 
     if (id) {
@@ -138,6 +140,20 @@ const TambahGudang = () => {
               </option>
             ))}
           </select>
+        </div>
+
+        <div>
+          <label className="block font-medium mb-1">
+            Kapasitas Maksimum Jagung (Kg)
+          </label>
+          <input
+            type="number"
+            value={maxCornCapacity}
+            onChange={(e) => setMaxCornCapacity(e.target.value)}
+            placeholder="Masukkan jumlah maksimal jagung..."
+            className="w-full border rounded px-3 py-2 bg-gray-100 focus:outline-none focus:ring"
+            required
+          />
         </div>
 
         <div className="text-right">

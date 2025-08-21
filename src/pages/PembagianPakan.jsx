@@ -1,7 +1,8 @@
 // src/pages/PembagianPakan.jsx
 import React, { useMemo, useState } from "react";
-import { getChickenCageFeeds } from "../services/cages";
+import { getChickenCageFeed, getChickenCageFeeds } from "../services/cages";
 import { useEffect } from "react";
+import { getWarehouses } from "../services/warehouses";
 
 const rupiahKg = (n) =>
   `${Number(n || 0).toLocaleString("id-ID", { maximumFractionDigits: 0 })} Kg`;
@@ -85,7 +86,9 @@ export default function PembagianPakan() {
   const [kandangList, setKandangList] = useState([]);
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(null);
+  const [gudangOptions, setGudangOptions] = useState(gudangList);
   const [gudangId, setGudangId] = useState("");
+  const [confirmationData, setConfirmationData] = useState([]);
 
   const formula = useMemo(() => {
     if (!selected) return [];
@@ -102,10 +105,20 @@ export default function PembagianPakan() {
     return row.id !== 1;
   };
 
-  const openModal = (row) => {
+  const openModal = async (row) => {
     setSelected(row);
-    setGudangId(""); // reset pilihan gudang tiap buka modal
-    setOpen(true);
+    setGudangId("");
+
+    try {
+      const detailResponse = await getChickenCageFeed(row?.id);
+      console.log("detailResponse: ", detailResponse);
+      if (detailResponse.status == 200) {
+        setConfirmationData(detailResponse.data.data);
+        setOpen(true);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
   };
 
   const closeModal = () => {
@@ -155,7 +168,28 @@ export default function PembagianPakan() {
       console.log("error :", error);
     }
   };
+
+  const fetchWarehouses = async () => {
+    try {
+      const warehouseResponse = await getWarehouses();
+      if (warehouseResponse.status == 200) {
+        const warehouses = warehouseResponse.data.data;
+        let filteredWarehouses;
+
+        if (userRole !== "Owner") {
+          filteredWarehouses = warehouses.filter(
+            (warehouse) => warehouse.location.id == locationId
+          );
+        }
+        setGudangOptions(filteredWarehouses);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
   useEffect(() => {
+    fetchWarehouses();
     fetchKandangList();
   }, []);
 
@@ -227,28 +261,32 @@ export default function PembagianPakan() {
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <p className="text-sm text-gray-600">Kandang</p>
-                  <p className="font-semibold">{selected.cage.name}</p>
+                  <p className="font-semibold">{confirmationData.cage.name}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Usia Ayam</p>
-                  <p className="font-semibold">{selected.chickenAge} Minggu</p>
+                  <p className="font-semibold">
+                    {confirmationData.chickenAge} Minggu
+                  </p>
                 </div>
 
                 <div>
                   <p className="text-sm text-gray-600">Kategori Ayam</p>
-                  <p className="font-semibold">{selected.chickenCategory}</p>
+                  <p className="font-semibold">
+                    {confirmationData.chickenCategory}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Jumlah Ayam</p>
                   <p className="font-semibold">
-                    {selected.totalChicken.toLocaleString("id-ID")} Ekor
+                    {confirmationData.totalChicken.toLocaleString("id-ID")} Ekor
                   </p>
                 </div>
 
                 <div>
                   <p className="text-sm text-gray-600">Sisa Pakan Kemarin</p>
                   <p className="font-semibold">
-                    {rupiahKg(selected.remainingFeed)}
+                    {rupiahKg(confirmationData.yesterdayTotalFeed)}
                   </p>
                 </div>
                 <div>
@@ -256,7 +294,7 @@ export default function PembagianPakan() {
                     Jumlah yang akan dibuat
                   </p>
                   <p className="font-semibold">
-                    {rupiahKg(selected.expectedTotalFeed)}
+                    {rupiahKg(confirmationData.expectedTotalFeed)}
                   </p>
                 </div>
               </div>
@@ -275,14 +313,14 @@ export default function PembagianPakan() {
                       </tr>
                     </thead>
                     <tbody>
-                      {formula.map((f, i) => (
+                      {confirmationData.feedDetails.map((f, i) => (
                         <tr key={i} className="border-b">
-                          <td className="px-3 py-2">{f.bahan}</td>
-                          <td className="px-3 py-2">{f.persen}%</td>
-                          <td className="px-3 py-2">{rupiahKg(f.jumlah)}</td>
+                          <td className="px-3 py-2">{f?.item?.name}</td>
+                          <td className="px-3 py-2">{f?.percentage}%</td>
+                          <td className="px-3 py-2">{rupiahKg(f?.quantity)}</td>
                         </tr>
                       ))}
-                      {formula.length === 0 && (
+                      {confirmationData.feedDetails.length === 0 && (
                         <tr>
                           <td
                             className="px-3 py-4 text-center text-gray-500"
@@ -309,7 +347,7 @@ export default function PembagianPakan() {
                   <option value="" disabled>
                     Pilih gudang
                   </option>
-                  {gudangList.map((g) => (
+                  {gudangOptions.map((g) => (
                     <option key={g.id} value={g.id}>
                       {g.name}
                     </option>

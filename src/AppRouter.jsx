@@ -100,6 +100,9 @@ import DraftPengadaanBarang from "./pages/DraftPengadaanBarang";
 import InputDraftPengadaanBarang from "./pages/InputDraftPengadaanBarang";
 import DetailPengadaanBarang from "./pages/DetailPengadaanBarang";
 import EditFormulaPakan from "./pages/EditFormulaPakan";
+import PengadaanJagung from "./pages/PengadaanJagung";
+import DraftPengadaanJagung from "./pages/DraftPengadaanJagung";
+import InputDraftPengadaanJagung from "./pages/InputDraftPengadaanJagung";
 
 const AppRouter = createBrowserRouter([
   {
@@ -977,6 +980,22 @@ const AppRouter = createBrowserRouter([
                   {
                     path: "input-pengadaan-barang",
                     element: <InputPengadaanBarang />,
+                  },
+                ],
+              },
+              {
+                path: "pengadaan-jagung",
+                element: <PengadaanJagung />,
+                children: [
+                  {
+                    path: "draft-pengadaan-jagung",
+                    element: <DraftPengadaanJagung />,
+                    children: [
+                      {
+                        path: "input-draft-pengadaan-jagung",
+                        element: <InputDraftPengadaanJagung />,
+                      },
+                    ],
                   },
                 ],
               },

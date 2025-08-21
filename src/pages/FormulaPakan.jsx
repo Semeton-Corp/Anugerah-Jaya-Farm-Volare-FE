@@ -135,13 +135,13 @@ const FormulaPakan = () => {
           </table>
         </div>
       </div>
-      <button
+      {/* <button
         onClick={() => {
           console.log("feedFormulaData: ", feedFormulaData);
         }}
       >
         CHECK
-      </button>
+      </button> */}
     </div>
   );
 };
