@@ -86,6 +86,15 @@ export const getChickenCageFeed = (id) => {
   });
 };
 
+export const confirmationChickenCageFeed = (payload, id) => {
+  return api.post(`/cages/chickens/feeds/${id}/confirmations`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
 export const getCageFeeds = () => {
   return api.get(`/cages/feeds`, {
     headers: {

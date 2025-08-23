@@ -295,6 +295,26 @@ export const getWarehouseItemCornProcurements = () => {
   });
 };
 
+export const getWarehouseItemCornProcurement = (id) => {
+  return api.get(`/warehouses/items/corns/procurements/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const createWarehouseItemCornProcurementPayment = (paylaod, id) => {
+  return api.post(
+    `/warehouses/items/corns/procurements/${id}/payments`,
+    paylaod,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};
+
 export const getWarehouseItemCornPrice = () => {
   return api.get(`/warehouses/items/corns/prices`, {
     headers: {

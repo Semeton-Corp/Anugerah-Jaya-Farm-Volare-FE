@@ -29,7 +29,7 @@ const PengadaanJagung = () => {
   const navigate = useNavigate();
 
   const [daftarJagungData, setDaftarJagungData] = useState([]);
-  const detailPages = ["draft-pengadaan-jagung"];
+  const detailPages = ["draft-pengadaan-jagung", "detail-pengadaan-jagung"];
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
@@ -85,7 +85,7 @@ const PengadaanJagung = () => {
   };
 
   const handleDetail = (id) => {
-    navigate(`${location.pathname}/detail-jagung/${id}`);
+    navigate(`${location.pathname}/detail-pengadaan-jagung/${id}`);
   };
 
   const handleDraftPengadaanJagung = () => {

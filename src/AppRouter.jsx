@@ -103,6 +103,7 @@ import EditFormulaPakan from "./pages/EditFormulaPakan";
 import PengadaanJagung from "./pages/PengadaanJagung";
 import DraftPengadaanJagung from "./pages/DraftPengadaanJagung";
 import InputDraftPengadaanJagung from "./pages/InputDraftPengadaanJagung";
+import DetailPengadaanJagung from "./pages/DetailPengadaanJagung";
 
 const AppRouter = createBrowserRouter([
   {
@@ -1000,6 +1001,10 @@ const AppRouter = createBrowserRouter([
                         element: <InputDraftPengadaanJagung />,
                       },
                     ],
+                  },
+                  {
+                    path: "detail-pengadaan-jagung/:id",
+                    element: <DetailPengadaanJagung />,
                   },
                 ],
               },

@@ -1,6 +1,10 @@
 // src/pages/PembagianPakan.jsx
 import React, { useMemo, useState } from "react";
-import { getChickenCageFeed, getChickenCageFeeds } from "../services/cages";
+import {
+  confirmationChickenCageFeed,
+  getChickenCageFeed,
+  getChickenCageFeeds,
+} from "../services/cages";
 import { useEffect } from "react";
 import { getWarehouses } from "../services/warehouses";
 
@@ -100,8 +104,6 @@ export default function PembagianPakan() {
   }, [selected]);
 
   const canConfirmRow = (row) => {
-    // contoh: baris pertama disabled supaya mirip screenshot
-    // Ubah ke logika yang kamu mau, mis: return row.jumlahPakan > 0;
     return row.id !== 1;
   };
 
@@ -126,25 +128,21 @@ export default function PembagianPakan() {
     setSelected(null);
   };
 
-  const submitConfirm = () => {
+  const submitConfirm = async () => {
     if (!selected) return;
     const payload = {
-      cageName: selected.kandang,
-      kategori: selected.kategori,
-      usiaMinggu: selected.usiaMinggu,
-      jumlahAyam: selected.jumlahAyam,
-      jenisPakan: selected.jenisPakan,
-      sisaKemarin: selected.sisaKemarin,
-      jumlahDibuat: selected.jumlahPakan,
-      gudangId,
-      formula: formula.map((f) => ({
-        bahan: f.bahan,
-        persen: f.persen,
-        jumlahKg: f.jumlah,
-      })),
+      warehouseId: gudangId,
     };
-    console.log("KONFIRMASI PEMBAGIAN PAKAN -> payload:", payload);
-    closeModal();
+    try {
+      const confirmResponse = await confirmationChickenCageFeed();
+      if (confirmResponse.status == 200) {
+        closeModal();
+        fetchKandangList();
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+    // console.log("KONFIRMASI PEMBAGIAN PAKAN -> payload:", payload);
   };
 
   const fetchKandangList = async () => {
@@ -153,14 +151,14 @@ export default function PembagianPakan() {
       if (kandangResponse.status == 200) {
         const list = kandangResponse.data.data;
         let filteredList;
-        if (userRole != "Owner") {
-          filteredList = list.filter(
-            (item) => item.cage.location.id == locationId
-          );
-        } else {
-          filteredList = list;
-        }
-        setKandangList(filteredList);
+        // if (userRole != "Owner") {
+        //   filteredList = list.filter(
+        //     (item) => item.cage.location.id == locationId
+        //   );
+        // } else {
+        //   filteredList = list;
+        // }
+        setKandangList(list);
         console.log("filteredList: ", filteredList);
       }
       // console.log("kandangResponse: ", kandangResponse);

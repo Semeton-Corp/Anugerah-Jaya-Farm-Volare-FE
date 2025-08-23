@@ -275,7 +275,6 @@ export default function DetailPengadaanDoc() {
         CHECK
       </button>
 
-      {/* Modal Tambah Pembayaran */}
       {showPaymentModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white w-full max-w-lg p-6 rounded shadow-xl">

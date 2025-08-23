@@ -175,11 +175,12 @@ const PengadaanBarang = () => {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <span>{r.deadlinePaymentDate}</span>
-                        {r.isMoreThanDeadlinePaymentDate && (
-                          <span title="Terlambat" className="text-red-500">
-                            <GoAlertFill size={24} />
-                          </span>
-                        )}
+                        {r.isMoreThanDeadlinePaymentDate &&
+                          r.paymentStatus != "Lunas" && (
+                            <span title="Terlambat" className="text-red-500">
+                              <GoAlertFill size={24} />
+                            </span>
+                          )}
                       </div>
                     </td>
                     <td className="px-4 py-3">
