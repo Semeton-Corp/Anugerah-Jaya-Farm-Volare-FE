@@ -42,7 +42,7 @@ const KonfirmasiBarangSampaiJagungModal = ({
     onConfirm({
       quantity: Number(jumlah || 0),
       note: isSesuai ? "" : catatan.trim(),
-      status: mode,
+      //   status: mode,
     });
     onClose?.();
   };

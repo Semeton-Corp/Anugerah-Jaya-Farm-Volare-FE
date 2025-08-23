@@ -3,7 +3,10 @@ import { PiCalendarBlank } from "react-icons/pi";
 import { GoAlertFill } from "react-icons/go";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
-import { getWarehouseItemCornProcurements } from "../services/warehouses";
+import {
+  arrivalConfirmationWarehouseItemCornProcurement,
+  getWarehouseItemCornProcurements,
+} from "../services/warehouses";
 import KonfirmasiBarangSampaiJagungModal from "../components/KonfirmasiBarangSampaiJagungModal";
 
 const badge = (text, variant = "neutral") => {
@@ -51,19 +54,20 @@ const PengadaanJagung = () => {
 
   const confirmBarangSampaiHandle = async (payload) => {
     console.log("test:", payload);
-    // try {
-    //   const arriveResponse = await arrivalConfirmationWarehouseItemProcurement(
-    //     payload,
-    //     selectedItem.id
-    //   );
-    //   console.log("arriveResponse: ", arriveResponse);
-    //   if (arriveResponse.status == 200) {
-    //     fetchBarangData();
-    //   }
-    // } catch (error) {
-    //   console.log("error :", error);
-    // }
-    // setIsShowConfirmModal(false);
+    try {
+      const arriveResponse =
+        await arrivalConfirmationWarehouseItemCornProcurement(
+          payload,
+          selectedItem.id
+        );
+      console.log("arriveResponse: ", arriveResponse);
+      if (arriveResponse.status == 200) {
+        fetchJagungData();
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+    setIsShowConfirmModal(false);
   };
 
   useEffect(() => {
@@ -75,7 +79,7 @@ const PengadaanJagung = () => {
   }, [location]);
 
   const handleBarangSampai = (item) => {
-    console.log("Barang Sampai clicked for:", item);
+    // console.log("Barang Sampai clicked for:", item);
     setIsShowConfirmModal(true);
     setSelectedItem(item);
   };
@@ -159,11 +163,11 @@ const PengadaanJagung = () => {
                         : badge("Belum Lunas", "warning")}
                     </td>
                     <td className="px-4 py-3">
-                      {item.procurementStatus === "Selesai - Sesuai"
-                        ? badge("Selesai - Sesuai", "success")
+                      {item.procurementStatus === "Sampai - Sesuai"
+                        ? badge("Sampai - Sesuai", "success")
                         : item.procurementStatus === "Sampai - Tidak Sesuai"
                         ? badge("Sampai - Tidak Sesuai", "success")
-                        : item.procurementStatus === "Sedang Dikirim"
+                        : item.procurementStatus == "Sedang Dikirim"
                         ? badge("Sedang Dikirim", "warning")
                         : item.procurementStatus
                         ? badge(item.procurementStatus, "neutral")
@@ -171,7 +175,7 @@ const PengadaanJagung = () => {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
-                        {!item.isArrived && (
+                        {!item.IsArrived && (
                           <button
                             onClick={() => handleBarangSampai(item)}
                             className="bg-orange-300 hover:bg-orange-500 text-black px-3 py-1 rounded"
@@ -226,6 +230,17 @@ const PengadaanJagung = () => {
           data={selectedItem}
         />
       )}
+      <button
+        onClick={() => {
+          console.log("daftarJagungData: ", daftarJagungData);
+          console.log(
+            "daftarJagungData[0].isArrived: ",
+            daftarJagungData[0].IsArrived
+          );
+        }}
+      >
+        CHECk
+      </button>
     </div>
   );
 };

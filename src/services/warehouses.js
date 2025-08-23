@@ -294,10 +294,26 @@ export const getWarehouseItemCornProcurements = () => {
     },
   });
 };
+
 export const getWarehouseItemCornPrice = () => {
   return api.get(`/warehouses/items/corns/prices`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
+};
+
+export const arrivalConfirmationWarehouseItemCornProcurement = (
+  payload,
+  id
+) => {
+  return api.put(
+    `/warehouses/items/corns/procurements/${id}/arrivals`,
+    payload,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
 };
