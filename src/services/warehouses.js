@@ -242,3 +242,62 @@ export const getWarehouseItemCornProcurementDrafts = () => {
     },
   });
 };
+
+export const getWarehouseItemCornProcurementDraft = (id) => {
+  return api.get(`/warehouses/items/corns/procurements/drafts/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const deleteWarehouseItemCornProcurementDraft = (id) => {
+  return api.delete(`/warehouses/items/corns/procurements/drafts/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const getCornWarehouseItemSummary = (id) => {
+  return api.get(`/warehouses/items/corns/summary/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const createWarehouseItemCornProcurementDraft = (payload) => {
+  return api.post(`/warehouses/items/corns/procurements/drafts`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const confirmationWarehouseItemCornProcurementDraft = (payload, id) => {
+  return api.post(
+    `/warehouses/items/corns/procurements/drafts/${id}/confirmations`,
+    payload,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};
+
+export const getWarehouseItemCornProcurements = () => {
+  return api.get(`/warehouses/items/corns/procurements`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+export const getWarehouseItemCornPrice = () => {
+  return api.get(`/warehouses/items/corns/prices`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

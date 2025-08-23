@@ -995,6 +995,10 @@ const AppRouter = createBrowserRouter([
                         path: "input-draft-pengadaan-jagung",
                         element: <InputDraftPengadaanJagung />,
                       },
+                      {
+                        path: "input-draft-pengadaan-jagung/:id",
+                        element: <InputDraftPengadaanJagung />,
+                      },
                     ],
                   },
                 ],

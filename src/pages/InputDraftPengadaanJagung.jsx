@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { PiCalendarBlank } from "react-icons/pi";
 import { IoHome } from "react-icons/io5";
-import { GiChicken } from "react-icons/gi"; // Mengimpor ikon GiChicken
-import { getTodayDateInBahasa } from "../utils/dateFormat";
+import { GiChicken } from "react-icons/gi";
 import { GoAlertFill } from "react-icons/go";
-import { useNavigate } from "react-router-dom";
-import { getWarehouses } from "../services/warehouses";
+import { useNavigate, useParams } from "react-router-dom";
+import { getTodayDateInBahasa } from "../utils/dateFormat";
+import {
+  createWarehouseItemCornProcurementDraft,
+  getCornWarehouseItemSummary,
+  getWarehouseItemCornPrice,
+  getWarehouseItemCornProcurementDraft,
+  getWarehouses,
+} from "../services/warehouses";
 import { getSuppliers } from "../services/supplier";
 
-// Data untuk diskon berdasarkan kadar air
-const discountData = [
+const discountDataInit = [
   { range: [0, 15.0], discount: 0 },
   { range: [15.01, 16.0], discount: 0 },
   { range: [16.01, 17.0], discount: 0 },
@@ -42,9 +46,18 @@ const discountData = [
   { range: [43.01, 44.0], discount: 31.8 },
 ];
 
+const computeDefaultBasePrice = (moisture) => {
+  const m = parseFloat(moisture);
+  if (Number.isNaN(m)) return 5800;
+  return m < 17 ? 5800 : 5450;
+};
+
 const InputDraftPengadaanJagung = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
 
+  const [discountData, setDiscountData] = useState(discountDataInit);
+  const [inputDate, setInputDate] = useState(getTodayDateInBahasa());
   const [formData, setFormData] = useState({
     warehouse: "",
     moistureLevel: "",
@@ -54,22 +67,31 @@ const InputDraftPengadaanJagung = () => {
     quantity: "",
   });
 
-  const [currentCornStock, setCurrentCornStock] = useState(100);
-  const maxWarehouseCapacity = 150;
-
-  // Base price for corn, based on the provided image
-  const basePrice = parseFloat(formData.moistureLevel) < 17 ? 5800 : 5450;
-
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState();
-
-  const moistureLevelOptions = ["16%", "15%", "14%", "13%", "12%"];
-  const ovenConditionOptions = ["Hidup", "Mati"];
-  const ovenCanOperateOptions = ["Ya", "Tidak"];
   const [supplierOptions, setsupplierOptions] = useState([]);
-  const maxOrderQuantity = selectedWarehouse?.cornCapacity || 0;
 
-  // Calculated values
+  const [currentCornStock, setCurrentCornStock] = useState(0);
+  const isCanBuyCorn = !(
+    (formData.ovenCondition === "Hidup" &&
+      formData.ovenCanOperate === "Tidak") ||
+    formData.moistureLevel > 44
+  );
+
+  const [basePrice, setBasePrice] = useState(
+    computeDefaultBasePrice(formData.moistureLevel)
+  );
+  const [basePriceEdited, setBasePriceEdited] = useState(false);
+
+  useEffect(() => {
+    if (!basePriceEdited) {
+      setBasePrice(computeDefaultBasePrice(formData.moistureLevel));
+    }
+  }, [formData.moistureLevel, basePriceEdited]);
+
+  const maxOrderQuantity =
+    selectedWarehouse?.cornCapacity - currentCornStock?.quantity || 0;
+
   const discountRate =
     discountData.find(
       (d) =>
@@ -78,44 +100,86 @@ const InputDraftPengadaanJagung = () => {
     )?.discount || 0;
 
   const discountedPricePerKg = basePrice - (basePrice * discountRate) / 100;
-  const totalPurchasePrice = formData.quantity * discountedPricePerKg;
-  const isQuantityOverMax = parseInt(formData.quantity) > maxOrderQuantity;
+  const totalPurchasePrice =
+    Number(formData.quantity || 0) * discountedPricePerKg || 0;
+  const isQuantityOverMax =
+    Number.parseInt(formData.quantity || 0, 10) > maxOrderQuantity;
 
-  // Disable state for form fields
-  const isFormDisabled =
-    formData.ovenCondition === "Hidup" && formData.ovenCanOperate === "Tidak";
+  const moisture = parseFloat(formData.moistureLevel);
+  const isOvenConditionDisabled = isNaN(moisture) || moisture < 17;
+  const isOvenCanOperateDisabled =
+    isOvenConditionDisabled || formData.ovenCondition !== "Hidup";
 
   const handleInputChange = (e) => {
     let { name, value } = e.target;
     if (name !== "moistureLevel") {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
+      setFormData((prev) => ({ ...prev, [name]: value }));
     } else {
       value = Number(value);
-      if (value > 100) {
-        value = 100;
-      }
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
+      if (value > 100) value = 100;
+
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
-  const handleSimpan = (e) => {
+  const handleSimpan = async (e) => {
     e.preventDefault();
-    console.log("Saving Draft:", formData);
-    // You would implement the API call to save the data here
-    navigate("/pengadaan-jagung/draft-pengadaan-jagung");
+
+    if (
+      !selectedWarehouse ||
+      !formData.moistureLevel ||
+      !formData.supplier ||
+      !formData.quantity
+    ) {
+      alert("❌ Mohon isi semua field dengan benar!");
+      return;
+    }
+
+    if (isQuantityOverMax) {
+      alert(
+        "❌ Jumlah barang yang anda masukkan melebihi jumlah maksimum pesan!"
+      );
+      return;
+    }
+
+    const payload = {
+      warehouseId: selectedWarehouse.id,
+      supplierId: parseInt(formData.supplier),
+      ovenCondition: formData.ovenCondition || "Mati",
+      cornWaterLevel: formData.moistureLevel,
+      isOvenCanOperateInNearDay:
+        formData.ovenCanOperate === "Tidak" ? false : true,
+      quantity: parseInt(formData.quantity),
+      price: basePrice.toString(),
+      discount: discountRate,
+    };
+
+    console.log("payload: ", payload);
+    try {
+      const createResponse = await createWarehouseItemCornProcurementDraft(
+        payload
+      );
+      if (createResponse.status == 201) {
+        navigate(-1, { state: { refetch: true } });
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+    // console.log("Saving Draft:", { ...formData, basePrice });
   };
+
+  const getInputClass = (isDisabled) =>
+    `w-full px-4 py-2 rounded-md border border-gray-300 
+   ${
+     isDisabled
+       ? "w-full bg-gray-100 text-gray-400 cursor-not-allowed"
+       : "w-full bg-white text-gray-700 "
+   }`;
 
   const fetchWarehouses = async () => {
     try {
       const warehouseResponse = await getWarehouses();
-      console.log("warehouseResponse: ", warehouseResponse);
-      if (warehouseResponse.status == 200) {
+      if (warehouseResponse.status === 200) {
         setWarehouseOptions(warehouseResponse.data.data);
         setSelectedWarehouse(warehouseResponse.data.data[0]);
       }
@@ -127,7 +191,7 @@ const InputDraftPengadaanJagung = () => {
   const fetchSuppliers = async () => {
     try {
       const supplierResponse = await getSuppliers();
-      if (supplierResponse.status == 200) {
+      if (supplierResponse.status === 200) {
         setsupplierOptions(supplierResponse.data.data);
       }
     } catch (error) {
@@ -135,35 +199,112 @@ const InputDraftPengadaanJagung = () => {
     }
   };
 
+  const fetchCornSummary = async () => {
+    try {
+      if (!selectedWarehouse?.id) return;
+      const cornResponse = await getCornWarehouseItemSummary(
+        selectedWarehouse.id
+      );
+      if (cornResponse.status === 200) {
+        setCurrentCornStock(cornResponse.data.data);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const fetchDiscountData = async () => {
+    try {
+      const res = await getWarehouseItemCornPrice();
+      console.log("res: ", res);
+      if (res.status == 200 && Array.isArray(res.data.data)) {
+        if (res.data.data.length > 0) {
+          const mapped = res.data.data?.map((item) => ({
+            range: [item.bottomLimit, item.upperLimit],
+            discount: item.discount,
+          }));
+          console.log("mapped: ", mapped);
+          setDiscountData(mapped);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching discount data:", err);
+    }
+  };
+
+  const fetchDetailData = async () => {
+    try {
+      const detailResponse = await getWarehouseItemCornProcurementDraft(id);
+      // console.log("detailResponse: ", detailResponse);
+      if (detailResponse.status == 200) {
+        const data = detailResponse.data.data;
+        setInputDate(data.inputDate);
+        setSelectedWarehouse(data.warehouse);
+        setFormData({
+          moistureLevel: data.cornWaterLevel,
+          ovenCondition: data.oveCondition,
+          ovenCanOperate: data.isOvenCanOperateInNearDay ? "Ya" : "Tidak",
+          supplier: data.supplier,
+          quantity: data.quantity,
+        });
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    if (isOvenConditionDisabled && formData.ovenCondition !== "") {
+      setFormData((prev) => ({ ...prev, ovenCondition: "" }));
+    }
+  }, [isOvenConditionDisabled]);
+
+  useEffect(() => {
+    if (isOvenCanOperateDisabled && formData.ovenCanOperate !== "") {
+      setFormData((prev) => ({ ...prev, ovenCanOperate: "" }));
+    }
+  }, [isOvenCanOperateDisabled]);
+
   useEffect(() => {
     fetchWarehouses();
     fetchSuppliers();
+    fetchDiscountData();
+    if (id) {
+      fetchDetailData();
+    }
+    console.log("id: ", id);
   }, []);
+
+  useEffect(() => {
+    fetchCornSummary();
+  }, [selectedWarehouse]);
+
+  useEffect(() => {
+    setBasePrice(computeDefaultBasePrice(formData.moistureLevel));
+  }, [formData.moistureLevel]);
 
   return (
     <div className="flex flex-col px-4 py-3 gap-6 font-sans">
-      {/* Header Section */}
       <div className="flex justify-between items-center mb-2 flex-wrap gap-4">
         <h1 className="text-3xl font-bold">Input Draft Pengadaan Jagung</h1>
       </div>
 
-      {/* Info Cards Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Stok Jagung */}
         <div className="flex items-center bg-green-100 rounded-lg p-4 gap-4">
           <div className="flex justify-between items-center w-full">
             <div className="flex flex-col">
               <span className="text-sm font-medium text-gray-600">
                 Stok Jagung Saat ini
               </span>
-              <span className="text-2xl font-bold">{currentCornStock} Kg</span>
+              <span className="text-2xl font-bold">
+                {currentCornStock?.quantity} Kg
+              </span>
             </div>
             <div className="p-2 rounded-xl bg-green-700">
               <GiChicken size={24} color="white" />
             </div>
           </div>
         </div>
-        {/* Kapasitas Gudang */}
         <div className="flex items-center bg-green-100 rounded-lg p-4 gap-4">
           <div className="flex justify-between items-center w-full">
             <div className="flex flex-col">
@@ -181,12 +322,10 @@ const InputDraftPengadaanJagung = () => {
         </div>
       </div>
 
-      {/* Main Form Section */}
       <form
         onSubmit={handleSimpan}
         className="bg-white p-6 border rounded-lg w-full border-black-6 flex flex-col gap-6"
       >
-        {/* Tanggal Input */}
         <div className="flex flex-col gap-2">
           <label className="text-sm font-semibold text-gray-700">
             Tanggal Input
@@ -194,7 +333,7 @@ const InputDraftPengadaanJagung = () => {
           <input
             type="text"
             className="px-4 py-2 rounded-md border border-gray-300 bg-gray-100 cursor-not-allowed"
-            value={getTodayDateInBahasa()}
+            value={inputDate}
             disabled
           />
         </div>
@@ -211,13 +350,10 @@ const InputDraftPengadaanJagung = () => {
             name="warehouse"
             value={selectedWarehouse?.id}
             onChange={(e) => {
-              const selectedWarehouse = warehouseOptions.find(
-                (item) => item.id == e.target.value
-              );
-              setSelectedWarehouse(selectedWarehouse);
+              const w = warehouseOptions.find((it) => it.id == e.target.value);
+              setSelectedWarehouse(w);
             }}
             className="px-4 py-2 rounded-md border border-gray-300 bg-white"
-            disabled={isFormDisabled}
           >
             <option value="" disabled>
               Pilih Gudang
@@ -237,20 +373,7 @@ const InputDraftPengadaanJagung = () => {
           <p className="text-xl font-bold">Jagung</p>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-semibold text-gray-700">
-            Harga Jagung Normal/Kg
-          </label>
-          <div className="px-4 py-2 rounded-md border border-gray-300 bg-gray-100">
-            <span className="font-bold">
-              Rp {basePrice.toLocaleString("id-ID")}
-            </span>
-          </div>
-        </div>
-
-        {/* Multi-column fields */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Kadar Air */}
           <div className="flex flex-col gap-2">
             <label
               htmlFor="moistureLevel"
@@ -273,7 +396,7 @@ const InputDraftPengadaanJagung = () => {
               </span>
             </div>
           </div>
-          {/* Kondisi Oven */}
+
           <div className="flex flex-col gap-2">
             <label
               htmlFor="ovenCondition"
@@ -286,19 +409,25 @@ const InputDraftPengadaanJagung = () => {
               name="ovenCondition"
               value={formData.ovenCondition}
               onChange={handleInputChange}
-              className="px-4 py-2 rounded-md border border-gray-300 bg-white"
+              disabled={isOvenConditionDisabled}
+              className={`px-4 py-2 rounded-md border border-gray-300 
+                ${
+                  isOvenConditionDisabled
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-white text-gray-700 cursor-pointer"
+                }`}
             >
               <option value="" disabled>
                 Pilih Kondisi
               </option>
-              {ovenConditionOptions.map((option) => (
+              {["Hidup", "Mati"].map((option) => (
                 <option key={option} value={option}>
                   {option}
                 </option>
               ))}
             </select>
           </div>
-          {/* Oven dapat hidup? */}
+
           <div className="flex flex-col gap-2">
             <label
               htmlFor="ovenCanOperate"
@@ -311,12 +440,18 @@ const InputDraftPengadaanJagung = () => {
               name="ovenCanOperate"
               value={formData.ovenCanOperate}
               onChange={handleInputChange}
-              className="px-4 py-2 rounded-md border border-gray-300 bg-white"
+              disabled={isOvenCanOperateDisabled}
+              className={`px-4 py-2 rounded-md border border-gray-300 
+                ${
+                  isOvenCanOperateDisabled
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-white text-gray-700 cursor-pointer"
+                }`}
             >
               <option value="" disabled>
                 Pilih Ya/Tidak
               </option>
-              {ovenCanOperateOptions.map((option) => (
+              {["Ya", "Tidak"].map((option) => (
                 <option key={option} value={option}>
                   {option}
                 </option>
@@ -325,7 +460,23 @@ const InputDraftPengadaanJagung = () => {
           </div>
         </div>
 
-        {/* Supplier */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-semibold text-gray-700">
+            Harga Jagung Normal/Kg
+          </label>
+          <input
+            type="text"
+            className={getInputClass(!isCanBuyCorn)}
+            disabled={!isCanBuyCorn}
+            value={`Rp ${Number(basePrice || 0).toLocaleString("id-ID")}`}
+            onChange={(e) => {
+              const raw = e.target.value.replace(/\D/g, "");
+              setBasePrice(Number(raw || 0));
+              setBasePriceEdited(true);
+            }}
+          />
+        </div>
+
         <div className="flex flex-col gap-2">
           <label
             htmlFor="supplier"
@@ -338,8 +489,8 @@ const InputDraftPengadaanJagung = () => {
             name="supplier"
             value={formData.supplier}
             onChange={handleInputChange}
-            className="px-4 py-2 rounded-md border border-gray-300 bg-white"
-            disabled={isFormDisabled}
+            className={getInputClass(!isCanBuyCorn)}
+            disabled={!isCanBuyCorn}
           >
             <option value="" disabled>
               Pilih Supplier
@@ -352,7 +503,7 @@ const InputDraftPengadaanJagung = () => {
           </select>
         </div>
 
-        {/* Jumlah Pesan & Jumlah Maksimum */}
+        {/* Jumlah Pesan & Maksimum */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
             <label
@@ -368,12 +519,10 @@ const InputDraftPengadaanJagung = () => {
                 name="quantity"
                 value={formData.quantity}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-2 rounded-md border ${
-                  isQuantityOverMax ? "border-red-500" : "border-gray-300"
-                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                disabled={isFormDisabled}
+                className={getInputClass(!isCanBuyCorn)}
+                disabled={!isCanBuyCorn}
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">
+              <span className="absolute right-8 top-1/2 -translate-y-1/2 text-gray-500">
                 Kg
               </span>
             </div>
@@ -388,21 +537,27 @@ const InputDraftPengadaanJagung = () => {
             <label className="text-sm font-semibold text-gray-700">
               Jumlah Maksimum Pesan
             </label>
-            <div className="px-4 py-2 rounded-md border border-gray-300 bg-gray-100">
+            <div
+              className={getInputClass(!isCanBuyCorn)}
+              disabled={!isCanBuyCorn}
+            >
               <span className="font-bold">{maxOrderQuantity} Kg</span>
             </div>
           </div>
         </div>
 
-        {/* Hasil Harga Beli / Kg & Harga Beli Total */}
+        {/* Hasil harga */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-700">
               Hasil Harga Beli / Kg
             </label>
-            <div className="px-4 py-2 rounded-md border border-gray-300 bg-gray-100">
+            <div
+              className={getInputClass(!isCanBuyCorn)}
+              disabled={!isCanBuyCorn}
+            >
               <span className="font-bold">
-                Rp {discountedPricePerKg.toLocaleString("id-ID")}
+                Rp {Number(discountedPricePerKg || 0).toLocaleString("id-ID")}
               </span>
             </div>
           </div>
@@ -410,25 +565,43 @@ const InputDraftPengadaanJagung = () => {
             <label className="text-sm font-semibold text-gray-700">
               Harga Beli Total
             </label>
-            <div className="px-4 py-2 rounded-md border border-gray-300 bg-gray-100">
+            <div
+              className={getInputClass(!isCanBuyCorn)}
+              disabled={!isCanBuyCorn}
+            >
               <span className="font-bold">
-                Rp {totalPurchasePrice.toLocaleString("id-ID") || "-"}
+                Rp {Number(totalPurchasePrice || 0).toLocaleString("id-ID")}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Save Button */}
+        {/* Save */}
         <div className="flex justify-end mt-4">
           <button
             type="submit"
-            className="px-6 py-2 rounded-lg bg-green-700 hover:bg-green-800 text-white font-medium"
-            disabled={isFormDisabled}
+            className={`px-6 py-2 rounded-lg  text-white font-medium 
+              ${
+                isCanBuyCorn
+                  ? "bg-green-700 hover:bg-green-800 cursor-pointer"
+                  : "bg-gray-300 cursor-not-allowed"
+              }
+              `}
+            disabled={!isCanBuyCorn}
           >
             Simpan
           </button>
         </div>
       </form>
+      <button
+        onClick={() => {
+          console.log("formData: ", formData);
+          console.log("discountRate: ", discountRate);
+          console.log("discountData: ", discountData);
+        }}
+      >
+        CHECK
+      </button>
     </div>
   );
 };

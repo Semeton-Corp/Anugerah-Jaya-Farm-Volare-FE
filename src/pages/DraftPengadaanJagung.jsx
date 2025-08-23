@@ -3,13 +3,23 @@ import { useState } from "react";
 import { PiCalendarBlank } from "react-icons/pi";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
-import { getWarehouseItemCornProcurementDrafts } from "../services/warehouses";
+import {
+  confirmationWarehouseItemCornProcurementDraft,
+  deleteWarehouseItemCornProcurementDraft,
+  getWarehouseItemCornProcurementDrafts,
+} from "../services/warehouses";
+import KonfirmasiPemesananJagungModal from "../components/KonfirmasiPemesananJagungModal";
 
 const DraftPengadaanJagung = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
   const [daftarDrafts, setDaftarDrafts] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
+  const [showBatalModal, setShowBatalModal] = useState(false);
+
+  const [selectedDraft, setSelectedDraft] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const detailPages = ["input-draft-pengadaan-jagung"];
 
@@ -20,13 +30,80 @@ const DraftPengadaanJagung = () => {
   const fetchDraftsData = async () => {
     try {
       const dataResponse = await getWarehouseItemCornProcurementDrafts();
-      //   console.log("dataResponse: ", dataResponse);
-      
+      console.log("dataResponse: ", dataResponse);
       if (dataResponse.status === 200) {
         setDaftarDrafts(dataResponse.data.data);
       }
     } catch (error) {
       console.error("Error fetching draft data:", error);
+    }
+  };
+
+  const handleEdit = (item) => {
+    console.log("Edit clicked for:", item);
+    navigate(`${location.pathname}/input-draft-pengadaan-jagung/${item.id}`);
+  };
+
+  const handleBatalkan = (item) => {
+    console.log("Batalkan clicked for:", item);
+  };
+
+  const handlePesan = (item) => {
+    setSelectedDraft(item);
+    setOpenModal(true);
+  };
+
+  const handleConfirmOrder = async (payload) => {
+    console.log("Konfirmasi pesanan:", payload);
+
+    try {
+      const confirmResponse =
+        await confirmationWarehouseItemCornProcurementDraft(
+          payload,
+          selectedDraft.id
+        );
+      // console.log("confirmResponse: ", confirmResponse);
+      if (confirmResponse.status == 201) {
+        const newPath = location.pathname.replace(
+          "/draft-pengadaan-jagung",
+          ""
+        );
+        navigate(newPath, { state: { refetch: true } });
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+
+    // contoh: setelah sukses, refresh tabel dan tutup modal
+    // setOpenModal(false);
+    // setSelectedDraft(null);
+    // fetchDraftsData();
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setSelectedDraft(null);
+  };
+
+  const handleTambahDraft = () => {
+    navigate(`${location.pathname}/input-draft-pengadaan-jagung`);
+    // console.log("Tambah Draft clicked");
+  };
+
+  const handleDelete = async () => {
+    try {
+      const deleteResponse = await deleteWarehouseItemCornProcurementDraft(
+        selectedItem.id
+      );
+      console.log("deleteResponse: ", deleteResponse);
+      if (deleteResponse.status === 204) {
+        alert("✅ Berhasil membatalkan pesanan");
+        setSelectedItem(null);
+        setShowBatalModal(false);
+        fetchDraftsData();
+      }
+    } catch (error) {
+      console.log("error :", error);
     }
   };
 
@@ -37,23 +114,6 @@ const DraftPengadaanJagung = () => {
       window.history.replaceState({}, document.title);
     }
   }, [location]);
-
-  const handlePesan = (item) => {
-    console.log("Pesan clicked for:", item);
-  };
-
-  const handleEdit = (item) => {
-    console.log("Edit clicked for:", item);
-  };
-
-  const handleBatalkan = (item) => {
-    console.log("Batalkan clicked for:", item);
-  };
-
-  const handleTambahDraft = () => {
-    navigate(`${location.pathname}/input-draft-pengadaan-jagung`);
-    // console.log("Tambah Draft clicked");
-  };
 
   if (isDetailPage) {
     return <Outlet />;
@@ -120,7 +180,10 @@ const DraftPengadaanJagung = () => {
                         Edit
                       </button>
                       <button
-                        onClick={() => handleBatalkan(item)}
+                        onClick={() => {
+                          setSelectedItem(item);
+                          setShowBatalModal(true);
+                        }}
                         className="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded"
                       >
                         Batalkan
@@ -143,6 +206,37 @@ const DraftPengadaanJagung = () => {
           </table>
         </div>
       </div>
+      {showBatalModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="bg-white rounded-2xl shadow-md px-8 py-6 max-w-md text-center">
+            <p className="text-lg font-semibold mb-6">
+              Apakah anda yakin untuk pengadaan barang ini?
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setShowBatalModal(false)}
+                className="bg-gray-300 hover:bg-gray-400 cursor-pointer text-black font-semibold px-6 py-2 rounded-lg"
+              >
+                Tidak
+              </button>
+              <button
+                onClick={() => {
+                  handleDelete();
+                }}
+                className="bg-red-400 hover:bg-red-500 cursor-pointer text-white font-semibold px-6 py-2 rounded-lg"
+              >
+                Ya, Lanjutkan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <KonfirmasiPemesananJagungModal
+        open={openModal}
+        data={selectedDraft}
+        onClose={handleCloseModal}
+        onConfirm={handleConfirmOrder}
+      />
     </div>
   );
 };

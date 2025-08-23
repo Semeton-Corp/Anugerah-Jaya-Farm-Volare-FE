@@ -3,64 +3,9 @@ import { PiCalendarBlank } from "react-icons/pi";
 import { GoAlertFill } from "react-icons/go";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getTodayDateInBahasa } from "../utils/dateFormat";
+import { getWarehouseItemCornProcurements } from "../services/warehouses";
+import KonfirmasiBarangSampaiJagungModal from "../components/KonfirmasiBarangSampaiJagungModal";
 
-// Mock service function for fetching corn data.
-const getCornProcurements = async () => {
-  // Replace with your actual API call that returns the combined data
-  return {
-    status: 200,
-    data: {
-      data: {
-        cornProcurements: [
-          {
-            id: 10,
-            orderDate: "20 Mar 2025",
-            itemName: "Jagung",
-            quantity: 12,
-            unit: "Kg",
-            supplierName: "Dagang Jagung A",
-            estimationArrivalDate: "23 Mar 2025",
-            deadlinePaymentDate: "23 Mar 2025",
-            isMoreThanDeadlinePaymentDate: true,
-            paymentStatus: "Belum Lunas",
-            procurementStatus: "Sedang Dikirim",
-            isArrived: false,
-          },
-          {
-            id: 11,
-            orderDate: "20 Mar 2025",
-            itemName: "Jagung",
-            quantity: 12,
-            unit: "Kg",
-            supplierName: "Dagang Jagung B",
-            estimationArrivalDate: "23 Mar 2025",
-            deadlinePaymentDate: "23 Mar 2025",
-            isMoreThanDeadlinePaymentDate: false,
-            paymentStatus: "Belum Dibayar",
-            procurementStatus: "Sedang Dikirim",
-            isArrived: false,
-          },
-          {
-            id: 12,
-            orderDate: "20 Mar 2025",
-            itemName: "Jagung",
-            quantity: 10,
-            unit: "Kg",
-            supplierName: "Dagang Jagung C",
-            estimationArrivalDate: "23 Mar 2025",
-            deadlinePaymentDate: "23 Mar 2025",
-            isMoreThanDeadlinePaymentDate: false,
-            paymentStatus: "Lunas",
-            procurementStatus: "Selesai - Sesuai",
-            isArrived: true,
-          },
-        ],
-      },
-    },
-  };
-};
-
-// Reusable badge component
 const badge = (text, variant = "neutral") => {
   const map = {
     warning: "bg-[#F2D08A] text-[#5F4000]",
@@ -87,15 +32,38 @@ const PengadaanJagung = () => {
     location.pathname.includes(segment)
   );
 
+  const [isShowConfirmModal, setIsShowConfirmModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+
   const fetchJagungData = async () => {
     try {
-      const dataResponse = await getCornProcurements();
+      const dataResponse = await getWarehouseItemCornProcurements();
+      console.log("dataResponse: ", dataResponse);
       if (dataResponse.status === 200) {
-        setDaftarJagungData(dataResponse.data.data.cornProcurements);
+        setDaftarJagungData(
+          dataResponse.data.data.WarehouseItemCornProcurements
+        );
       }
     } catch (error) {
       console.error("Error fetching corn data:", error);
     }
+  };
+
+  const confirmBarangSampaiHandle = async (payload) => {
+    console.log("test:", payload);
+    // try {
+    //   const arriveResponse = await arrivalConfirmationWarehouseItemProcurement(
+    //     payload,
+    //     selectedItem.id
+    //   );
+    //   console.log("arriveResponse: ", arriveResponse);
+    //   if (arriveResponse.status == 200) {
+    //     fetchBarangData();
+    //   }
+    // } catch (error) {
+    //   console.log("error :", error);
+    // }
+    // setIsShowConfirmModal(false);
   };
 
   useEffect(() => {
@@ -108,7 +76,8 @@ const PengadaanJagung = () => {
 
   const handleBarangSampai = (item) => {
     console.log("Barang Sampai clicked for:", item);
-    // Logic for handling 'Barang Sampai' modal or API call
+    setIsShowConfirmModal(true);
+    setSelectedItem(item);
   };
 
   const handleDetail = (id) => {
@@ -116,7 +85,6 @@ const PengadaanJagung = () => {
   };
 
   const handleDraftPengadaanJagung = () => {
-    // Logic for navigating to the 'Draft Pengadaan Jagung' page
     navigate(`${location.pathname}/draft-pengadaan-jagung`);
   };
 
@@ -169,9 +137,9 @@ const PengadaanJagung = () => {
                 <React.Fragment key={item.id || idx}>
                   <tr className="border-b">
                     <td className="px-4 py-3">{item.orderDate}</td>
-                    <td className="px-4 py-3">{item.itemName}</td>
-                    <td className="px-4 py-3">{`${item.quantity} ${item.unit}`}</td>
-                    <td className="px-4 py-3">{item.supplierName}</td>
+                    <td className="px-4 py-3">{item.item.name}</td>
+                    <td className="px-4 py-3">{`${item.quantity} ${item.item.unit}`}</td>
+                    <td className="px-4 py-3">{item.supplier.name}</td>
                     <td className="px-4 py-3">{item.estimationArrivalDate}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
@@ -250,6 +218,14 @@ const PengadaanJagung = () => {
           </div>
         </div>
       </div>
+      {isShowConfirmModal && selectedItem && (
+        <KonfirmasiBarangSampaiJagungModal
+          isOpen={isShowConfirmModal}
+          onClose={() => setIsShowConfirmModal(false)}
+          onConfirm={confirmBarangSampaiHandle}
+          data={selectedItem}
+        />
+      )}
     </div>
   );
 };
