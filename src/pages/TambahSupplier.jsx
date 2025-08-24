@@ -1,14 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCage } from "../services/cages";
-import { inputTelur } from "../services/eggs";
-import { getEggMonitoringById } from "../services/eggs";
 import { useParams } from "react-router-dom";
-import { updateEggMonitoring } from "../services/eggs";
-import { getWarehouses } from "../services/warehouses";
-import { getTodayDateInBahasa } from "../utils/dateFormat";
-import { use } from "react";
-import { getWarehouseItems } from "../services/warehouses";
 import {
   createSupplier,
   getSupplierById,

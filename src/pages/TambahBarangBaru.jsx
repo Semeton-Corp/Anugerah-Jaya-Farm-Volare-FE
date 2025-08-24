@@ -55,7 +55,7 @@ const TambahBarangBaru = () => {
   const fetchWarehouseItembyId = async (id) => {
     try {
       const detailResponse = await getItemById(id);
-      // console.log("detailResponse: ", detailResponse);
+      console.log("detailResponse: ", detailResponse);
       if (detailResponse.status == 200) {
         setName(detailResponse.data.data.name);
         setSelectedCategory(detailResponse.data.data.category);
@@ -90,6 +90,7 @@ const TambahBarangBaru = () => {
           navigate(-1, { state: { refecth: true } });
         }
       } catch (error) {
+        alert("❌ Gagal memperbaharui barang baru! ", error);
         console.log("error :", error);
       }
     } else {
@@ -100,6 +101,7 @@ const TambahBarangBaru = () => {
           navigate(-1, { state: { refecth: true } });
         }
       } catch (error) {
+        alert("❌ Gagal menambahkan barang baru! ", error);
         console.log("error :", error);
       }
     }
@@ -109,7 +111,9 @@ const TambahBarangBaru = () => {
 
   return (
     <div className="flex flex-col px-4 py-3 gap-4">
-      <h1 className="text-3xl font-bold">Tambah Barang Baru</h1>
+      <h1 className="text-3xl font-bold">
+        {id ? "Edit Detail Barang" : "Tambah Barang Baru"}
+      </h1>
 
       <div className="w-full mx-auto p-6 bg-white shadow rounded border">
         <h2 className="text-lg font-semibold mb-1">Input data barang</h2>
@@ -175,7 +179,7 @@ const TambahBarangBaru = () => {
           </div>
         </div>
 
-        {selectedCategory == "Bahan Baku Adukan - Jagung" && (
+        {/* {selectedCategory == "Bahan Baku Adukan - Jagung" && (
           <div className="grid grid-cols-2 mb-6 gap-4">
             <div>
               <label className="block font-medium mb-1">
@@ -196,7 +200,7 @@ const TambahBarangBaru = () => {
               <label className="block font-medium mb-1"></label>
             </div>
           </div>
-        )}
+        )} */}
 
         <div className="mt-6 text-right">
           <button

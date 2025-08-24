@@ -104,6 +104,7 @@ import PengadaanJagung from "./pages/PengadaanJagung";
 import DraftPengadaanJagung from "./pages/DraftPengadaanJagung";
 import InputDraftPengadaanJagung from "./pages/InputDraftPengadaanJagung";
 import DetailPengadaanJagung from "./pages/DetailPengadaanJagung";
+import PerbandinganPakan from "./pages/PerbandinganPakan";
 
 const AppRouter = createBrowserRouter([
   {
@@ -955,6 +956,10 @@ const AppRouter = createBrowserRouter([
                     element: <EditStokBarang />,
                   },
                 ],
+              },
+              {
+                path: "perbandingan-pakan",
+                element: <PerbandinganPakan />,
               },
               {
                 path: "pengadaan-barang",

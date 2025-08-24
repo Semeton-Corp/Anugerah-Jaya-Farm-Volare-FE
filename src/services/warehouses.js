@@ -95,14 +95,16 @@ export const getWarehousesByLocation = (locationId) => {
   });
 };
 
-export const getWarehouseItems = (category, storeId) => {
+export const getWarehouseItems = (warehouseId, category, itemNames, unit) => {
   return api.get("/warehouses/items", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
     params: {
+      warehouseId: warehouseId,
       category: category,
-      storeId: storeId,
+      itemNames: itemNames,
+      unit: unit,
     },
   });
 };
@@ -336,4 +338,24 @@ export const arrivalConfirmationWarehouseItemCornProcurement = (
       },
     }
   );
+};
+
+export const createReadyToEatFeed = (payload) => {
+  return api.post(
+    `/warehouses/procurements/drafts/ready-to-eat-feeds`,
+    payload,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};
+
+export const createRawFeed = (payload) => {
+  return api.post(`/warehouses/procurements/drafts/raw-feeds`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 };

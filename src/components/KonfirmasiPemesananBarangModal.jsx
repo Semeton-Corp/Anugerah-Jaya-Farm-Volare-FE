@@ -78,7 +78,9 @@ const KonfirmasiPemesananBarangModal = ({
 
   // Tanggal lain
   const [etaDate, setEtaDate] = useState(new Date().toISOString().slice(0, 10));
-  const [expiredAt, setExpiredAt] = useState("");
+  const [expiredAt, setExpiredAt] = useState(
+    new Date().toISOString().slice(0, 10)
+  );
 
   // Pembayaran
   const [paymentType, setPaymentType] = useState("Penuh");

@@ -13,7 +13,6 @@ import {
   getEggStoreItemSummary,
   getStores,
 } from "../services/stores";
-import { getWarehouseItems } from "../services/warehouses";
 import {
   getTodayDateInBahasa,
   formatDateToDDMMYYYY,

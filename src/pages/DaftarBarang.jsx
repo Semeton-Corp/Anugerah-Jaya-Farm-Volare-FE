@@ -1,13 +1,6 @@
 import React from "react";
-import { PiCalendarBlank } from "react-icons/pi";
-import { BiSolidEditAlt } from "react-icons/bi";
-import { MdDelete } from "react-icons/md";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
-import { getChickenMonitoring } from "../services/chickenMonitorings";
-import { deleteChickenData } from "../services/chickenMonitorings";
-import { getTodayDateInBahasa } from "../utils/dateFormat";
-import { getWarehouseItems } from "../services/warehouses";
 import { deleteItem, getItems } from "../services/item";
 
 const DaftarBarang = () => {
