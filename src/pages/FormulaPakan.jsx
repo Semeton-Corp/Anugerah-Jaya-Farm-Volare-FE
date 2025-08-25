@@ -21,7 +21,7 @@ const FormulaPakan = () => {
   const fetchFormulaData = async () => {
     try {
       const formulaResponse = await getCageFeeds();
-      // console.log("formulaResponse: ", formulaResponse);
+      console.log("formulaResponse: ", formulaResponse);
       if (formulaResponse.status == 200) {
         setFeedFormulaData(formulaResponse.data.data);
       }
