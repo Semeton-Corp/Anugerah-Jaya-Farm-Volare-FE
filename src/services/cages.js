@@ -68,11 +68,14 @@ export const deleteCage = (id) => {
   });
 };
 
-export const getChickenCageFeeds = () => {
+export const getChickenCageFeeds = (locationId) => {
   return api.get(`/cages/chickens/feeds`, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
+    },
+    params: {
+      locationId: locationId,
     },
   });
 };

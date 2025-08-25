@@ -7,6 +7,8 @@ import {
 } from "../services/cages";
 import { useEffect } from "react";
 import { getWarehouses } from "../services/warehouses";
+import { getLocations } from "../services/location";
+import { MdStore } from "react-icons/md";
 
 const rupiahKg = (n) =>
   `${Number(n || 0).toLocaleString("id-ID", { maximumFractionDigits: 0 })} Kg`;
@@ -94,6 +96,11 @@ export default function PembagianPakan() {
   const [gudangId, setGudangId] = useState("");
   const [confirmationData, setConfirmationData] = useState([]);
 
+  const [siteOptions, setSiteOptions] = useState([]);
+  const [selectedSite, setSelectedSite] = useState(
+    userRole === "Owner" ? 0 : localStorage.getItem("locationId")
+  );
+
   const formula = useMemo(() => {
     if (!selected) return [];
     const base = formulaByKategori[selected.kategori] || [];
@@ -147,19 +154,11 @@ export default function PembagianPakan() {
 
   const fetchKandangList = async () => {
     try {
-      const kandangResponse = await getChickenCageFeeds();
+      const kandangResponse = await getChickenCageFeeds(selectedSite);
+      console.log("kandangResponse: ", kandangResponse);
       if (kandangResponse.status == 200) {
         const list = kandangResponse.data.data;
-        let filteredList;
-        // if (userRole != "Owner") {
-        //   filteredList = list.filter(
-        //     (item) => item.cage.location.id == locationId
-        //   );
-        // } else {
-        //   filteredList = list;
-        // }
         setKandangList(list);
-        console.log("filteredList: ", filteredList);
       }
       // console.log("kandangResponse: ", kandangResponse);
     } catch (error) {
@@ -186,14 +185,50 @@ export default function PembagianPakan() {
     }
   };
 
+  const fetchSites = async () => {
+    try {
+      const res = await getLocations();
+      if (res.status === 200) {
+        setSiteOptions(res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch sites", err);
+    }
+  };
+
   useEffect(() => {
     fetchWarehouses();
     fetchKandangList();
+    fetchSites();
   }, []);
+
+  useEffect(() => {
+    fetchKandangList();
+  }, [selectedSite]);
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4">Pembagian Pakan</h1>
+      <div className="flex justify-between">
+        <h1 className="text-3xl font-bold mb-4">Pembagian Pakan</h1>
+
+        {userRole == "Owner" && (
+          <div className="flex items-center rounded-lg px-4 py-1 bg-orange-300 hover:bg-orange-500 cursor-pointer mb-2">
+            <MdStore size={18} />
+            <select
+              value={selectedSite}
+              onChange={(e) => setSelectedSite(e.target.value)}
+              className="ml-2 bg-transparent text-base font-medium outline-none"
+            >
+              <option value="">Semua Site</option>
+              {siteOptions.map((site) => (
+                <option key={site.id} value={site.id}>
+                  {site.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
 
       <div className="p-6 bg-white border rounded">
         <table className="min-w-full table-auto border-collapse">
