@@ -69,7 +69,7 @@ const KonfirmasiPemesananJagungModal = ({
     () => payments.reduce((a, p) => a + Number(p.nominal || 0), 0),
     [payments]
   );
-  const remaining = Math.max(totalPrice - totalPaid, 0);
+  const remaining = totalPrice - totalPaid;
   const paymentStatus =
     remaining === 0 && payments.length > 0 ? "Lunas" : "Belum Lunas";
 
@@ -123,7 +123,6 @@ const KonfirmasiPemesananJagungModal = ({
   };
 
   const handleConfirm = () => {
-    // validasi pembayaran penuh
     if (paymentType === "Penuh" && totalPaid !== totalPrice) {
       alert(
         "❌ Total pembayaran harus sama dengan harga total pesanan untuk tipe 'Penuh'."
@@ -131,6 +130,15 @@ const KonfirmasiPemesananJagungModal = ({
       return;
     }
 
+    if (remaining < 0) {
+      alert("❌ Masukkan total pembayaran yang valid!");
+      return;
+    }
+
+    if (!data?.supplier?.id) {
+      alert("❌ Silahkan memilih supplier terlebih dahulu pada tombol edit!");
+      return;
+    }
     const payload = {
       warehouseId: data?.warehouse?.id,
       supplierId: data?.supplier?.id ?? null,
@@ -142,7 +150,8 @@ const KonfirmasiPemesananJagungModal = ({
       discount: data?.discount,
       paymentType,
       expiredAt: toInputDate(expiredAt),
-      deadlinePaymentDate: toInputDate(deadlinePaymentDate),
+      deadlinePaymentDate:
+        paymentType == "Penuh" ? null : toInputDate(deadlinePaymentDate),
       payments: payments.map((p) => ({
         paymentDate: p.paymentDate ?? "",
         paymentMethod: p.paymentMethod ?? "",
@@ -289,18 +298,19 @@ const KonfirmasiPemesananJagungModal = ({
           </select>
         </div>
 
-        {/* Tenggat Pembayaran */}
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-semibold text-gray-700">
-            Tenggat Pembayaran
-          </label>
-          <input
-            type="date"
-            className="border rounded p-2"
-            value={deadlinePaymentDate}
-            onChange={(e) => setDeadlinePaymentDate(e.target.value)}
-          />
-        </div>
+        {paymentType != "Penuh" && (
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-gray-700">
+              Tenggat Pembayaran
+            </label>
+            <input
+              type="date"
+              className="border rounded p-2"
+              value={deadlinePaymentDate}
+              onChange={(e) => setDeadlinePaymentDate(e.target.value)}
+            />
+          </div>
+        )}
 
         {/* Pembayaran */}
         <div className="border rounded mt-3">

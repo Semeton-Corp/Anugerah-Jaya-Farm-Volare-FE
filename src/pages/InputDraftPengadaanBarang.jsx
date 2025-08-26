@@ -4,6 +4,7 @@ import {
   createWarehouseItemProcurementDraft,
   getWarehouseItemProcurementDraft,
   getWarehouses,
+  updateWarehouseItemProcurementDraft,
 } from "../services/warehouses";
 import { getItems } from "../services/item";
 import { getSuppliers } from "../services/supplier";
@@ -74,13 +75,30 @@ export default function InputDraftPengadaanBarang() {
 
     console.log("payload: ", payload);
 
-    try {
-      const createResponse = await createWarehouseItemProcurementDraft(payload);
-      if (createResponse.status == 201) {
-        navigate(-1, { state: { refetch: true } });
+    if (id) {
+      try {
+        const updateResponse = await updateWarehouseItemProcurementDraft(
+          payload,
+          id
+        );
+        console.log("updateResponse: ", updateResponse);
+        if (updateResponse.status == 200) {
+          navigate(-1, { state: { refetch: true } });
+        }
+      } catch (error) {
+        console.log("error :", error);
       }
-    } catch (error) {
-      console.log("error :", error);
+    } else {
+      try {
+        const createResponse = await createWarehouseItemProcurementDraft(
+          payload
+        );
+        if (createResponse.status == 201) {
+          navigate(-1, { state: { refetch: true } });
+        }
+      } catch (error) {
+        console.log("error :", error);
+      }
     }
   };
 

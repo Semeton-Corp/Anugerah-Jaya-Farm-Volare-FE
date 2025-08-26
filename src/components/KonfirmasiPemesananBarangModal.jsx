@@ -89,7 +89,7 @@ const KonfirmasiPemesananBarangModal = ({
     () => payments.reduce((a, p) => a + num(p.nominal), 0),
     [payments]
   );
-  const remaining = Math.max(orderTotal - totalPaid, 0);
+  const remaining = orderTotal - totalPaid;
   const paymentStatus =
     remaining === 0 && payments.length > 0 ? "Lunas" : "Belum Lunas";
 
@@ -127,10 +127,20 @@ const KonfirmasiPemesananBarangModal = ({
     setPayments((prev) => prev.filter((_, i) => i !== idx));
 
   const handleConfirm = () => {
-    if (paymentType === "Penuh" && totalPaid !== orderTotal) {
+    if (paymentType === "Penuh" && totalPaid != orderTotal) {
       alert(
         "❌ Total pembayaran harus sama dengan total harga untuk pembayaran penuh."
       );
+      return;
+    }
+
+    if (remaining < 0) {
+      alert("❌ Masukkan total pembayaran yang valid!");
+      return;
+    }
+
+    if (!selectedItem?.supplier?.id) {
+      alert("❌ Silahkan memilih supplier terlebih dahulu pada tombol edit!");
       return;
     }
 
@@ -143,7 +153,9 @@ const KonfirmasiPemesananBarangModal = ({
       price: String(pricePerUnit),
       estimationArrivalDate: toDDMMYYYY(etaDate),
       expiredAt: toDDMMYYYY(expiredAt),
-      deadlinePaymentDate: toDDMMYYYY(deadlinePaymentDate),
+      paymentType: paymentType,
+      deadlinePaymentDate:
+        paymentType == "Penuh" ? null : toDDMMYYYY(deadlinePaymentDate),
       payments: payments.map((p) => ({
         paymentDate: toDDMMYYYY(p.paymentDate),
         nominal: String(p.nominal ?? "0"),
@@ -293,16 +305,17 @@ const KonfirmasiPemesananBarangModal = ({
             />
           </div>
         </div>
-
-        <div className="mt-3">
-          <p className="text-sm text-gray-600 mb-1">Deadline Pembayaran</p>
-          <input
-            type="date"
-            className="w-full border rounded px-3 py-2"
-            value={deadlinePaymentDate}
-            onChange={(e) => setDeadlinePaymentDate(e.target.value)}
-          />
-        </div>
+        {paymentType != "Penuh" && (
+          <div className="mt-3">
+            <p className="text-sm text-gray-600 mb-1">Tenggat Pembayaran</p>
+            <input
+              type="date"
+              className="w-full border rounded px-3 py-2"
+              value={deadlinePaymentDate}
+              onChange={(e) => setDeadlinePaymentDate(e.target.value)}
+            />
+          </div>
+        )}
 
         {/* Tipe Pembayaran */}
         <div className="flex flex-col mt-3 mb-2">

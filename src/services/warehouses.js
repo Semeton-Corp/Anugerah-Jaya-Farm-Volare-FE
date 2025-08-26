@@ -185,6 +185,14 @@ export const createWarehouseItemProcurementDraft = (payload) => {
   });
 };
 
+export const updateWarehouseItemProcurementDraft = (payload, id) => {
+  return api.put(`/warehouses/items/procurements/drafts/${id}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export const confirmationWarehouseItemProcurementDraft = (payload, id) => {
   return api.post(
     `/warehouses/items/procurements/drafts/${id}/confirmations`,

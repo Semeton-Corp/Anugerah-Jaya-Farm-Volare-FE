@@ -55,6 +55,8 @@ const computeDefaultBasePrice = (moisture) => {
 const InputDraftPengadaanJagung = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const userRole = localStorage.getItem("role");
+  const locationId = localStorage.getItem("locationId");
 
   const [discountData, setDiscountData] = useState(discountDataInit);
   const [inputDate, setInputDate] = useState(getTodayDateInBahasa());
@@ -180,8 +182,19 @@ const InputDraftPengadaanJagung = () => {
     try {
       const warehouseResponse = await getWarehouses();
       if (warehouseResponse.status === 200) {
-        setWarehouseOptions(warehouseResponse.data.data);
-        setSelectedWarehouse(warehouseResponse.data.data[0]);
+        const warehouses = warehouseResponse.data.data;
+        let filteredWarehouse;
+        if (userRole != "Owner") {
+          filteredWarehouse = warehouses.filter(
+            (item) => item.location.id == locationId
+          );
+        } else {
+          filteredWarehouse = warehouses;
+        }
+        console.log("warehouses: ", warehouses);
+        console.log("filteredWarehouse: ", filteredWarehouse);
+        setWarehouseOptions(filteredWarehouse);
+        setSelectedWarehouse(filteredWarehouse[0]);
       }
     } catch (error) {
       console.log("error :", error);

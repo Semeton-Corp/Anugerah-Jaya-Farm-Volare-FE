@@ -129,7 +129,6 @@ const PengadaanJagung = () => {
                 <th className="px-4 py-3">Nama barang</th>
                 <th className="px-4 py-3">Jumlah</th>
                 <th className="px-4 py-3">Supplier</th>
-                <th className="px-4 py-3">Estimasi Tiba</th>
                 <th className="px-4 py-3">Tenggat Pembayaran</th>
                 <th className="px-4 py-3">Status Pembayaran</th>
                 <th className="px-4 py-3">Keterangan</th>
@@ -144,10 +143,21 @@ const PengadaanJagung = () => {
                     <td className="px-4 py-3">{item.item.name}</td>
                     <td className="px-4 py-3">{`${item.quantity} ${item.item.unit}`}</td>
                     <td className="px-4 py-3">{item.supplier.name}</td>
-                    <td className="px-4 py-3">{item.estimationArrivalDate}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <span>{item.deadlinePaymentDate}</span>
+                        <span
+                          className={
+                            item.paymentStatus === "Lunas"
+                              ? "text-gray-200"
+                              : item.isMoreThanDeadlinePaymentDate
+                              ? "text-red-600"
+                              : ""
+                          }
+                        >
+                          {item.paymentStatus == "Lunas"
+                            ? "(Lunas)"
+                            : item.deadlinePaymentDate || "-"}
+                        </span>
                         {item.isMoreThanDeadlinePaymentDate && (
                           <span title="Terlambat" className="text-red-500">
                             <GoAlertFill size={24} />

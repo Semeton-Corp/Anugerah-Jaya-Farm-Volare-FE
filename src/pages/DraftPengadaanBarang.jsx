@@ -68,6 +68,7 @@ const DraftPengadaanBarang = () => {
   };
 
   const handleConfirmProcuremnet = async (payload) => {
+    console.log("payload: ", payload);
     try {
       const submitResponse = await confirmationWarehouseItemProcurementDraft(
         payload,
@@ -75,7 +76,13 @@ const DraftPengadaanBarang = () => {
       );
       console.log("submitResponse: ", submitResponse);
       if (submitResponse.status == 201) {
+        setShowOrderModal(false);
         fetchDraftData();
+        const newPath = location.pathname.replace(
+          "/draft-pengadaan-barang",
+          ""
+        );
+        navigate(newPath, { state: { refetch: true } });
       }
     } catch (error) {
       console.log("error :", error);
@@ -95,6 +102,14 @@ const DraftPengadaanBarang = () => {
     } catch (error) {
       console.log("error :", error);
     }
+  };
+
+  const handlePerbandinganPakan = () => {
+    const newPath = location.pathname.replace(
+      "pengadaan-barang/draft-pengadaan-barang",
+      "perbandingan-pakan"
+    );
+    navigate(newPath);
   };
 
   useEffect(() => {
@@ -117,7 +132,9 @@ const DraftPengadaanBarang = () => {
       <div className="bg-white p-4 rounded border shadow">
         <div className="flex justify-end items-center mb-3 gap-4">
           <button
-            onClick={() => {}}
+            onClick={() => {
+              handlePerbandinganPakan();
+            }}
             className="bg-orange-300 hover:bg-yellow-500 py-2 rounded px-4 cursor-pointer"
           >
             Perbandingan Pakan

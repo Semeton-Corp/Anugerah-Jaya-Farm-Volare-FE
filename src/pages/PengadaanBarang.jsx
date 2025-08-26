@@ -174,7 +174,19 @@ const PengadaanBarang = () => {
                     <td className="px-4 py-3">{r.estimationArrivalDate}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <span>{r.deadlinePaymentDate}</span>
+                        <span
+                          className={
+                            r.paymentStatus === "Lunas"
+                              ? "text-gray-200"
+                              : r.isMoreThanDeadlinePaymentDate
+                              ? "text-red-600"
+                              : ""
+                          }
+                        >
+                          {r.paymentStatus == "Lunas"
+                            ? "(Lunas)"
+                            : r.deadlinePaymentDate || "-"}
+                        </span>
                         {r.isMoreThanDeadlinePaymentDate &&
                           r.paymentStatus != "Lunas" && (
                             <span title="Terlambat" className="text-red-500">
