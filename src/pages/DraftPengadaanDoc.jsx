@@ -60,7 +60,6 @@ const DraftPengadaanDoc = () => {
 
   const handleSubmit = async (payload) => {
     try {
-      console.log("selectedItem: ", selectedItem);
       const submitResponse = await confirmationChickenProcurementDraft(
         payload,
         selectedItem.id
@@ -143,16 +142,12 @@ const DraftPengadaanDoc = () => {
                       {}
                     )}`}
                   </td>
-                  {/* <td className="p-3">
-                    <span className="px-2 py-1 text-sm rounded bg-orange-200 text-orange-900 font-medium">
-                      {item.status}
-                    </span>
-                  </td> */}
+
                   <td className="p-3 flex items-center gap-2">
                     <div className="flex gap-3 justify-center">
                       <button
                         onClick={() => {
-                          const localNumber = "081246087972"; // nanti bisa ganti ke item?.customer?.phone
+                          const localNumber = "081246087972";
                           const waNumber = localNumber.replace(/^0/, "62");
 
                           const namaCustomer = item?.customer?.name || "";
@@ -225,7 +220,6 @@ const DraftPengadaanDoc = () => {
           onClose={() => setShowAlokasiModal(false)}
           onConfirm={(payload) => {
             handleSubmit(payload);
-            // console.log("CONFIRMED:", payload);
           }}
           order={{
             orderDate: selectedItem.inputDate,
@@ -233,7 +227,7 @@ const DraftPengadaanDoc = () => {
             kandang: selectedItem.cage,
             kandangOptions: kandangOptions,
             quantity: selectedItem.quantity,
-            price: selectedItem.price,
+            price: selectedItem.totalPrice,
           }}
         />
       )}

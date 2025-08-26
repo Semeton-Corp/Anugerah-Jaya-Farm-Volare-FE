@@ -19,10 +19,13 @@ const KonfirmasiPemesananDocModal = ({
     price: 5000000,
   },
 }) => {
+  const today = new Date().toISOString().slice(0, 10);
   const [kandang, setKandang] = useState(order.kandang);
   const [qty, setQty] = useState(order.quantity);
   const [price, setPrice] = useState(order.price);
-  const [estimationArrivalDate, setEtaDate] = useState("");
+  const [estimationArrivalDate, setEtaDate] = useState(today);
+  const [deadlinePaymentDate, setDeadlinePaymentDate] = useState(today);
+
   const orderTotal = useMemo(() => Number(price || 0), [price]);
 
   const [editKandang, setEditKandang] = useState(false);
@@ -34,7 +37,7 @@ const KonfirmasiPemesananDocModal = ({
     () => payments.reduce((acc, p) => acc + Number(p.nominal || 0), 0),
     [payments]
   );
-  const remaining = Math.max(Number(price || 0) - totalPaid, 0);
+  const remaining = Number(price || 0) - totalPaid;
   const paymentStatus =
     remaining === 0 && payments.length > 0 ? "Lunas" : "Belum Lunas";
 
@@ -89,11 +92,24 @@ const KonfirmasiPemesananDocModal = ({
 
   const confirmOrder = () => {
     const cleanedPayments = payments.map(({ remaining, ...rest }) => rest);
+    if (paymentType === "Penuh") {
+      if (remaining != 0) {
+        alert("❌ Pastikan jumlah pembayaran melunasi harga pemesanan!");
+      }
+    }
+
+    if (remaining < 0) {
+      alert("❌ Pastikan jumlah valid!");
+    }
 
     onConfirm?.({
       quantity: Number(qty || 0),
-      price: price,
+      totalPrice: price,
       estimationArrivalDate: convertToInputDateFormat(estimationArrivalDate),
+      deadlinePaymentDate:
+        paymentType === "Penuh"
+          ? null
+          : convertToInputDateFormat(deadlinePaymentDate),
       payments: cleanedPayments,
       paymentType: paymentType,
     });
@@ -222,7 +238,7 @@ const KonfirmasiPemesananDocModal = ({
           </div>
         </div>
 
-        <div className="flex flex-col">
+        <div className="flex flex-col mb-4">
           <label className="text-sm">Tipe Pembayaran</label>
           <select
             className="border rounded p-2"
@@ -233,6 +249,21 @@ const KonfirmasiPemesananDocModal = ({
             <option value="Cicil">Cicil</option>
           </select>
         </div>
+
+        {paymentType != "Penuh" && (
+          <div className="mb-4">
+            <p className="text-sm text-gray-600">Tenggat Pembayaran</p>
+            <div className="relative mt-1">
+              <input
+                type="date"
+                value={deadlinePaymentDate || ""}
+                onChange={(e) => setDeadlinePaymentDate(e.target.value)}
+                className="border rounded px-3 py-2 w-full"
+                style={{ appearance: "auto" }}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Pembayaran */}
         <div className="border rounded mt-3">
@@ -334,7 +365,6 @@ const KonfirmasiPemesananDocModal = ({
         </div>
       </div>
 
-      {/* PAYMENT MODAL */}
       {showPaymentModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white w-full max-w-lg p-6 rounded shadow-xl">

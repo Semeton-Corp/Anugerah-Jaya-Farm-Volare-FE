@@ -70,14 +70,11 @@ const InputTelur = () => {
 
         const dataChickenCage = chickenResponse.data.data;
         const dataWarehouse = warehouseResponse.data.data;
-        // console.log("dataWarehouse: ", dataWarehouse);
-        // console.log("dataChickenCage: ", dataChickenCage);
 
         if (userRole != "Owner" && userRole != "Kepala Kandang") {
           const filterCage = dataChickenCage.filter(
             (cage) => cage.eggPic == userName
           );
-          // console.log("filterCage: ", filterCage);
           setChickenCages(filterCage);
           setSelectedChickenCage(filterCage[0]);
         } else {
@@ -99,7 +96,6 @@ const InputTelur = () => {
           // console.log("dataChickenCage: ", dataChickenCage);
           // console.log("data: ", data);
 
-          
           if (updateResponse.status == 200) {
             const selectedCage = dataChickenCage.find(
               (cage) => cage.cage.id === data.chickenCage.cage.id
@@ -135,23 +131,7 @@ const InputTelur = () => {
       }
     };
 
-    // const fetchWarehouses = async () => {
-    //   try {
-    //     const response = await getWarehousesByLocation();
-    //     if (response.status == 200) {
-    //       setWarehouses(response.data.data);
-    //       // console.log("list warehouse: ", response.data.data);
-
-    //       setSelectedWarehouse(response.data.data[0].id);
-    //       // console.log("selected warehouse: ", response.data.data[0].id);
-    //     }
-    //   } catch (error) {
-    //     console.error("Gagal memuat data gudang:", error);
-    //   }
-    // };
-
     fetchChickenCages();
-    // fetchWarehouses();
   }, []);
 
   useEffect(() => {

@@ -105,6 +105,7 @@ import DraftPengadaanJagung from "./pages/DraftPengadaanJagung";
 import InputDraftPengadaanJagung from "./pages/InputDraftPengadaanJagung";
 import DetailPengadaanJagung from "./pages/DetailPengadaanJagung";
 import PerbandinganPakan from "./pages/PerbandinganPakan";
+import PresensiKelolaPegawai from "./pages/PresensiKelolaPegawai";
 
 const AppRouter = createBrowserRouter([
   {
@@ -546,8 +547,12 @@ const AppRouter = createBrowserRouter([
             path: "kelola-pegawai",
             children: [
               {
-                path: "overview",
+                path: "ringkasan-kinerja",
                 element: <OverviewKelolaPegawai />,
+              },
+              {
+                path: "presensi",
+                element: <PresensiKelolaPegawai />,
               },
               {
                 path: "daftar-pegawai",

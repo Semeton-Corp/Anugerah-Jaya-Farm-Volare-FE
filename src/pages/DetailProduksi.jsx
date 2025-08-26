@@ -36,7 +36,7 @@ const DetailProduksi = () => {
     const mm = String(today.getMonth() + 1).padStart(2, "0");
     const dd = String(today.getDate()).padStart(2, "0");
 
-    const todayStr = `${yyyy}-${mm}-${dd}`; // same format as selectedDate
+    const todayStr = `${yyyy}-${mm}-${dd}`;
     return selectedDate === todayStr;
   };
   const dateInputRef = useRef(null);
@@ -244,13 +244,6 @@ const DetailProduksi = () => {
         </div>
       </div>
 
-      <button
-        onClick={() => {
-          console.log("produksiDetail: ", produksiDetail);
-        }}
-      >
-        CHECK
-      </button>
     </div>
   );
 };

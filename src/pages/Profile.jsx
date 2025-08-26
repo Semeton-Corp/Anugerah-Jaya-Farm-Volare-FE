@@ -88,7 +88,7 @@ const Profile = () => {
 
   const fetchOverviewData = async () => {
     try {
-      const overviewData = await getOverviewUser(userId, year, month + 1);
+      const overviewData = await getOverviewUser(userId, year, month);
       console.log("overviewData: ", overviewData);
     } catch (error) {
       console.log("error :", error);

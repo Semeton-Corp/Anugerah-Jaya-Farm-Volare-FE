@@ -106,7 +106,8 @@ export const sidebarMenus = {
       tabName: "Kelola Pegawai",
       element: <OverviewOwner />,
       subTabs: [
-        { tabName: "Overview", path: "overview" },
+        { tabName: "Ringkasan Kinerja", path: "ringkasan-kinerja" },
+        { tabName: "Presensi", path: "presensi" },
         { tabName: "Daftar Pegawai", path: "daftar-pegawai" },
         { tabName: "Tugas Pegawai", path: "tugas-pegawai" },
       ],
