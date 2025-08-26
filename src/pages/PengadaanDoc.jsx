@@ -9,33 +9,7 @@ import {
   getChickenProcurements,
 } from "../services/chickenMonitorings";
 import { useEffect } from "react";
-
-const dummyOrders = [
-  {
-    orderDate: "20 Mar 2025",
-    quantity: "1000 Ekor",
-    supplier: "Dagang 01",
-    estimatedArrival: "23 Mar 2025",
-    paymentStatus: "Dibayar Setengah",
-    shippingStatus: "Sedang Dikirim",
-  },
-  {
-    orderDate: "20 Mar 2025",
-    quantity: "12 Ekor",
-    supplier: "Dagang 02",
-    estimatedArrival: "23 Mar 2025",
-    paymentStatus: "Belum Dibayar",
-    shippingStatus: "Sedang Dikirim",
-  },
-  {
-    orderDate: "20 Mar 2025",
-    quantity: "12 Ekor",
-    supplier: "Dagang 03",
-    estimatedArrival: "23 Mar 2025",
-    paymentStatus: "Lunas",
-    shippingStatus: "Selesai",
-  },
-];
+import { GoAlertFill } from "react-icons/go";
 
 const getPaymentClass = (status) => {
   switch (status) {
@@ -78,7 +52,6 @@ const PengadaanDoc = () => {
 
   const [showBarangsampaiModal, setShowBarangSampaiModal] = useState(false);
 
-  // ---- Dummy Data ----
   const detailPages = ["draft-pesan-doc", "detail-pengadaan-doc"];
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
@@ -87,7 +60,7 @@ const PengadaanDoc = () => {
   const fetchOrderData = async () => {
     try {
       const ordersResponse = await getChickenProcurements();
-      // console.log("ordersResponse: ", ordersResponse);
+      console.log("ordersResponse: ", ordersResponse);
       if (ordersResponse.status === 200) {
         setOrderData(ordersResponse.data.data.chickenProcurements);
       }
@@ -129,7 +102,10 @@ const PengadaanDoc = () => {
 
   useEffect(() => {
     fetchOrderData();
-  }, []);
+    if (location?.state?.refetch) {
+      fetchOrderData();
+    }
+  }, [location]);
 
   if (isDetailPage) {
     return <Outlet />;
@@ -173,6 +149,7 @@ const PengadaanDoc = () => {
                 <th className="p-3">Jumlah</th>
                 <th className="p-3">Supplier</th>
                 <th className="p-3">Estimasi Tiba</th>
+                <th className="p-3">Tenggat Pembayaran</th>
                 <th className="p-3">Status Pembayaran</th>
                 <th className="p-3">Status Pengiriman</th>
                 <th className="p-3">Aksi</th>
@@ -185,6 +162,29 @@ const PengadaanDoc = () => {
                   <td className="p-3">{order.quantity}</td>
                   <td className="p-3">{order.supplier.name}</td>
                   <td className="p-3">{order.estimationArrivalDate}</td>
+                  <td className="p-3 flex items-center gap-2">
+                    <span
+                      className={
+                        order.paymentStatus === "Lunas"
+                          ? "text-gray-200"
+                          : order.isMoreThanDeadlinePaymentDate
+                          ? "text-red-600"
+                          : ""
+                      }
+                    >
+                      {order.paymentStatus == "Lunas"
+                        ? "(Lunas)"
+                        : order.deadlinePaymentDate || "-"}
+                    </span>
+                    {order.isMoreThanDeadlinePaymentDate && (
+                      <span
+                        title="Sudah melewati deadline"
+                        className="text-red-600"
+                      >
+                        <GoAlertFill size={24} />
+                      </span>
+                    )}
+                  </td>
                   <td className="p-3">
                     <span
                       className={`px-2 py-1 text-sm font-medium rounded ${getPaymentClass(

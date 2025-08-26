@@ -60,7 +60,7 @@ const InputDraftPemesananDoc = () => {
       cageId: selectedCage?.id,
       supplierId: selectedSupplier.id,
       quantity: parseInt(quantity),
-      price: price,
+      totalPrice: price,
     };
 
     try {
@@ -145,12 +145,20 @@ const InputDraftPemesananDoc = () => {
               placeholder="Masukkan jumlah barang..."
               className="w-full border rounded px-4 py-2"
               value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                if (selectedCage?.capacity && val > selectedCage.capacity) {
+                  setQuantity(selectedCage.capacity);
+                } else {
+                  setQuantity(val);
+                }
+              }}
+              min={0}
             />
           </div>
 
           <div>
-            <label className="block mb-1">Harga</label>
+            <label className="block mb-1">Total Harga</label>
             <input
               type="number"
               placeholder="Masukkan jumlah barang..."
@@ -171,13 +179,13 @@ const InputDraftPemesananDoc = () => {
         </form>
       </div>
 
-      <button
+      {/* <button
         onClick={() => {
           console.log("selectedSupplier: ", selectedSupplier);
         }}
       >
         CHECK
-      </button>
+      </button> */}
     </div>
   );
 };

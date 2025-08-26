@@ -68,6 +68,8 @@ const DraftPengadaanDoc = () => {
         alert("✅ Berhasil mengonfirmasi pesanan");
         setShowAlokasiModal(false);
         fetchDraftData();
+        const newPath = location.pathname.replace("/draft-pesan-doc", "");
+        navigate(newPath, { state: { refetch: true } });
       }
     } catch (error) {
       alert("Gagal mengonfirmasi pesanan: " + error.message);

@@ -95,11 +95,13 @@ const KonfirmasiPemesananDocModal = ({
     if (paymentType === "Penuh") {
       if (remaining != 0) {
         alert("❌ Pastikan jumlah pembayaran melunasi harga pemesanan!");
+        return;
       }
     }
 
     if (remaining < 0) {
       alert("❌ Pastikan jumlah valid!");
+      return;
     }
 
     onConfirm?.({
