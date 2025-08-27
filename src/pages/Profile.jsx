@@ -54,6 +54,11 @@ const Profile = () => {
   const userId = localStorage.getItem("userId");
   const [note, setNote] = useState("Lebih di perhatikan kesehatan ayamnya ya!");
 
+  const [userInformation, setUserInformation] = useState([]);
+  const [userPresenceInformation, setUserPresenceInformation] = useState([]);
+  const [userSalaryInformation, setUserSalaryInformation] = useState([]);
+  const [userWorkInformation, setUserWorkInformation] = useState([]);
+
   const [month, setMonth] = useState(new Date().getMonth());
   const [year, setYear] = useState(new Date().getFullYear());
   const [monthName, setMonthName] = useState(
@@ -88,8 +93,16 @@ const Profile = () => {
 
   const fetchOverviewData = async () => {
     try {
-      const overviewData = await getOverviewUser(userId, year, month);
-      console.log("overviewData: ", overviewData);
+      console.log("monthName: ", monthName);
+      const overviewResponse = await getOverviewUser(userId, year, monthName);
+      console.log("overviewResponse: ", overviewResponse);
+      if (overviewResponse.status == 200) {
+        const data = overviewResponse.data.data;
+        setUserInformation(data.userInformation);
+        setUserPresenceInformation(data.userPresenceInformation);
+        setUserSalaryInformation(data.userSalaryInformation);
+        setUserWorkInformation(data.userWorkInformation);
+      }
     } catch (error) {
       console.log("error :", error);
     }
@@ -191,11 +204,12 @@ const Profile = () => {
             </button>
           </div>
           <button
-          // onClick={() => {
-          //   console.log("userId: ", userId);
-          //   console.log("year: ", year);
-          //   console.log("month: ", month);
-          // }}
+            onClick={() => {
+              console.log("userId: ", userId);
+              console.log("year: ", year);
+              console.log("month: ", month);
+              console.log("monthName: ", monthName);
+            }}
           >
             CHECK
           </button>
