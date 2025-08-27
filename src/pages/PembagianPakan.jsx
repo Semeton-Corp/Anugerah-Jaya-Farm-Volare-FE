@@ -117,7 +117,6 @@ export default function PembagianPakan() {
   const openModal = async (row) => {
     setSelected(row);
     setGudangId("");
-
     try {
       const detailResponse = await getChickenCageFeed(row?.id);
       console.log("detailResponse: ", detailResponse);
@@ -138,16 +137,28 @@ export default function PembagianPakan() {
   const submitConfirm = async () => {
     if (!selected) return;
     const payload = {
-      warehouseId: gudangId,
+      warehouseId: parseInt(gudangId),
     };
+    console.log("payload: ", payload);
+    console.log("selected: ", selected);
     try {
-      const confirmResponse = await confirmationChickenCageFeed();
+      const confirmResponse = await confirmationChickenCageFeed(
+        payload,
+        selected.id
+      );
       if (confirmResponse.status == 200) {
         closeModal();
         fetchKandangList();
       }
     } catch (error) {
-      console.log("error :", error);
+      if (error.response.data.message == "warehouse item not found") {
+        alert(
+          "❌ Gudang tidak memiliki barang yang diperlukan, silahkan hubungi penanggung jawab!"
+        );
+        return;
+      }
+      alert(error.response.data.message);
+      console.log("error :", error.response.data.message);
     }
     // console.log("KONFIRMASI PEMBAGIAN PAKAN -> payload:", payload);
   };

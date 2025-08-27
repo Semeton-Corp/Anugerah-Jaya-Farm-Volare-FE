@@ -269,6 +269,14 @@ export const deleteWarehouseItemCornProcurementDraft = (id) => {
   });
 };
 
+export const updateWarehouseItemCornProcurementDraft = (payload, id) => {
+  return api.put(`/warehouses/items/corns/procurements/drafts/${id}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export const getCornWarehouseItemSummary = (id) => {
   return api.get(`/warehouses/items/corns/summary/${id}`, {
     headers: {

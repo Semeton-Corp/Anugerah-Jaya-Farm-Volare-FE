@@ -23,6 +23,8 @@ const InputAyam = () => {
 
   const [chickenCages, setChickenCages] = useState([]);
   const [selectedChickenCage, setSelectedChickenCage] = useState("");
+  const isCageEmpty =
+    selectedChickenCage?.cage && !selectedChickenCage.cage.isUsed;
 
   const [loading, setLoading] = useState(true);
   const { id } = useParams();
@@ -191,6 +193,7 @@ const InputAyam = () => {
             onChange={(e) => {
               const cageObj = JSON.parse(e.target.value);
               setSelectedChickenCage(cageObj);
+              console.log("cageObj: ", cageObj);
             }}
           >
             <option value="" disabled hidden>
@@ -208,6 +211,12 @@ const InputAyam = () => {
               {selectedChickenCage.cage.name}
             </p>
           </div>
+        )}
+
+        {isCageEmpty && (
+          <p className="text-red-600 font-semibold mb-4">
+            Kandang yang dipilih masih kosong
+          </p>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -263,11 +272,17 @@ const InputAyam = () => {
               <input
                 type="number"
                 value={getDisplayValue(totalSickChicken)}
-                className="w-full bg-black-4 border border-black-6 rounded p-2"
+                className={`w-full border border-black-6 rounded p-2 
+              ${
+                isCageEmpty
+                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  : "bg-black-4"
+              }`}
                 placeholder="Masukkan jumlah ayam sakit"
                 onChange={(e) => {
                   setTotalSickChicken(e.target.value);
                 }}
+                disabled={isCageEmpty}
               />
             ) : (
               <div>
@@ -281,11 +296,17 @@ const InputAyam = () => {
               <input
                 type="number"
                 value={getDisplayValue(totalDeathChicken)}
-                className="w-full border border-black-6  bg-black-4 rounded p-2"
+                className={`w-full border border-black-6 rounded p-2 
+                  ${
+                    isCageEmpty
+                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      : "bg-black-4"
+                  }`}
                 placeholder="Masukkan jumlah ayam mati"
                 onChange={(e) => {
                   setTotalDeathChicken(e.target.value);
                 }}
+                disabled={isCageEmpty}
               />
             ) : (
               <div>
@@ -302,11 +323,17 @@ const InputAyam = () => {
               <input
                 type="number"
                 value={getDisplayValue(totalFeed)}
-                className="w-full border border-black-6 rounded p-2 bg-black-4"
+                className={`w-full border border-black-6 rounded p-2 
+                  ${
+                    isCageEmpty
+                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      : "bg-black-4"
+                  }`}
                 placeholder="Masukkan jumlah pakan"
                 onChange={(e) => {
                   setTotalFeed(e.target.value);
                 }}
+                disabled={isCageEmpty}
               />
             ) : (
               <div>
@@ -340,11 +367,17 @@ const InputAyam = () => {
             <textarea
               type="text"
               value={note}
-              className="w-full border border-black-6 rounded p-2 bg-black-4"
+              className={`w-full border border-black-6 rounded p-2 
+                  ${
+                    isCageEmpty
+                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      : "bg-black-4"
+                  }`}
               placeholder="Masukkan catatan jika terdapat catatan untuk kondisi kandang"
               onChange={(e) => {
                 setNote(e.target.value);
               }}
+              disabled={isCageEmpty}
             />
           ) : (
             <div>
@@ -371,10 +404,11 @@ const InputAyam = () => {
             )}
             {isEditMode && (
               <button
-                onClick={() => {
-                  simpanAyamHandle();
-                }}
-                className="bg-green-700 text-white py-3 px-8 rounded hover:bg-green-900 cursor-pointer"
+                onClick={simpanAyamHandle}
+                className="py-3 px-8 rounded text-white cursor-pointer
+                bg-green-700 hover:bg-green-900
+                disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400"
+                disabled={isCageEmpty}
               >
                 Simpan
               </button>
@@ -392,7 +426,7 @@ const InputAyam = () => {
             )}
           </div>
         </div>
-        <div className="mt-6 text-right ">
+        {/* <div className="mt-6 text-right ">
           <button
             onClick={() => {
               const payload = {
@@ -412,9 +446,9 @@ const InputAyam = () => {
           >
             Check
           </button>
-        </div>
+        </div> */}
       </div>
-      
+
       <DeleteModal
         isOpen={showDeleteModal}
         onCancel={() => setShowDeleteModal(false)}

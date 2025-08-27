@@ -44,10 +44,10 @@ const DetailAyam = () => {
     const mm = String(today.getMonth() + 1).padStart(2, "0");
     const dd = String(today.getDate()).padStart(2, "0");
 
-    const todayStr = `${yyyy}-${mm}-${dd}`; 
+    const todayStr = `${yyyy}-${mm}-${dd}`;
     return selectedDate === todayStr;
   };
-  
+
   const dateInputRef = useRef(null);
   const openDatePicker = () => {
     if (dateInputRef.current) {
@@ -251,7 +251,9 @@ const DetailAyam = () => {
                     </div>
                   </td>
                   {isSelectedDateToday(selectedDate) &&
-                    row.chickenCage.chickenPic === userName && (
+                    (row.chickenCage.chickenPic === userName ||
+                      userRole === "Owner" ||
+                      userRole === "Kepala Kandang") && (
                       <td className="py-2 px-4 flex justify-center gap-4">
                         <span
                           onClick={() => {

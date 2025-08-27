@@ -30,7 +30,7 @@ const DraftPengadaanJagung = () => {
   const fetchDraftsData = async () => {
     try {
       const dataResponse = await getWarehouseItemCornProcurementDrafts();
-      console.log("dataResponse: ", dataResponse);
+      console.log("draftResponse: ", dataResponse);
       if (dataResponse.status === 200) {
         setDaftarDrafts(dataResponse.data.data);
       }

@@ -104,10 +104,6 @@ const InputTelur = () => {
             const selectedWarehouse = dataWarehouse.find(
               (warehouse) => warehouse.id === data.warehouse.id
             );
-
-            console.log("dataChickenCage: ", dataChickenCage);
-
-            console.log("data: ", data);
             // console.log("dataChickenCage: ", dataChickenCage);
             // console.log("selectedWarehouse: ", selectedWarehouse);
 

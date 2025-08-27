@@ -10,6 +10,7 @@ import {
   getWarehouseItemCornPrice,
   getWarehouseItemCornProcurementDraft,
   getWarehouses,
+  updateWarehouseItemCornProcurementDraft,
 } from "../services/warehouses";
 import { getSuppliers } from "../services/supplier";
 
@@ -144,30 +145,51 @@ const InputDraftPengadaanJagung = () => {
       return;
     }
 
-    const payload = {
+    let payload = {
       warehouseId: selectedWarehouse.id,
       supplierId: parseInt(formData.supplier),
-      ovenCondition: formData.ovenCondition || "Mati",
       cornWaterLevel: formData.moistureLevel,
-      isOvenCanOperateInNearDay:
-        formData.ovenCanOperate === "Tidak" ? false : true,
       quantity: parseInt(formData.quantity),
       price: basePrice.toString(),
       discount: discountRate,
     };
 
-    console.log("payload: ", payload);
-    try {
-      const createResponse = await createWarehouseItemCornProcurementDraft(
-        payload
-      );
-      if (createResponse.status == 201) {
-        navigate(-1, { state: { refetch: true } });
-      }
-    } catch (error) {
-      console.log("error :", error);
+    if (formData.ovenCondition !== "") {
+      payload.ovenCondition = formData.ovenCondition;
     }
-    // console.log("Saving Draft:", { ...formData, basePrice });
+
+    if (formData.ovenCanOperate !== "") {
+      payload.isOvenCanOperateInNearDay =
+        formData.ovenCanOperate === "Tidak" ? false : true;
+    }
+
+    console.log("payload:", payload);
+
+    if (id) {
+      try {
+        const updateResponse = await updateWarehouseItemCornProcurementDraft(
+          payload,
+          id
+        );
+        if (updateResponse.status == 200) {
+          navigate(-1, { state: { refetch: true } });
+        }
+      } catch (error) {
+        alert("❌ Gagal memperbaharui data pengadaan!");
+        console.log("error :", error);
+      }
+    } else {
+      try {
+        const createResponse = await createWarehouseItemCornProcurementDraft(
+          payload
+        );
+        if (createResponse.status == 201) {
+          navigate(-1, { state: { refetch: true } });
+        }
+      } catch (error) {
+        console.log("error :", error);
+      }
+    }
   };
 
   const getInputClass = (isDisabled) =>
@@ -191,8 +213,6 @@ const InputDraftPengadaanJagung = () => {
         } else {
           filteredWarehouse = warehouses;
         }
-        console.log("warehouses: ", warehouses);
-        console.log("filteredWarehouse: ", filteredWarehouse);
         setWarehouseOptions(filteredWarehouse);
         setSelectedWarehouse(filteredWarehouse[0]);
       }
@@ -236,7 +256,6 @@ const InputDraftPengadaanJagung = () => {
             range: [item.bottomLimit, item.upperLimit],
             discount: item.discount,
           }));
-          console.log("mapped: ", mapped);
           setDiscountData(mapped);
         }
       }
@@ -248,16 +267,16 @@ const InputDraftPengadaanJagung = () => {
   const fetchDetailData = async () => {
     try {
       const detailResponse = await getWarehouseItemCornProcurementDraft(id);
-      // console.log("detailResponse: ", detailResponse);
       if (detailResponse.status == 200) {
         const data = detailResponse.data.data;
+        console.log("data: ", data);
         setInputDate(data.inputDate);
         setSelectedWarehouse(data.warehouse);
         setFormData({
           moistureLevel: data.cornWaterLevel,
           ovenCondition: data.oveCondition,
           ovenCanOperate: data.isOvenCanOperateInNearDay ? "Ya" : "Tidak",
-          supplier: data.supplier,
+          supplier: data.supplier.id,
           quantity: data.quantity,
         });
       }
@@ -600,7 +619,7 @@ const InputDraftPengadaanJagung = () => {
                   : "bg-gray-300 cursor-not-allowed"
               }
               `}
-            disabled={!isCanBuyCorn}
+            disabled={!isCanBuyCorn && !isQuantityOverMax}
           >
             Simpan
           </button>

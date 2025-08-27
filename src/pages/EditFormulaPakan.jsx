@@ -83,15 +83,16 @@ const EditFormulaPakan = () => {
       feedType,
       totalFeed: Number(jumlahPakan || 0),
       cageFeedDetails: komposisi.map((r) => ({
-        ...(r.id ? { id: r.id } : {}), 
+        ...(r.id ? { id: r.id } : {}),
         itemId: r.itemId,
         percentage: Number(r.percentage || 0),
       })),
     };
 
+    console.log("payload: ", payload);
     try {
       const updateResponse = await updateCageFeed(payload, id);
-      //   console.log("updateResponse: ", updateResponse);
+      console.log("updateResponse: ", updateResponse);
       if (updateResponse.status == 200) {
         navigate(-1, { state: { refetch: true } });
       }
@@ -140,15 +141,19 @@ const EditFormulaPakan = () => {
     }
   };
 
-  const filterItemList = () => {
-    let selectedItem;
-    if (feedType == "Pakan Jadi") {
-      selectedItem = allItems?.filter((item) => item.category == "Pakan Jadi");
-    } else if (feedType == "Pakan Adukan") {
-      selectedItem = allItems?.filter(
-        (item) => item.category == "Bahan Baku Adukan"
+  const filterItemList = (items, type) => {
+    let selectedItem = [];
+    console.log("type?.trim().toLowerCase(): ", type?.trim().toLowerCase());
+    if (type?.trim().toLowerCase() == "pakan jadi") {
+      selectedItem = items?.filter(
+        (item) => item.category?.trim().toLowerCase() === "pakan jadi"
+      );
+    } else if (type?.trim().toLowerCase() == "pakan adukan") {
+      selectedItem = items?.filter(
+        (item) => item.category?.trim().toLowerCase() === "bahan baku adukan"
       );
     }
+
     setItemList(selectedItem);
   };
 
@@ -158,8 +163,10 @@ const EditFormulaPakan = () => {
   }, []);
 
   useEffect(() => {
-    filterItemList();
-  }, [feedType]);
+    if (allItems && feedType) {
+      filterItemList(allItems, feedType);
+    }
+  }, [feedType, allItems]);
 
   return (
     <div className="p-6">
@@ -283,16 +290,29 @@ const EditFormulaPakan = () => {
         </div>
       </div>
 
-      <button
+      {/* <button
         onClick={() => {
           console.log("feedTypeList: ", feedTypeList);
           console.log("itemList: ", itemList);
           console.log("allItems: ", allItems);
           console.log("komposisi: ", komposisi);
+          console.log("feedType: ", feedType);
+
+          const payload = {
+            chickenCategory: cageData?.chickenCategory,
+            feedType,
+            totalFeed: Number(jumlahPakan || 0),
+            cageFeedDetails: komposisi.map((r) => ({
+              ...(r.id ? { id: r.id } : {}),
+              itemId: r.itemId,
+              percentage: Number(r.percentage || 0),
+            })),
+          };
+          console.log("payload: ", payload);
         }}
       >
         CHECK
-      </button>
+      </button> */}
     </div>
   );
 };
