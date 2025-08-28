@@ -11,3 +11,9 @@ export const signUp = (payload) => {
     headers: { Authorization: `Bearer ${token}` },
   });
 };
+
+export const deleteAccount = (id) => {
+  return api.delete(`/authentication/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+};

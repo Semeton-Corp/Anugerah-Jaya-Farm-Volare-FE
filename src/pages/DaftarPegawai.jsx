@@ -7,80 +7,7 @@ import profileAvatar from "../assets/profile_avatar.svg";
 import { useEffect } from "react";
 import { getListStaff } from "../services/staff";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { getListUser } from "../services/user";
-
-const pegawaiAktif = [
-  {
-    nama: "Budi Santoso",
-    email: "budi.s@company.com",
-    id: "ID12345",
-    jabatan: "Kepala Kandang",
-    gaji: 5200000,
-  },
-  {
-    nama: "Gede Indra",
-    email: "indra@company.com",
-    id: "ID123456",
-    jabatan: "Pekerja Gudang",
-    gaji: 2500000,
-  },
-  {
-    nama: "Siti Rahayu",
-    email: "siti@company.com",
-    id: "ID1234567",
-    jabatan: "Pekerja Toko",
-    gaji: 1500000,
-  },
-  {
-    nama: "Siti Rahayu",
-    email: "siti@company.com",
-    id: "ID1234567",
-    jabatan: "Kepala Gudang",
-    gaji: 4500000,
-  },
-  {
-    nama: "Siti Rahayu",
-    email: "siti@company.com",
-    id: "ID1234567",
-    jabatan: "Kepala Gudang",
-    gaji: 4500000,
-  },
-  {
-    nama: "Siti Rahayu",
-    email: "siti@company.com",
-    id: "ID1234567",
-    jabatan: "Kepala Gudang",
-    gaji: 4500000,
-  },
-  {
-    nama: "Siti Rahayu",
-    email: "siti@company.com",
-    id: "ID1234567",
-    jabatan: "Kepala Gudang",
-    gaji: 4500000,
-  },
-  {
-    nama: "Budi Santoso",
-    email: "budi.s@company.com",
-    id: "ID12345",
-    jabatan: "Kepala Kandang",
-    gaji: 5200000,
-  },
-  {
-    nama: "Gede Indra",
-    email: "indra@company.com",
-    id: "ID123456",
-    jabatan: "Pekerja Gudang",
-    gaji: 2500000,
-  },
-  {
-    nama: "Siti Rahayu",
-    email: "siti@company.com",
-    id: "ID1234567",
-    jabatan: "Pekerja Toko",
-    gaji: 1500000,
-  },
-];
+import { getListUser, getUserOverviewList } from "../services/user";
 
 const DaftarPegawai = () => {
   const location = useLocation();
@@ -90,7 +17,7 @@ const DaftarPegawai = () => {
 
   const [page, setPage] = useState(1);
 
-  const detailPages = ["tambah-pegawai"];
+  const detailPages = ["tambah-pegawai", "profil"];
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
@@ -101,19 +28,18 @@ const DaftarPegawai = () => {
   const fectPegawaiAktifData = async () => {
     try {
       // console.log("page: ", page);
-      const fetchResponse = await getListUser();
+      const fetchResponse = await getUserOverviewList();
       console.log("fetchResponse: ", fetchResponse);
       if (fetchResponse.status == 200) {
-        setPegawaiAktifData(fetchResponse.data.data);
+        setPegawaiAktifData(fetchResponse.data.data.users);
       }
     } catch (error) {
       console.log("error :", error);
     }
   };
 
-  const handleSearch = (e) => {
-    setQuery(e.target.value);
-    onSearch(e.target.value); // Call parent function with search input
+  const handleDetail = (userId) => {
+    navigate(`${location.pathname}/profil/${userId}`);
   };
 
   const tambahPegawaiHandle = () => {
@@ -190,7 +116,8 @@ const DaftarPegawai = () => {
                 <th className="py-2 px-4">Pegawai</th>
                 <th className="py-2 px-4">ID</th>
                 <th className="py-2 px-4">Jabatan</th>
-                <th className="py-2 px-4">Gaji</th>
+                <th className="py-2 px-4">Status Kinerja</th>
+                <th className="py-2 px-4"></th>
                 <th className="py-2 px-4"></th>
               </tr>
             </thead>
@@ -199,12 +126,10 @@ const DaftarPegawai = () => {
                 <tr key={index} className="border-b border-black-6">
                   <td className="py-3 px-4">
                     <div className="flex gap-6">
-                      {/* profile picture */}
                       <div className="h-12 w-12 rounded-full overflow-hidden">
                         <img src={item.photoProfile} alt="Profile Avatar" />
                       </div>
 
-                      {/* user name + role */}
                       <div className="">
                         <p className="text-base font-me leading-tight">
                           {item.name}
@@ -215,8 +140,27 @@ const DaftarPegawai = () => {
                   </td>
                   <td className="py-2 px-4">{item.id}</td>
                   <td className="py-2 px-4">{item.role.name}</td>
+                  <td className="py-2 px-4">
+                    <span
+                      className={`inline-block px-6 py-2 rounded-lg font-medium text-center
+                        ${
+                          ((item.kpiStatus || "").toLowerCase() === "baik" &&
+                            "bg-[#87FF8B] text-black") ||
+                          ((item.kpiStatus || "").toLowerCase() === "buruk" &&
+                            "bg-[#FF5E5E] text-black") ||
+                          "bg-gray-200 text-gray-700"
+                        }`}
+                    >
+                      {item.kpiStatus ?? "-"}
+                    </span>
+                  </td>
                   <td className="py-2 px-4">{item.salary}</td>
-                  <td className="py-2 px-4 underline text-black hover:text-black-6 cursor-pointer">
+                  <td
+                    onClick={() => {
+                      handleDetail(item.id);
+                    }}
+                    className="py-2 px-4 underline text-black hover:text-black-6 cursor-pointer"
+                  >
                     Detail
                   </td>
                 </tr>

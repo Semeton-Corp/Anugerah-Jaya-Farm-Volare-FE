@@ -124,7 +124,7 @@ const AppRouter = createBrowserRouter([
           { path: "", element: <Navigate to="ringkasan" replace /> },
           {
             path: "profile",
-            element: <Profile />,
+            element: <Profile mode="MyProfile" />,
           },
           { path: "ringkasan", element: <OverviewOwner /> },
           {
@@ -559,6 +559,10 @@ const AppRouter = createBrowserRouter([
                 element: <DaftarPegawai />,
                 children: [
                   { path: "tambah-pegawai", element: <TambahPegawai /> },
+                  {
+                    path: "profil/:id",
+                    element: <Profile mode="StaffDetail" />,
+                  },
                 ],
               },
               {
@@ -606,7 +610,7 @@ const AppRouter = createBrowserRouter([
           { path: "", element: <Navigate to="ringkasan" replace /> },
           {
             path: "profile",
-            element: <Profile />,
+            element: <Profile mode="MyProfile" />,
             children: [
               { path: "detail-absensi", element: <DetailAbsensi /> },
               {
@@ -708,7 +712,7 @@ const AppRouter = createBrowserRouter([
           { path: "", element: <Navigate to="overview" replace /> },
           {
             path: "profile",
-            element: <Profile />,
+            element: <Profile mode="MyProfile" />,
             children: [
               { path: "detail-absensi", element: <DetailAbsensi /> },
               {
@@ -757,7 +761,7 @@ const AppRouter = createBrowserRouter([
           { path: "", element: <Navigate to="ringkasan" replace /> },
           {
             path: "profile",
-            element: <Profile />,
+            element: <Profile mode="MyProfile" />,
             children: [
               { path: "detail-absensi", element: <DetailAbsensi /> },
               {
@@ -857,7 +861,7 @@ const AppRouter = createBrowserRouter([
           { path: "", element: <Navigate to="overview" replace /> },
           {
             path: "profile",
-            element: <Profile />,
+            element: <Profile mode="MyProfile" />,
             children: [
               { path: "detail-absensi", element: <DetailAbsensi /> },
               {
@@ -1200,7 +1204,7 @@ const AppRouter = createBrowserRouter([
           { path: "", element: <Navigate to="produksi-telur" replace /> },
           {
             path: "profile",
-            element: <Profile />,
+            element: <Profile mode="MyProfile" />,
             children: [
               { path: "detail-absensi", element: <DetailAbsensi /> },
               {

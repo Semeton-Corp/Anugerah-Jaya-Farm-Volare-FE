@@ -34,3 +34,16 @@ export const getOverviewUser = (id, year, month) => {
     },
   });
 };
+
+export const getUserOverviewList = (page, keyword, roleId) => {
+  return api.get(`users/overview`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    params: {
+      page: page,
+      keyword: keyword,
+      roleId: roleId,
+    },
+  });
+};
