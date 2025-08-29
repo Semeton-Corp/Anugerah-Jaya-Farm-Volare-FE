@@ -2,11 +2,14 @@ import api from "./api";
 const token = localStorage.getItem("token");
 const locationId = localStorage.getItem("locationId");
 
-export const getCage = () => {
+export const getCage = (locationId) => {
   return api.get("/cages", {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
+    },
+    params: {
+      locationId: locationId,
     },
   });
 };

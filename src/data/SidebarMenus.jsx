@@ -115,7 +115,14 @@ export const sidebarMenus = {
     {
       icon: <img src={cashflow} alt="Overview Icon" className="h-4 w-4" />,
       tabName: "Cashflow",
-      element: <OverviewOwner />,
+      subTabs: [
+        { tabName: "General Cashflow", path: "general-cashflow" },
+        { tabName: "Pendapatan", path: "pendapatan" },
+        { tabName: "Pengeluaran", path: "pengeluaran" },
+        { tabName: "Piutang", path: "piutang" },
+        { tabName: "Hutang", path: "Hutang" },
+        { tabName: "Gaji Pegawai", path: "gaji-pegawai" },
+      ],
     },
   ],
   "Pekerja Kandang": [
@@ -325,3 +332,4 @@ export const sidebarMenus = {
     // add more items
   ],
 };
+

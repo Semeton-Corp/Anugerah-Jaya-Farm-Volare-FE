@@ -17,7 +17,7 @@ const Presensi = () => {
   const [note, setNote] = useState([]);
 
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState(""); // "sakit" | "izin"
+  const [modalType, setModalType] = useState("");
 
   const monthNamesBahasa = [
     "Januari",

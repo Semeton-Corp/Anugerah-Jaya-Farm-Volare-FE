@@ -52,3 +52,11 @@ export const updatePresence = (payload, id) => {
     },
   });
 };
+
+export const getLocationPresenceSummaries = () => {
+  return api.get(`/presences/locations/summaries`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

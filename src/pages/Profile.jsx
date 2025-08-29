@@ -89,18 +89,6 @@ const Profile = ({ mode }) => {
     salaryDetails.bonus -
     salaryDetails.kasbon;
 
-  // const fetchMyData = async () => {
-  //   try {
-  //     const userResponse = await getUserById(userId);
-  //     // console.log("userResponse: ", userResponse);
-  //     if (userResponse.status == 200) {
-  //       setUserData(userResponse.data.data);
-  //     }
-  //   } catch (error) {
-  //     console.log("error :", error);
-  //   }
-  // };
-
   const fetchOverviewData = async () => {
     try {
       // console.log("monthName: ", monthName);

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { getLocationPresenceSummaries } from "../services/presence";
 
 const classNames = (...arr) => arr.filter(Boolean).join(" ");
 
@@ -78,106 +79,16 @@ export default function PresensiKelolaPegawai() {
   const [activeModal, setActiveModal] = useState(null);
   const [selected, setSelected] = useState(new Set());
 
+  const fetchSummary = async () => {
+    try {
+      const summaryResponse = await getLocationPresenceSummaries();
+      console.log("summaryResponse: ", summaryResponse);
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
   useEffect(() => {
-    const sample = {
-      date: "2025-03-20",
-      data: [
-        {
-          jabatan: "Kepala Kandang Sidodadi",
-          jumlahPegawai: 1,
-          hadir: 1,
-          sakit: 0,
-          izin: 0,
-          alpha: 0,
-          requests: { izin: [], sakit: [] },
-        },
-        {
-          jabatan: "Kepala Kandang Sukamaju",
-          jumlahPegawai: 1,
-          hadir: 1,
-          sakit: 0,
-          izin: 0,
-          alpha: 0,
-          requests: { izin: [], sakit: [] },
-        },
-        {
-          jabatan: "Pekerja Kandang Sidodadi",
-          jumlahPegawai: 10,
-          hadir: 4,
-          sakit: 3,
-          izin: 2,
-          alpha: 1,
-          requests: {
-            izin: [
-              {
-                id: "izin-1",
-                nama: "Siti Rahayu",
-                tanggal: "2025-03-20",
-                keterangan: "Acara Keluarga",
-                buktiUrl: "#",
-                status: "pending",
-              },
-            ],
-            sakit: [
-              {
-                id: "sakit-1",
-                nama: "Siti Rahayu",
-                tanggal: "2025-03-20",
-                keterangan: "Demam",
-                buktiUrl: "#",
-                status: "pending",
-              },
-            ],
-          },
-        },
-        {
-          jabatan: "Pekerja Kandang Sukamaju",
-          jumlahPegawai: 10,
-          hadir: 4,
-          sakit: 3,
-          izin: 2,
-          alpha: 1,
-          requests: { izin: [], sakit: [] },
-        },
-        {
-          jabatan: "Pekerja Gudang Pusat",
-          jumlahPegawai: 10,
-          hadir: 4,
-          sakit: 3,
-          izin: 2,
-          alpha: 1,
-          requests: { izin: [], sakit: [] },
-        },
-        {
-          jabatan: "Pekerja Toko A",
-          jumlahPegawai: 10,
-          hadir: 4,
-          sakit: 3,
-          izin: 2,
-          alpha: 1,
-          requests: { izin: [], sakit: [] },
-        },
-      ],
-    };
-
-    const blob = new Blob([JSON.stringify(sample)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-
-    // --- Use real fetch ---
-    fetch(url)
-      .then((r) => r.json())
-      .then((json) => {
-        setRows(json.data);
-        setLoading(true);
-        setTimeout(() => setLoading(false), 150);
-      })
-      .catch((e) => {
-        setError(e.message || "Gagal memuat data");
-        setLoading(false);
-      })
-      .finally(() => URL.revokeObjectURL(url));
+    fetchSummary();
   }, []);
 
   const openModal = (type, rowIndex) => {

@@ -106,6 +106,11 @@ import InputDraftPengadaanJagung from "./pages/InputDraftPengadaanJagung";
 import DetailPengadaanJagung from "./pages/DetailPengadaanJagung";
 import PerbandinganPakan from "./pages/PerbandinganPakan";
 import PresensiKelolaPegawai from "./pages/PresensiKelolaPegawai";
+import GeneralCashflow from "./pages/GeneralCashflow";
+import Pendapatan from "./pages/Pendapatan";
+import DetailPendapatan from "./pages/DetailPendapatan";
+import Pengeluaran from "./pages/Pengeluaran";
+import TambahPengeluaran from "./pages/TambahPengeluaran";
 
 const AppRouter = createBrowserRouter([
   {
@@ -588,6 +593,35 @@ const AppRouter = createBrowserRouter([
                   {
                     path: "tambah-tugas-rutin/:id",
                     element: <TambahTugasRutin />,
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            path: "cashflow",
+            children: [
+              {
+                path: "general-cashflow",
+                element: <GeneralCashflow />,
+              },
+              {
+                path: "pendapatan",
+                element: <Pendapatan />,
+                children: [
+                  {
+                    path: "detail-pendapatan",
+                    element: <DetailPendapatan />,
+                  },
+                ],
+              },
+              {
+                path: "pengeluaran",
+                element: <Pengeluaran />,
+                children: [
+                  {
+                    path: "tambah-pengeluaran",
+                    element: <TambahPengeluaran />,
                   },
                 ],
               },
