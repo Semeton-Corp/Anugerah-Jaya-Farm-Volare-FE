@@ -83,7 +83,7 @@ import DetailToko from "./pages/DetailToko";
 import DetailTugasTambahan from "./pages/DetailTugasTambahan";
 import DetailRiwayatStok from "./pages/DetailRiwayatStok";
 import PageKosong from "./pages/PageKosong";
-import PengadaanDoc from "./pages/PengadaanDOC";
+
 import DraftPengadaanDoc from "./pages/DraftPengadaanDoc";
 import InputDraftPemesananDoc from "./pages/InputDraftPemesananDoc";
 import JualAyamAfkir from "./pages/JualAyamAfkir";
@@ -111,6 +111,8 @@ import Pendapatan from "./pages/Pendapatan";
 import DetailPendapatan from "./pages/DetailPendapatan";
 import Pengeluaran from "./pages/Pengeluaran";
 import TambahPengeluaran from "./pages/TambahPengeluaran";
+import DetailPengeluaran from "./pages/DetailPengeluaran";
+import PengadaanDoc from "./pages/PengadaanDoc";
 
 const AppRouter = createBrowserRouter([
   {
@@ -622,6 +624,10 @@ const AppRouter = createBrowserRouter([
                   {
                     path: "tambah-pengeluaran",
                     element: <TambahPengeluaran />,
+                  },
+                  {
+                    path: "detail-pengeluaran/:category/:id",
+                    element: <DetailPengeluaran />,
                   },
                 ],
               },

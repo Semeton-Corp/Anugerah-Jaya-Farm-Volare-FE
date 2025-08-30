@@ -6,6 +6,8 @@ import { useEffect } from "react";
 import { getStores } from "../services/stores";
 import { getWarehouses } from "../services/warehouses";
 import { getCage } from "../services/cages";
+import { createExpense } from "../services/cashflow";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const formatTanggalID = (d = new Date()) =>
   new Intl.DateTimeFormat("id-ID", {
@@ -14,33 +16,54 @@ const formatTanggalID = (d = new Date()) =>
     year: "numeric",
   }).format(d);
 
-const KATEGORI_OPTIONS = ["Operasional", "Lain-lain"];
-
-const LOKASI_OPTIONS = [
-  "Sidodadi - Kandang 01",
-  "Sidodadi - Kandang 02",
-  "Sidodadi - Toko A",
-  "Sidodadi - Gudang Pusat",
+const REQUIRED_KEYS = [
+  "expenseCategory",
+  "locationId",
+  "placeId",
+  "locationType",
+  "receiverName",
+  "name",
+  "receiverPhoneNumber",
+  "nominal",
+  "paymentMethod",
+  "paymentProof",
 ];
 
+const KATEGORI_OPTIONS = ["Operasional", "Lain-lain"];
 export default function TambahPengeluaran() {
+  const navigate = useNavigate();
+  const locaiton = useLocation();
+
   const [form, setForm] = useState({
-    expenseCategory: "",
+    expenseCategory: KATEGORI_OPTIONS[0],
     locationId: "",
     placeId: "",
     locationType: "",
-    /////////////
-    namaTransaksi: "",
-    penerima: "",
-    telepon: "",
+    receiverName: "",
+    name: "",
+    receiverPhoneNumber: "",
     nominal: "",
-    metode: "",
-    deskripsi: "",
-    buktiFile: null,
+    paymentMethod: "Tunai",
+    description: "",
+    paymentProof: "htpps://example.com",
   });
 
-  const [lokasiOptions, setLokasiOptions] = useState(LOKASI_OPTIONS);
+  const isNonEmpty = (v) => v != null && String(v).trim() !== "";
+
+  const isFormValid = (form) =>
+    REQUIRED_KEYS.every((k) => isNonEmpty(form[k])) && Number(form.nominal) > 0;
+
+  const [lokasiOptions, setLokasiOptions] = useState([]);
   const [selectedLokasiId, setSelectedLokasiId] = useState(0);
+
+  const onlyDigits = (s = "") => s.replace(/\D/g, "");
+  const formatThousand = (s = "") =>
+    onlyDigits(s).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+  const onNominalChange = (e) => {
+    const raw = onlyDigits(e.target.value);
+    setForm((f) => ({ ...f, nominal: raw }));
+  };
 
   const getId = (o) =>
     o?.id ?? o?._id ?? o?.storeId ?? o?.cageId ?? o?.warehouseId ?? o?.value;
@@ -60,7 +83,7 @@ export default function TambahPengeluaran() {
       locationType: sourceLabel,
     }));
 
-  const [siteOptions, setSiteOptions] = useState(LOKASI_OPTIONS);
+  const [siteOptions, setSiteOptions] = useState([]);
 
   const fileRef = useRef(null);
 
@@ -81,29 +104,58 @@ export default function TambahPengeluaran() {
 
   const onFile = (e) => {
     const file = e.target.files?.[0];
-    setForm((f) => ({ ...f, buktiFile: file || null }));
+    setForm((f) => ({ ...f, paymentProof: file || null }));
   };
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-    alert(
-      "Disimpan!\n\n" +
-        JSON.stringify(
-          {
-            ...form,
-            buktiFile: form.buktiFile ? form.buktiFile.name : null,
-          },
-          null,
-          2
-        )
-    );
+    const payload = {
+      expenseCategory: form.expenseCategory,
+      locationId: parseInt(form.locationId),
+      placeId: parseInt(form.placeId),
+      locationType: form.locationType,
+      receiverName: form.receiverName,
+      name: form.name,
+      receiverPhoneNumber: form.receiverPhoneNumber,
+      nominal: form.nominal,
+      paymentMethod: form.paymentMethod,
+      description: form.description,
+      paymentProof: form.paymentProof,
+    };
+
+    console.log("payload: ", payload);
+
+    if (!isFormValid(payload)) {
+      alert("❌ Pastikan semua field terisi dengan benar!");
+      return;
+    }
+
+    try {
+      const createResponse = await createExpense(payload);
+      if (createResponse.status == 201) {
+        navigate(-1, { state: { refetch: true } });
+      }
+    } catch (error) {
+      if (error.response.data.message == "invalid phone number") {
+        alert(
+          "❌ Mohon masukkan format nomor telepon dengan benar. Contoh: 08xxxxxxxxx"
+        );
+      }
+      console.log("error :", error);
+    }
   };
 
   const fetchSite = async () => {
     try {
       const siteResponse = await getLocations();
       if (siteResponse.status == 200) {
-        setSiteOptions(siteResponse.data.data);
+        const sites = siteResponse?.data?.data ?? [];
+        setSiteOptions(sites);
+        if (sites.length > 0) {
+          const firstId = sites[0]?.id ?? sites[0]?._id;
+          console.log("firstId: ", firstId);
+          setForm((prev) => ({ ...prev, locationId: String(firstId || "") }));
+        }
       }
     } catch (error) {
       console.log("error :", error);
@@ -164,7 +216,7 @@ export default function TambahPengeluaran() {
             Kategori Pengeluaran
           </label>
           <select
-            value={form.kategori}
+            value={form.expenseCategory}
             onChange={onChange("expenseCategory")}
             className="w-full rounded border border-gray-300 bg-gray-100 px-3 py-2 outline-none"
           >
@@ -211,7 +263,7 @@ export default function TambahPengeluaran() {
               Pilih lokasi pengeluaran
             </option>
             {lokasiOptions.map((o) => (
-              <option key={`${o.source}-${o.placeId}`} value={o.placeId}>
+              <option key={`${o.locationType}-${o.placeId}`} value={o.placeId}>
                 {o.label}
               </option>
             ))}
@@ -224,8 +276,8 @@ export default function TambahPengeluaran() {
           </label>
           <input
             type="text"
-            value={form.namaTransaksi}
-            onChange={onChange("namaTransaksi")}
+            value={form.name}
+            onChange={onChange("name")}
             placeholder="Nama Tugas Tambahan"
             className="w-full rounded border border-gray-300 bg-gray-100 px-3 py-2 outline-none"
           />
@@ -236,8 +288,8 @@ export default function TambahPengeluaran() {
             <label className="block text-sm font-semibold mb-2">Penerima</label>
             <input
               type="text"
-              value={form.penerima}
-              onChange={onChange("penerima")}
+              value={form.receiverName}
+              onChange={onChange("receiverName")}
               placeholder="Masukkan tanggal pelaksanaan tugas"
               className="w-full rounded border border-gray-300 bg-gray-100 px-3 py-2 outline-none"
             />
@@ -248,8 +300,8 @@ export default function TambahPengeluaran() {
             </label>
             <input
               type="number"
-              value={form.telepon}
-              onChange={onChange("telepon")}
+              value={form.receiverPhoneNumber}
+              onChange={onChange("receiverPhoneNumber")}
               placeholder="Masukkan waktu pelaksanaan tugas"
               className="w-full rounded border border-gray-300 bg-gray-100 px-3 py-2 outline-none"
             />
@@ -265,10 +317,10 @@ export default function TambahPengeluaran() {
             <div className="flex items-center rounded border border-gray-300 bg-gray-100 px-3 py-2">
               <span className="text-gray-600 mr-2 select-none">Rp</span>
               <input
-                type="number"
+                type="text"
                 inputMode="numeric"
-                value={form.nominal}
-                onChange={onChange("nominal")}
+                value={formatThousand(form.nominal)}
+                onChange={onNominalChange}
                 placeholder="0"
                 className="flex-1 bg-transparent outline-none border-0 focus:ring-0"
               />
@@ -279,8 +331,8 @@ export default function TambahPengeluaran() {
               Metode Pembayaran
             </label>
             <select
-              value={form.metode}
-              onChange={onChange("metode")}
+              value={form.paymentMethod}
+              onChange={onChange("paymentMethod")}
               className="w-full rounded border border-gray-300 bg-gray-100 px-3 py-2 outline-none"
             >
               <option value="" disabled>
@@ -311,7 +363,7 @@ export default function TambahPengeluaran() {
             <span className="inline-flex h-6 w-6 items-center justify-center rounded border border-gray-300">
               <FiUpload size={14} />
             </span>
-            {form.buktiFile ? form.buktiFile.name : "Unggah bukti pembayaran"}
+            {form.paymentProof ? form.paymentProof : "Unggah bukti pembayaran"}
           </button>
         </div>
 
@@ -321,8 +373,8 @@ export default function TambahPengeluaran() {
           </label>
           <textarea
             rows={3}
-            value={form.deskripsi}
-            onChange={onChange("deskripsi")}
+            value={form.description}
+            onChange={onChange("description")}
             placeholder="Tuliskan deskripsi pekerjaan tambahan"
             className="w-full rounded border border-gray-300 bg-gray-100 px-3 py-2 outline-none"
           />
