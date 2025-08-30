@@ -38,6 +38,7 @@ const Badge = ({ tone = "neutral", children }) => {
   );
 };
 
+
 export default function DetailPenjualanAyam() {
   const navigate = useNavigate();
   const { id } = useParams();

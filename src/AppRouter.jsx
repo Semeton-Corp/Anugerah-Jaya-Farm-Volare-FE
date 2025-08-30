@@ -113,6 +113,10 @@ import Pengeluaran from "./pages/Pengeluaran";
 import TambahPengeluaran from "./pages/TambahPengeluaran";
 import DetailPengeluaran from "./pages/DetailPengeluaran";
 import PengadaanDoc from "./pages/PengadaanDoc";
+import Piutang from "./pages/Piutang";
+import TambahKasbon from "./pages/TambahKasbon";
+import DetailPiutang from "./pages/DetailPiutang";
+import Hutang from "./pages/Hutang";
 
 const AppRouter = createBrowserRouter([
   {
@@ -630,6 +634,25 @@ const AppRouter = createBrowserRouter([
                     element: <DetailPengeluaran />,
                   },
                 ],
+              },
+              {
+                path: "piutang",
+                element: <Piutang />,
+                children: [
+                  {
+                    path: "tambah-kasbon",
+                    element: <TambahKasbon />,
+                  },
+                  {
+                    path: "detail-piutang/:category/:id",
+                    element: <DetailPiutang />,
+                  },
+                ],
+              },
+              {
+                path: "hutang",
+                element: <Hutang />,
+                children: [],
               },
             ],
           },

@@ -55,3 +55,67 @@ export const getIncome = (category, id) => {
     },
   });
 };
+
+export const getReceivablesOverview = (category, month, year) => {
+  return api.get(`/cashflows/receivables/overview`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    params: {
+      category: category,
+      month: month,
+      year,
+    },
+  });
+};
+
+export const getUserCashAdvanceByUserId = (userId) => {
+  return api.get(`/cashflows/cash-advances/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const createUserCashAdvance = (payload) => {
+  return api.post(`/cashflows/cash-advances`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const createUserCashAdvancePayment = (payload, id) => {
+  return api.post(`/cashflows/cash-advances/${id}/payments`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const getReceivables = (category, id) => {
+  return api.get(`/cashflows/receivables/${category}/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const getDebtOverview = (category, month, year) => {
+  return api.get(`/cashflows/debts/overview`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    params: {
+      category: category,
+      month: month,
+      year,
+    },
+  });
+};
