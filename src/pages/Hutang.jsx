@@ -73,7 +73,7 @@ export default function Hutang() {
     try {
       setLoading(true);
       const res = await getDebtOverview(category, monthName, year);
-      console.log("res: ", res);
+      console.log("debt res: ", res);
       if (res?.status === 200) {
         const payload = res.data?.data || {};
         setPie(payload.debtPie || null);
@@ -264,7 +264,7 @@ export default function Hutang() {
                     <td className="py-3 px-4">{r.placeName}</td>
                     <td className="py-3 px-4">{r.name}</td>
                     <td className="py-3 px-4 font-medium">
-                      {formatRupiah(r.totalNominal)}
+                      {formatRupiah(r.nominal)}
                     </td>
                     <td className="py-3 px-4 font-medium">
                       {formatRupiah(r.remainingPayment)}

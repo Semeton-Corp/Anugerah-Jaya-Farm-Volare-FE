@@ -117,6 +117,7 @@ import Piutang from "./pages/Piutang";
 import TambahKasbon from "./pages/TambahKasbon";
 import DetailPiutang from "./pages/DetailPiutang";
 import Hutang from "./pages/Hutang";
+import DetailHutang from "./pages/DetailHutang";
 
 const AppRouter = createBrowserRouter([
   {
@@ -652,7 +653,12 @@ const AppRouter = createBrowserRouter([
               {
                 path: "hutang",
                 element: <Hutang />,
-                children: [],
+                children: [
+                  {
+                    path: "detail-hutang/:category/:id",
+                    element: <DetailHutang />,
+                  },
+                ],
               },
             ],
           },

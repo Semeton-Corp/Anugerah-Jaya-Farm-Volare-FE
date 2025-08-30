@@ -119,3 +119,12 @@ export const getDebtOverview = (category, month, year) => {
     },
   });
 };
+
+export const getDebt = (category, id) => {
+  return api.get(`/cashflows/debts/${category}/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
