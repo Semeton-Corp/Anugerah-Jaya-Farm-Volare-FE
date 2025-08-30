@@ -29,15 +29,6 @@ const MONTHS_ID = [
   "Desember",
 ];
 
-const CATEGORIES = [
-  "Operasional",
-  "Pengadaan Ayam DOC",
-  "Pengadaan Barang",
-  "Pengadaan Jagung",
-  "Lain-lain",
-  "Pegawai",
-];
-
 const CATEGORY_OPTIONS = [
   "Operasional",
   "Pengadaan Ayam DOC",
@@ -67,7 +58,7 @@ export default function Pengeluaran() {
   const location = useLocation();
 
   const [expenseData, setExpenseData] = useState([]);
-  const [pieChartData, setpieChartData] = useState([]);
+  const [pieChartData, setPieChartData] = useState([]);
 
   const pieData = useMemo(() => {
     if (!pieChartData) return [];
@@ -88,13 +79,12 @@ export default function Pengeluaran() {
       .filter((d) => d.value > 0);
   }, [pieChartData]);
 
+  const [category, setCategory] = useState("Semua");
   const [month, setMonth] = useState(new Date().getMonth());
   const [year, setYear] = useState(new Date().getFullYear());
   const [monthName, setMonthName] = useState(
     new Intl.DateTimeFormat("id-ID", { month: "long" }).format(new Date())
   );
-
-  const [category, setCategory] = useState("Semua");
 
   const [openCat, setOpenCat] = useState(false);
 
@@ -135,7 +125,7 @@ export default function Pengeluaran() {
       console.log("fetchExpenseResponse: ", fetchExpenseResponse);
       if (fetchExpenseResponse.status == 200) {
         setExpenseData(fetchExpenseResponse.data.data.expenses);
-        setpieChartData(fetchExpenseResponse.data.data.expensePie);
+        setPieChartData(fetchExpenseResponse.data.data.expensePie);
       }
     } catch (error) {
       console.log("error :", error);
@@ -162,7 +152,7 @@ export default function Pengeluaran() {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="ml-2 bg-transparent text-base font-medium outline-none"
+                className="ml-2 bg-transparent text-base font-medium outline-none cursor-pointer"
               >
                 <option value="">Semua Kategori</option>
                 {CATEGORY_OPTIONS.map((c) => (
@@ -173,9 +163,6 @@ export default function Pengeluaran() {
               </select>
             </div>
           </div>
-
-          {/* Bulan / Tahun */}
-
           <MonthYearSelector
             month={month}
             year={year}

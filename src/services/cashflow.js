@@ -32,3 +32,26 @@ export const getExpense = (category, id) => {
     },
   });
 };
+
+export const getIncomeOverview = (category, month, year) => {
+  return api.get(`/cashflows/incomes/overview`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    params: {
+      category: category,
+      month: month,
+      year,
+    },
+  });
+};
+
+export const getIncome = (category, id) => {
+  return api.get(`/cashflows/incomes/${category}/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};

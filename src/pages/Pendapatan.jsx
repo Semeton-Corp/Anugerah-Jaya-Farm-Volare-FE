@@ -1,5 +1,5 @@
 // src/pages/Pendapatan.jsx
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ResponsiveContainer,
   PieChart,
@@ -11,6 +11,7 @@ import {
 import { FaCalendarAlt } from "react-icons/fa";
 import MonthYearSelector from "../components/MonthYearSelector";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { getIncomeOverview } from "../services/cashflow";
 
 const MONTHS_ID = [
   "Januari",
@@ -33,6 +34,33 @@ const CATEGORIES = [
   "Penjualan Telur Gudang",
 ];
 
+const CATEGORY_OPTIONS = [
+  "Operasional",
+  "Pengadaan Ayam DOC",
+  "Pengadaan Barang",
+  "Pengadaan Jagung",
+  "Lain-lain",
+  "Pegawai",
+];
+
+const INCOME_CATEGORIES = [
+  "Penjualan Telur Toko",
+  "Penjualan Telur Gudang",
+  "Penjualan Ayam Afkir",
+];
+
+const INCOME_PIE_MAP = {
+  "Penjualan Telur Toko": "storeEggSalePercentage",
+  "Penjualan Telur Gudang": "warehouseEggSalePercentage",
+  "Penjualan Ayam Afkir": "afkirChickenSalePercentage",
+};
+
+const INCOME_COLORS = {
+  "Penjualan Telur Toko": "#3b82f6",
+  "Penjualan Telur Gudang": "#22c55e",
+  "Penjualan Ayam Afkir": "#f59e0b",
+};
+
 const COLORS = {
   "Penjualan Ayam": "#215963",
   "Penjualan Telur Toko": "#E29901",
@@ -48,6 +76,18 @@ const formatRupiah = (n = 0) =>
 export default function Pendapatan() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const [incomeData, setIncomeData] = useState([]);
+  const [pieChartData, setPieChartData] = useState([]);
+
+  const pieData = useMemo(() => {
+    if (!pieChartData) return [];
+    return INCOME_CATEGORIES.map((name) => ({
+      name,
+      value: Number(pieChartData[INCOME_PIE_MAP[name]] ?? 0),
+    })).filter((d) => d.value > 0);
+  }, [pieChartData]);
+
   const [rows] = useState([
     {
       id: 1,
@@ -100,26 +140,11 @@ export default function Pendapatan() {
     });
   }, [rows, category, month, year]);
 
-  // pie data (keep stable order via CATEGORIES)
-  const pieData = useMemo(() => {
-    const totals = new Map(CATEGORIES.map((c) => [c, 0]));
-    filtered.forEach((r) => {
-      const key = r.kategori ?? "Penjualan Ayam";
-      totals.set(key, (totals.get(key) || 0) + Number(r.nominal || 0));
-    });
-    return (
-      CATEGORIES.map((name) => ({ name, value: totals.get(name) || 0 }))
-        // hide zero segments from the chart (legend still shows via <Legend/>)
-        .filter((d) => d.value > 0)
-    );
-  }, [filtered]);
-
   const totalNominal = useMemo(
     () => filtered.reduce((sum, r) => sum + Number(r.nominal || 0), 0),
     [filtered]
   );
 
-  // Custom tooltip with Rupiah + percentage of total
   const PieTip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
     const { name, value, payload: p } = payload[0];
@@ -134,9 +159,29 @@ export default function Pendapatan() {
     );
   };
 
-  const handleDetail = () => {
-    navigate(`${location.pathname}/detail-pendapatan`);
+  const handleDetail = (category, id) => {
+    navigate(`${location.pathname}/detail-pendapatan/${category}/${id}`);
   };
+
+  const fetchIncomeData = async () => {
+    try {
+      const fetchIncomeResponse = await getIncomeOverview(
+        category,
+        monthName,
+        year
+      );
+      if (fetchIncomeResponse.status == 200) {
+        setIncomeData(fetchIncomeResponse.data.data.incomes);
+        setPieChartData(fetchIncomeResponse.data.data.incomePie);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchIncomeData();
+  }, [category, monthName, year]);
 
   if (isDetailPage) {
     return <Outlet />;
@@ -149,40 +194,22 @@ export default function Pendapatan() {
         <h1 className="text-2xl font-bold">Pendapatan</h1>
 
         <div className="flex items-center gap-2">
-          {/* Kategori
-          <div className="relative">
-            <button
-              onClick={() => setCategory((prev) => prev)} 
-              className="bg-orange-300 hover:bg-orange-500 cursor-pointer text-black px-4 py-2 rounded flex items-center gap-2"
-            >
-              <FaCalendarAlt size={16} />
-              {category === "Semua" ? "Semua Kategori" : category}
-            </button>
-            <div className="absolute right-0 mt-2 w-56 rounded border bg-white shadow z-10">
-              <ul className="py-1 text-sm">
-                <li>
-                  <button
-                    className="w-full text-left px-3 py-2 hover:bg-gray-100"
-                    onClick={() => setCategory("Semua")}
-                  >
-                    Semua
-                  </button>
-                </li>
-                {CATEGORIES.map((c) => (
-                  <li key={c}>
-                    <button
-                      className="w-full text-left px-3 py-2 hover:bg-gray-100"
-                      onClick={() => setCategory(c)}
-                    >
-                      {c}
-                    </button>
-                  </li>
+          <div className="">
+            <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="ml-2 bg-transparent text-base font-medium outline-none cursor-pointer"
+              >
+                <option value="">Semua Kategori</option>
+                {CATEGORY_OPTIONS.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
                 ))}
-              </ul>
+              </select>
             </div>
-          </div> */}
-
-          {/* Bulan/Tahun */}
+          </div>
           <MonthYearSelector
             month={month}
             year={year}
@@ -215,27 +242,28 @@ export default function Pendapatan() {
         {/* Pie + legend */}
         <div className="max-w-2xl">
           {pieData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={260}>
+            <ResponsiveContainer width="100%" height={240}>
               <PieChart>
                 <Pie
                   data={pieData}
                   dataKey="value"
                   nameKey="name"
-                  outerRadius={100}
-                  innerRadius={50}
+                  outerRadius={90}
+                  innerRadius={45}
                   stroke="#fff"
                   strokeWidth={1}
                   paddingAngle={2}
-                  isAnimationActive
                 >
-                  {pieData.map((entry) => (
+                  {pieData.map((d) => (
                     <Cell
-                      key={entry.name}
-                      fill={COLORS[entry.name] || "#9CA3AF"}
+                      key={d.name}
+                      fill={INCOME_COLORS[d.name] || "#9CA3AF"}
                     />
                   ))}
                 </Pie>
-                <Tooltip content={<PieTip />} />
+                <Tooltip
+                  formatter={(v, n) => [`${Number(v).toFixed(2)}%`, n]}
+                />
                 <Legend
                   verticalAlign="middle"
                   align="right"
@@ -267,44 +295,37 @@ export default function Pendapatan() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {filtered.map((item) => {
-                  const d = new Date(item.date);
-                  const tanggal = `${String(d.getDate()).padStart(
-                    2,
-                    "0"
-                  )} ${MONTHS_ID[d.getMonth()].slice(0, 3)} ${d.getFullYear()}`;
-                  return (
-                    <tr key={item.id} className="align-top">
-                      <td className="py-3 px-4 whitespace-nowrap">{tanggal}</td>
-                      <td className="py-3 px-4">{item.kategori}</td>
-                      <td className="py-3 px-4">{item.lokasi}</td>
-                      <td className="py-3 px-4">{item.namaBarang}</td>
-                      <td className="py-3 px-4">{item.jumlahBarang}</td>
-                      <td className="py-3 px-4">{item.pelanggan}</td>
-                      <td className="py-3 px-4 font-medium">
-                        {formatRupiah(item.nominal)}
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex flex-col gap-2 w-28">
-                          <button
-                            className="rounded bg-orange-300 hover:bg-orange-500 text-black px-3 py-1.5 cursor-pointer"
-                            onClick={() => alert("Lihat Bukti")}
-                          >
-                            Lihat Bukti
-                          </button>
-                          <button
-                            className="rounded bg-green-700 hover:bg-green-900 text-white px-3 py-1.5 cursor-pointer"
-                            onClick={() => {
-                              handleDetail();
-                            }}
-                          >
-                            Lihat detail
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {incomeData.map((item) => (
+                  <tr key={item.id} className="align-top">
+                    <td className="py-3 px-4">{item.date}</td>
+                    <td className="py-3 px-4">{item.category}</td>
+                    <td className="py-3 px-4">{item.placeName}</td>
+                    <td className="py-3 px-4">{item.itemName}</td>
+                    <td className="py-3 px-4">{`${item.quantity} ${item.itemUnit}`}</td>
+                    <td className="py-3 px-4">{item.customerName}</td>
+                    <td className="py-3 px-4 font-medium">
+                      {formatRupiah(item.nominal)}
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex flex-col gap-2 w-28">
+                        <button
+                          className="rounded bg-orange-300 hover:bg-orange-500 text-black px-3 py-1.5 cursor-pointer"
+                          onClick={() => alert("Lihat Bukti")}
+                        >
+                          Lihat Bukti
+                        </button>
+                        <button
+                          className="rounded bg-green-700 hover:bg-green-900 text-white px-3 py-1.5 cursor-pointer"
+                          onClick={() => {
+                            handleDetail(item.category, item.id);
+                          }}
+                        >
+                          Lihat detail
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
 
                 {filtered.length === 0 && (
                   <tr>
@@ -336,6 +357,14 @@ export default function Pendapatan() {
           </div>
         </div>
       </div>
+      <button
+        onClick={() => {
+          console.log("incomeData: ", incomeData);
+          console.log("pieChartData: ", pieChartData);
+        }}
+      >
+        CHECK
+      </button>
     </div>
   );
 }

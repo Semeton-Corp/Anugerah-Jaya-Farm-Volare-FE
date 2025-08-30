@@ -612,7 +612,7 @@ const AppRouter = createBrowserRouter([
                 element: <Pendapatan />,
                 children: [
                   {
-                    path: "detail-pendapatan",
+                    path: "detail-pendapatan/:category/:id",
                     element: <DetailPendapatan />,
                   },
                 ],
