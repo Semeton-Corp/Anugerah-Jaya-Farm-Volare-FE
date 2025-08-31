@@ -303,12 +303,15 @@ const Ayam = () => {
               </div>
 
               <div className="flex flex-wrap gap-4">
-                {/* item butir */}
                 <div className="flex flex-wrap gap-4">
                   <div className="flex">
-                    {/* popuasl */}
                     <p className="text-3xl font-semibold pe-2">
-                      {chickenDetail?.totalKPIPerformance ?? "-"}
+                      {chickenDetail?.totalKPIPerformance != null
+                        ? new Intl.NumberFormat("en-US", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          }).format(Number(chickenDetail.totalKPIPerformance))
+                        : "-"}
                     </p>
                     <p className="text-3xl font-semibold">%</p>
                   </div>

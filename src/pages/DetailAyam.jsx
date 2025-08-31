@@ -98,7 +98,6 @@ const DetailAyam = () => {
 
   const handleDateChange = (e) => {
     const date = e.target.value;
-    console.log("date: ", date);
     setSelectedDate(date);
   };
 

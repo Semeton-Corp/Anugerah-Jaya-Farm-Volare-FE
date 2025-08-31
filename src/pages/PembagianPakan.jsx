@@ -188,7 +188,11 @@ export default function PembagianPakan() {
           filteredWarehouses = warehouses.filter(
             (warehouse) => warehouse.location.id == locationId
           );
+        } else {
+          filteredWarehouses = warehouses;
         }
+
+        console.log("filteredWarehouses: ", filteredWarehouses);
         setGudangOptions(filteredWarehouses);
       }
     } catch (error) {
@@ -391,7 +395,7 @@ export default function PembagianPakan() {
                   <option value="" disabled>
                     Pilih gudang
                   </option>
-                  {gudangOptions.map((g) => (
+                  {gudangOptions?.map((g) => (
                     <option key={g.id} value={g.id}>
                       {g.name}
                     </option>

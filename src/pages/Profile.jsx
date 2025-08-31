@@ -73,7 +73,6 @@ const Profile = ({ mode }) => {
   const [monthName, setMonthName] = useState(
     new Intl.DateTimeFormat("id-ID", { month: "long" }).format(new Date())
   );
-  console.log("mode: ", mode);
   const detailPages = ["detail-absensi", "detail-penyelesaian-pekerjaan"];
 
   const isDetailPage = detailPages.some((segment) =>
@@ -131,8 +130,8 @@ const Profile = ({ mode }) => {
     navigate(`${location.pathname}/detail-absensi`);
   };
 
-  const detailPenyelesaianPekerjaan = () => {
-    navigate(`${location.pathname}/detail-penyelesaian-pekerjaan`);
+  const detailPenyelesaianPekerjaan = (userId) => {
+    navigate(`${location.pathname}/detail-penyelesaian-pekerjaan/${userId}`);
   };
 
   if (isDetailPage) {
@@ -421,7 +420,9 @@ const Profile = ({ mode }) => {
                 <div className="flex justify-between items-center mb-2">
                   <h2 className="text-lg font-semibold">Penyelesaian Tugas</h2>
                   <button
-                    onClick={detailPenyelesaianPekerjaan}
+                    onClick={() => {
+                      detailPenyelesaianPekerjaan(userData.id);
+                    }}
                     className="px-4 py-2 rounded-[4px] bg-orange-400 hover:bg-orange-600 cursor-pointer"
                   >
                     Detail

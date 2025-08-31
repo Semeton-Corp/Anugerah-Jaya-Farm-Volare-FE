@@ -2,7 +2,9 @@ import React from "react";
 import { FiCheck } from "react-icons/fi";
 import {
   getAdditionalWorks,
+  getAdditionalWorkUserByUserId,
   getDailyWorkUser,
+  getDailyWorkUserByUserId,
   takeAdditionalWorks,
   updateAdditionalWorkStaff,
   updateDailyWorkStaff,
@@ -14,37 +16,71 @@ import {
 } from "../utils/dateFormat";
 import { getCurrentPresence } from "../services/presence";
 import { PiCalendarBlank } from "react-icons/pi";
+import { useParams } from "react-router-dom";
+import MonthYearSelector from "../components/MonthYearSelector";
 
 const DetailPenyelesaianPekerjaan = () => {
+  const { userId } = useParams();
+
+  const [month, setMonth] = useState(new Date().getMonth());
+  const [year, setYear] = useState(new Date().getFullYear());
+  const [monthName, setMonthName] = useState(
+    new Intl.DateTimeFormat("id-ID", { month: "long" }).format(new Date())
+  );
+
   const [tugasTambahanData, setTugasTambahanData] = useState([]);
+
+  const [pageAdditional, setPageAdditional] = useState(1);
+  const [pageDaily, setPageDaily] = useState(1);
+
+  const [maxPageAdditional, setMaxPageAdditional] = useState(1);
+  const [maxPageDaily, setMaxPageDaily] = useState(1);
 
   const [dailyWorks, setDailyWorks] = useState([]);
   const [additionalWorks, setAdditionalWorks] = useState([]);
 
-  const fetchTugasTambahanData = async () => {
-    try {
-      const response = await getAdditionalWorks();
-      console.log("response.data.data: ", response);
+  const onPrevAdditional = () => setPageAdditional((p) => Math.max(1, p - 1));
+  const onNextAdditional = () =>
+    setPageAdditional((p) => Math.min(maxPageAdditional, p + 1));
 
-      if (response.status == 200) {
-        setTugasTambahanData(response.data.data);
+  const onPrevDaily = () => setPageDaily((p) => Math.max(1, p - 1));
+  const onNextDaily = () => setPageDaily((p) => Math.min(maxPageDaily, p + 1));
+
+  const fetchTugasTambahanData = async () => {
+    const params = {
+      page: pageAdditional,
+      month: monthName,
+      year,
+      withDeleted: true,
+    };
+    try {
+      const response = await getAdditionalWorkUserByUserId(userId, params);
+      if (response.status === 200) {
+        const data = response?.data?.data?.additionalWorkUsers;
+        console.log("data: ", data);
+        setAdditionalWorks(data);
+        setMaxPageAdditional(Number(data.totalPage || data.totalPages || 1));
       }
     } catch (error) {
-      alert("Terjadi kesalahan saat memuat tugas rutin");
+      alert("Terjadi kesalahan saat memuat tugas tambahan");
       console.log("Error: ", error);
     }
   };
 
   const fetchAllTugas = async () => {
+    const params = {
+      page: pageDaily,
+      month: monthName,
+      year: year,
+      withDeleted: true,
+    };
     try {
-      const response = await getDailyWorkUser();
-      console.log("response fetch tugas tambahan data: ", response);
-
+      const response = await getDailyWorkUserByUserId(userId, params);
+      console.log("response.data.data.dailyWorks: ", response);
       if (response.status == 200) {
-        setDailyWorks(response.data.data.dailyWorks);
+        setDailyWorks(response.data.data.dailyWorkUsers);
         setAdditionalWorks(response.data.data.additionalWorks);
-
-        // setTugasTambahanData(response.data.data);
+        setMaxPageDaily(response.data.data.totalPage);
       }
     } catch (error) {
       alert("Terjadi kesalahan saat memuat tugas rutin");
@@ -52,72 +88,13 @@ const DetailPenyelesaianPekerjaan = () => {
     }
   };
 
-  const takeAdditionalTaskHandle = async (id) => {
-    try {
-      const takeResponse = await takeAdditionalWorks(id);
-      console.log("takeResponse: ", takeResponse);
-      if (takeResponse.status == 201) {
-        fetchTugasTambahanData();
-      }
-    } catch (error) {
-      console.log("error :", error);
-    }
-  };
-
-  const getTodayPresence = async (id) => {
-    try {
-      const presenceResponse = await getCurrentPresence();
-      console.log("presenceResponse: ", presenceResponse);
-      if (presenceResponse.status == 200) {
-        setIsPresence(presenceResponse.data.data.isPresent);
-        if (presenceResponse.data.data.isPresent) {
-          fetchTugasTambahanData();
-          fetchAllTugas();
-        }
-      }
-    } catch (error) {
-      console.log("error :", error);
-    }
-  };
+  useEffect(() => {
+    fetchAllTugas();
+  }, [monthName, year, pageDaily]);
 
   useEffect(() => {
-    getTodayPresence();
-
     fetchTugasTambahanData();
-    fetchAllTugas();
-  }, []);
-
-  const finishAdditionalTask = async (taskId) => {
-    const payload = {
-      isDone: true,
-    };
-
-    try {
-      const updateResponse = await updateAdditionalWorkStaff(payload, taskId);
-      console.log("updateResponse: ", updateResponse);
-      if (updateResponse.status == 200) {
-        fetchAllTugas();
-      }
-    } catch (error) {
-      console.log("error :", error);
-    }
-  };
-
-  const finishDailyTask = async (taskId) => {
-    const payload = {
-      isDone: true,
-    };
-
-    try {
-      const updateResponse = await updateDailyWorkStaff(payload, taskId);
-      console.log("updateResponse: ", updateResponse);
-      if (updateResponse.status == 200) {
-        fetchAllTugas();
-      }
-    } catch (error) {
-      console.log("error :", error);
-    }
-  };
+  }, [monthName, year, pageAdditional]);
 
   const getStatusStyle = (status) => {
     switch (status) {
@@ -139,17 +116,18 @@ const DetailPenyelesaianPekerjaan = () => {
         <div className="text-3xl font-bold mb-4">
           Detail Penyelesaian Pekerjaan
         </div>
-        <div className="flex items-center rounded-lg px-4 py-1 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-          <PiCalendarBlank size={18} />
-          <div className="text-base font-medium ms-2">
-            Hari ini ({getTodayDateInBahasa()})
-          </div>
-        </div>
+        <MonthYearSelector
+          month={month}
+          year={year}
+          setMonth={setMonth}
+          setMonthName={setMonthName}
+          setYear={setYear}
+        />
       </div>
 
       {/* tugas tambahan  */}
       <div className="border p-4 border-black-6 rounded-lg bg-white mb-3">
-        <h2 className="text-xl font-semibold mb-4">Tugas Tambahan</h2>
+        <h2 className="text-xl font-semibold mb-4">Pekerjaan Tambahan</h2>
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-green-700 text-white text-left">
@@ -178,11 +156,51 @@ const DetailPenyelesaianPekerjaan = () => {
             ))}
           </tbody>
         </table>
+
+        <div className="flex justify-between mt-16 px-6">
+          <p className="text-sm text-[#CCCCCC]">
+            Menampilkan {additionalWorks?.length} data dari {maxPageAdditional}{" "}
+            Halaman Riwayat
+          </p>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              disabled={pageAdditional === 1}
+              onClick={pageAdditional > 1 ? onPrevAdditional : undefined}
+              className={`rounded-[4px] py-2 px-6 text-base font-medium
+                  ${
+                    pageAdditional === 1
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-green-100 hover:bg-green-200 text-black cursor-pointer"
+                  }`}
+            >
+              Previous
+            </button>
+
+            <button
+              type="button"
+              disabled={pageAdditional === maxPageAdditional}
+              onClick={
+                pageAdditional < maxPageAdditional
+                  ? onNextAdditional
+                  : undefined
+              }
+              className={`rounded-[4px] py-2 px-6 text-base font-medium
+                  ${
+                    pageAdditional === maxPageAdditional
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-green-700 hover:bg-green-900 text-white cursor-pointer"
+                  }`}
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Tugas hari ini */}
       <div className="border p-4 border-black-6 rounded-lg bg-white">
-        <h2 className="text-xl font-semibold mb-4">Tugas Rutin</h2>
+        <h2 className="text-xl font-semibold mb-4">Pekerjaan Rutin</h2>
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-green-700 text-white text-left">
@@ -211,15 +229,52 @@ const DetailPenyelesaianPekerjaan = () => {
             ))}
           </tbody>
         </table>
+        <div className="flex justify-between mt-16 px-6">
+          <p className="text-sm text-[#CCCCCC]">
+            Menampilkan {dailyWorks.length} data dari {maxPageDaily} Halaman
+            Riwayat{" "}
+          </p>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              disabled={pageDaily === 1}
+              onClick={pageDaily > 1 ? onPrevDaily : undefined}
+              className={`rounded-[4px] py-2 px-6 text-base font-medium
+                ${
+                  pageDaily === 1
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-green-100 hover:bg-green-200 text-black cursor-pointer"
+                }`}
+            >
+              Previous
+            </button>
+
+            <button
+              type="button"
+              disabled={pageDaily === maxPageDaily}
+              onClick={pageDaily < maxPageDaily ? onNextDaily : undefined}
+              className={`rounded-[4px] py-2 px-6 text-base font-medium
+                ${
+                  pageDaily === maxPageDaily
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-green-700 hover:bg-green-900 text-white cursor-pointer"
+                }`}
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
-      {/* <button
-          onClick={() => {
-            console.log("tugasTambahanData: ", tugasTambahanData);
-            console.log("additionalWorks: ", additionalWorks);
-          }}
-        >
-          check
-        </button> */}
+      <button
+        onClick={() => {
+          console.log("tugasTambahanData: ", tugasTambahanData);
+          console.log("additionalWorks: ", additionalWorks);
+          console.log("maxPageDaily: ", maxPageDaily);
+          console.log("pageDaily: ", pageDaily);
+        }}
+      >
+        check
+      </button>
     </div>
   );
 };

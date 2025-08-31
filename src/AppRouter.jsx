@@ -118,6 +118,8 @@ import TambahKasbon from "./pages/TambahKasbon";
 import DetailPiutang from "./pages/DetailPiutang";
 import Hutang from "./pages/Hutang";
 import DetailHutang from "./pages/DetailHutang";
+import GajiPegawai from "./pages/GajiPegawai";
+import DetailGaji from "./pages/DetailGaji";
 
 const AppRouter = createBrowserRouter([
   {
@@ -369,25 +371,20 @@ const AppRouter = createBrowserRouter([
               {
                 path: "stok-gudang",
                 element: <Gudang />,
-              },
-              {
-                path: "pakan",
                 children: [
                   {
-                    path: "pembagian-pakan",
-                    element: <PembagianPakan />,
+                    path: "edit-stok-telur",
+                    element: <EditStokTelur />,
                   },
                   {
-                    path: "formula-pakan",
-                    element: <FormulaPakan />,
-                    children: [
-                      {
-                        path: "edit-formula-pakan/:id",
-                        element: <EditFormulaPakan />,
-                      },
-                    ],
+                    path: "edit-stok-barang",
+                    element: <EditStokBarang />,
                   },
                 ],
+              },
+              {
+                path: "perbandingan-pakan",
+                element: <PerbandinganPakan />,
               },
               {
                 path: "pengadaan-barang",
@@ -396,12 +393,54 @@ const AppRouter = createBrowserRouter([
                   {
                     path: "draft-pengadaan-barang",
                     element: <DraftPengadaanBarang />,
+                    children: [
+                      {
+                        path: "input-draft-pengadaan-barang",
+                        element: <InputDraftPengadaanBarang />,
+                      },
+                      {
+                        path: "input-draft-pengadaan-barang/:id",
+                        element: <InputDraftPengadaanBarang />,
+                      },
+                    ],
+                  },
+                  {
+                    path: "detail-pengadaan-barang/:id",
+                    element: <DetailPengadaanBarang />,
                   },
                   {
                     path: "input-pengadaan-barang",
                     element: <InputPengadaanBarang />,
                   },
                 ],
+              },
+              {
+                path: "pengadaan-jagung",
+                element: <PengadaanJagung />,
+                children: [
+                  {
+                    path: "draft-pengadaan-jagung",
+                    element: <DraftPengadaanJagung />,
+                    children: [
+                      {
+                        path: "input-draft-pengadaan-jagung",
+                        element: <InputDraftPengadaanJagung />,
+                      },
+                      {
+                        path: "input-draft-pengadaan-jagung/:id",
+                        element: <InputDraftPengadaanJagung />,
+                      },
+                    ],
+                  },
+                  {
+                    path: "detail-pengadaan-jagung/:id",
+                    element: <DetailPengadaanJagung />,
+                  },
+                ],
+              },
+              {
+                path: "pesanan-toko",
+                element: <PesananToko />,
               },
               {
                 path: "daftar-barang",
@@ -414,38 +453,6 @@ const AppRouter = createBrowserRouter([
                   {
                     path: "tambah-barang-baru/:id",
                     element: <TambahBarangBaru />,
-                  },
-                ],
-              },
-              {
-                path: "daftar-suplier",
-                element: <DaftarSuplier />,
-                children: [
-                  {
-                    path: "tambah-supplier",
-                    element: <TambahSupplier />,
-                  },
-                  {
-                    path: "tambah-supplier/:id",
-                    element: <TambahSupplier />,
-                  },
-                  {
-                    path: "detail-supplier/:id",
-                    element: <DetailSupplier />,
-                  },
-                ],
-              },
-              {
-                path: "pesanan-toko",
-                element: <PesananToko />,
-              },
-              {
-                path: "riwayat-gudang",
-                element: <RiwayatGudang />,
-                children: [
-                  {
-                    path: "detail-riwayat-gudang/:id",
-                    element: <DetailRiwayatGudang />,
                   },
                 ],
               },
@@ -464,6 +471,38 @@ const AppRouter = createBrowserRouter([
                   {
                     path: "detail-vaksin-obat/:id",
                     element: <DetailVaksinObatItem />,
+                  },
+                ],
+              },
+              {
+                path: "riwayat-gudang",
+                element: <RiwayatGudang />,
+                children: [
+                  {
+                    path: "detail-riwayat-gudang",
+                    element: <DetailRiwayatGudang />,
+                  },
+                  {
+                    path: "detail-riwayat-gudang/:id",
+                    element: <DetailRiwayatGudang />,
+                  },
+                ],
+              },
+              {
+                path: "daftar-suplier",
+                element: <DaftarSuplier />,
+                children: [
+                  {
+                    path: "tambah-supplier",
+                    element: <TambahSupplier />,
+                  },
+                  {
+                    path: "tambah-supplier/:id",
+                    element: <TambahSupplier />,
+                  },
+                  {
+                    path: "detail-supplier/:id",
+                    element: <DetailSupplier />,
                   },
                 ],
               },
@@ -660,6 +699,16 @@ const AppRouter = createBrowserRouter([
                   },
                 ],
               },
+              {
+                path: "gaji-pegawai",
+                element: <GajiPegawai />,
+                children: [
+                  {
+                    path: "detail-gaji/:salaryId",
+                    element: <DetailGaji />,
+                  },
+                ],
+              },
             ],
           },
         ],
@@ -683,7 +732,7 @@ const AppRouter = createBrowserRouter([
             children: [
               { path: "detail-absensi", element: <DetailAbsensi /> },
               {
-                path: "detail-penyelesaian-pekerjaan",
+                path: "detail-penyelesaian-pekerjaan/:userId",
                 element: <DetailPenyelesaianPekerjaan />,
               },
             ],
@@ -785,7 +834,7 @@ const AppRouter = createBrowserRouter([
             children: [
               { path: "detail-absensi", element: <DetailAbsensi /> },
               {
-                path: "detail-penyelesaian-pekerjaan",
+                path: "detail-penyelesaian-pekerjaan/:userId",
                 element: <DetailPenyelesaianPekerjaan />,
               },
             ],
@@ -834,7 +883,7 @@ const AppRouter = createBrowserRouter([
             children: [
               { path: "detail-absensi", element: <DetailAbsensi /> },
               {
-                path: "detail-penyelesaian-pekerjaan",
+                path: "detail-penyelesaian-pekerjaan/:userId",
                 element: <DetailPenyelesaianPekerjaan />,
               },
             ],
@@ -934,7 +983,7 @@ const AppRouter = createBrowserRouter([
             children: [
               { path: "detail-absensi", element: <DetailAbsensi /> },
               {
-                path: "detail-penyelesaian-pekerjaan",
+                path: "detail-penyelesaian-pekerjaan/:userId",
                 element: <DetailPenyelesaianPekerjaan />,
               },
             ],
@@ -1277,7 +1326,7 @@ const AppRouter = createBrowserRouter([
             children: [
               { path: "detail-absensi", element: <DetailAbsensi /> },
               {
-                path: "detail-penyelesaian-pekerjaan",
+                path: "detail-penyelesaian-pekerjaan/:userId",
                 element: <DetailPenyelesaianPekerjaan />,
               },
             ],

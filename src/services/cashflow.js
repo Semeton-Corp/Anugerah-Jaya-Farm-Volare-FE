@@ -128,3 +128,44 @@ export const getDebt = (category, id) => {
     },
   });
 };
+
+export const getUserSalaries = (params) => {
+  return api.get(`/cashflows/salaries`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    params: params,
+  });
+};
+
+export const getUserSalaryDetail = (id) => {
+  return api.get(`/cashflows/salaries/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};
+
+export const getUserSalarySummary = (month, year) => {
+  return api.get(`/cashflows/salaries/summary`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    params: {
+      month: month,
+      year: year,
+    },
+  });
+};
+
+export const payUserSalary = (payload, id) => {
+  return api.post(`/cashflows/salaries/${id}/pay`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+};

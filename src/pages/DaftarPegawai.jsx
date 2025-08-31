@@ -8,6 +8,8 @@ import { useEffect } from "react";
 import { getListStaff } from "../services/staff";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { getListUser, getUserOverviewList } from "../services/user";
+import { getRoles } from "../services/roles";
+import { MdStore } from "react-icons/md";
 
 const DaftarPegawai = () => {
   const location = useLocation();
@@ -24,14 +26,27 @@ const DaftarPegawai = () => {
   );
 
   const [pegawaiAktifData, setPegawaiAktifData] = useState([]);
+  const [roleOptions, setRoleOptions] = useState([]);
+  const [selectedRole, setSelectedRole] = useState("");
 
-  const fectPegawaiAktifData = async () => {
+  const fetchPegawaiAktifData = async () => {
     try {
-      // console.log("page: ", page);
       const fetchResponse = await getUserOverviewList();
-      console.log("fetchResponse: ", fetchResponse);
+      // console.log("fetchResponse: ", fetchResponse);
       if (fetchResponse.status == 200) {
         setPegawaiAktifData(fetchResponse.data.data.users);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const fetchRoles = async () => {
+    try {
+      const roleResponse = await getRoles();
+      // console.log("roleResponse: ", roleResponse);
+      if (roleResponse.status == 200) {
+        setPegawaiAktifData(roleResponse.data.data);
       }
     } catch (error) {
       console.log("error :", error);
@@ -47,12 +62,17 @@ const DaftarPegawai = () => {
   };
 
   useEffect(() => {
-    fectPegawaiAktifData();
+    fetchPegawaiAktifData();
+    fetchRoles();
     if (location.state?.refetch) {
-      fectPegawaiAktifData();
+      fetchPegawaiAktifData();
       window.history.replaceState({}, document.title);
     }
   }, [location]);
+
+  useEffect(() => {
+    fetchPegawaiAktifData();
+  }, [query]);
 
   if (isDetailPage) {
     return <Outlet />;
@@ -97,9 +117,20 @@ const DaftarPegawai = () => {
 
           {/* filters */}
           <div className="flex gap-3">
-            <div className="rounded-[4px] py-2 px-6 bg-orange-400 flex items-center justify-center text-black text-base font-medium hover:bg-orange-500 cursor-pointer">
-              <p>Semua jabatan</p>
-              <IoIosArrowDown size={24} />
+            <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+              <MdStore size={18} />
+              <select
+                value={selectedRole}
+                onChange={(e) => setSelectedRole(e.target.value)}
+                className="ml-2 bg-transparent text-base font-medium outline-none"
+              >
+                <option value="">Semua Site</option>
+                {roleOptions.map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {role.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="rounded-[4px] py-2 px-6 bg-orange-400 flex items-center justify-center text-black text-base font-medium hover:bg-orange-500 cursor-pointer">
               <PiCalendarBlank size={24} />
@@ -127,19 +158,19 @@ const DaftarPegawai = () => {
                   <td className="py-3 px-4">
                     <div className="flex gap-6">
                       <div className="h-12 w-12 rounded-full overflow-hidden">
-                        <img src={item.photoProfile} alt="Profile Avatar" />
+                        <img src={item?.photoProfile} alt="Profile Avatar" />
                       </div>
 
                       <div className="">
                         <p className="text-base font-me leading-tight">
-                          {item.name}
+                          {item?.name}
                         </p>
-                        <p className="text-sm text-gray-500">{item.email}</p>
+                        <p className="text-sm text-gray-500">{item?.email}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="py-2 px-4">{item.id}</td>
-                  <td className="py-2 px-4">{item.role.name}</td>
+                  <td className="py-2 px-4">{item?.id}</td>
+                  <td className="py-2 px-4">{item?.role?.name}</td>
                   <td className="py-2 px-4">
                     <span
                       className={`inline-block px-6 py-2 rounded-lg font-medium text-center

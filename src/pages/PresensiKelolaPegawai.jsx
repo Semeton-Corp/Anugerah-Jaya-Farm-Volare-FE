@@ -1,5 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { getLocationPresenceSummaries } from "../services/presence";
+import {
+  getLocationPresenceSummaries,
+  getUserPresencePending,
+} from "../services/presence";
 
 const classNames = (...arr) => arr.filter(Boolean).join(" ");
 
@@ -79,10 +82,19 @@ export default function PresensiKelolaPegawai() {
   const [activeModal, setActiveModal] = useState(null);
   const [selected, setSelected] = useState(new Set());
 
+  const [modalRequests, setModalRequests] = useState([]);
+  const [modalLoading, setModalLoading] = useState(false);
+
+  const [submitting, setSubmitting] = useState(false);
+
   const fetchSummary = async () => {
     try {
       const summaryResponse = await getLocationPresenceSummaries();
       console.log("summaryResponse: ", summaryResponse);
+      if (summaryResponse.status == 200) {
+        setLoading(false);
+        setRows(summaryResponse.data.data);
+      }
     } catch (error) {
       console.log("error :", error);
     }
@@ -91,9 +103,46 @@ export default function PresensiKelolaPegawai() {
     fetchSummary();
   }, []);
 
-  const openModal = (type, rowIndex) => {
+  const openModal = async (type, rowIndex) => {
     setActiveModal({ type, rowIndex });
     setSelected(new Set());
+
+    const row = rows[rowIndex];
+    const roleId = row.roleId ?? row.role?.id;
+    const placeId = row.placeId ?? row.locationId ?? row.place?.id;
+
+    const presenceStatus = type === "sakit" ? "Sakit" : "Izin";
+
+    setModalLoading(true);
+    try {
+      const resp = await getUserPresencePending({
+        roleId,
+        placeId,
+        presenceStatus,
+        submissionPresence: "Menunggu",
+      });
+
+      console.log("resp: ", resp);
+      if (resp?.status === 200) {
+        const list = (resp.data?.data || []).map((r) => ({
+          // normalize to your UI shape
+          id: r.id,
+          tanggal: r.date || r.tanggal || r.createdAt,
+          nama: r.user?.name || r.nama || "-",
+          keterangan: r.reason || r.keterangan || "-",
+          status: "pending",
+          buktiUrl: r.proofUrl || r.buktiUrl || r.attachmentUrl,
+        }));
+        setModalRequests(list);
+      } else {
+        setModalRequests([]);
+      }
+    } catch (e) {
+      console.error(e);
+      setModalRequests([]);
+    } finally {
+      setModalLoading(false);
+    }
   };
 
   const closeModal = () => {
@@ -123,6 +172,26 @@ export default function PresensiKelolaPegawai() {
       const allSelected = ids.every((id) => prev.has(id));
       return allSelected ? new Set() : new Set(ids);
     });
+  };
+  const handleBulkReview = async (newStatus) => {
+    if (!activeModal) return;
+    const ids = Array.from(selected);
+    if (!ids.length) return;
+
+    try {
+      setSubmitting(true);
+      await reviewPresenceRequests({
+        type: activeModal.type,
+        ids,
+        action: newStatus,
+      });
+      updateStatus(newStatus);
+    } catch (e) {
+      console.error(e);
+      alert(e?.message || "Gagal mengirim persetujuan, coba lagi.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const updateStatus = (newStatus) => {
@@ -169,6 +238,9 @@ export default function PresensiKelolaPegawai() {
                 Jumlah Pegawai
               </th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-white">
+                Lokasi
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-white">
                 Hadir
               </th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-white">
@@ -199,36 +271,39 @@ export default function PresensiKelolaPegawai() {
               rows.map((row, idx) => (
                 <tr key={idx} className="hover:bg-gray-50/60">
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                    {row.jabatan}
+                    {row.roleName}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">
-                    {row.jumlahPegawai} Orang
+                    {row.totalUser} Orang
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-700">
+                    {row.placeName}
                   </td>
                   <td className="px-6 py-4 text-sm">
-                    <Badge intent="green">{row.hadir} Orang</Badge>
+                    <Badge intent="green">{row.totalPresentUser} Orang</Badge>
                   </td>
                   <td className="px-6 py-4 text-sm">
-                    <Badge intent="yellow">{row.sakit} Orang</Badge>
+                    <Badge intent="yellow">{row.totalSickUser} Orang</Badge>
                   </td>
                   <td className="px-6 py-4 text-sm">
-                    <Badge intent="blue">{row.izin} Orang</Badge>
+                    <Badge intent="blue">{row.totalPermissionUser} Orang</Badge>
                   </td>
                   <td className="px-6 py-4 text-sm">
-                    <Badge intent="red">{row.alpha} Orang</Badge>
+                    <Badge intent="red">{row.totalAlphaUser} Orang</Badge>
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <div className="flex gap-3">
                       <PillButton
                         variant="warning"
                         onClick={() => openModal("sakit", idx)}
-                        disabled={row.sakit === 0}
+                        disabled={!row?.isSickUserPendingExist}
                       >
                         Sakit
                       </PillButton>
                       <PillButton
                         variant="neutral"
                         onClick={() => openModal("izin", idx)}
-                        disabled={row.izin === 0}
+                        disabled={!row?.isPermissionUserPendingExist}
                       >
                         Izin
                       </PillButton>
@@ -246,11 +321,14 @@ export default function PresensiKelolaPegawai() {
         open={!!activeModal}
         type={activeModal?.type}
         row={activeModal ? rows[activeModal.rowIndex] : null}
+        requests={modalRequests}
+        loading={modalLoading}
         selected={selected}
         onToggle={toggleSelect}
         onToggleAll={toggleSelectAll}
-        onApprove={() => updateStatus("approved")}
-        onReject={() => updateStatus("rejected")}
+        onApprove={() => handleBulkReview("approved")}
+        onReject={() => handleBulkReview("rejected")}
+        submitting={submitting}
         onClose={closeModal}
       />
     </div>
@@ -261,22 +339,24 @@ function ApprovalModal({
   open,
   type,
   row,
+  requests = [],
+  loading = false,
   selected,
   onToggle,
   onToggleAll,
   onApprove,
   onReject,
+  submitting,
   onClose,
 }) {
   const isIzin = type === "izin";
   const title = isIzin ? `Persetujuan Izin` : `Persetujuan Sakit`;
-  const requests = row?.requests?.[type] || [];
   const pending = requests.filter((x) => x.status === "pending");
 
   return (
     <Modal
       open={open}
-      title={`${title}${row ? ` · ${row.jabatan}` : ""}`}
+      title={`${title}${row ? ` · ${row.roleName ?? row.jabatan ?? ""}` : ""}`}
       onClose={onClose}
       footer={
         <div className="flex w-full items-center justify-between">
@@ -287,28 +367,34 @@ function ApprovalModal({
             <PillButton
               variant="danger"
               onClick={onReject}
-              disabled={selected.size === 0}
+              disabled={selected.size === 0 || submitting || loading}
             >
-              Tolak ({selected.size})
+              {submitting ? "Memproses..." : `Tolak (${selected.size})`}
             </PillButton>
             <PillButton
               variant="primary"
               onClick={onApprove}
-              disabled={selected.size === 0}
+              disabled={selected.size === 0 || submitting || loading}
             >
-              Setujui ({selected.size})
+              {submitting ? "Memproses..." : `Setujui (${selected.size})`}
             </PillButton>
           </div>
         </div>
       }
     >
-      {requests.length === 0 && (
+      {loading && (
+        <div className="rounded-xl border border-dashed p-6 text-center text-gray-500">
+          Memuat permintaan…
+        </div>
+      )}
+
+      {!loading && requests.length === 0 && (
         <div className="rounded-xl border border-dashed p-6 text-center text-gray-500">
           Tidak ada permintaan.
         </div>
       )}
 
-      {requests.length > 0 && (
+      {!loading && requests.length > 0 && (
         <div className="space-y-4">
           <label className="flex items-center gap-3 text-sm font-medium">
             <input
@@ -318,7 +404,6 @@ function ApprovalModal({
               checked={
                 pending.length > 0 && pending.every((x) => selected.has(x.id))
               }
-              indeterminate={undefined}
             />
             Pilih Semua ({pending.length} permintaan)
           </label>
@@ -333,7 +418,7 @@ function ApprovalModal({
                   <input
                     type="checkbox"
                     className="mt-1 h-4 w-4 rounded border-gray-300"
-                    disabled={r.status !== "pending"}
+                    disabled={r.status !== "pending" || submitting}
                     checked={selected.has(r.id)}
                     onChange={() => onToggle(r.id)}
                   />
@@ -343,27 +428,28 @@ function ApprovalModal({
                       Keterangan : {r.keterangan}
                     </div>
                     <div className="mt-2">
-                      {r.status === "pending" && (
-                        <Badge intent="yellow">Menunggu Persetujuan</Badge>
-                      )}
-                      {r.status === "approved" && (
-                        <Badge intent="green">Disetujui</Badge>
-                      )}
-                      {r.status === "rejected" && (
-                        <Badge intent="red">Ditolak</Badge>
-                      )}
+                      <Badge intent="yellow">Menunggu Persetujuan</Badge>
                     </div>
                   </div>
                 </label>
-                <PillButton
-                  onClick={() => window.open(r.buktiUrl, "_blank")}
-                  variant="ghost"
-                >
-                  Bukti Izin
-                </PillButton>
+                {!!r.buktiUrl && (
+                  <PillButton
+                    onClick={() => window.open(r.buktiUrl, "_blank")}
+                    variant="ghost"
+                  >
+                    Bukti Izin
+                  </PillButton>
+                )}
               </div>
             </div>
           ))}
+          <button
+            onClick={() => {
+              console.log("requests: ", requests);
+            }}
+          >
+            CHECK
+          </button>
         </div>
       )}
     </Modal>

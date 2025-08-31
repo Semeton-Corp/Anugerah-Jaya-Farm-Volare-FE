@@ -1,4 +1,3 @@
-// src/pages/TambahKasbon.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { FaExclamationTriangle } from "react-icons/fa";
 import { getListUser } from "../services/user";
@@ -95,9 +94,8 @@ export default function TambahKasbon() {
     fetchAdvances(selectedUserId);
   }, [selectedUserId]);
 
-  // thousand-separator on type
   const handleNominalChange = (e) => {
-    const raw = e.target.value.replace(/\D/g, ""); // keep digits
+    const raw = e.target.value.replace(/\D/g, "");
     if (!raw) {
       setNominal("");
       return;
@@ -124,13 +122,10 @@ export default function TambahKasbon() {
     } catch (error) {
       console.log("error :", error);
     }
-
-    alert("Contoh submit. Hubungkan ke endpoint penyimpanan kasbon Anda.");
   };
 
   return (
     <div className="p-4 space-y-4">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Tambah Kasbon</h1>
         <div className="text-gray-700 font-medium">

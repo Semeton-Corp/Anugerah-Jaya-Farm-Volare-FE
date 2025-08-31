@@ -32,7 +32,7 @@ export const takeAdditionalWorks = (id) => {
   return api.post(
     `/works/additionals/takes/${id}`,
     {},
-  {
+    {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
@@ -137,5 +137,25 @@ export const getWorkOverview = () => {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
     },
+  });
+};
+
+export const getAdditionalWorkUserByUserId = (id, params) => {
+  return api.get(`/works/additionals/users/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    params: params,
+  });
+};
+
+export const getDailyWorkUserByUserId = (id, params) => {
+  return api.get(`/works/dailies/users/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    params: params,
   });
 };

@@ -60,3 +60,17 @@ export const getLocationPresenceSummaries = () => {
     },
   });
 };
+
+export const getUserPresencePending = ({
+  roleId,
+  placeId,
+  presenceStatus,
+  submissionPresence = "Menunggu",
+}) => {
+  return api.get(`/presences/locations/summaries`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    params: { roleId, placeId, presenceStatus, submissionPresence },
+  });
+};

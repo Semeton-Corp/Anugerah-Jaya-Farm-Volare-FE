@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { getTodayDateInBahasa } from "../utils/dateFormat";
+import React, { useEffect, useRef, useState } from "react";
+import { formatDate, getTodayDateInBahasa } from "../utils/dateFormat";
 import { PiCalendarBlank } from "react-icons/pi";
 import {
   getCurrentPresence,
@@ -8,6 +8,7 @@ import {
   getAllPresence,
   updatePresence,
 } from "../services/presence";
+import MonthYearSelector from "../components/MonthYearSelector";
 
 const Presensi = () => {
   const [presenceId, setPresenceId] = useState(0);
@@ -36,10 +37,17 @@ const Presensi = () => {
 
   const today = new Date();
   const monthIndex = today.getMonth();
-  const year = today.getFullYear();
 
-  const monthName = monthNamesBahasa[monthIndex];
-  const monthNumber = monthIndex + 1;
+  const [month, setMonth] = useState(new Date().getMonth());
+  const [year, setYear] = useState(new Date().getFullYear());
+  const [monthName, setMonthName] = useState(
+    new Intl.DateTimeFormat("id-ID", { month: "long" }).format(new Date())
+  );
+
+  const handleDateChange = (e) => {
+    const date = e.target.value;
+    setSelectedDate(date);
+  };
 
   const getTodayPresence = async () => {
     try {
@@ -70,9 +78,6 @@ const Presensi = () => {
 
   const getAttandanceData = async () => {
     try {
-      // console.log("monthName: ", monthName);
-      // console.log("year: ", year);
-
       const allPresenceResponse = await getAllPresence(monthName, year);
       console.log("allPresenceResponse: ", allPresenceResponse);
       if (allPresenceResponse.status == 200) {
@@ -307,7 +312,7 @@ const Presensi = () => {
   useEffect(() => {
     getTodayPresence();
     getAttandanceData();
-  }, [isPresence, isGoHome]);
+  }, [isPresence, isGoHome, monthName]);
 
   return (
     <div className="p-4">
@@ -370,12 +375,13 @@ const Presensi = () => {
       <div className="bg-white rounded border border-black-6 p-6">
         <div className="flex justify-between items-center mb-2 flex-wrap gap-4">
           <div></div>
-          <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-            <PiCalendarBlank size={18} />
-            <div className="text-base font-medium ms-2">
-              Hari ini ({getTodayDateInBahasa()})
-            </div>
-          </div>
+          <MonthYearSelector
+            month={month}
+            year={year}
+            setMonth={setMonth}
+            setMonthName={setMonthName}
+            setYear={setYear}
+          />
         </div>
 
         <table className="w-full border-collapse ">
