@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { PiCalendarBlank } from "react-icons/pi";
 import { MdEgg, MdShoppingCart } from "react-icons/md";
 import { PiMoneyWavyFill } from "react-icons/pi";
@@ -21,6 +21,11 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import MonthYearSelector from "../components/MonthYearSelector";
+import { getLocations } from "../services/location";
+import { getItems } from "../services/item";
+import { getCashflowSaleOverview } from "../services/cashflow";
+import { formatRupiah } from "../utils/moneyFormat";
 
 const dataUntung = [
   { date: "29 Mar", untung: 25000000 },
@@ -73,9 +78,44 @@ const pieData = [
 
 const COLORS = ["#2E7E8B", "#E8AD34"];
 
+const MONTHS_ID = [
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
+];
+
 const Penjualan = () => {
+  const userRole = localStorage.getItem("role");
+  const userName = localStorage.getItem("userName");
+
   const location = useLocation();
   const detailPages = ["detail-penjualan"];
+
+  const now = new Date();
+  const [month, setMonth] = useState(now.getMonth());
+  const [year, setYear] = useState(now.getFullYear());
+  const [monthName, setMonthName] = useState(MONTHS_ID[now.getMonth()]);
+
+  const [cashflowSaleSummary, setCashflowSaleSummary] = useState([]);
+
+  const [siteOptions, setSiteOptions] = useState([]);
+  const [selectedSite, setSelectedSite] = useState(
+    userRole === "Owner" ? 0 : localStorage.getItem("locationId")
+  );
+
+  const [itemOptions, setItemOptions] = useState([]);
+  const [selectedItem, setSelectedItem] = useState(
+    userRole === "Owner" ? 0 : localStorage.getItem("locationId")
+  );
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
@@ -89,6 +129,64 @@ const Penjualan = () => {
     navigate(detailPath);
   };
 
+  const fetchSites = async () => {
+    try {
+      const res = await getLocations();
+      if (res.status === 200) {
+        setSiteOptions(res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch sites", err);
+    }
+  };
+
+  const fetchItems = async () => {
+    try {
+      const res = await getItems("Telur");
+      if (res.status === 200) {
+        console.log("res: ", res);
+        setItemOptions(res.data.data);
+        setSelectedItem(res.data.data[0].id);
+      }
+    } catch (err) {
+      console.error("Failed to fetch sites", err);
+    }
+  };
+
+  const fetchSaleOverview = async () => {
+    try {
+      const saleResponse = await getCashflowSaleOverview(
+        selectedSite,
+        monthName,
+        year,
+        selectedItem
+      );
+      console.log("saleResponse: ", saleResponse);
+      if (saleResponse.status === 200) {
+        const data = saleResponse.data.data;
+        setCashflowSaleSummary(data.cashflowSaleSummary);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSites();
+    fetchItems();
+  }, [location]);
+
+  useEffect(() => {
+    if (
+      selectedSite !== null &&
+      selectedItem !== 0 &&
+      month !== null &&
+      year !== null
+    ) {
+      fetchSaleOverview();
+    }
+  }, [selectedSite, month, year, selectedItem]);
+
   return (
     <>
       {isDetailPage ? (
@@ -99,16 +197,30 @@ const Penjualan = () => {
           <div className="flex justify-between mb-2 flex-wrap gap-4">
             <h1 className="text-3xl font-bold">Penjualan</h1>
             <div className="flex gap-2">
-              <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-                <MdStore size={18} />
-                <div className="text-base font-medium ms-2">Semua Toko</div>
-              </div>
-              <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-                <PiCalendarBlank size={18} />
-                <div className="text-base font-medium ms-2">
-                  Hari ini (20 Mar 2025)
+              {userRole == "Owner" && (
+                <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+                  <MdStore size={18} />
+                  <select
+                    value={selectedSite}
+                    onChange={(e) => setSelectedSite(e.target.value)}
+                    className="ml-2 bg-transparent text-base font-medium outline-none"
+                  >
+                    <option value="">Semua Site</option>
+                    {siteOptions.map((site) => (
+                      <option key={site.id} value={site.id}>
+                        {site.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              </div>
+              )}
+              <MonthYearSelector
+                month={month}
+                year={year}
+                setMonth={setMonth}
+                setMonthName={setMonthName}
+                setYear={setYear}
+              />
               <div className="flex items-center rounded-lg px-4 py-2 bg-green-700 hover:bg-green-900 cursor-pointer">
                 <IoMdDownload size={18} color="White" />
                 <div className="text-base font-medium pl-2 text-white">
@@ -118,96 +230,90 @@ const Penjualan = () => {
             </div>
           </div>
 
-          {/* penjualan, pendapatan, keuntungan*/}
-          <div className="flex justify-between gap-4 items-stretch">
-            {/* produksi telur */}
-            <div className="flex-1 justify-center p-4 rounded-md border-2 border-black-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+            <div className="bg-white w-full p-4 border border-black-6 rounded-lg">
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="text-lg font-semibold">Pendapatan</h2>
+                <div className="p-2 rounded-xl bg-green-700">
+                  <PiMoneyWavyFill size={24} color="white" />
+                </div>
+              </div>
+              <p className="text-[36px] font-semibold mb-2">
+                {formatRupiah(cashflowSaleSummary.income)}
+              </p>
+              <div className="flex items-center">
+                <FaArrowDownLong color="#F41C1C" />
+                <p className="text-[16px] text-[#F41C1C]">
+                  10% dibanding kemarin
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white w-full p-4 border border-black-6 rounded-lg">
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="text-lg font-semibold">Keuntungan</h2>
+                <div className="p-2 rounded-xl bg-green-700">
+                  <PiMoneyWavyFill size={24} color="white" />
+                </div>
+              </div>
+              <p className="text-[36px] font-semibold mb-2">
+                {" "}
+                Rp {formatRupiah(cashflowSaleSummary.profit)}
+              </p>
+              <div className="flex items-center">
+                <FaArrowDownLong color="#F41C1C" />
+                <p className="text-[16px] text-[#F41C1C]">
+                  10% dibanding kemarin
+                </p>
+              </div>
+            </div>
+            <div className="bg-white w-full p-4 border border-black-6 rounded-lg">
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="text-lg font-semibold">Pengeluaran</h2>
+                <div className="p-2 rounded-xl bg-green-700">
+                  <PiMoneyWavyFill size={24} color="white" />
+                </div>
+              </div>
+              <p className="text-[36px] font-semibold mb-2">
+                Rp {formatRupiah(cashflowSaleSummary.expense)}
+              </p>
+              <div className="flex items-center">
+                <FaArrowDownLong color="#F41C1C" />
+                <p className="text-[16px] text-[#F41C1C]">
+                  10% dibanding kemarin
+                </p>
+              </div>
+            </div>
+            <div className="p-4 rounded-md border-2 border-black-6 h-full">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Penjualan Telur Ikat</h2>
                 <div className="p-2 rounded-xl bg-green-700">
                   <MdEgg size={24} color="white" />
                 </div>
               </div>
-              <div className="">
-                <div className="flex justify-center flex-wrap gap-4">
-                  {/* item ikat */}
-                  <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                    <p className="text-3xl font-bold text-center">50</p>
-                    <p className="text-xl text-center">Ikat</p>
-                  </div>
+              <div className="flex justify-center flex-wrap gap-4">
+                <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+                  <p className="text-3xl font-bold text-center">50</p>
+                  <p className="text-xl text-center">Ikat</p>
                 </div>
               </div>
             </div>
 
-            <div className="flex-1 justify-center p-4 rounded-md border-2 border-black-6">
+            <div className="p-4 rounded-md border-2 border-black-6 h-full">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Telur OK Eceran</h2>
                 <div className="p-2 rounded-xl bg-green-700">
                   <MdEgg size={24} color="white" />
                 </div>
               </div>
-              <div className="">
-                <div className="flex justify-center flex-wrap gap-4">
-                  {/* item karpet */}
-                  <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                    <p className="text-3xl font-bold text-center">100</p>
-                    <p className="text-xl text-center">Karpet</p>
-                  </div>
-                  {/* item butir */}
-                  <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                    <p className="text-3xl font-bold text-center">1000</p>
-                    <p className="text-xl text-center">Butir</p>
-                  </div>
+              <div className="flex justify-center flex-wrap gap-4">
+                <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+                  <p className="text-3xl font-bold text-center">100</p>
+                  <p className="text-xl text-center">Karpet</p>
                 </div>
-                {/* <div>
-                  <div className="flex items-center px-6 py-2">
-                    <FaArrowDownLong color="#F41C1C" />
-                    <p className="text-[16px] text-[#F41C1C]">
-                      10% dibanding kemarin
-                    </p>
-                  </div>
-                </div> */}
-              </div>
-            </div>
-
-            {/* pendapatan */}
-            <div className="flex-1 ">
-              {/* Pendapatan */}
-              <div className="bg-white w-full h-full p-4 flex flex-col  border border-black-6 rounded-lg">
-                <div className="flex justify-between items-center mb-3">
-                  <h2 className="text-lg font-semibold">Pendapatan</h2>
-                  <div className="p-2 rounded-xl bg-green-700">
-                    <PiMoneyWavyFill size={24} color="white" />
-                  </div>
-                </div>
-                <p className="text-[36px] font-semibold mb-2">Rp 12.500.000</p>
-                {/* profit dynamics notification */}
-                <div className="flex items-center">
-                  <FaArrowDownLong color="#F41C1C" />
-                  <p className="text-[16px] text-[#F41C1C]">
-                    10% dibanding kemarin
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* keuntungan */}
-            <div className="flex-1 ">
-              {/* Pendapatan */}
-              <div className="bg-white w-full h-full p-4 flex flex-col  border border-black-6 rounded-lg">
-                <div className="flex justify-between items-center mb-3">
-                  <h2 className="text-lg font-semibold">Keuntungan</h2>
-                  <div className="p-2 rounded-xl bg-green-700">
-                    <PiMoneyWavyFill size={24} color="white" />
-                  </div>
-                </div>
-                <p className="text-[36px] font-semibold mb-2">Rp 12.500.000</p>
-                {/* profit dynamics notification */}
-                <div className="flex items-center">
-                  <FaArrowDownLong color="#F41C1C" />
-                  <p className="text-[16px] text-[#F41C1C]">
-                    10% dibanding kemarin
-                  </p>
+                <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+                  <p className="text-3xl font-bold text-center">1000</p>
+                  <p className="text-xl text-center">Butir</p>
                 </div>
               </div>
             </div>
@@ -243,7 +349,25 @@ const Penjualan = () => {
 
             {/* Chart Section (1/2 width on large screens) */}
             <div className="w-full lg:w-1/2 bg-white rounded-lg p-6 border border-black-6">
-              <h2 className="text-xl font-semibold mb-4">Penjualan Telur</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold mb-4">Penjualan Telur</h2>
+
+                {userRole == "Owner" && (
+                  <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+                    <select
+                      value={selectedItem}
+                      onChange={(e) => setSelectedItem(e.target.value)}
+                      className=" bg-transparent text-base font-medium outline-none"
+                    >
+                      {itemOptions.map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
               <ResponsiveContainer width="100%" height="90%">
                 <LineChart data={dataJual}>
                   <CartesianGrid strokeDasharray="3 3" />

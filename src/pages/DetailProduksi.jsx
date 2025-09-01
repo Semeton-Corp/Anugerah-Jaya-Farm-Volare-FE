@@ -200,13 +200,11 @@ const DetailProduksi = () => {
                       {item.status}
                     </span>
                   </td>
-                  {userRole === "Pekerja Gudang" && (
-                    <th className="py-1 px-4 ">
-                      <span className="px-4 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer">
-                        Barang Sampai
-                      </span>
-                    </th>
-                  )}
+                  <th className="py-1 px-4 ">
+                    <span className="px-4 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer">
+                      Lihat Detail
+                    </span>
+                  </th>
 
                   {isSelectedDateToday(selectedDate) &&
                     item.chickenCage.eggPic == userName && (

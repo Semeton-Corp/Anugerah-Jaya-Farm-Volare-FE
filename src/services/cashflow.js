@@ -170,15 +170,17 @@ export const payUserSalary = (payload, id) => {
   });
 };
 
-export const getCashflowSaleOverview = (month, year) => {
-  return api.get(`/cashflows/salaries/summary`, {
+export const getCashflowSaleOverview = (locationId, month, year, itemId) => {
+  return api.get(`/cashflows/sales/overview`, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
     },
     params: {
+      locationId: locationId,
       month: month,
       year: year,
+      itemId: itemId,
     },
   });
 };
