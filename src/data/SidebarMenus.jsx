@@ -295,19 +295,25 @@ export const sidebarMenus = {
     {
       icon: <img src={produksiTelur} alt="Overview Icon" className="h-4 w-4" />,
       tabName: "Produksi Telur",
-      element: <ProduksiTelur />,
+      subTabs: [
+        { tabName: "Ringkasan Produksi Telur", path: "overview-gudang" },
+        { tabName: "Data Produksi Telur", path: "riwayat-gudang" },
+      ],
     },
     {
       icon: <img src={gudang} alt="ayam Icon" className="h-4 w-4" />,
       tabName: "Gudang",
       element: <OverviewOwner />,
       subTabs: [
-        { tabName: "Stok Gudang", path: "stok-gudang" },
+        { tabName: "Stok Gudang", path: "overview-gudang" },
+        { tabName: "Perbandingan Pakan", path: "perbandingan-pakan" },
         { tabName: "Pengadaan Barang", path: "pengadaan-barang" },
-        { tabName: "Daftar Barang", path: "daftar-barang" },
+        { tabName: "Pengadaan Jagung", path: "pengadaan-jagung" },
         { tabName: "Pesanan Toko", path: "pesanan-toko" },
-        { tabName: "Riwayat Gudang", path: "riwayat-gudang" },
+        { tabName: "Daftar Barang", path: "daftar-barang" },
         { tabName: "Daftar Suplier", path: "daftar-suplier" },
+        { tabName: "Daftar Vaksin & Obat", path: "daftar-suplier" },
+        { tabName: "Riwayat Gudang", path: "riwayat-gudang" },
       ],
     },
     {
@@ -332,4 +338,3 @@ export const sidebarMenus = {
     // add more items
   ],
 };
-

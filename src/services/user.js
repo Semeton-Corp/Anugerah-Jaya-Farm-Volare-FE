@@ -47,3 +47,12 @@ export const getUserOverviewList = (page, keyword, roleId) => {
     },
   });
 };
+
+export const getUserPerformanceOverview = (params) => {
+  return api.get("/users/performances/overview", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    params: params,
+  });
+};

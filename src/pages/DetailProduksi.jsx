@@ -61,11 +61,10 @@ const DetailProduksi = () => {
       let response;
 
       const date = formatDateToDDMMYYYY(selectedDate);
-      // console.log("effectiveLocationId: ", selectedSite);
-      // console.log("date: ", date);
       response = await getEggMonitoring(selectedSite, date);
-      // console.log("response: ", response);
-      // console.log("response: ", response);
+      console.log("response egg:", response);
+      console.log("selectedSite:", selectedSite);
+      console.log("date:", date);
 
       if (response?.status === 200) {
         setProduksiDetail(response.data.data);
@@ -243,7 +242,6 @@ const DetailProduksi = () => {
           )}
         </div>
       </div>
-
     </div>
   );
 };

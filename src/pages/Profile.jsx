@@ -95,6 +95,7 @@ const Profile = ({ mode }) => {
       // console.log("overviewResponse: ", overviewResponse);
       if (overviewResponse.status == 200) {
         const data = overviewResponse.data.data;
+        console.log("data.userInformation:", data.userInformation);
         setUserInformation(data.userInformation);
         setUserPresenceInformation(data.userPresenceInformation);
         setUserSalaryInformation(data.userSalaryInformation);
@@ -112,7 +113,7 @@ const Profile = ({ mode }) => {
   const handleConfirmDelete = async () => {
     try {
       const deleteResponse = await deleteAccount(id);
-      // console.log("deleteResponse: ", deleteResponse);
+      console.log("deleteResponse: ", deleteResponse);
       if (deleteResponse.status == 204) {
         navigate(-1, { state: { refetch: true } });
       }
@@ -252,22 +253,24 @@ const Profile = ({ mode }) => {
           </div>
 
           <div className="mt-4 w-full">
-            <button className="w-full rounded-[4px] cursor-pointer h-[40px] bg-orange-200 hover:bg-orange-500 flex items-center justify-center">
-              <div className="flex gap-4">
-                <RiEdit2Fill size={24} />
-                <p className="text-lg font-medium">Edit Profil</p>
-              </div>
-            </button>
-
-            <div className="mt-2 w-full">
+            <div className="flex mt-2 w-full gap-3">
               {mode === "StaffDetail" && (
-                <button
-                  onClick={() => setShowDelete(true)}
-                  className="w-full rounded-[4px] h-[40px] bg-red-600 text-red-100 hover:bg-red-300 cursor-pointer hover:text-white flex items-center justify-center gap-2"
-                >
-                  <RiDeleteBin6Line size={20} />
-                  <span className="text-lg font-medium">Hapus Pegawai</span>
-                </button>
+                <>
+                  <button className="w-full rounded-[4px] cursor-pointer h-[40px] bg-orange-200 hover:bg-orange-500 flex items-center justify-center">
+                    <div className="flex gap-4">
+                      <RiEdit2Fill size={24} />
+                      <p className="text-lg font-medium">Edit Profil</p>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => setShowDelete(true)}
+                    className="w-full rounded-[4px] h-[40px] bg-red-600 text-red-100 hover:bg-red-300 cursor-pointer hover:text-white flex items-center justify-center gap-2"
+                  >
+                    <RiDeleteBin6Line size={20} />
+                    <span className="text-lg font-medium">Hapus Pegawai</span>
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -307,7 +310,12 @@ const Profile = ({ mode }) => {
                   </div>
                   <div className="flex items-center">
                     <p className="text-3xl font-semibold me-3">
-                      {userInformation?.totalWorkHour}
+                      {userInformation?.totalWorkHour != null
+                        ? new Intl.NumberFormat("en-US", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          }).format(Number(userInformation?.totalWorkHour))
+                        : "-"}
                     </p>
                     <p className="text-lg font-semibold">jam</p>
                   </div>
@@ -324,7 +332,12 @@ const Profile = ({ mode }) => {
                     </div>
                     <div className="flex items-center">
                       <p className="text-3xl font-semibold pe-2">
-                        {userInformation?.workKpiScore}
+                        {userInformation?.workKpiScore != null
+                          ? new Intl.NumberFormat("en-US", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }).format(Number(userInformation?.workKpiScore))
+                          : "-"}
                       </p>
                       <p className="text-xl font-semibold">%</p>
                     </div>

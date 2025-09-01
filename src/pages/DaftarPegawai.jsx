@@ -32,6 +32,7 @@ const DaftarPegawai = () => {
   const fetchPegawaiAktifData = async () => {
     try {
       const fetchResponse = await getUserOverviewList();
+      console.log("fetchResponse:", fetchResponse);
       // console.log("fetchResponse: ", fetchResponse);
       if (fetchResponse.status == 200) {
         setPegawaiAktifData(fetchResponse.data.data.users);

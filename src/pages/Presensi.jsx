@@ -277,7 +277,7 @@ const Presensi = () => {
           longitude: longitude,
         };
 
-        // console.log("payload: ", payload);
+        console.log("payload: ", payload);
         // console.log("presenceId: ", presenceId);
 
         try {

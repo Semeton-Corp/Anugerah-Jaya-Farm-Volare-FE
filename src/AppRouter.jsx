@@ -83,7 +83,6 @@ import DetailToko from "./pages/DetailToko";
 import DetailTugasTambahan from "./pages/DetailTugasTambahan";
 import DetailRiwayatStok from "./pages/DetailRiwayatStok";
 import PageKosong from "./pages/PageKosong";
-
 import DraftPengadaanDoc from "./pages/DraftPengadaanDoc";
 import InputDraftPemesananDoc from "./pages/InputDraftPemesananDoc";
 import JualAyamAfkir from "./pages/JualAyamAfkir";
@@ -1333,7 +1332,16 @@ const AppRouter = createBrowserRouter([
           },
           {
             path: "produksi-telur",
-            element: <DetailProduksi />,
+            children: [
+              {
+                path: "ringkasan-produksi-telur",
+                element: <ProduksiTelur />,
+              },
+              {
+                path: "data-produksi-telur",
+                element: <DetailProduksi />,
+              },
+            ],
           },
           {
             path: "gudang",
@@ -1341,16 +1349,76 @@ const AppRouter = createBrowserRouter([
               {
                 path: "stok-gudang",
                 element: <Gudang />,
+                children: [
+                  {
+                    path: "edit-stok-telur",
+                    element: <EditStokTelur />,
+                  },
+                  {
+                    path: "edit-stok-barang",
+                    element: <EditStokBarang />,
+                  },
+                ],
+              },
+              {
+                path: "perbandingan-pakan",
+                element: <PerbandinganPakan />,
               },
               {
                 path: "pengadaan-barang",
                 element: <PengadaanBarang />,
                 children: [
                   {
+                    path: "draft-pengadaan-barang",
+                    element: <DraftPengadaanBarang />,
+                    children: [
+                      {
+                        path: "input-draft-pengadaan-barang",
+                        element: <InputDraftPengadaanBarang />,
+                      },
+                      {
+                        path: "input-draft-pengadaan-barang/:id",
+                        element: <InputDraftPengadaanBarang />,
+                      },
+                    ],
+                  },
+                  {
+                    path: "detail-pengadaan-barang/:id",
+                    element: <DetailPengadaanBarang />,
+                  },
+                  {
                     path: "input-pengadaan-barang",
                     element: <InputPengadaanBarang />,
                   },
                 ],
+              },
+              {
+                path: "pengadaan-jagung",
+                element: <PengadaanJagung />,
+                children: [
+                  {
+                    path: "draft-pengadaan-jagung",
+                    element: <DraftPengadaanJagung />,
+                    children: [
+                      {
+                        path: "input-draft-pengadaan-jagung",
+                        element: <InputDraftPengadaanJagung />,
+                      },
+                      {
+                        path: "input-draft-pengadaan-jagung/:id",
+                        element: <InputDraftPengadaanJagung />,
+                      },
+                    ],
+                  },
+                  {
+                    path: "detail-pengadaan-jagung/:id",
+                    element: <DetailPengadaanJagung />,
+                  },
+                ],
+              },
+              {
+                path: "pesanan-toko",
+                element: <PesananToko />,
               },
               {
                 path: "daftar-barang",
@@ -1367,8 +1435,22 @@ const AppRouter = createBrowserRouter([
                 ],
               },
               {
-                path: "pesanan-toko",
-                element: <PesananToko />,
+                path: "daftar-vaksin-&-obat",
+                element: <DaftarVaksinObat />,
+                children: [
+                  {
+                    path: "tambah-vaksin",
+                    element: <TambahVaksinObat />,
+                  },
+                  {
+                    path: "tambah-vaksin/:id",
+                    element: <TambahVaksinObat />,
+                  },
+                  {
+                    path: "detail-vaksin-obat/:id",
+                    element: <DetailVaksinObatItem />,
+                  },
+                ],
               },
               {
                 path: "riwayat-gudang",
@@ -1395,6 +1477,10 @@ const AppRouter = createBrowserRouter([
                   {
                     path: "tambah-supplier/:id",
                     element: <TambahSupplier />,
+                  },
+                  {
+                    path: "detail-supplier/:id",
+                    element: <DetailSupplier />,
                   },
                 ],
               },
