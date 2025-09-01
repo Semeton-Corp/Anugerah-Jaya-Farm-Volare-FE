@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
+  approveUserPresence,
   getLocationPresenceSummaries,
   getUserPresencePending,
 } from "../services/presence";
@@ -125,15 +126,15 @@ export default function PresensiKelolaPegawai() {
       console.log("resp: ", resp);
       if (resp?.status === 200) {
         const list = (resp.data?.data || []).map((r) => ({
-          // normalize to your UI shape
           id: r.id,
-          tanggal: r.date || r.tanggal || r.createdAt,
-          nama: r.user?.name || r.nama || "-",
-          keterangan: r.reason || r.keterangan || "-",
+          tanggal: r.date,
+          nama: r.name,
+          keterangan: r.note,
           status: "pending",
-          buktiUrl: r.proofUrl || r.buktiUrl || r.attachmentUrl,
+          buktiUrl: r.proofUrl || r.buktiUrl || r.evidence,
         }));
         setModalRequests(list);
+        console.log("list:", list);
       } else {
         setModalRequests([]);
       }
@@ -173,22 +174,34 @@ export default function PresensiKelolaPegawai() {
       return allSelected ? new Set() : new Set(ids);
     });
   };
+
   const handleBulkReview = async (newStatus) => {
     if (!activeModal) return;
     const ids = Array.from(selected);
     if (!ids.length) return;
 
+    const statusMap = {
+      approved: "Disetujui",
+      rejected: "Ditolak",
+    };
+
     try {
       setSubmitting(true);
-      await reviewPresenceRequests({
-        type: activeModal.type,
-        ids,
-        action: newStatus,
-      });
-      updateStatus(newStatus);
+      const payload = {
+        approvalStatus: statusMap[newStatus],
+        userPresenceIds: ids,
+      };
+
+      console.log("payload:", payload);
+
+      const resp = await approveUserPresence(payload);
+      if (resp.status == 200) {
+        closeModal();
+        fetchSummary();
+      }
     } catch (e) {
       console.error(e);
-      alert(e?.message || "Gagal mengirim persetujuan, coba lagi.");
+      alert("❌Gagal untuk memproses persetujuan");
     } finally {
       setSubmitting(false);
     }
