@@ -23,7 +23,7 @@ const MONTHS_ID = [
   "Desember",
 ];
 
-const fmtRp = (n = 0) =>
+export const fmtRp = (n = 0) =>
   "Rp " +
   Number(n || 0)
     .toFixed(0)
