@@ -397,3 +397,17 @@ export const getChickenPerformances = (date) => {
     params: { date: date },
   });
 };
+
+export const getChickenAndCompanyPerformanceOverview = (
+  locationId,
+  cageId,
+  year
+) => {
+  return api.get(`/chickens/performances/chicken-company`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    params: { locationId: locationId, cageId: cageId, year: year },
+  });
+};

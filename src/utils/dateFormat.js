@@ -22,6 +22,17 @@ export const getTodayDateInBahasa = () => {
   return `${day} ${month} ${year}`;
 };
 
+export function getTodayMonthYear() {
+  return new Intl.DateTimeFormat("id-ID", {
+    month: "long",
+    year: "numeric",
+  }).format(new Date());
+}
+
+export function getTodayYear() {
+  return new Date().getFullYear();
+}
+
 export const translateDateToBahasa = (dateStr) => {
   const monthMap = {
     January: "Januari",

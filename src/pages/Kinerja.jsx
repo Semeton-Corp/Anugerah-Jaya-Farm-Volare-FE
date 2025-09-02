@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { PiCalendarBlank } from "react-icons/pi";
 import { MdEgg, MdShoppingCart } from "react-icons/md";
 import { PiMoneyWavyFill } from "react-icons/pi";
@@ -34,6 +34,15 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import {
+  formatDate,
+  getTodayDateInBahasa,
+  getTodayMonthYear,
+  getTodayYear,
+} from "../utils/dateFormat";
+import { getLocations } from "../services/location";
+import { getChickenCage } from "../services/cages";
+import { getChickenAndCompanyPerformanceOverview } from "../services/chickenMonitorings";
 
 const performanceData = [
   { day: "Minggu", value: 36 },
@@ -45,24 +54,6 @@ const performanceData = [
   { day: "Sabtu", value: 41 },
 ];
 
-const kinerjaData = [
-  { day: "Minggu", value: 44 },
-  { day: "Senin", value: 52 },
-  { day: "Selasa", value: 30 },
-  { day: "Rabu", value: 48 },
-  { day: "Kamis", value: 52 },
-  { day: "Jumat", value: 39 },
-  { day: "Sabtu", value: 52 },
-];
-
-const ageDistributionData = [
-  { stage: "DOC", value: 40 },
-  { stage: "Grower", value: 47 },
-  { stage: "Prelayer", value: 28 },
-  { stage: "Layer", value: 45 },
-  { stage: "Afkir", value: 48 },
-];
-
 const getBarColor = (day) => {
   if (day === "Selasa") return "#FF5E5E";
   if (day === "Jumat") return "#F2D08A";
@@ -70,6 +61,49 @@ const getBarColor = (day) => {
 };
 
 const Kinerja = () => {
+  const userRole = localStorage.getItem("role");
+  const userName = localStorage.getItem("userName");
+
+  const [siteOptions, setSiteOptions] = useState([]);
+  const [selectedSite, setSelectedSite] = useState(
+    userRole === "Owner" ? 0 : localStorage.getItem("locationId")
+  );
+  const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
+
+  const [chickenCageOptions, setChickenCageOptions] = useState([]);
+  const [selectedChickenCage, setSelectedChickenCage] = useState(0);
+
+  const [chickenBarCharts, setChickenBarCharts] = useState([]);
+  const [chickenPerformanceSummary, setChickenPerformanceSummary] = useState(
+    []
+  );
+  const [
+    profitabilityPerformanceBarCharts,
+    setProfitabilityPerformanceBarCharts,
+  ] = useState([]);
+
+  const ageDistributionData = useMemo(() => {
+    const src = chickenBarCharts || {};
+    const pick = (k) => Number(src?.[k] ?? 0);
+
+    const preLayerVal =
+      src?.chickenPreLayer != null
+        ? pick("chickenPreLayer")
+        : pick("chickentPreLayer");
+
+    return [
+      { stage: "DOC", value: pick("chickenDOC") },
+      { stage: "Pre Layer", value: preLayerVal },
+      { stage: "Grower", value: pick("chickenGrower") },
+      { stage: "Layer", value: pick("chickenLayer") },
+      { stage: "Afkir", value: pick("chickenAfkir") },
+    ];
+  }, [chickenBarCharts]);
+
+  const [bepGoodEgg, setBepGoodEgg] = useState([]);
+  const [marginOfSafety, setMarginOfSafety] = useState([]);
+  const [rcRatio, setRcRatio] = useState([]);
+
   const location = useLocation();
   const detailPages = ["detail-kinerja-ayam"];
 
@@ -94,6 +128,63 @@ const Kinerja = () => {
 
   const [selectedFilter, setSelectedFilter] = useState("Rentabilitas");
 
+  const fetchSites = async () => {
+    try {
+      const res = await getLocations();
+      if (res.status === 200) {
+        setSiteOptions(res.data.data);
+        console.log("res.data.data: ", res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch sites", err);
+    }
+  };
+
+  const fetchChickenCages = async () => {
+    try {
+      const cageResponse = await getChickenCage(selectedSite);
+      if (cageResponse.status === 200) {
+        setChickenCageOptions(cageResponse.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch sites", err);
+    }
+  };
+
+  const fetchPerformanceOverview = async () => {
+    try {
+      const year = getTodayYear();
+      const performanceResponse = await getChickenAndCompanyPerformanceOverview(
+        selectedSite,
+        selectedChickenCage,
+        year
+      );
+      console.log("performanceResponse: ", performanceResponse);
+      if (performanceResponse.status === 200) {
+        setChickenBarCharts(performanceResponse.data.data.chickenBarCharts);
+        setChickenPerformanceSummary(
+          performanceResponse.data.data.chickenPerformanceSummary
+        );
+        setBepGoodEgg(performanceResponse.data.data.bepGoodEgg);
+        setMarginOfSafety(performanceResponse.data.data.marginOfSafety);
+        setRcRatio(performanceResponse.data.data.rcRatio);
+        setProfitabilityPerformanceBarCharts(
+          performanceResponse.data.data.profitabilityPerformanceBarCharts
+        );
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSites();
+    fetchChickenCages();
+  }, []);
+
+  useEffect(() => {
+    fetchPerformanceOverview();
+  }, [selectedChickenCage, selectedSite]);
   return (
     <>
       {isDetailPage ? (
@@ -104,27 +195,50 @@ const Kinerja = () => {
           <div className="flex justify-between mb-2 flex-wrap gap-4">
             <h1 className="text-3xl font-bold">Kinerja</h1>
             <div className="flex gap-2">
-              <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-                <FaLocationDot size={18} />
-                <div className="text-base font-medium ms-2">Semua Site</div>
-              </div>
-              <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-                <GiBirdCage size={18} />
-                <div className="text-base font-medium ms-2">Semua kandang</div>
-              </div>
-
-              <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-                <PiCalendarBlank size={18} />
-                <div className="text-base font-medium ms-2">
-                  Hari ini (20 Mar 2025)
-                </div>
-              </div>
+              {userRole == "Owner" && (
+                <>
+                  <div className="flex items-center rounded-lg px-4 py-2 bg-[#BFBFBF]">
+                    {getTodayDateInBahasa()}
+                  </div>
+                  <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+                    <MdStore size={18} />
+                    <select
+                      value={selectedSite}
+                      onChange={(e) => setSelectedSite(e.target.value)}
+                      className="ml-2 bg-transparent text-base font-medium outline-none"
+                    >
+                      <option value="">Semua Site</option>
+                      {siteOptions.map((site) => (
+                        <option key={site.id} value={site.id}>
+                          {site.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+                    <GiBirdCage size={18} />
+                    <select
+                      value={selectedChickenCage}
+                      onChange={(e) => setSelectedChickenCage(e.target.value)}
+                      className="ml-2 bg-transparent text-base font-medium outline-none"
+                    >
+                      <option value="">Semua Kandang</option>
+                      {chickenCageOptions.map((chickenCage) => (
+                        <option
+                          key={chickenCage.id}
+                          value={chickenCage.cage.id}
+                        >
+                          {chickenCage.cage.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
-          {/* Telur  ok, retak, pecah, reject*/}
           <div className="flex md:grid-cols-2 gap-4 justify-between">
-            {/* telur OK */}
             <div className="p-4 w-full rounded-md bg-green-100">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Konsumsi pakan</h2>
@@ -135,14 +249,14 @@ const Kinerja = () => {
                   <LuWheat size={24} color="white" />
                 </div>
                 <div className="flex items-center">
-                  {/* popuasl */}
-                  <p className="text-3xl font-semibold me-3">25.000</p>
+                  <p className="text-3xl font-semibold me-3">
+                    {chickenPerformanceSummary?.foodConsumption}
+                  </p>
                   <p className="text-xl font-semibold">Ton</p>
                 </div>
               </div>
             </div>
 
-            {/* ayam sakit */}
             <div className="p-4 w-full rounded-md bg-green-100">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">HDP rata-rata</h2>
@@ -154,54 +268,60 @@ const Kinerja = () => {
                     <MdEgg size={24} color="white" />
                   </div>
                   <div className="flex items-center">
-                    <p className="text-3xl font-semibold pe-2">80</p>
+                    <p className="text-3xl font-semibold pe-2">
+                      {Number(
+                        chickenPerformanceSummary?.foodConsumption
+                      ).toFixed(2)}
+                    </p>
                     <p className="text-xl font-semibold">%</p>
                   </div>
                 </div>
               </div>
             </div>
-            {/* penjualan telur */}
             <div className="p-4 w-full rounded-md bg-green-100">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Berat telur rata-rata</h2>
               </div>
 
               <div className="flex flex-wrap gap-4">
-                {/* item butir */}
                 <div className="flex flex-wrap gap-4 items-center">
                   <div className="p-2 rounded-xl bg-green-700">
                     <MdEgg size={24} color="white" />
                   </div>
                   <div className="flex items-center">
-                    <p className="text-3xl font-semibold pe-2">14</p>
+                    <p className="text-3xl font-semibold pe-2">
+                      {Number(
+                        chickenPerformanceSummary?.averageEggWeight
+                      ).toFixed(2)}
+                    </p>
                     <p className="text-xl font-semibold">gr</p>
                   </div>
                 </div>
               </div>
             </div>
-            {/* penjualan telur */}
             <div className="p-4 w-full rounded-md bg-green-100">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">FCR rata-rata</h2>
               </div>
 
               <div className="flex flex-wrap gap-4">
-                {/* item butir */}
                 <div className="flex flex-wrap gap-4">
                   <div className="flex flex-wrap gap-4 items-center">
                     <div className="p-2 rounded-xl bg-green-700">
                       <GiChicken size={24} color="white" />
                     </div>
-                    {/* popuasl */}
                     <div className="flex">
-                      <p className="text-3xl font-semibold pe-2">2.1</p>
+                      <p className="text-3xl font-semibold pe-2">
+                        {Number(
+                          chickenPerformanceSummary?.averageFCR || 0
+                        ).toFixed(2)}
+                      </p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* telur OK */}
             <div className="p-4 w-full rounded-md bg-green-100">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Mortalitas rata-rata</h2>
@@ -212,34 +332,81 @@ const Kinerja = () => {
                   <GiChicken size={24} color="white" />
                 </div>
                 <div>
-                  {/* popuasl */}
-                  <p className="text-3xl font-semibold">0.02</p>
+                  <p className="text-3xl font-semibold">
+                    {Number(
+                      chickenPerformanceSummary?.averageMortalityRate
+                    ).toFixed(2)}
+                  </p>
                 </div>
               </div>
             </div>
           </div>
-          <div className="p-4 border rounded-lg">
-            <h2 className="text-lg font-bold mb-4">Distribusi Usia Ayam</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={ageDistributionData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="stage" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="value" fill="#5A9EA7" barSize={40} />
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2">
+              <div className="p-4 border rounded-lg">
+                <h2 className="text-lg font-bold mb-4">Distribusi Usia Ayam</h2>
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={ageDistributionData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="stage" />
+                    <YAxis tickFormatter={(v) => v.toLocaleString("id-ID")} />
+                    <Tooltip formatter={(v) => v.toLocaleString("id-ID")} />
+                    <Bar dataKey="value" fill="#5A9EA7" barSize={40} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className=" p-4 border rounded-lg">
+              <div className="space-y-4 mt-3">
+                <div className="flex justify-end">
+                  <span className="inline-block rounded bg-gray-300 px-4 py-1 font-semibold text-gray-800 shadow">
+                    {getTodayMonthYear()}
+                  </span>
+                </div>
+
+                <div className="rounded-xl border-2 border-teal-900 bg-slate-100 px-4 py-5 text-center">
+                  <p className="font-semibold text-[15px] leading-tight mb-2">
+                    Break Even Point (BEP) Telur OK
+                  </p>
+                  <p className="text-4xl font-extrabold">
+                    {Number(bepGoodEgg).toFixed(2)}
+                    <span className="font-bold">Kg</span>
+                  </p>
+                </div>
+
+                <div className="rounded-xl border-2 border-teal-900 bg-slate-100 px-4 py-5 text-center">
+                  <p className="font-semibold text-[15px] leading-tight mb-2">
+                    Margin of Safety (MOS)
+                  </p>
+                  <p className="text-4xl font-extrabold">
+                    {Number(marginOfSafety).toFixed(2)}{" "}
+                    <span className="font-bold">%</span>
+                  </p>
+                </div>
+
+                <div className="rounded-xl border-2 border-teal-900 bg-slate-100 px-4 py-5 text-center">
+                  <p className="font-semibold text-[15px] leading-tight mb-2">
+                    Return on Cost Ratio (R/C Ratio)
+                  </p>
+                  <p className="text-4xl font-extrabold">
+                    {Number(rcRatio).toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="flex flex-col lg:flex-row h-120 gap-6">
+
+          <div className="flex flex-col lg:flex-row gap-6">
             <div className="w-full p-4 border rounded-lg">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-bold">Kinerja perusahaan</h2>
                 <div className="flex gap-2">
-                  <select className="text-sm rounded bg-[#BFBFBF] px-2 py-1 text-gray-700">
+                  {/* <select className="text-sm rounded bg-[#BFBFBF] px-2 py-1 text-gray-700">
                     <option>Rentabilitas</option>
                     <option>Produktivitas</option>
-                  </select>
-                  <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 ">
+                  </select> */}
+                  {/* <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 ">
                     <FaCalendarAlt size={18} />
                     <select
                       value={graphFilter}
@@ -252,22 +419,32 @@ const Kinerja = () => {
                         </option>
                       ))}
                     </select>
-                  </div>
+                  </div> */}
+                  <span className="inline-block rounded bg-gray-300 px-4 py-1 font-semibold text-gray-800 shadow">
+                    {getTodayYear()}
+                  </span>
                 </div>
               </div>
-              <ResponsiveContainer width="100%" height={370}>
-                <BarChart data={performanceData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="value">
-                    {performanceData.map((entry, index) => (
-                      <Cell key={index} fill={getBarColor(entry.day)} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+
+              {profitabilityPerformanceBarCharts.length === 0 ? (
+                <p className="italic text-gray-300">
+                  Belum ada Data kinerja perusahaan
+                </p>
+              ) : (
+                <ResponsiveContainer width="100%" height={370}>
+                  <BarChart data={performanceData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="day" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="value">
+                      {performanceData.map((entry, index) => (
+                        <Cell key={index} fill={getBarColor(entry.day)} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
         </div>
