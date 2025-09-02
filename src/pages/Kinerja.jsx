@@ -145,6 +145,7 @@ const Kinerja = () => {
       const cageResponse = await getChickenCage(selectedSite);
       if (cageResponse.status === 200) {
         setChickenCageOptions(cageResponse.data.data);
+        console.log("cageResponse.data.data: ", cageResponse.data.data);
       }
     } catch (err) {
       console.error("Failed to fetch sites", err);

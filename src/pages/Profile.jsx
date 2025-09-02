@@ -105,7 +105,9 @@ const Profile = ({ mode }) => {
         setUserPlacements(data.placements);
       }
     } catch (error) {
-      alert("❌ Detail pengguna tidak ditemukan!");
+      alert(
+        "❌ Detail kinerja pengguna tidak ditemukan untuk bulan yang dipilih!"
+      );
       console.log("error :", error);
     }
   };
