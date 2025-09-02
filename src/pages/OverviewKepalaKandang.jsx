@@ -202,7 +202,6 @@ const OverviewKepalaKandang = () => {
         <Outlet />
       ) : (
         <div className="flex flex-col px-4 py-3 gap-4 ">
-          {/* header section */}
           <div className="flex justify-between mb-2 flex-wrap gap-4">
             <h1 className="text-3xl font-bold">Kinerja</h1>
             <div className="flex gap-2">

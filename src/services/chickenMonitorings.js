@@ -387,3 +387,13 @@ export const deleteAfkirChickenSalePayment = (
     }
   );
 };
+
+export const getChickenPerformances = (date) => {
+  return api.get(`/chickens/performances`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    params: { date: date },
+  });
+};

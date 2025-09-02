@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { PiCalendarBlank } from "react-icons/pi";
 import { MdEgg, MdShoppingCart } from "react-icons/md";
 import { PiMoneyWavyFill } from "react-icons/pi";
@@ -34,6 +34,9 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { getChickenPerformances } from "../services/chickenMonitorings";
+import { useEffect } from "react";
+import { formatDate, formatDateToDDMMYYYY } from "../utils/dateFormat";
 
 const kinerjaData = [
   { day: "Minggu", value: 44 },
@@ -70,80 +73,22 @@ const kinerjaAyamData = [
   },
 ];
 
-const detailAyamData = [
-  {
-    kandang: "Kandang A1",
-    kategori: "DOC",
-    usiaMinggu: 49,
-    hidup: 4000,
-    sakit: 50,
-    mati: 10,
-    pakanKg: 20,
-    mortalitas: "3%",
-    vaksin: "Vaksin A (5 ml)",
-    obat: "Obat B (4ml)",
-  },
-  {
-    kandang: "Kandang A2",
-    kategori: "Grower",
-    usiaMinggu: 49,
-    hidup: 1200,
-    sakit: 20,
-    mati: 12,
-    pakanKg: 40,
-    mortalitas: "0.8%",
-    vaksin: "-",
-    obat: "-",
-  },
-  {
-    kandang: "Kandang A3",
-    kategori: "Pre Layer",
-    usiaMinggu: 49,
-    hidup: 1200,
-    sakit: 20,
-    mati: 12,
-    pakanKg: 40,
-    mortalitas: "0.8%",
-    vaksin: "-",
-    obat: "-",
-  },
-  {
-    kandang: "Kandang A4",
-    kategori: "Layer",
-    usiaMinggu: 49,
-    hidup: 1200,
-    sakit: 20,
-    mati: 12,
-    pakanKg: 40,
-    mortalitas: "0.8%",
-    vaksin: "-",
-    obat: "-",
-  },
-  {
-    kandang: "Kandang A5",
-    kategori: "Afkir",
-    usiaMinggu: 49,
-    hidup: 1200,
-    sakit: 20,
-    mati: 12,
-    pakanKg: 40,
-    mortalitas: "0.8%",
-    vaksin: "-",
-    obat: "-",
-  },
-];
-
-const usiaAyamData = [
-  { name: "DOC", value: 200 },
-  { name: "Grower", value: 300 },
-  { name: "Pre Layer", value: 150 },
-  { name: "Layer", value: 500 },
-  { name: "Afkir", value: 100 },
-];
-
 const DetailKinerjaAyam = () => {
   const location = useLocation();
   const detailPages = ["pindah-ayam"];
+
+  const [performacesData, setPerformacesData] = useState([]);
+
+  const [selectedFilter, setSelectedFilter] = useState("Rentabilitas");
+
+  const dateInputRef = useRef(null);
+  const openDatePicker = () => {
+    if (dateInputRef.current) {
+      dateInputRef.current.showPicker() || dateInputRef.current.click();
+    }
+  };
+
+  const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
@@ -152,6 +97,11 @@ const DetailKinerjaAyam = () => {
 
   const handlePindahAyam = () => {
     navigate(`${location.pathname}/pindah-ayam`);
+  };
+
+  const handleDateChange = (e) => {
+    const date = e.target.value;
+    setSelectedDate(date);
   };
 
   const handlePengadaanDoc = () => {
@@ -170,7 +120,23 @@ const DetailKinerjaAyam = () => {
     navigate(newUrl);
   };
 
-  const [selectedFilter, setSelectedFilter] = useState("Rentabilitas");
+  const fetchChickenPerformances = async () => {
+    try {
+      const date = formatDateToDDMMYYYY(selectedDate);
+      const performancesResponse = await getChickenPerformances(date);
+      console.log("performancesResponse: ", performancesResponse);
+
+      if (performancesResponse.status === 200) {
+        setPerformacesData(performancesResponse.data.data);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchChickenPerformances();
+  }, [selectedDate]);
 
   return (
     <>
@@ -180,6 +146,19 @@ const DetailKinerjaAyam = () => {
         <div className="flex flex-col px-4 py-3 gap-4 ">
           <div className="flex justify-between mb-2 flex-wrap gap-4">
             <h1 className="text-3xl font-bold">Detail Kinerja Ayam</h1>
+
+            <div
+              className="flex items-center rounded-lg bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+              onClick={openDatePicker}
+            >
+              <input
+                ref={dateInputRef}
+                type="date"
+                value={selectedDate}
+                onChange={handleDateChange}
+                className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+              />
+            </div>
           </div>
 
           <div className="bg-white p-4 rounded-lg border border-gray-300">
@@ -210,36 +189,47 @@ const DetailKinerjaAyam = () => {
                 <thead>
                   <tr className="bg-green-700 text-white text-center">
                     <th className="py-2 px-4">Kandang</th>
-                    <th className="py-2 px-4">Usia</th>
-                    <th className="py-2 px-4">Jumlah</th>
+                    <th className="py-2 px-4">Kategori</th>
+                    <th className="py-2 px-4">Usia (Minggu)</th>
+                    <th className="py-2 px-4">Jumlah Ayam</th>
                     <th className="py-2 px-4">Produksi (Butir)</th>
-                    <th className="py-2 px-4">Konsumsi (Kg)</th>
-                    <th className="py-2 px-4">Berat telur (gr)</th>
+                    <th className="py-2 px-4">Konsumsi (Gr/Ekor)</th>
+                    <th className="py-2 px-4">Berat telur (Gr/Butir)</th>
                     <th className="py-2 px-4">FCR</th>
                     <th className="py-2 px-4">%HDP</th>
                     <th className="py-2 px-4">Produktivitas</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {kinerjaAyamData.map((row, index) => (
+                  {performacesData.map((row, index) => (
                     <tr key={index} className="border-b text-center">
-                      <td className="py-2 px-4">{row.kandang}</td>
-                      <td className="py-2 px-4">{row.usia}</td>
-                      <td className="py-2 px-4">{row.jumlah}</td>
-                      <td className="py-2 px-4">{row.produksi}</td>
-                      <td className="py-2 px-4">{row.konsumsi}</td>
-                      <td className="py-2 px-4">{row.beratTelur}</td>
-                      <td className="py-2 px-4">{row.fcr}</td>
-                      <td className="py-2 px-4">{row.hdp}</td>
+                      <td className="py-2 px-4">{row.cageName}</td>
+                      <td className="py-2 px-4">{row.chickenCategory}</td>
+                      <td className="py-2 px-4">{row.chickenAge}</td>
+                      <td className="py-2 px-4">{row.totalChicken}</td>
+                      <td className="py-2 px-4">{row.totalGoodEgg}</td>
+                      <td className="py-2 px-4">
+                        {Number(row.averageConsumptionPerChicken).toFixed(2)}
+                      </td>
+
+                      <td className="py-2 px-4">
+                        {Number(row.averageWeightPerEgg).toFixed(2)}
+                      </td>
+                      <td className="py-2 px-4">
+                        {Number(row.fcr).toFixed(2)}
+                      </td>
+                      <td className="py-2 px-4">
+                        {Number(row.hdp).toFixed(2)}
+                      </td>
                       <td className="py-2 px-4 flex justify-center">
                         <div
                           className={`w-24 py-1 flex justify-center rounded text-sm font-semibold ${
-                            row.produktivitas === "Produktif"
+                            row.productivity === "Produktif"
                               ? "bg-aman-box-surface-color text-aman-text-color"
-                              : "bg-orange-200 text-orange-900"
+                              : "bg-kritis-box-surface-color text-kritis-text-color"
                           }`}
                         >
-                          {row.produktivitas}
+                          {row.productivity}
                         </div>
                       </td>
                     </tr>
