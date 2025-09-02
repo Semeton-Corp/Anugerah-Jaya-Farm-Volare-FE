@@ -184,3 +184,17 @@ export const getCashflowSaleOverview = (locationId, month, year, itemId) => {
     },
   });
 };
+
+export const downloadReport = (month, year) => {
+  return api.get(`/cashflows/sales/reports`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    params: {
+      month: month,
+      year: year,
+    },
+    responseType: "blob",
+  });
+};

@@ -4,7 +4,7 @@ import { MdEgg, MdShoppingCart } from "react-icons/md";
 import { PiMoneyWavyFill } from "react-icons/pi";
 import { IoMdDownload } from "react-icons/io";
 import { MdStore } from "react-icons/md";
-import { FaArrowDownLong } from "react-icons/fa6";
+import { FaArrowDownLong, FaArrowUpLong } from "react-icons/fa6";
 import { FiMaximize2 } from "react-icons/fi";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 
@@ -24,28 +24,9 @@ import {
 import MonthYearSelector from "../components/MonthYearSelector";
 import { getLocations } from "../services/location";
 import { getItems } from "../services/item";
-import { getCashflowSaleOverview } from "../services/cashflow";
+import { downloadReport, getCashflowSaleOverview } from "../services/cashflow";
 import { formatRupiah } from "../utils/moneyFormat";
-
-const dataUntung = [
-  { date: "29 Mar", untung: 25000000 },
-  { date: "30 Mar", untung: 14000000 },
-  { date: "31 Mar", untung: 30000000 },
-  { date: "01 Apr", untung: 22000000 },
-  { date: "02 Apr", untung: 16000000 },
-  { date: "03 Apr", untung: 25000000 },
-  { date: "04 Apr", untung: 43000000 },
-];
-
-const dataJual = [
-  { date: "29 Mar", penjualan: 30 },
-  { date: "30 Mar", penjualan: 40 },
-  { date: "31 Mar", penjualan: 33 },
-  { date: "01 Apr", penjualan: 40 },
-  { date: "02 Apr", penjualan: 8 },
-  { date: "03 Apr", penjualan: 20 },
-  { date: "04 Apr", penjualan: 32 },
-];
+import { useMemo } from "react";
 
 const salesData = [
   {
@@ -106,6 +87,22 @@ const Penjualan = () => {
   const [monthName, setMonthName] = useState(MONTHS_ID[now.getMonth()]);
 
   const [cashflowSaleSummary, setCashflowSaleSummary] = useState([]);
+  const [eggSaleSummary, setEggSaleSummary] = useState([]);
+  const [eggSaleGraphs, setEggSaleGraphs] = useState([]);
+  const [cashflowSaleGraph, setCashflowSaleGraph] = useState([]);
+  const [locationSaleSummaries, setLocationSaleSummaries] = useState([]);
+  const [locationPieChart, setLocationPieChart] = useState([]);
+
+  const pieData = useMemo(() => {
+    if (!locationPieChart) return [];
+    return [
+      { name: "Toko", value: locationPieChart?.storePercentage || 0 },
+      { name: "Gudang", value: locationPieChart?.warehosuePercentage || 0 },
+    ];
+  }, [locationPieChart]);
+
+  console.log("pieData: ", pieData);
+  console.log("locationPieChart: ", locationPieChart);
 
   const [siteOptions, setSiteOptions] = useState([]);
   const [selectedSite, setSelectedSite] = useState(
@@ -161,13 +158,42 @@ const Penjualan = () => {
         year,
         selectedItem
       );
-      console.log("saleResponse: ", saleResponse);
+      // console.log("saleResponse: ", saleResponse);
       if (saleResponse.status === 200) {
         const data = saleResponse.data.data;
         setCashflowSaleSummary(data.cashflowSaleSummary);
+        setEggSaleSummary(data.eggSaleSummary);
+        setEggSaleGraphs(data.eggSaleGraphs);
+        setCashflowSaleGraph(data.cashflowSaleGraphs);
+        setLocationSaleSummaries(data.locationSaleSummaries);
+        setLocationPieChart(data.locationPieChart);
       }
     } catch (error) {
       console.log("error :", error);
+    }
+  };
+
+  const handleDownloadReport = async () => {
+    try {
+      const downloadResponse = await downloadReport(monthName, year, {
+        responseType: "blob",
+      });
+
+      const blob = new Blob([downloadResponse.data], {
+        type: downloadResponse.data.type,
+      });
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `Report-${monthName}-${year}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      console.log("Download started!");
+    } catch (error) {
+      console.log("Download failed:", error);
     }
   };
 
@@ -221,7 +247,10 @@ const Penjualan = () => {
                 setMonthName={setMonthName}
                 setYear={setYear}
               />
-              <div className="flex items-center rounded-lg px-4 py-2 bg-green-700 hover:bg-green-900 cursor-pointer">
+              <div
+                onClick={handleDownloadReport}
+                className="flex items-center rounded-lg px-4 py-2 bg-green-700 hover:bg-green-900 cursor-pointer"
+              >
                 <IoMdDownload size={18} color="White" />
                 <div className="text-base font-medium pl-2 text-white">
                   Simpan Laporan
@@ -242,10 +271,23 @@ const Penjualan = () => {
                 {formatRupiah(cashflowSaleSummary.income)}
               </p>
               <div className="flex items-center">
-                <FaArrowDownLong color="#F41C1C" />
-                <p className="text-[16px] text-[#F41C1C]">
-                  10% dibanding kemarin
-                </p>
+                {cashflowSaleSummary.isIncomeIncrease ? (
+                  <>
+                    <FaArrowUpLong color="#00A651" />
+                    <p className="text-[16px] text-[#00A651] ml-1">
+                      {`${cashflowSaleSummary.incomeDiffPercentage}`}% dibanding
+                      kemarin
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <FaArrowDownLong color="#F41C1C" />
+                    <p className="text-[16px] text-[#F41C1C] ml-1">
+                      {`${cashflowSaleSummary.incomeDiffPercentage}`}% dibanding
+                      kemarin
+                    </p>
+                  </>
+                )}
               </div>
             </div>
 
@@ -261,10 +303,23 @@ const Penjualan = () => {
                 Rp {formatRupiah(cashflowSaleSummary.profit)}
               </p>
               <div className="flex items-center">
-                <FaArrowDownLong color="#F41C1C" />
-                <p className="text-[16px] text-[#F41C1C]">
-                  10% dibanding kemarin
-                </p>
+                {cashflowSaleSummary.isProfitIncrease ? (
+                  <>
+                    <FaArrowUpLong color="#00A651" />
+                    <p className="text-[16px] text-[#00A651] ml-1">
+                      {`${cashflowSaleSummary.profitDiffPercentage}`}% dibanding
+                      kemarin
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <FaArrowDownLong color="#F41C1C" />
+                    <p className="text-[16px] text-[#F41C1C] ml-1">
+                      {`${cashflowSaleSummary.incomeDiffPercentage}`}% dibanding
+                      kemarin
+                    </p>
+                  </>
+                )}
               </div>
             </div>
             <div className="bg-white w-full p-4 border border-black-6 rounded-lg">
@@ -278,42 +333,87 @@ const Penjualan = () => {
                 Rp {formatRupiah(cashflowSaleSummary.expense)}
               </p>
               <div className="flex items-center">
-                <FaArrowDownLong color="#F41C1C" />
-                <p className="text-[16px] text-[#F41C1C]">
-                  10% dibanding kemarin
-                </p>
+                {cashflowSaleSummary.isExpenseIncrease ? (
+                  <>
+                    <FaArrowUpLong color="#00A651" />
+                    <p className="text-[16px] text-[#00A651] ml-1">
+                      {`${cashflowSaleSummary.expenseDiffPercentage}`}%
+                      dibanding kemarin
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <FaArrowDownLong color="#F41C1C" />
+                    <p className="text-[16px] text-[#F41C1C] ml-1">
+                      {`${cashflowSaleSummary.expenseDiffPercentage}`}%
+                      dibanding kemarin
+                    </p>
+                  </>
+                )}
               </div>
             </div>
             <div className="p-4 rounded-md border-2 border-black-6 h-full">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">Penjualan Telur Ikat</h2>
+                <h2 className="text-lg font-semibold">Penjualan Telur OK</h2>
                 <div className="p-2 rounded-xl bg-green-700">
                   <MdEgg size={24} color="white" />
                 </div>
               </div>
               <div className="flex justify-center flex-wrap gap-4">
                 <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                  <p className="text-3xl font-bold text-center">50</p>
+                  <p className="text-3xl font-bold text-center">
+                    {eggSaleSummary.totalGoodEggInIkat}
+                  </p>
                   <p className="text-xl text-center">Ikat</p>
+                </div>
+                <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+                  <p className="text-3xl font-bold text-center">
+                    {" "}
+                    {eggSaleSummary.totalGoodEggInKg}
+                  </p>
+                  <p className="text-xl text-center">Kg</p>
                 </div>
               </div>
             </div>
 
             <div className="p-4 rounded-md border-2 border-black-6 h-full">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">Telur OK Eceran</h2>
+                <h2 className="text-lg font-semibold">Penjualan Telur Retak</h2>
                 <div className="p-2 rounded-xl bg-green-700">
                   <MdEgg size={24} color="white" />
                 </div>
               </div>
               <div className="flex justify-center flex-wrap gap-4">
                 <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                  <p className="text-3xl font-bold text-center">100</p>
-                  <p className="text-xl text-center">Karpet</p>
+                  <p className="text-3xl font-bold text-center">
+                    {eggSaleSummary.totalCrackedEggInIkat}
+                  </p>
+                  <p className="text-xl text-center">Ikat</p>
                 </div>
                 <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-                  <p className="text-3xl font-bold text-center">1000</p>
-                  <p className="text-xl text-center">Butir</p>
+                  <p className="text-3xl font-bold text-center">
+                    {eggSaleSummary.totalCrackedEggInKg}
+                  </p>
+                  <p className="text-xl text-center">Kg</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-md border-2 border-black-6 h-full">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">
+                  Penjualan Telur Bonyok
+                </h2>
+                <div className="p-2 rounded-xl bg-green-700">
+                  <MdEgg size={24} color="white" />
+                </div>
+              </div>
+              <div className="flex justify-center flex-wrap gap-4">
+                <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
+                  <p className="text-3xl font-bold text-center">
+                    {eggSaleSummary.totalBrokenEggInPlastik}
+                  </p>
+                  <p className="text-xl text-center">Plastik</p>
                 </div>
               </div>
             </div>
@@ -325,9 +425,9 @@ const Penjualan = () => {
             <div className="w-full lg:w-1/2 bg-white rounded-lg p-6 border border-black-6">
               <h2 className="text-xl font-semibold mb-4">Keuntungan</h2>
               <ResponsiveContainer width="100%" height="90%">
-                <LineChart data={dataUntung}>
+                <LineChart data={cashflowSaleGraph}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
+                  <XAxis dataKey="key" />
                   <YAxis
                     domain={["auto", "auto"]}
                     tickFormatter={(value) => `${value / 1000000} juta`}
@@ -337,9 +437,27 @@ const Penjualan = () => {
 
                   <Line
                     type="monotone"
-                    dataKey="untung"
+                    dataKey="income"
+                    stroke="#22c55e"
+                    name="Pendapatan"
+                    strokeWidth={2}
+                    dot={{ r: 4 }}
+                  />
+
+                  <Line
+                    type="monotone"
+                    dataKey="expense"
                     stroke="#ef4444"
-                    name="Keuntungan"
+                    name="Pengeluaran"
+                    strokeWidth={2}
+                    dot={{ r: 4 }}
+                  />
+
+                  <Line
+                    type="monotone"
+                    dataKey="profit"
+                    stroke="#E8AD34"
+                    name="Laba"
                     strokeWidth={2}
                     dot={{ r: 4 }}
                   />
@@ -369,16 +487,16 @@ const Penjualan = () => {
                 )}
               </div>
               <ResponsiveContainer width="100%" height="90%">
-                <LineChart data={dataJual}>
+                <LineChart data={eggSaleGraphs}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
+                  <XAxis dataKey="key" />
                   <YAxis domain={[0, 50]} />
                   <Tooltip />
                   <Legend verticalAlign="top" align="right" />
 
                   <Line
                     type="monotone"
-                    dataKey="penjualan"
+                    dataKey="value"
                     stroke="#ef4444"
                     name="Penjualan Telur"
                     strokeWidth={2}
@@ -394,46 +512,36 @@ const Penjualan = () => {
             {/* Left: Tabel Penjualan */}
             <div className="w-2/3 bg-white px-8 py-6 rounded-lg border border-black-6">
               <div className="flex justify-between items-start mb-4">
-                <h2 className="text-lg font-semibold">Detail Penjualan</h2>
-                <div
+                <h2 className="text-lg font-semibold">
+                  Pendapatan Tiap Lokasi
+                </h2>
+                {/* <div
                   onClick={detailPenjualanHandle}
                   className="p-2 rounded-full hover:bg-black-4 cursor-pointer"
                 >
                   <FiMaximize2 size={24} color="" />
-                </div>
+                </div> */}
               </div>
 
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-green-700 text-white text-center">
-                    <th className="py-2 px-4">Tanggal Kirim</th>
-                    <th className="py-2 px-4">Nama barang</th>
-                    <th className="py-2 px-4">Kuantitas</th>
-                    <th className="py-2 px-4">Customer</th>
-                    <th className="py-2 px-4">Status</th>
+                    <th className="py-2 px-4">Lokasi Penjualan</th>
+                    <th className="py-2 px-4">Pendapatan</th>
+                    <th className="py-2 px-4">Piutang</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {salesData.map((item, i) => (
+                  {locationSaleSummaries.map((item, i) => (
                     <tr key={i} className="border-b">
-                      <td className="py-2 px-4 text-center">{item.tanggal}</td>
                       <td className="py-2 px-4 text-center">
-                        {item.namaBarang}
+                        {item.placeName}
                       </td>
                       <td className="py-2 px-4 text-center">
-                        {item.kuantitas}
+                        Rp {formatRupiah(item.income)}
                       </td>
-                      <td className="py-2 px-4 text-center">{item.customer}</td>
-                      <td className="py-2 px-4 text-center flex justify-center">
-                        <span
-                          className={`w-28 flex justify-center text-xs font-medium px-2 py-1 rounded ${
-                            item.status === "Selesai"
-                              ? "bg-aman-box-surface-color text-aman-text-color"
-                              : "bg-kritis-box-surface-color text-kritis-text-color"
-                          }`}
-                        >
-                          {item.status}
-                        </span>
+                      <td className="py-2 px-4 text-center">
+                        Rp {formatRupiah(item.receieveables)}
                       </td>
                     </tr>
                   ))}
@@ -474,7 +582,14 @@ const Penjualan = () => {
             </div>
           </div>
 
-          <Outlet />
+          <button
+            onClick={() => {
+              console.log("eggSaleGraph: ", eggSaleGraphs);
+            }}
+          >
+            CHECK
+          </button>
+          {/* <Outlet /> */}
         </div>
       )}
     </>
