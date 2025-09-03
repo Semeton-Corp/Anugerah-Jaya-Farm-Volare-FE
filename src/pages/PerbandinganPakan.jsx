@@ -7,12 +7,11 @@ import {
 } from "../services/warehouses";
 import { getItems } from "../services/item";
 import { useLocation, useNavigate } from "react-router-dom";
+import { use } from "react";
 
-// ===== helpers =====
 const rupiah = (n) =>
   `Rp ${Number(n || 0).toLocaleString("id-ID", { maximumFractionDigits: 0 })}`;
 
-// contoh data gudang (ganti dengan data dari API bila ada)
 const WAREHOUSES = [
   { id: 1, name: "Gudang Pusat", cornCapacity: 0 },
   { id: 2, name: "Gudang Timur", cornCapacity: 15000 },
@@ -64,13 +63,7 @@ export default function PerbandinganPakan() {
   const [pakanJadiOptions, setPakanJadiOptions] = useState([]);
   const [selectedPakanJadi, setSelectedPakanJadi] = useState();
 
-  const totalAdukan = useMemo(() => {
-    const j = Number(jagungKg || 0) * priceJagung;
-    const d = Number(dedakKg || 0) * priceDedak;
-    const k = Number(konsentratKg || 0) * priceKonsentrat;
-    const p = Number(premixKg || 0) * pricePremix;
-    return j + d + k + p;
-  }, [jagungKg, dedakKg, konsentratKg, premixKg]);
+  const [totalPrice, settotalPrice] = useState();
 
   const totalJadi = useMemo(() => {
     return Number(jumlahPakanJadi || 0) * Number(hargaPakanJadi || 0);
@@ -254,6 +247,18 @@ export default function PerbandinganPakan() {
     }
   };
 
+  const calculateTotalPriceAdukan = () => {
+    const toNumber = (value) => Number(value) || 0;
+
+    const jagungPrice = toNumber(priceJagung) * toNumber(jagungKg);
+    const dedakPrice = toNumber(priceDedak) * toNumber(dedakKg);
+    const konsentratPrice = toNumber(priceKonsentrat) * toNumber(konsentratKg);
+    const premixPrice = toNumber(pricePremix) * toNumber(premixKg);
+
+    const total = jagungPrice + dedakPrice + konsentratPrice + premixPrice;
+    settotalPrice(total);
+  };
+
   useEffect(() => {
     fetchWarehouses();
     fetchPakanJadiData();
@@ -262,6 +267,10 @@ export default function PerbandinganPakan() {
   useEffect(() => {
     fetchDailySpendingData();
   }, [selectedWarehouse]);
+
+  useEffect(() => {
+    calculateTotalPriceAdukan();
+  }, [priceJagung, priceDedak, priceKonsentrat, pricePremix, daysAdukan]);
 
   useEffect(() => {
     setDedakKg(dailyDedak * daysAdukan);
@@ -476,7 +485,7 @@ export default function PerbandinganPakan() {
           {/* Footer total + button */}
           <div className="mt-4">
             <p className="text-lg font-bold">
-              Total Harga : {rupiah(totalAdukan)}
+              Total Harga : {rupiah(totalPrice)}
             </p>
             <button
               onClick={pesanAdukan}

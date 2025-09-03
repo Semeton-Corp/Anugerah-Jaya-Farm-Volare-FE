@@ -200,14 +200,11 @@ const DetailProduksi = () => {
                       {item.status}
                     </span>
                   </td>
-                  <th className="py-1 px-4 ">
-                    <span className="px-4 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer">
-                      Lihat Detail
-                    </span>
-                  </th>
 
                   {isSelectedDateToday(selectedDate) &&
-                    item.chickenCage.eggPic == userName && (
+                    (item.chickenCage.eggPic === userName ||
+                      userRole === "Owner" ||
+                      userRole === "Kepala Kandang") && (
                       <td className="py-1 px-4  text-center">
                         <span
                           onClick={() => editDataHandle(item.id)}
