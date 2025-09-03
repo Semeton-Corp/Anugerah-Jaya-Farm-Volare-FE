@@ -8,7 +8,10 @@ import { MdDelete } from "react-icons/md";
 import { useState } from "react";
 import { formatDate, formatDateToDDMMYYYY } from "../utils/dateFormat";
 import { getCurrentUserWarehousePlacement } from "../services/placement";
-import { getWarehousesByLocation } from "../services/warehouses";
+import {
+  getEggWarehouseItemSummary,
+  getWarehousesByLocation,
+} from "../services/warehouses";
 import {
   getStoreRequestItems,
   getStores,
@@ -17,6 +20,8 @@ import {
 } from "../services/stores";
 import KonfirmasiPemenuhanPesananTokoTelurOk from "../components/KonfirmasiPemenuhanPesananTokoTelurOk ";
 import KonfirmasiPemenuhanPesananTokoTelurRetak from "../components/KonfirmasiPemenuhanPesananTokoTelurRetak";
+import { e } from "mathjs";
+import { GoAlertFill } from "react-icons/go";
 
 const getStatusStyle = (status) => {
   switch (status) {
@@ -61,18 +66,18 @@ const getSecondAction = (status) => {
 
 const PesananToko = () => {
   const userRole = localStorage.getItem("role");
-  const [selectedSite, setSelectedSite] = useState(
+  const [selectedSite] = useState(
     userRole === "Owner" ? 0 : localStorage.getItem("locationId")
   );
-
   const [warehouses, setWarehouses] = useState([]);
-  const [selectedWarehouse, setSelectedWarehouse] = useState(0);
-
-  const [stokTelurOK, setStokTelurOK] = useState(0);
-  const [stokTelurRetak, setStokTelurRetak] = useState(0);
-
+  const [selectedWarehouse, setSelectedWarehouse] = useState();
   const [warehousePlacement, setWarehousePlacement] = useState([]);
   const [requestData, setRequestData] = useState([]);
+
+  const [telurOkKg, setTelurOkKg] = useState(0);
+  const [telurOkIkat, setTelurOkIkat] = useState(0);
+  const [telurRetakKg, setTelurRetakKg] = useState(0);
+  const [telurRetakIkat, setTelurRetakIkat] = useState(0);
 
   const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
   const [page, setPage] = useState(1);
@@ -98,7 +103,7 @@ const PesananToko = () => {
 
   const handleDateChange = (e) => {
     const date = e.target.value;
-    // console.log("date: ", date);
+  
     setSelectedDate(date);
   };
 
@@ -118,9 +123,6 @@ const PesananToko = () => {
   const fetchRequestItemsData = async () => {
     try {
       const date = formatDateToDDMMYYYY(selectedDate);
-      console.log("date: ", date);
-      console.log("page: ", page);
-      console.log("selectedWarehouse: ", selectedWarehouse);
       const requestReponse = await getStoreRequestItems(
         date,
         page,
@@ -176,7 +178,11 @@ const PesananToko = () => {
         fetchRequestItemsData();
       }
     } catch (error) {
-      alert("Terjadi kesalahan dalam melakukan konfirmasi: ", error);
+      if (error.response.data.error.Quantity == "Quantity is required") {
+        alert("❌Telur retak yang ingin dikirim masih kosong");
+      } else {
+        alert("❌Terjadi kesalahan dalam melakukan konfirmasi: ", error);
+      }
       console.log("error :", error);
     }
   };
@@ -218,15 +224,58 @@ const PesananToko = () => {
     }
   };
 
+  const fetchWarehousePlacement = async () => {
+    try {
+      const placementResponse = await getCurrentUserWarehousePlacement();
+      console.log("placementResponse: ", placementResponse);
+      if (placementResponse.status == 200) {
+        setSelectedWarehouse(placementResponse?.data?.data?.warehouse?.id);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const fetchEggWarehouseSummary = async () => {
+    try {
+      const eggResponse = await getEggWarehouseItemSummary(selectedWarehouse);
+      console.log("eggResponse: ", eggResponse);
+      if (eggResponse.status == 200) {
+        const telurOkKg = eggResponse.data.data.find(
+          (item) => item.name === "Telur OK" && item.unit === "Kg"
+        );
+        const telurRetakKg = eggResponse.data.data.find(
+          (item) => item.name === "Telur Retak" && item.unit === "Kg"
+        );
+        const telurOkIkat = eggResponse.data.data.find(
+          (item) => item.name === "Telur OK" && item.unit === "Ikat"
+        );
+        const telurRetakIkat = eggResponse.data.data.find(
+          (item) => item.name === "Telur Retak" && item.unit === "Ikat"
+        );
+        setTelurOkKg(telurOkKg ? telurOkKg.quantity : 0);
+        setTelurOkIkat(telurOkIkat ? telurOkIkat.quantity : 0);
+        setTelurRetakKg(telurRetakKg ? telurRetakKg.quantity : 0);
+        setTelurRetakIkat(telurRetakIkat ? telurRetakIkat.quantity : 0);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
   useEffect(() => {
-    fetchWarehouseData();
+    if (userRole == "Pekerja Gudang") {
+      fetchWarehousePlacement();
+    } else {
+      fetchWarehouseData();
+    }
     fetchStore();
   }, []);
 
   useEffect(() => {
-    if (selectedWarehouse) {
-      fetchRequestItemsData();
-    }
+    console.log("selectedWarehouse: ", selectedWarehouse);
+    fetchRequestItemsData();
+    fetchEggWarehouseSummary();
   }, [selectedWarehouse, page, selectedDate]);
 
   return (
@@ -244,7 +293,6 @@ const PesananToko = () => {
                   onChange={(e) => setSelectedWarehouse(e.target.value)}
                   className="ml-2 bg-transparent text-base font-medium outline-none"
                 >
-                  <option value="">Semua Site</option>
                   {warehouses.map((warehouse) => (
                     <option key={warehouse.id} value={warehouse.id}>
                       {warehouse.name}
@@ -269,6 +317,14 @@ const PesananToko = () => {
         </div>
       </div>
 
+      {!selectedWarehouse && (
+        <div className="flex items-center p-4 mb-4 text-sm text-yellow-800 rounded-lg bg-yellow-50 border border-yellow-300">
+          <GoAlertFill className="w-5 h-5 mr-2 text-yellow-600" />
+          <span>
+            Anda tidak memiliki akses ke gudang manapun, silahkan hubungi Owner
+          </span>
+        </div>
+      )}
       <div className="flex  items-center">
         <h2 className="text-xl font-medium">Stok Telur Tersedia : </h2>
       </div>
@@ -286,12 +342,12 @@ const PesananToko = () => {
           <div className="flex justify-center flex-wrap gap-4">
             {/* item ikat */}
             <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-              <p className="text-3xl font-bold text-center">20</p>
+              <p className="text-3xl font-bold text-center">{telurOkIkat}</p>
               <p className="text-xl text-center">Ikat</p>
             </div>
 
             <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-              <p className="text-3xl font-bold text-center">20</p>
+              <p className="text-3xl font-bold text-center">{telurOkKg}</p>
               <p className="text-xl text-center">Kg</p>
             </div>
           </div>
@@ -309,12 +365,12 @@ const PesananToko = () => {
           <div className="flex justify-center flex-wrap gap-4">
             {/* item butir */}
             <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-              <p className="text-3xl font-bold text-center">20</p>
+              <p className="text-3xl font-bold text-center">{telurRetakIkat}</p>
               <p className="text-xl text-center">Ikat</p>
             </div>
 
             <div className="flex flex-col items-center justify-center w-32 py-4 bg-green-200 rounded-md">
-              <p className="text-3xl font-bold text-center">20</p>
+              <p className="text-3xl font-bold text-center">{telurRetakKg}</p>
               <p className="text-xl text-center">Kg</p>
             </div>
           </div>
@@ -335,10 +391,7 @@ const PesananToko = () => {
                 <th className="py-2 px-4">Jumlah (Ikat)</th>
                 <th className="py-2 px-4">Toko Pemesan</th>
                 <th className="py-2 px-4">Keterangan</th>
-                {userRole === "Pekerja Gudang" ||
-                  (userRole === "Kepala Kandang" && (
-                    <th className="py-2 px-4">Aksi</th>
-                  ))}
+                <th className="py-2 px-4">Aksi</th>
               </tr>
             </thead>
             <tbody>

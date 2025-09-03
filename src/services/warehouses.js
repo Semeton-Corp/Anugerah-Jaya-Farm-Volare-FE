@@ -59,12 +59,13 @@ export const getEggWarehouseItemSummary = (id, date) => {
   });
 };
 
-export const getWarehousesOverview = (id) => {
+export const getWarehousesOverview = (id, date) => {
   return api.get(`/warehouses/overview/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
     },
+    params: { date: date },
   });
 };
 
@@ -120,8 +121,8 @@ export const getWarehouseItemById = (id) => {
   });
 };
 
-export const updateWarehouseItem = (payload, id) => {
-  return api.put(`/warehouses/items/${id}`, payload, {
+export const updateWarehouseItem = (payload, warehouseId, itemId) => {
+  return api.put(`/warehouses/${warehouseId}/items/${itemId}`, payload, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

@@ -377,12 +377,13 @@ export default function PerbandinganPakan() {
             </div>
             <div>
               <label className="block text-sm text-gray-700 mb-1">
-                Kapasitas Maksimum Gudang
+                Kapasitas Maksimum Jagung Gudang
               </label>
               <div className="px-3 py-2 rounded-md border border-gray-300 bg-gray-100">
                 {selectedWarehouse?.cornCapacity
                   ? selectedWarehouse.cornCapacity
                   : "-"}
+                  
                 Kg
               </div>
             </div>
