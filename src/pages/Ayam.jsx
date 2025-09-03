@@ -167,7 +167,6 @@ const Ayam = () => {
           { age: "Layer", value: pie.chickenLayer },
           { age: "Afkir", value: pie.chickenAfkir },
         ];
-        console.log("ageData: ", ageData);
         setChickenAgeData(ageData);
       }
     } catch (error) {
@@ -222,7 +221,7 @@ const Ayam = () => {
                 >
                   <option value="">Semua Kandang</option>
                   {chickenCageOptions.map((chickenCage) => (
-                    <option key={chickenCage.id} value={chickenCage.id}>
+                    <option key={chickenCage.id} value={chickenCage.cage.id}>
                       {chickenCage.cage.name}
                     </option>
                   ))}

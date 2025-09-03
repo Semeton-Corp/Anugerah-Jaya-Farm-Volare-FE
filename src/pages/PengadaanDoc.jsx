@@ -63,7 +63,7 @@ const PengadaanDoc = () => {
       console.log("ordersResponse: ", ordersResponse);
       if (ordersResponse.status === 200) {
         setOrderData(ordersResponse.data.data.chickenProcurements);
-      }
+      }``
     } catch (error) {
       console.log("error :", error);
     }
