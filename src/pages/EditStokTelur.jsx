@@ -7,8 +7,7 @@ export default function EditStokTelur() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // data passed from navigate
-  const { warehouseId, itemId, quantity, itemName, unit } =
+  const { warehouseId, itemId, quantity, itemName, unit, description } =
     location.state || {};
 
   const [jumlah, setJumlah] = useState(quantity || 0);
@@ -16,22 +15,21 @@ export default function EditStokTelur() {
 
   useEffect(() => {
     if (!location.state) {
-      // if accessed directly without state, redirect back
       navigate(-1);
     }
   }, [location.state, navigate]);
 
   const handleSubmit = async () => {
     const payload = {
-      quantity: jumlah,
+      quantity: parseInt(jumlah),
     };
+
     try {
       const updateResponse = await updateWarehouseItem(
         payload,
         warehouseId,
         itemId
       );
-      console.log("updateResponse: ", updateResponse);
       if (updateResponse.status == 200) {
         setShowConfirm(false);
         navigate(-1, { state: { refetch: true } });
@@ -47,14 +45,24 @@ export default function EditStokTelur() {
 
       <div className="border rounded p-8">
         {/* Keterangan Stok */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">
-            Keterangan Stok
-          </label>
-          <span className="inline-block px-6 py-2 rounded bg-aman-box-surface-color text-aman-text-color text-sm font-semibold">
-            aman
-          </span>
-        </div>
+        {description && (
+          <>
+            <label className="block text-sm font-medium mb-1">
+              Keterangan Stok
+            </label>
+
+            <span
+              className={`w-24 py-1 flex justify-center rounded text-sm font-semibold ${
+                description === "Aman"
+                  ? "bg-aman-box-surface-color text-aman-text-color"
+                  : "bg-kritis-box-surface-color text-kritis-text-color"
+              }`}
+            >
+              {description}
+            </span>
+          </>
+        )}
+        <div className="mb-4"></div>
 
         {/* Nama Barang */}
         <div className="mb-4">

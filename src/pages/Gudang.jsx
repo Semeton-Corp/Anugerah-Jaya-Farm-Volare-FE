@@ -53,7 +53,6 @@ const Gudang = () => {
   );
 
   const editStokTelurHandle = (item) => {
-    console.log("item: ", item);
     const currentPath = location.pathname;
     const detailPath = currentPath + "/edit-stok-telur";
 
@@ -63,14 +62,25 @@ const Gudang = () => {
         itemId: item.item.id,
         quantity: item.quantity,
         itemName: item.item.name,
+        description: item.description,
       },
     });
   };
 
-  const editStokBarangHandle = () => {
+  const editStokBarangHandle = (item) => {
     const currentPath = location.pathname;
     const detailPath = currentPath + "/edit-stok-barang";
-    navigate(detailPath);
+
+    navigate(detailPath, {
+      state: {
+        warehouseId: selectedWarehouse,
+        itemId: item.item.id,
+        quantity: item.quantity,
+        itemName: item.item.name,
+        estimationRunOut: item.estimationRunOut,
+        description: item.description,
+      },
+    });
   };
 
   const fetchWarehouseData = async () => {
@@ -124,7 +134,6 @@ const Gudang = () => {
     try {
       const selected = warehouses?.find((w) => w.id == selectedWarehouse);
       console.log("selected: ", selected);
-      console.log("selectedWarehouse: ", selectedWarehouse);
 
       if (!selected) return;
       const payload = {
@@ -390,7 +399,8 @@ const Gudang = () => {
                       <td className="py-2 px-4 justify-center gap-4">
                         <span
                           onClick={() => {
-                            editStokBarangHandle();
+                            console.log("item: ", item);
+                            editStokBarangHandle(item);
                           }}
                           className="py-1 px-4 rounded bg-green-700 hover:bg-green-900  text-white cursor-pointer"
                         >
@@ -446,7 +456,7 @@ const Gudang = () => {
                       <td className="py-2 px-4 justify-center gap-4">
                         <span
                           onClick={() => {
-                            editStokBarangHandle();
+                            editStokBarangHandle(item);
                           }}
                           className="py-1 px-4 rounded bg-green-700 hover:bg-green-900  text-white cursor-pointer"
                         >

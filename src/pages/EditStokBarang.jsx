@@ -1,37 +1,79 @@
 import { useState } from "react";
 import ConfirmUpdateModal from "../components/ConfirmModal";
+import { useLocation, useNavigate } from "react-router-dom";
+import { updateWarehouseItem } from "../services/warehouses";
 
 export default function EditStokBarang() {
-  const [jumlah, setJumlah] = useState(40);
-  const [estimasiHabis, setEstimasiHabis] = useState(0);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const {
+    warehouseId,
+    itemId,
+    quantity,
+    itemName,
+    unit,
+    estimationRunOut,
+    description,
+  } = location.state || {};
+
+  const [jumlah, setJumlah] = useState(quantity || 0);
+  const [estimasiHabis, setEstimasiHabis] = useState(
+    parseInt(estimationRunOut || 0)
+  );
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const handleSubmit = () => {
-    console.log("Jumlah disimpan:", jumlah);
-    setShowConfirm(false);
+  const handleSubmit = async () => {
+    const payload = {
+      quantity: parseInt(jumlah),
+      runOutCountDown: parseInt(estimasiHabis),
+    };
+    console.log("payload: ", payload);
+    try {
+      const updateResponse = await updateWarehouseItem(
+        payload,
+        warehouseId,
+        itemId
+      );
+      // console.log("updateResponse: ", updateResponse);
+      if (updateResponse.status == 200) {
+        setShowConfirm(false);
+        navigate(-1, { state: { refetch: true } });
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
   };
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Edit Stok Barang</h1>
 
       <div className="border rounded p-8">
-        {/* Keterangan Stok */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">
-            Keterangan Stok
-          </label>
-          <span className="inline-block px-6 py-2 rounded bg-aman-box-surface-color text-aman-text-color text-sm font-semibold">
-            aman
-          </span>
-        </div>
+        {description && (
+          <>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">
+                Keterangan Stok
+              </label>
+              <span
+                className={`w-24 py-1 flex justify-center rounded text-sm font-semibold ${
+                  description === "Aman"
+                    ? "bg-aman-box-surface-color text-aman-text-color"
+                    : "bg-kritis-box-surface-color text-kritis-text-color"
+                }`}
+              >
+                {description}
+              </span>
+            </div>
+          </>
+        )}
 
-        {/* Nama Barang */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-1">Nama Barang</label>
-          <p className="font-bold">Telur OK</p>
+          <p className="font-bold">{itemName}</p>
         </div>
 
-        {/* Jumlah Barang */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-1">
             Jumlah Barang
@@ -48,7 +90,7 @@ export default function EditStokBarang() {
         </div>
 
         {/* Jumlah Barang */}
-        <div className="mb-4">
+        {/* <div className="mb-4">
           <label className="block text-sm font-medium mb-1">
             Estimasi Habis
           </label>
@@ -56,12 +98,12 @@ export default function EditStokBarang() {
             <input
               type="number"
               value={estimasiHabis}
-              onChange={(e) => setJumlah(e.target.value)}
+              onChange={(e) => setEstimasiHabis(e.target.value)}
               className="w-full max-w-md px-3 py-2 border border-gray-300 rounded bg-gray-100 focus:outline-none"
             />
             <span className="font-semibold">Hari lagi</span>
           </div>
-        </div>
+        </div> */}
 
         <div className="flex justify-end">
           <button
