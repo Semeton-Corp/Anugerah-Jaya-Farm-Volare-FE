@@ -39,6 +39,10 @@ const KonfirmasiPenjualanAyamModal = ({
   const [saleDate] = useState(sale.saleDate);
   const [estimationArrivalDate] = useState("");
 
+  const [deadlinePaymentDate, setDeadlinePaymentDate] = useState(
+    new Date().toISOString().slice(0, 10)
+  );
+
   const [editQty, setEditQty] = useState(false);
   const [editPrice, setEditPrice] = useState(false);
 
@@ -136,6 +140,8 @@ const KonfirmasiPenjualanAyamModal = ({
         nominal: String(p.nominal),
       })),
       paymentType: paymentType ?? "",
+      deadlinePaymentDate:
+        paymentType == "Penuh" ? null : toInputDate(deadlinePaymentDate),
     };
 
     onConfirm?.(payload);
@@ -235,6 +241,20 @@ const KonfirmasiPenjualanAyamModal = ({
             <option value="Cicil">Cicil</option>
           </select>
         </div>
+
+        {paymentType != "Penuh" && (
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-gray-700">
+              Tenggat Pembayaran
+            </label>
+            <input
+              type="date"
+              className="border rounded p-2"
+              value={deadlinePaymentDate}
+              onChange={(e) => setDeadlinePaymentDate(e.target.value)}
+            />
+          </div>
+        )}
 
         {/* Pembayaran */}
         <div className="border rounded mt-3">

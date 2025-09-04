@@ -11,6 +11,7 @@ import {
   updateAfkirChickenSalePayment,
 } from "../services/chickenMonitorings";
 import { convertToInputDateFormat, toYMD } from "../utils/dateFormat";
+import { GoAlertFill } from "react-icons/go";
 
 const rupiah = (n) => `Rp ${Number(n || 0).toLocaleString("id-ID")}`;
 const today = (() => {
@@ -37,7 +38,6 @@ const Badge = ({ tone = "neutral", children }) => {
     </span>
   );
 };
-
 
 export default function DetailPenjualanAyam() {
   const navigate = useNavigate();
@@ -75,6 +75,10 @@ export default function DetailPenjualanAyam() {
   const [selectedDeletePayment, setSelectedDeletePayment] = useState();
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedEditPayment, setSelectedEditPayment] = useState(null);
+
+  const [isMoreThanDeadlinePaymentDate, setIsMoreThanDeadlinePaymentDate] =
+    useState(false);
+  const [deadlinePaymentDate, setDeadlinePaymentDate] = useState("");
 
   const totalPrice = useMemo(
     () =>
@@ -198,6 +202,10 @@ export default function DetailPenjualanAyam() {
       console.log("detailResponse: ", detailResponse);
       if (detailResponse.status == 200) {
         setSale(detailResponse.data.data);
+        setIsMoreThanDeadlinePaymentDate(
+          detailResponse.data.data.isMoreThanDeadlinePaymentDate
+        );
+        setDeadlinePaymentDate(detailResponse.data.data.deadlinePaymentDate);
       }
     } catch (error) {
       console.log("error :", error);
@@ -270,6 +278,22 @@ export default function DetailPenjualanAyam() {
           </div>
         </div>
 
+        <div className="mt-8">
+          <h2 className="text-lg font-bold mb-2">Payment Deadline</h2>
+          <p
+            className={`flex text-lg items-center gap-2 font-semibold ${
+              isMoreThanDeadlinePaymentDate ? "text-red-600" : "text-black"
+            }`}
+          >
+            {isMoreThanDeadlinePaymentDate && (
+              <span className="text-red-600">
+                <GoAlertFill />
+              </span>
+            )}
+            {deadlinePaymentDate}
+          </p>
+        </div>
+
         {/* Pembayaran */}
         <div className="border rounded mt-6">
           <div className="flex items-center justify-between p-4">
@@ -277,7 +301,7 @@ export default function DetailPenjualanAyam() {
             {sale.remainingPayment != 0 && (
               <button
                 onClick={() => setShowPaymentModal(true)}
-                className="bg-yellow-400 hover:bg-yellow-500 px-4 py-2 rounded text-black cursor-pointer"
+                className="bg-orange-300 hover:bg-orange-500 px-4 py-2 rounded text-black cursor-pointer"
               >
                 Pilih Pembayaran
               </button>

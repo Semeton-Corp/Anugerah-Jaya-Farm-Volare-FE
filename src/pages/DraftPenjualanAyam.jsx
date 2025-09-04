@@ -68,7 +68,10 @@ const DraftPenjualanAyam = () => {
 
   useEffect(() => {
     fetchDraftData();
-  }, []);
+    if (location.state?.refetch) {
+      fetchDraftData();
+    }
+  }, [location]);
 
   if (isDetailPage) {
     return <Outlet />;
@@ -104,7 +107,7 @@ const DraftPenjualanAyam = () => {
             <tbody>
               {draftSalesData.map((item, index) => (
                 <tr key={index} className="border-t">
-                  <td className="p-3">{item.date}</td>
+                  <td className="p-3">{item.inputDate}</td>
                   <td className="p-3">{item.afkirChickenCustomer.name}</td>
                   <td className="p-3">{`${item.totalSellChicken} Ekor`}</td>
                   <td className="p-3">
@@ -118,10 +121,17 @@ const DraftPenjualanAyam = () => {
                           const localNumber = "081246087972";
                           const waNumber = localNumber.replace(/^0/, "62");
                           const message = `Halo ${
-                            item.customer
-                          }, kami dari Anugerah Jaya Farm ingin mengonfirmasi penjualan ayam afkir sejumlah ${
-                            item.quantity
-                          } dengan total ${formatCurrency(item.totalPrice)}.`;
+                            item.afkirChickenCustomer.name
+                          }, 
+                          Kami dari Anugerah Jaya Farm ingin mengonfirmasi pesanan ayam afkir Anda:
+
+                          🐔 Jumlah: ${item.totalSellChicken} ekor
+                          💰 Harga per ekor: ${formatCurrency(
+                            item.pricePerChicken
+                          )}
+                          📦 Total: ${formatCurrency(item.totalPrice)}
+
+                          Apakah pesanan ini jadi diproses?`;
                           const waURL = `https://wa.me/${waNumber}?text=${encodeURIComponent(
                             message
                           )}`;

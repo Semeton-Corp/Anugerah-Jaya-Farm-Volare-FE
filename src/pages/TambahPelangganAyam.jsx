@@ -67,10 +67,17 @@ export default function TambahPelangganAyam() {
           navigate(-1, { state: { refetch: true } });
         }
       } catch (error) {
-        alert(
-          "❌ Gagal menambahkan pelanggan baru, periksa input kembali! ",
-          error.message
-        );
+        if (
+          error?.response?.data?.message ==
+          "afkir chicken customer already exist"
+        ) {
+          alert("❌ Nomor sudah terdaftar, silahkan gunakan nomor lain! ");
+        } else {
+          alert(
+            "❌ Gagal menambahkan pelanggan baru, periksa input kembali! ",
+            error.message
+          );
+        }
         console.log("error :", error);
       }
     }
