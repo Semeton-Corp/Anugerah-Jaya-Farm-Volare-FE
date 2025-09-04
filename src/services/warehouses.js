@@ -249,11 +249,12 @@ export const arrivalConfirmationWarehouseItemProcurement = (payload, id) => {
   });
 };
 
-export const getWarehouseItemCornProcurementDrafts = () => {
+export const getWarehouseItemCornProcurementDrafts = (date) => {
   return api.get(`/warehouses/items/corns/procurements/drafts`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
+    params: { date: date },
   });
 };
 
@@ -309,11 +310,12 @@ export const confirmationWarehouseItemCornProcurementDraft = (payload, id) => {
   );
 };
 
-export const getWarehouseItemCornProcurements = () => {
+export const getWarehouseItemCornProcurements = (date) => {
   return api.get(`/warehouses/items/corns/procurements`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
+    params: { date: date },
   });
 };
 

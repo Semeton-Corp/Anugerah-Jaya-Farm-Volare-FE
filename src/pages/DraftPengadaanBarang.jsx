@@ -43,7 +43,7 @@ const DraftPengadaanBarang = () => {
   const fetchDraftData = async () => {
     try {
       const draftResponse = await getWarehouseItemProcurementDrafts();
-      console.log("draftResponse: ", draftResponse);
+      // console.log("draftResponse: ", draftResponse);
       if (draftResponse.status == 200) {
         setDraftData(draftResponse.data.data);
       }

@@ -95,6 +95,16 @@ const TambahSupplier = () => {
           navigate(-1, { state: { refetch: true } });
         }
       } catch (error) {
+        if (
+          error?.response?.data?.error?.PhoneNumber ==
+          "PhoneNumber is not a valid phone number"
+        ) {
+          alert(
+            "❌ Nomor telepon tidak valid. Silakan masukkan nomor telepon yang benar. Contoh 08xxxxxxxx"
+          );
+        } else {
+          alert("❌ Terjadi kesalahan saat menyimpan data.");
+        }
         console.log("error :", error);
       }
     }
@@ -163,7 +173,7 @@ const TambahSupplier = () => {
             Nomor Telepon Supplier
           </label>
           <input
-            type="text"
+            type="number"
             className="w-full border rounded p-2 mb-6 bg-black-4"
             placeholder="Masukkan alamat supplier..."
             value={phoneNumber}

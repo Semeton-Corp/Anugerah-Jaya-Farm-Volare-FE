@@ -35,37 +35,32 @@ const EditPic = () => {
         cageId: parseInt(cageId, 10),
       },
     ].filter(Boolean);
-    // console.log("payload: ", payload);
     try {
       const placementResponse = await createCagePlacement(payload);
       if (placementResponse.status == 200) {
         navigate(-1, { state: { refetch: true } });
       }
-      // console.log("placementResponse: ", placementResponse);
     } catch (error) {
       console.log("error :", error);
     }
-    // console.log("PIC Updated Payload:", payload);
   };
 
   const fetchPicList = async () => {
     try {
-      // console.log("locationId: ", locationId);
       const [picCageResponse, picEggResponse] = await Promise.all([
         getListUser(2, locationId),
         getListUser(1, locationId),
       ]);
 
       if (picCageResponse.status == 200) {
-        setPicCageOptions(picCageResponse.data.data.users);
-        console.log("picCageResponse: ", picCageResponse.data.data.users);
+        setPicCageOptions(picCageResponse.data.data);
+        console.log("picCageResponse: ", picCageResponse);
       }
       if (picEggResponse.status == 200) {
-        setPicEggOptions(picEggResponse.data.data.users);
-        console.log("picEggResponse: ", picEggResponse.data.data.users);
+        setPicEggOptions(picEggResponse.data.data);
+        console.log("picEggResponse: ", picEggResponse);
+        // console.log("picEggResponse: ", picEggResponse.data.data.users);
       }
-      // console.log("picCageResponse: ", picCageResponse);
-      // console.log("picEggResponse: ", picEggResponse);
     } catch (error) {
       console.log("error :", error);
     }

@@ -1,8 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useState } from "react";
 import { PiCalendarBlank } from "react-icons/pi";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { getTodayDateInBahasa } from "../utils/dateFormat";
+import { formatDate, formatDateToDDMMYYYY, getTodayDateInBahasa } from "../utils/dateFormat";
 import {
   confirmationWarehouseItemCornProcurementDraft,
   deleteWarehouseItemCornProcurementDraft,
@@ -21,15 +21,25 @@ const DraftPengadaanJagung = () => {
   const [selectedDraft, setSelectedDraft] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
 
+  const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
+
   const detailPages = ["input-draft-pengadaan-jagung"];
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
 
+  const dateInputRef = useRef(null);
+  const openDatePicker = () => {
+    if (dateInputRef.current) {
+      dateInputRef.current.showPicker?.() || dateInputRef.current.click();
+    }
+  };
+
   const fetchDraftsData = async () => {
     try {
-      const dataResponse = await getWarehouseItemCornProcurementDrafts();
+      const date = formatDateToDDMMYYYY(selectedDate);
+      const dataResponse = await getWarehouseItemCornProcurementDrafts(date);
       console.log("draftResponse: ", dataResponse);
       if (dataResponse.status === 200) {
         setDaftarDrafts(dataResponse.data.data);
@@ -80,6 +90,11 @@ const DraftPengadaanJagung = () => {
     navigate(`${location.pathname}/input-draft-pengadaan-jagung`);
   };
 
+  const handleDateChange = (e) => {
+    const date = e.target.value;
+    setSelectedDate(date);
+  };
+
   const handleDelete = async () => {
     try {
       const deleteResponse = await deleteWarehouseItemCornProcurementDraft(
@@ -103,7 +118,7 @@ const DraftPengadaanJagung = () => {
       fetchDraftsData();
       window.history.replaceState({}, document.title);
     }
-  }, [location]);
+  }, [location, selectedDate]);
 
   if (isDetailPage) {
     return <Outlet />;
@@ -113,11 +128,17 @@ const DraftPengadaanJagung = () => {
     <div className="flex flex-col px-4 py-3 gap-6">
       <div className="flex justify-between items-center mb-2 flex-wrap gap-4">
         <h1 className="text-3xl font-bold">Draft Pengadaan Jagung</h1>
-        <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-          <PiCalendarBlank size={18} />
-          <div className="text-base font-medium ms-2">
-            Hari ini ({getTodayDateInBahasa()})
-          </div>
+        <div
+          className="flex items-center rounded-lg bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+          onClick={openDatePicker}
+        >
+          <input
+            ref={dateInputRef}
+            type="date"
+            value={selectedDate}
+            onChange={handleDateChange}
+            className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+          />
         </div>
       </div>
 

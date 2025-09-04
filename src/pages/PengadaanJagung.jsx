@@ -1,8 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { PiCalendarBlank } from "react-icons/pi";
 import { GoAlertFill } from "react-icons/go";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
-import { getTodayDateInBahasa } from "../utils/dateFormat";
+import {
+  formatDate,
+  formatDateToDDMMYYYY,
+  getTodayDateInBahasa,
+} from "../utils/dateFormat";
 import {
   arrivalConfirmationWarehouseItemCornProcurement,
   getWarehouseItemCornProcurements,
@@ -35,12 +39,22 @@ const PengadaanJagung = () => {
     location.pathname.includes(segment)
   );
 
+  const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
+
   const [isShowConfirmModal, setIsShowConfirmModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
+  const dateInputRef = useRef(null);
+  const openDatePicker = () => {
+    if (dateInputRef.current) {
+      dateInputRef.current.showPicker?.() || dateInputRef.current.click();
+    }
+  };
+
   const fetchJagungData = async () => {
     try {
-      const dataResponse = await getWarehouseItemCornProcurements();
+      const date = formatDateToDDMMYYYY(selectedDate);
+      const dataResponse = await getWarehouseItemCornProcurements(date);
       console.log("dataResponse: ", dataResponse);
       if (dataResponse.status === 200) {
         setDaftarJagungData(
@@ -78,8 +92,11 @@ const PengadaanJagung = () => {
     }
   }, [location]);
 
+  useEffect(() => {
+    fetchJagungData();
+  }, [selectedDate]);
+
   const handleBarangSampai = (item) => {
-    // console.log("Barang Sampai clicked for:", item);
     setIsShowConfirmModal(true);
     setSelectedItem(item);
   };
@@ -92,6 +109,11 @@ const PengadaanJagung = () => {
     navigate(`${location.pathname}/draft-pengadaan-jagung`);
   };
 
+  const handleDateChange = (e) => {
+    const date = e.target.value;
+    setSelectedDate(date);
+  };
+
   if (isDetailPage) {
     return <Outlet />;
   }
@@ -101,11 +123,17 @@ const PengadaanJagung = () => {
       {/* Header Section */}
       <div className="flex justify-between items-center mb-2 flex-wrap gap-4">
         <h1 className="text-3xl font-bold">Pengadaan Jagung</h1>
-        <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-          <PiCalendarBlank size={18} />
-          <div className="text-base font-medium ms-2">
-            Hari ini ({getTodayDateInBahasa()})
-          </div>
+        <div
+          className="flex items-center rounded-lg bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+          onClick={openDatePicker}
+        >
+          <input
+            ref={dateInputRef}
+            type="date"
+            value={selectedDate}
+            onChange={handleDateChange}
+            className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+          />
         </div>
       </div>
 

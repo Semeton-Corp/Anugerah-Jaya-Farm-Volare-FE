@@ -30,7 +30,7 @@ const DaftarBarang = () => {
   const fetchWarehouseItems = async () => {
     try {
       const warehouseItemResponse = await getItems();
-      // console.log("warehouseItemResponse: ", warehouseItemResponse);
+      console.log("warehouseItemResponse: ", warehouseItemResponse);
       if (warehouseItemResponse.status == 200) {
         setDaftarBarangData(warehouseItemResponse.data.data);
       }
@@ -101,6 +101,7 @@ const DaftarBarang = () => {
               <tr className="bg-green-700 text-white text-center">
                 <th className="py-2 px-4">Nama Barang</th>
                 <th className="py-2 px-4">Jenis Barang</th>
+                <th className="py-2 px-4">Jumlah Penggunaan Harian</th>
                 <th className="py-2 px-4">Satuan</th>
                 <th className="py-2 px-4">Aksi</th>
               </tr>
@@ -115,6 +116,7 @@ const DaftarBarang = () => {
                     >
                       <td className="py-2 px-4">{data.name}</td>
                       <td className="py-2 px-4">{data.category}</td>
+                      <td className="py-2 px-4">{data.dailySpending ?? "-"}</td>
                       <td className="py-2 px-4">{data.unit}</td>
 
                       <td className="py-2 px-4 flex justify-center gap-4">
