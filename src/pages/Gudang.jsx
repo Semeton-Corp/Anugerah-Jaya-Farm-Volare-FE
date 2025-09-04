@@ -86,10 +86,11 @@ const Gudang = () => {
   const fetchWarehouseData = async () => {
     try {
       const warehouseResponse = await getWarehousesByLocation(selectedSite);
-      // console.log("warehouseResponse: ", warehouseResponse);
+      console.log("warehouseResponse: ", warehouseResponse);
       if (warehouseResponse.status == 200) {
         setWarehouses(warehouseResponse.data.data);
         setSelectedWarehouse(warehouseResponse.data.data[0].id);
+        setCornCapacity(warehouseResponse.data.data[0].cornCapacity);
       }
     } catch (error) {
       console.log("error :", error);

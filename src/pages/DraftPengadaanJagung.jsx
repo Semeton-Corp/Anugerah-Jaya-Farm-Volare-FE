@@ -44,10 +44,6 @@ const DraftPengadaanJagung = () => {
     navigate(`${location.pathname}/input-draft-pengadaan-jagung/${item.id}`);
   };
 
-  const handleBatalkan = (item) => {
-    console.log("Batalkan clicked for:", item);
-  };
-
   const handlePesan = (item) => {
     setSelectedDraft(item);
     setOpenModal(true);
@@ -73,11 +69,6 @@ const DraftPengadaanJagung = () => {
     } catch (error) {
       console.log("error :", error);
     }
-
-    // contoh: setelah sukses, refresh tabel dan tutup modal
-    // setOpenModal(false);
-    // setSelectedDraft(null);
-    // fetchDraftsData();
   };
 
   const handleCloseModal = () => {
@@ -87,7 +78,6 @@ const DraftPengadaanJagung = () => {
 
   const handleTambahDraft = () => {
     navigate(`${location.pathname}/input-draft-pengadaan-jagung`);
-    // console.log("Tambah Draft clicked");
   };
 
   const handleDelete = async () => {
@@ -131,7 +121,6 @@ const DraftPengadaanJagung = () => {
         </div>
       </div>
 
-      {/* Main Table Section */}
       <div className="bg-white p-4 border rounded-lg w-full border-black-6">
         <div className="flex justify-end items-center mb-4">
           <button
@@ -192,6 +181,7 @@ const DraftPengadaanJagung = () => {
                   </td>
                 </tr>
               ))}
+
               {daftarDrafts?.length === 0 && (
                 <tr>
                   <td

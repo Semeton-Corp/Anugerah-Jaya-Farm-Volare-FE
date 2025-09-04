@@ -32,21 +32,6 @@ const DraftPengadaanBarang = () => {
     location.pathname.includes(segment)
   );
 
-  const handleCompare = () => console.log("Perbandingan Pakan clicked");
-  const handleAdd = () => console.log("Tambah Pengadaan clicked");
-  const handlePesan = (row) => console.log("Pesan:", row);
-  const handleEdit = (row) => console.log("Edit:", row);
-  const handleBatal = (row) =>
-    setDrafts((prev) => prev.filter((d) => d.id !== row.id));
-  const openWA = (row) =>
-    window.open(`https://wa.me/${row.wa.replace(/\D/g, "")}`, "_blank");
-
-  const fmtShort = (iso) => {
-    const d = new Date(iso);
-    const opt = { day: "2-digit", month: "short", year: "numeric" };
-    return d.toLocaleDateString("en-GB", opt).replace(",", "");
-  };
-
   const inputDraftPesanBarangHandle = () => {
     navigate(`${location.pathname}/input-draft-pengadaan-barang`);
   };
@@ -178,12 +163,11 @@ const DraftPengadaanBarang = () => {
                         onClick={() => {
                           const localNumber = "081246087972";
                           const waNumber = localNumber.replace(/^0/, "62");
-
-                          const namaCustomer = item?.customer?.name || "";
+                          const namaSupplier = item?.supplier?.name || "";
                           const namaBarang = item?.item?.name || "";
                           const satuan = item?.item?.unit || "";
                           const jumlah = item?.quantity || "";
-                          const message = `Halo ${namaCustomer}, kami dari Anugerah Jaya Farm ingin mengonfirmasi pesanan Anda:%0A%0A🧺 Nama Barang: ${namaBarang}%0A📦 Jumlah: ${jumlah} ${satuan}%0A%0AApakah jadi untuk memesan?`;
+                          const message = `Halo ${namaSupplier}, kami dari Anugerah Jaya Farm ingin memesan barang berikut:%0A%0A🧺 Nama Barang: ${namaBarang}%0A📦 Jumlah: ${jumlah} ${satuan}%0A%0AMohon konfirmasi ketersediaannya, terima kasih.`;
                           const waURL = `https://wa.me/${waNumber}?text=${message}`;
 
                           window.open(waURL, "_blank");
