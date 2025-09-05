@@ -198,3 +198,15 @@ export const downloadReport = (month, year) => {
     responseType: "blob",
   });
 };
+
+export const getCashflowOverview = (year) => {
+  return api.get(`/cashflows/overview`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    params: {
+      year: year,
+    },
+  });
+};

@@ -12,6 +12,8 @@ import {
 } from "recharts";
 import { PiCalendarBlank } from "react-icons/pi";
 import YearSelector from "../components/YearSelector";
+import { getCashflowOverview } from "../services/cashflow";
+import { useEffect } from "react";
 
 const MONTHS = [
   "Januari",
@@ -34,32 +36,39 @@ const formatRupiah = (n = 0) =>
     .toFixed(0)
     .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
-const SummaryCard = ({ title, value, yoy, highlight = false }) => {
+const SummaryCard = ({ title, value, yoy = null, isIncrease = null }) => {
+  const isPos = isIncrease === true;
+  const isNeg = isIncrease === false;
+
   const cardCls = `
     rounded-md p-4
-    ${
-      highlight
-        ? "border-2 border-green-500 bg-green-100"
-        : "border border-green-400 bg-green-50"
-    }
+    ${isPos ? "border-2 border-green-500 bg-green-100" : ""}
+    ${isNeg ? "border-2 border-red-500 bg-red-100" : ""}
+    ${isIncrease == null ? "border border-green-400 bg-green-50" : ""}
   `;
-  const titleCls = `font-semibold ${
-    highlight ? "text-green-800" : "text-green-700"
-  } mb-1`;
+
+  const titleCls = `font-semibold mb-1 ${
+    isPos ? "text-green-800" : isNeg ? "text-red-800" : "text-green-700"
+  }`;
+
+  const valueCls = `text-2xl font-bold ${
+    isPos ? "text-green-900" : isNeg ? "text-red-900" : "text-sky-900"
+  }`;
+
+  const yoyText =
+    yoy == null
+      ? "—"
+      : `${yoy > 0 ? "▲" : "▼"} ${Math.abs(yoy)}% dibanding tahun sebelumnya`;
+
+  const yoyCls = `text-sm mt-2 ${
+    isPos ? "text-[#00A651]" : isNeg ? "text-red-700" : "text-gray-500"
+  }`;
 
   return (
     <div className={cardCls}>
       <div className={titleCls}>{title}</div>
-      <div className="text-2xl font-bold text-sky-900">
-        {formatRupiah(value)}
-      </div>
-      <div className=" text-gray-500 mt-2">
-        {yoy == null
-          ? "—"
-          : `${yoy > 0 ? "▲" : "▼"} ${Math.abs(
-              yoy
-            )}% dibanding tahun sebelumnya`}
-      </div>
+      <div className={valueCls}>{formatRupiah(value)}</div>
+      <div className={yoyCls}>{yoyText}</div>
     </div>
   );
 };
@@ -144,7 +153,12 @@ export default function GeneralCashflow() {
       ],
     },
   }));
+
   const [year, setYear] = useState(2025);
+
+  const [cashflowSummary, setCashflowSummary] = useState([]);
+  const [cashflowGraphs, setCashflowGraphs] = useState([]);
+  const [eggSaleCashflowGraphs, setEggSaleCashflowGraphs] = useState([]);
 
   const currency = (v) => formatRupiah(Number(v));
 
@@ -204,6 +218,25 @@ export default function GeneralCashflow() {
     );
   };
 
+  const fetchOverviewData = async () => {
+    try {
+      const overviewResponse = await getCashflowOverview(year);
+      console.log("overviewResponse: ", overviewResponse);
+      if (overviewResponse.status == 200) {
+        const overviewData = overviewResponse.data.data;
+        setCashflowSummary(overviewData.cashflowSummary || []);
+        setCashflowGraphs(overviewData.cashflowGraphs || []);
+        setEggSaleCashflowGraphs(overviewData.eggSaleCashflowGraphs || []);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchOverviewData();
+  }, [year]);
+
   return (
     <div className="p-4 space-y-4">
       <div className="flex items-center justify-between">
@@ -214,35 +247,39 @@ export default function GeneralCashflow() {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
         <SummaryCard
           title="Keuntungan"
-          value={dataYear.summary.profit}
-          yoy={yoy(dataYear.summary.profit, prevYear?.summary.profit)}
-          highlight
+          value={cashflowSummary?.profit}
+          yoy={cashflowSummary?.profitDiffPercentage}
+          isIncrease={cashflowSummary?.isProfitIncrease}
         />
         <SummaryCard
           title="Pendapatan"
-          value={dataYear.summary.revenue}
-          yoy={yoy(dataYear.summary.revenue, prevYear?.summary.revenue)}
+          value={cashflowSummary?.income}
+          yoy={cashflowSummary?.incomeDiffPercentage}
+          isIncrease={cashflowSummary?.isIncomeIncrease}
         />
         <SummaryCard
           title="Pengeluaran"
-          value={dataYear.summary.expense}
-          yoy={yoy(dataYear.summary.expense, prevYear?.summary.expense)}
+          value={cashflowSummary?.expense}
+          yoy={cashflowSummary?.expenseDiffPercentage}
+          isIncrease={cashflowSummary?.isExpenseIncrease}
         />
         <SummaryCard
           title="Kas"
-          value={dataYear.summary.cash}
-          yoy={yoy(dataYear.summary.cash, prevYear?.summary.cash)}
-          highlight
+          value={cashflowSummary?.cash}
+          yoy={cashflowSummary?.cashDiffPercentage}
+          isIncrease={cashflowSummary?.isCashIncrease}
         />
         <SummaryCard
           title="Piutang"
-          value={dataYear.summary.receivable}
-          yoy={yoy(dataYear.summary.receivable, prevYear?.summary.receivable)}
+          value={cashflowSummary?.receivables}
+          yoy={cashflowSummary?.receivablesDiffPercentage}
+          isIncrease={cashflowSummary?.isReceivablesIncrease}
         />
         <SummaryCard
           title="Hutang"
-          value={dataYear.summary.debt}
-          yoy={yoy(dataYear.summary.debt, prevYear?.summary.debt)}
+          value={cashflowSummary?.debt}
+          yoy={cashflowSummary?.debtDiffPercentage}
+          isIncrease={cashflowSummary?.isDebtIncrease}
         />
       </div>
 
