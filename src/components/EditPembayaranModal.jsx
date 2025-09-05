@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useState } from "react";
+import { toISODate } from "../utils/dateFormat";
 
 export const EditPembayaranModal = ({
   open,
@@ -7,7 +8,7 @@ export const EditPembayaranModal = ({
   onSave,
   title = "Tambah Pembayaran",
   defaultMethod = "Tunai",
-  initialValues, // { paymentMethod, nominal, paymentDate(YYYY-MM-DD), paymentProof }
+  initialValues,
 }) => {
   const [paymentMethod, setPaymentMethod] = useState(defaultMethod);
   const [nominal, setNominal] = useState("");
@@ -24,16 +25,10 @@ export const EditPembayaranModal = ({
       setNominal(
         initialValues.nominal != null ? String(initialValues.nominal) : ""
       );
-      // initialValues.paymentDate bisa "DD-MM-YYYY" dari API, kita normalisasi
-      const raw = initialValues.paymentDate || "";
-      const parts = raw.includes("-") ? raw.split("-") : [];
-      const isDDMMYYYY =
-        parts.length === 3 && parts[0].length === 2 && parts[2].length === 4;
-      const isoLike = isDDMMYYYY
-        ? `${parts[2]}-${parts[1]}-${parts[0]}`
-        : raw || new Date().toISOString().slice(0, 10);
 
+      const isoLike = toISODate(initialValues.paymentDate);
       setPaymentDate(isoLike);
+
       setPaymentProof(initialValues.paymentProof || "https://example.com");
     } else {
       setPaymentMethod(defaultMethod);

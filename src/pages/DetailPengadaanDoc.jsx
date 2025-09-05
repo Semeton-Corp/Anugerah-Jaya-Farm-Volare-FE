@@ -6,8 +6,13 @@ import { useParams } from "react-router-dom";
 import {
   createChickenProcurementPayment,
   getChickenProcurement,
+  updateChickenProcurementPayment,
 } from "../services/chickenMonitorings";
-import { convertToInputDateFormat } from "../utils/dateFormat";
+import {
+  convertToInputDateFormat,
+  formatDateToDDMMYYYY,
+} from "../utils/dateFormat";
+import { EditPembayaranModal } from "../components/EditPembayaranModal";
 
 const rupiah = (n) => `Rp ${Number(n || 0).toLocaleString("id-ID")}`;
 
@@ -15,7 +20,7 @@ const Badge = ({ children, tone = "neutral" }) => {
   const tones = {
     neutral: "bg-gray-200 text-gray-800",
     warning: "bg-orange-200 text-orange-900",
-    success: "bg-[#87FF8B] text-[#369B34]",
+    success: "bg-[#87FF8B] text-black",
     info: "bg-cyan-200 text-cyan-900",
   };
   return (
@@ -59,6 +64,10 @@ export default function DetailPengadaanDoc() {
   const [nominal, setNominal] = useState("");
   const [paymentProof, setPaymentProof] = useState("https://example.com");
 
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState(null);
+
   const priceTotal = Number(data?.totalPrice || 0);
   const rows = useMemo(() => {
     let sisa = priceTotal;
@@ -80,7 +89,7 @@ export default function DetailPengadaanDoc() {
       ? "Lunas"
       : "Belum Lunas";
   const shipTone =
-    data?.statusShipping === "Sedang Dikirim" ? "warning" : "info";
+    data?.procurementStatus == "Sedang Dikirim" ? "warning" : "success";
 
   const addPayment = async () => {
     try {
@@ -111,11 +120,67 @@ export default function DetailPengadaanDoc() {
     }
   };
 
-  const deletePayment = (paymentId) => {
-    setData((prev) => ({
-      ...prev,
-      payments: prev.payments.filter((p) => p.id !== paymentId),
-    }));
+  const submitEditPayment = async ({
+    paymentMethod,
+    nominal,
+    paymentDate,
+    paymentProof,
+  }) => {
+    if (!selectedPayment?.id) return;
+
+    const payload = {
+      paymentDate: formatDateToDDMMYYYY(paymentDate),
+      nominal: String(nominal),
+      paymentMethod,
+      paymentProof,
+    };
+    console.log("payload: ", payload);
+
+    try {
+      const res = await updateChickenProcurementPayment(
+        payload,
+        id,
+        selectedPayment.id
+      );
+      console.log("res: ", res);
+      if (res?.status === 201) {
+        alert("✅ Pembayaran berhasil diperbarui");
+        setShowEditModal(false);
+        setSelectedPayment(null);
+        fetchDetailData();
+      } else {
+        alert("❌Gagal memperbarui pembayaran.");
+      }
+    } catch (e) {
+      console.error(e);
+      if (e?.response?.data?.message == "nominal is to high") {
+        alert("❌Nominal pembayaran melebihi sisa pembayaran.");
+      } else {
+        alert("❌Gagal memperbarui pembayaran.");
+      }
+    }
+  };
+
+  // DELETE
+  const submitDeletePayment = async () => {
+    if (!selectedPayment?.id) return;
+    try {
+      const res = await deleteWarehouseItemCornProcurementPayment(
+        id,
+        selectedPayment.id
+      );
+      if (res?.status === 200 || res?.status === 204) {
+        alert("✅ Pembayaran berhasil dihapus");
+        setShowDeleteModal(false);
+        setSelectedPayment(null);
+        fetchDetail();
+      } else {
+        alert("Gagal menghapus pembayaran.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Gagal menghapus pembayaran.");
+    }
   };
 
   const fetchDetailData = async () => {
@@ -124,6 +189,7 @@ export default function DetailPengadaanDoc() {
       console.log("detailResponse: ", detailResponse);
       if (detailResponse.status === 200) {
         setData(detailResponse.data.data);
+        console.log("detailResponse.data.data: ", detailResponse.data.data);
       }
     } catch (error) {
       console.error("Error fetching procurement details:", error);
@@ -135,7 +201,7 @@ export default function DetailPengadaanDoc() {
   }, []);
 
   return (
-    <div className="border rounded p-4">
+    <div className="border rounded p-6 m-4">
       <h2 className="text-2xl font-semibold mb-4">Detail Pengadaan DOC</h2>
       <div className="grid grid-cols-2 md:grid-cols-2 gap-6 mb-2">
         <div>
@@ -145,7 +211,7 @@ export default function DetailPengadaanDoc() {
         <div></div>
         <div>
           <p className=" text-gray-600">Status Pengiriman</p>
-          <Badge tone={shipTone}>{data?.statusShipping}</Badge>
+          <Badge tone={shipTone}>{data?.procurementStatus}</Badge>
         </div>
         <div>
           <p className=" text-gray-600">Estimasi Tiba</p>
@@ -210,7 +276,9 @@ export default function DetailPengadaanDoc() {
                   <th className="text-left px-3 py-2">Nominal Pembayaran</th>
                   <th className="text-left px-3 py-2">Sisa Bayar</th>
                   <th className="text-left px-3 py-2">Bukti Pembayaran</th>
-                  <th className="px-3 py-2"></th>
+                  {finalRemaining !== 0 && (
+                    <th className="text-left px-3 py-2">Aksi</th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -233,19 +301,33 @@ export default function DetailPengadaanDoc() {
                       <td className="px-3 py-2 underline cursor-pointer">
                         {p.proof}
                       </td>
-                      <td className="px-3 py-2">
-                        <div className="flex items-center gap-3">
-                          <button className="p-1 rounded hover:bg-gray-100">
-                            <BiSolidEditAlt size={18} />
-                          </button>
-                          <button
-                            onClick={() => deletePayment(p.id)}
-                            className="p-1 rounded hover:bg-gray-100"
-                          >
-                            <MdDelete size={18} />
-                          </button>
-                        </div>
-                      </td>
+                      {finalRemaining !== 0 && (
+                        <td className="w-full px-4 py-2 flex gap-3">
+                          <BiSolidEditAlt
+                            onClick={() => {
+                              console.log("p.paymentDate: ", p.date);
+                              setSelectedPayment({
+                                id: p.id,
+                                paymentMethod: p.paymentMethod,
+                                nominal: p.nominalNum,
+                                paymentDate: p.date,
+                                paymentProof: p.proof,
+                              });
+                              setShowEditModal(true);
+                            }}
+                            size={24}
+                            className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                          />
+                          <MdDelete
+                            onClick={() => {
+                              setSelectedPayment({ id: p.id });
+                              setShowDeleteModal(true);
+                            }}
+                            size={24}
+                            className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                          />
+                        </td>
+                      )}
                     </tr>
                   ))
                 )}
@@ -332,6 +414,25 @@ export default function DetailPengadaanDoc() {
           </div>
         </div>
       )}
+
+      {/* EDIT modal */}
+      <EditPembayaranModal
+        open={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedPayment(null);
+        }}
+        onSave={submitEditPayment}
+        title="Edit Pembayaran"
+        initialValues={
+          selectedPayment && {
+            paymentMethod: selectedPayment.paymentMethod,
+            nominal: selectedPayment.nominal,
+            paymentDate: selectedPayment.paymentDate,
+            paymentProof: selectedPayment.paymentProof,
+          }
+        }
+      />
     </div>
   );
 }

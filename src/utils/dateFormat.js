@@ -22,6 +22,110 @@ export const getTodayDateInBahasa = () => {
   return `${day} ${month} ${year}`;
 };
 
+const MONTHS = {
+  jan: 0,
+  january: 0,
+  feb: 1,
+  february: 1,
+  mar: 2,
+  march: 2,
+  apr: 3,
+  april: 3,
+  may: 4,
+  jun: 5,
+  june: 5,
+  jul: 6,
+  july: 6,
+  aug: 7,
+  august: 7,
+  sep: 8,
+  sept: 8,
+  september: 8,
+  oct: 9,
+  october: 9,
+  nov: 10,
+  november: 10,
+  dec: 11,
+  december: 11,
+
+  janari: 0,
+  januari: 0,
+  febuari: 1,
+  februari: 1,
+  maret: 2,
+  april: 3,
+  mei: 4,
+  juni: 5,
+  juli: 6,
+  agu: 7,
+  agt: 7,
+  ags: 7,
+  agust: 7,
+  agustus: 7,
+  septeber: 8,
+  september: 8,
+  oktober: 9,
+  nop: 10,
+  nopember: 10,
+  november: 10,
+  des: 11,
+  desember: 11,
+};
+
+export const toISODate = (input) => {
+  if (!input) return new Date().toISOString().slice(0, 10);
+
+  // Already ISO: 2025-08-26
+  if (/^\d{4}-\d{2}-\d{2}$/.test(input)) return input;
+
+  // DD-MM-YYYY
+  let m = input.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if (m) {
+    const [_, dd, mm, yyyy] = m;
+    return `${yyyy}-${String(mm).padStart(2, "0")}-${String(dd).padStart(
+      2,
+      "0"
+    )}`;
+  }
+
+  // DD/MM/YYYY
+  m = input.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) {
+    const [_, dd, mm, yyyy] = m;
+    return `${yyyy}-${String(mm).padStart(2, "0")}-${String(dd).padStart(
+      2,
+      "0"
+    )}`;
+  }
+
+  // DD Mon YYYY  (e.g., "26 Aug 2025", "26 Agustus 2025")
+  m = input.match(/^(\d{1,2})\s+([A-Za-z\.]+)\s+(\d{4})$/);
+  if (m) {
+    const [_, dd, mon, yyyy] = m;
+    const key = mon.toLowerCase().replace(/\./g, "");
+    const idx = MONTHS[key];
+    if (idx !== undefined) {
+      return `${yyyy}-${String(idx + 1).padStart(2, "0")}-${String(dd).padStart(
+        2,
+        "0"
+      )}`;
+    }
+  }
+
+  const d = new Date(input);
+  if (!Number.isNaN(d.getTime())) {
+    return d.toISOString().slice(0, 10);
+  }
+
+  return new Date().toISOString().slice(0, 10);
+};
+
+export const toDDMMYYYY = (iso) => {
+  if (!iso) return "";
+  const [y, m, d] = iso.split("-");
+  return `${d}-${m}-${y}`;
+};
+
 export function getTodayMonthYear() {
   return new Intl.DateTimeFormat("id-ID", {
     month: "long",

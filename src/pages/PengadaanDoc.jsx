@@ -63,7 +63,8 @@ const PengadaanDoc = () => {
       console.log("ordersResponse: ", ordersResponse);
       if (ordersResponse.status === 200) {
         setOrderData(ordersResponse.data.data.chickenProcurements);
-      }``
+      }
+      ``;
     } catch (error) {
       console.log("error :", error);
     }
@@ -207,13 +208,14 @@ const PengadaanDoc = () => {
                     {!order.IsArrived && (
                       <button
                         onClick={() => {
+                          console.log("order: ", order);
                           setShowBarangSampaiModal(true);
                           setSelectedItem(order);
                           console.log("order: ", order);
                         }}
                         className="bg-orange-300 hover:bg-orange-500 text-sm px-3 py-1 rounded cursor-pointer"
                       >
-                        Barang Sampai
+                        Ayam Sampai
                       </button>
                     )}
                     <button
@@ -248,10 +250,10 @@ const PengadaanDoc = () => {
       {showBarangsampaiModal && (
         <KonfirmasiPengadaanDocModal
           data={{
-            kandang: "Sidodadi DOC",
-            namaBarang: "Ayam DOC",
-            supplier: "Dagang A",
-            jumlah: 12,
+            kandang: selectedItem?.cage?.name || "-",
+            namaBarang: selectedItem?.supplier?.type || "-",
+            supplier: selectedItem?.supplier?.name || "-",
+            jumlah: selectedItem?.quantity || 0,
           }}
           onClose={() => setShowBarangSampaiModal(false)}
           onConfirm={(result) => {

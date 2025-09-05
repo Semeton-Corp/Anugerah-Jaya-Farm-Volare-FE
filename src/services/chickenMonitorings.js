@@ -257,6 +257,35 @@ export const createChickenProcurementPayment = (payload, id) => {
   });
 };
 
+export const updateChickenProcurementPayment = (
+  payload,
+  chickenProcurementId,
+  id
+) => {
+  return api.put(
+    `/chickens/procurements/${chickenProcurementId}/payments/${id}`,
+    payload,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    }
+  );
+};
+
+export const deleteChickenProcurementPayment = (chickenProcurementId, id) => {
+  return api.delete(
+    `/chickens/procurements/${chickenProcurementId}/payments/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    }
+  );
+};
+
 export const createAfkirCustomer = (payload) => {
   return api.post(`/chickens/afkir/customers`, payload, {
     headers: {
