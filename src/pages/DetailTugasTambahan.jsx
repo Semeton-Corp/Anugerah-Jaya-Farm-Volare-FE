@@ -63,7 +63,7 @@ const DetailTugasTambahan = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <div className="font-medium">Site</div>
-            <div className="font-bold">{detailData.location?.site || "-"}</div>
+            <div className="font-bold">{detailData.location?.name || "-"}</div>
           </div>
           <div>
             <div className="font-medium">Lokasi</div>

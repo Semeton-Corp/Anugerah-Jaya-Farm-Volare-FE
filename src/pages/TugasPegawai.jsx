@@ -154,12 +154,10 @@ const TugasPegawai = () => {
 
   return (
     <div className="flex flex-col px-4 py-3 gap-4 ">
-      {/* header */}
       <div className="flex justify-between mb-2 flex-wrap gap-4">
         <h1 className="text-3xl font-bold">Tugas Pegawai</h1>
       </div>
 
-      {/* tugas tambahan box */}
       <div className=" rounded-[4px] border border-black-6">
         <div className="px-6 pt-8 pb-4 flex items-center justify-between">
           <p className="text-lg font-bold">Tugas Tambahan</p>
@@ -171,7 +169,6 @@ const TugasPegawai = () => {
           </div>
         </div>
 
-        {/* tugas tambahan table */}
         <div className="px-6 py-2 ">
           <table className="w-full mb-8">
             <thead className="px-8 rounded-[4px] bg-green-700 text-white text-left">
@@ -179,7 +176,7 @@ const TugasPegawai = () => {
                 <th className="py-2 px-4">Tanggal</th>
                 <th className="py-2 px-4">Tugas Tambahan</th>
                 <th className="py-2 px-4">Lokasi</th>
-                <th className="py-2 px-4">Slot Pekerja</th>
+                <th className="py-2 px-4">Sisa Slot Pekerja</th>
                 <th className="py-2 px-4">Status</th>
                 <th className="py-2 px-4"></th>
               </tr>
@@ -228,8 +225,6 @@ const TugasPegawai = () => {
         </div>
       </div>
 
-      {/* tugas rutin box */}
-
       <div className=" rounded-[4px] border border-black-6">
         <div className="px-6 pt-8 pb-4 flex items-center justify-between">
           <p className="text-lg font-bold">Tugas Rutin</p>
@@ -242,7 +237,6 @@ const TugasPegawai = () => {
           </div>
         </div>
 
-        {/* tugas tambahan table */}
         <div className="px-6 py-2 ">
           <table className="w-full mb-8">
             <thead className="px-8 rounded-[4px] bg-green-700 text-white text-center">
