@@ -327,10 +327,40 @@ export const getWarehouseItemCornProcurement = (id) => {
   });
 };
 
-export const createWarehouseItemCornProcurementPayment = (paylaod, id) => {
+export const createWarehouseItemCornProcurementPayment = (payload, id) => {
   return api.post(
     `/warehouses/items/corns/procurements/${id}/payments`,
-    paylaod,
+    payload,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};
+
+export const updateWarehouseItemCornProcurementPayment = (
+  payload,
+  warehouseItemCornProcurementId,
+  id
+) => {
+  return api.put(
+    `/warehouses/items/corns/procurements/${warehouseItemCornProcurementId}/payments/${id}`,
+    payload,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};
+
+export const deleteWarehouseItemCornProcurementPayment = (
+  warehouseItemCornProcurementId,
+  id
+) => {
+  return api.delete(
+    `/warehouses/items/corns/procurements/${warehouseItemCornProcurementId}/payments/${id}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,

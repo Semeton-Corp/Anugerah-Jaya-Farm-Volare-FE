@@ -72,7 +72,13 @@ const DraftPengadaanDoc = () => {
         navigate(newPath, { state: { refetch: true } });
       }
     } catch (error) {
-      alert("Gagal mengonfirmasi pesanan: " + error.message);
+      if (
+        (error.response.data.message = "cage is in used by another chicken")
+      ) {
+        alert("❌Kandang sudah digunakan, silahkan pilih kandang lain.");
+      } else {
+        alert("Gagal mengonfirmasi pesanan: " + error.response.data.message);
+      }
       console.log("error :", error);
     }
   };

@@ -8,6 +8,12 @@ import { useNavigate } from "react-router-dom";
 
 const InputDraftPemesananDoc = () => {
   const navigate = useNavigate();
+  const userRole = localStorage.getItem("role");
+
+  const [selectedSite] = useState(
+    userRole === "Owner" ? 0 : localStorage.getItem("locationId")
+  );
+
   const [quantity, setQuantity] = useState("");
   const [price, setPrice] = useState("");
 
@@ -19,12 +25,12 @@ const InputDraftPemesananDoc = () => {
 
   const fetchCages = async () => {
     try {
-      const chickenCageResponse = await getCage();
-      console.log("chickenCageResponse: ", chickenCageResponse);
+      const chickenCageResponse = await getCage(selectedSite);
+      // console.log("chickenCageResponse: ", chickenCageResponse);
       if (chickenCageResponse.status === 200) {
         const allCages = chickenCageResponse.data.data;
         const filteredCages = allCages.filter(
-          (cage) => !cage.isUsed && cage.chickenCategory === "DOC"
+          (cage) => !cage.isUsed && cage.chickenCategory == "DOC"
         );
         setCages(filteredCages);
         if (filteredCages.length > 0) {
@@ -94,21 +100,27 @@ const InputDraftPemesananDoc = () => {
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
               <label className="block mb-2">Kandang</label>
-              <select
-                className="w-full border rounded px-4 py-2"
-                value={selectedCage?.id ?? ""}
-                onChange={(e) =>
-                  setSelectedCage(
-                    cages?.find((k) => k.id === parseInt(e.target.value))
-                  )
-                }
-              >
-                {cages?.map((k) => (
-                  <option key={k?.id} value={k?.id}>
-                    {k?.name}
-                  </option>
-                ))}
-              </select>
+              {cages && cages.length > 0 ? (
+                <select
+                  className="w-full border rounded px-4 py-2"
+                  value={selectedCage?.id ?? ""}
+                  onChange={(e) =>
+                    setSelectedCage(
+                      cages.find((k) => k.id === parseInt(e.target.value))
+                    )
+                  }
+                >
+                  {cages.map((k) => (
+                    <option key={k?.id} value={k?.id}>
+                      {k?.name}s
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className="px-4 py-2 bg-orange-100 text-yellow-800 rounded border border-orange-300">
+                  ⚠️ Tidak ada Kandang Doc yang tersedia
+                </div>
+              )}
             </div>
 
             <div className="w-1/2 text-left flex flex-col justify-center">

@@ -3,8 +3,13 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   createWarehouseItemCornProcurementPayment,
+  deleteWarehouseItemCornProcurementPayment,
   getWarehouseItemCornProcurement,
+  updateWarehouseItemCornProcurementPayment,
 } from "../services/warehouses";
+import { EditPembayaranModal } from "../components/EditPembayaranModal";
+import { MdDelete } from "react-icons/md";
+import { BiSolidEditAlt } from "react-icons/bi";
 
 // ===== Utils =====
 const rupiah = (n) => `Rp ${Number(n || 0).toLocaleString("id-ID")}`;
@@ -130,11 +135,77 @@ const TambahPembayaranModal = ({
 export default function DetailPengadaanJagung() {
   const { id } = useParams();
 
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState(null);
+
+  const submitEditPayment = async ({
+    paymentMethod,
+    nominal,
+    paymentDate,
+    paymentProof,
+  }) => {
+    if (!selectedPayment?.id) return;
+
+    const payload = {
+      paymentDate: toDDMMYYYY(paymentDate),
+      nominal: String(nominal),
+      paymentMethod,
+      paymentProof,
+    };
+
+    try {
+      console.log("id: ", id);
+      console.log("var: ", selectedPayment.id);
+      const res = await updateWarehouseItemCornProcurementPayment(
+        payload,
+        id,
+        selectedPayment.id
+      );
+      if (res?.status === 200) {
+        alert("✅ Pembayaran berhasil diperbarui");
+        setShowEditModal(false);
+        setSelectedPayment(null);
+        fetchDetail();
+      } else {
+        alert("❌Gagal memperbarui pembayaran.");
+      }
+    } catch (e) {
+      console.error(e);
+      if (e?.response?.data?.message == "nominal is to high") {
+        alert("❌Nominal pembayaran melebihi sisa pembayaran.");
+      } else {
+        alert("❌Gagal memperbarui pembayaran.");
+      }
+    }
+  };
+
+  // DELETE
+  const submitDeletePayment = async () => {
+    if (!selectedPayment?.id) return;
+    try {
+      const res = await deleteWarehouseItemCornProcurementPayment(
+        id,
+        selectedPayment.id
+      );
+      if (res?.status === 200 || res?.status === 204) {
+        alert("✅ Pembayaran berhasil dihapus");
+        setShowDeleteModal(false);
+        setSelectedPayment(null);
+        fetchDetail();
+      } else {
+        alert("Gagal menghapus pembayaran.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Gagal menghapus pembayaran.");
+    }
+  };
+
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
   const [data, setData] = useState(null);
-
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const fetchDetail = async () => {
     try {
@@ -276,10 +347,9 @@ export default function DetailPengadaanJagung() {
   if (!data) return <div className="p-4">Data tidak ditemukan.</div>;
 
   return (
-    <div className="border rounded p-4">
+    <div className="border rounded p-4 m-4">
       <h2 className="text-2xl font-semibold mb-4">Detail Pengadaan Jagung</h2>
 
-      {/* Header info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-2">
         <div>
           <p className="text-gray-600">Tanggal Pemesanan</p>
@@ -422,6 +492,9 @@ export default function DetailPengadaanJagung() {
                   <th className="text-left px-3 py-2">Nominal Pembayaran</th>
                   <th className="text-left px-3 py-2">Sisa Bayar</th>
                   <th className="text-left px-3 py-2">Bukti Pembayaran</th>
+                  {finalRemaining !== 0 && (
+                    <th className="text-left px-3 py-2">Aksi</th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -442,13 +515,38 @@ export default function DetailPengadaanJagung() {
                       <td className="px-3 py-2">{rupiah(p.nominalNum)}</td>
                       <td className="px-3 py-2">{rupiah(p.remainingNum)}</td>
                       <td className="px-3 py-2 underline">{p.proof || "-"}</td>
+                      {finalRemaining !== 0 && (
+                        <td className="w-full px-4 py-2 flex gap-3">
+                          <BiSolidEditAlt
+                            onClick={() => {
+                              setSelectedPayment({
+                                id: p.id,
+                                paymentMethod: p.paymentMethod,
+                                nominal: p.nominalNum,
+                                paymentDate: p.paymentDate,
+                                paymentProof: p.proof,
+                              });
+                              setShowEditModal(true);
+                            }}
+                            size={24}
+                            className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                          />
+                          <MdDelete
+                            onClick={() => {
+                              setSelectedPayment({ id: p.id });
+                              setShowDeleteModal(true);
+                            }}
+                            size={24}
+                            className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                          />
+                        </td>
+                      )}
                     </tr>
                   ))
                 )}
               </tbody>
             </table>
           </div>
-
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center gap-3">
               <span className="font-semibold">Status Pembayaran :</span>
@@ -457,7 +555,10 @@ export default function DetailPengadaanJagung() {
               </Badge>
             </div>
             <div className="text-right">
-              <p className="text-sm">Sisa Bayar : {rupiah(finalRemaining)}</p>
+              <p className="font-bold text-xl">
+                Sisa Bayar :{" "}
+                <p className="text-3xl">{rupiah(finalRemaining)}</p>
+              </p>
             </div>
           </div>
         </div>
@@ -468,6 +569,52 @@ export default function DetailPengadaanJagung() {
         onClose={() => setShowPaymentModal(false)}
         onSave={submitPayment}
       />
+      {/* EDIT modal */}
+      <EditPembayaranModal
+        open={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedPayment(null);
+        }}
+        onSave={submitEditPayment}
+        title="Edit Pembayaran"
+        initialValues={
+          selectedPayment && {
+            paymentMethod: selectedPayment.paymentMethod,
+            nominal: selectedPayment.nominal,
+            paymentDate: selectedPayment.paymentDate,
+            paymentProof: selectedPayment.paymentProof,
+          }
+        }
+      />
+
+      {/* DELETE confirm */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white w-full max-w-sm p-6 rounded shadow-xl">
+            <h3 className="text-lg font-bold mb-4 text-center">
+              Hapus pembayaran ini?
+            </h3>
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setSelectedPayment(null);
+                }}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                onClick={submitDeletePayment}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded cursor-pointer"
+              >
+                Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

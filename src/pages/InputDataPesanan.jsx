@@ -50,6 +50,8 @@ const InputDataPesanan = () => {
   const [isEditable, setEditable] = useState(true);
   const [isOutOfStock, setIsOutOfStock] = useState(false);
 
+  const [editingIndex, setEditingIndex] = useState(null);
+
   const [stores, setStores] = useState([]);
   const [selectedStore, setSelectedStore] = useState("");
 
@@ -70,7 +72,9 @@ const InputDataPesanan = () => {
   const [total, setTotal] = useState(0);
   const [remaining, setRemaining] = useState(0);
 
+  const [payments, setPayments] = useState([]);
   const [paymentHistory, setPaymentHistory] = useState([]);
+  const tablePayments = id ? paymentHistory : payments;
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -105,10 +109,6 @@ const InputDataPesanan = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeletePaymentModal, setShowDeletePaymentModal] = useState(false);
   const [selectedDeletePaymentId, setSelectedDeletePaymentId] = useState("");
-
-  const isDetailPage = detailPages.some((segment) =>
-    location.pathname.includes(segment)
-  );
 
   function getAvailableStock(name, unit) {
     if (name === "Telur OK" && unit === "Kg") return telurOkKg;
@@ -358,21 +358,16 @@ const InputDataPesanan = () => {
       itemId: selectedItem.id,
       saleUnit: unit,
       storeId: parseInt(selectedStore),
-      quantity: quantity,
+      quantity,
       price: itemPrice.toString(),
-      discount: discount,
+      discount,
       sendDate: formatDateToDDMMYYYY(sendDate),
-      paymentType: paymentType,
-      storeSalePayment: storeSalePayment,
-      customerType: customerType,
+      paymentType,
+      payments,
+      customerType,
       ...(customerType === "Pelanggan Baru"
-        ? {
-            customerName: customerName,
-            customerPhoneNumber: phone.toString(),
-          }
-        : {
-            customerId: selectedCustomerId,
-          }),
+        ? { customerName, customerPhoneNumber: phone.toString() }
+        : { customerId: selectedCustomerId }),
     };
 
     console.log("create payload is ready: ", payload);
@@ -577,6 +572,18 @@ const InputDataPesanan = () => {
       }
     }
   };
+
+  useEffect(() => {
+    const subtotal = Math.max(
+      (itemTotalPrice || 0) - (itemPriceDiscount || 0),
+      0
+    );
+    const paid = (tablePayments || []).reduce(
+      (s, p) => s + Number(p.nominal || 0),
+      0
+    );
+    setRemaining(Math.max(subtotal - paid, 0));
+  }, [itemTotalPrice, itemPriceDiscount, tablePayments]);
 
   return (
     <div className="flex flex-col px-4 py-3 gap-4 ">
@@ -894,6 +901,21 @@ const InputDataPesanan = () => {
           </div>
         </div>
 
+        {!id && (
+          <>
+            <label className="block mb-2 font-medium ">Tipe Pembayaran</label>
+            <select
+              className="border p-2 rounded w-full "
+              value={paymentType}
+              onChange={(e) => setPaymentType(e.target.value)}
+              title="Tipe Pembayaran"
+            >
+              <option value="Penuh">Penuh</option>
+              <option value="Cicil">Cicil</option>
+            </select>
+          </>
+        )}
+
         {/* table */}
         <div className="mt-4">
           <table className="w-full">
@@ -914,72 +936,70 @@ const InputDataPesanan = () => {
               </tr>
             </thead>
             <tbody className="border-b text-center">
-              {paymentHistory && paymentHistory.length > 0 ? (
-                paymentHistory.map((payment, index) => (
-                  <tr key={index}>
-                    <td className="px-4 py-2">{payment.date}</td>
-                    <td className="px-4 py-2">{payment.paymentMethod}</td>
-                    <td className="px-4 py-2">
-                      Rp {Intl.NumberFormat("id-ID").format(payment.nominal)}
-                    </td>
-                    <td className="px-4 py-2">
-                      Rp {Intl.NumberFormat("id-ID").format(payment.remaining)}
-                    </td>
-                    <td className="px-4 py-2 underline cursor-pointer">
-                      Lihat Bukti
-                    </td>
-                    {!isSend && (
-                      <td className="px-4 py-2 flex gap-3 justify-center">
-                        <BiSolidEditAlt
-                          onClick={() => {
-                            setPaymentMethod(payment.paymentMethod);
-                            setNominal(payment.nominal);
-                            setPaymentDate(
-                              convertToInputDateFormat(payment.date)
-                            );
-                            setPaymentId(payment.id);
-                            setShowEditModal(true);
-                          }}
-                          size={24}
-                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                        />
-                        <MdDelete
-                          onClick={() => {
-                            setShowDeletePaymentModal(true);
-                            setSelectedDeletePaymentId(payment.id);
-                          }}
-                          size={24}
-                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                        />
+              {tablePayments && tablePayments.length > 0 ? (
+                tablePayments.map((payment, index) => {
+                  const date = payment.date || payment.paymentDate;
+                  return (
+                    <tr key={payment.id || index}>
+                      <td className="px-4 py-2">{date}</td>
+                      <td className="px-4 py-2">{payment.paymentMethod}</td>
+                      <td className="px-4 py-2">
+                        Rp {Intl.NumberFormat("id-ID").format(payment.nominal)}
                       </td>
-                    )}
-                  </tr>
-                ))
-              ) : paymentDate &&
-                paymentMethod &&
-                nominal &&
-                remaining &&
-                paymentProof ? (
-                <tr>
-                  <td className="px-4 py-2">
-                    {formatDateToDDMMYYYY(paymentDate)}
-                  </td>
-                  <td className="px-4 py-2">{paymentMethod}</td>
-                  <td className="px-4 py-2">
-                    Rp {Intl.NumberFormat("id-ID").format(nominal)}
-                  </td>
-                  <td className="px-4 py-2">
-                    Rp {Intl.NumberFormat("id-ID").format(remaining)}
-                  </td>
-                  <td className="px-4 py-2 underline cursor-pointer">
-                    Lihat Bukti
-                  </td>
-                </tr>
+                      <td className="px-4 py-2">
+                        {payment.remaining !== undefined
+                          ? `Rp ${Intl.NumberFormat("id-ID").format(
+                              payment.remaining
+                            )}`
+                          : "-"}
+                      </td>
+                      <td className="px-4 py-2 underline cursor-pointer">
+                        {payment.paymentProof ? "Lihat Bukti" : "-"}
+                      </td>
+
+                      {!isSend && (
+                        <td className="px-4 py-2 flex gap-3 justify-center">
+                          <BiSolidEditAlt
+                            onClick={() => {
+                              setPaymentMethod(payment.paymentMethod);
+                              setNominal(payment.nominal);
+                              setPaymentDate(convertToInputDateFormat(date));
+
+                              if (id) {
+                                setPaymentId(payment.id);
+                                setShowEditModal(true);
+                              } else {
+                                setEditingIndex(index);
+                                setShowPaymentModal(true);
+                              }
+                            }}
+                            size={24}
+                            className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                          />
+                          <MdDelete
+                            onClick={() => {
+                              if (id) {
+                                setShowDeletePaymentModal(true);
+                                setSelectedDeletePaymentId(payment.id);
+                              } else {
+                                setPayments((prev) =>
+                                  prev.filter((_, i) => i !== index)
+                                );
+                              }
+                            }}
+                            size={24}
+                            className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                          />
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td
                     colSpan={5}
-                    className={`text-center py-4 italic  ${
+                    className={`text-center py-4 italic ${
                       isOutOfStock ? "text-gray-500/20" : "text-gray-500"
                     }`}
                   >
@@ -1079,7 +1099,7 @@ const InputDataPesanan = () => {
       <div className="flex justify-end mb-8">
         <div
           onClick={() => {
-            const storeSalePayment = {
+            const payments = {
               paymentDate: formatDateToDDMMYYYY(paymentDate),
               nominal: nominal.toString(),
               paymentProof: paymentProof,
@@ -1094,7 +1114,7 @@ const InputDataPesanan = () => {
               discount: discount,
               sendDate: formatDateToDDMMYYYY(sendDate),
               paymentType: paymentType,
-              storeSalePayment: storeSalePayment,
+              payments: payments,
               customerType: customerType,
             };
             console.log("===== Form Data =====");
@@ -1118,30 +1138,6 @@ const InputDataPesanan = () => {
             <h3 className="text-xl font-bold mb-4">
               {id ? "Tambah Pembayaran" : "Pembayaran"}
             </h3>
-
-            {/* Tipe Pembayaran */}
-            {id ? (
-              <></>
-            ) : (
-              <>
-                <label className="block mb-2 font-medium">
-                  Tipe Pembayaran
-                </label>
-                <select
-                  className="w-full border p-2 rounded mb-4"
-                  value={paymentType}
-                  onChange={(e) => {
-                    setPaymentType(e.target.value);
-                  }}
-                >
-                  <option className="text-black-6" value="" disabled hidden>
-                    Pilih Metode Pembayaran
-                  </option>
-                  <option value="Penuh">Penuh</option>
-                  <option value="Cicil">Cicil</option>
-                </select>{" "}
-              </>
-            )}
 
             {/* Metode Pembayaran */}
             <label className="block mb-2 font-medium">Metode Pembayaran</label>
@@ -1196,19 +1192,12 @@ const InputDataPesanan = () => {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => {
-                  if (id) {
-                    setShowPaymentModal(false);
-                    setPaymentType("Cicil");
-                    setPaymentMethod("Tunai");
-                    setNominal(0);
-                    setPaymentDate(today);
-                  } else {
-                    setPaymentType("Cicil");
-                    setPaymentMethod("Tunai");
-                    setNominal(0);
-                    setPaymentDate(today);
-                    setShowPaymentModal(false);
-                  }
+                  setEditingIndex(null);
+                  setPaymentType("Cicil");
+                  setPaymentMethod("Tunai");
+                  setNominal(0);
+                  setPaymentDate(today);
+                  setShowPaymentModal(false);
                 }}
                 className="px-4 py-2 bg-gray-300 hover:bg-gray-500 rounded cursor-pointer"
               >
@@ -1218,9 +1207,31 @@ const InputDataPesanan = () => {
                 onClick={() => {
                   if (id) {
                     createStoreSalePaymentHandle(id);
-                  } else {
-                    setShowPaymentModal(false);
+                    return;
                   }
+
+                  const newPayment = {
+                    paymentDate: formatDateToDDMMYYYY(paymentDate),
+                    nominal: nominal,
+                    paymentMethod,
+                    paymentProof,
+                  };
+
+                  setPayments((prev) => {
+                    if (editingIndex === null) {
+                      return [...prev, newPayment];
+                    } else {
+                      const copy = [...prev];
+                      copy[editingIndex] = newPayment;
+                      return copy;
+                    }
+                  });
+
+                  setEditingIndex(null);
+                  setPaymentMethod("Tunai");
+                  setNominal(0);
+                  setPaymentDate(today);
+                  setShowPaymentModal(false);
                 }}
                 className="px-4 py-2 bg-green-700 hover:bg-green-900 text-white rounded cursor-pointer"
               >
