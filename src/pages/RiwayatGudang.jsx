@@ -92,7 +92,7 @@ const RiwayatGudang = () => {
 
       const historyResponse = await getWarehouseItemHistories(date, page);
       console.log("page: ", page);
-      // console.log("historyResponse: ", historyResponse);
+      console.log("historyResponse: ", historyResponse);
 
       setTotaldata(historyResponse.data.data.totalData);
       setHistoryData(historyResponse.data.data.warehouseItemHistories);

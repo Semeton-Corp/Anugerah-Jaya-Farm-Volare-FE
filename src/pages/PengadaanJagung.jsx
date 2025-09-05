@@ -186,11 +186,12 @@ const PengadaanJagung = () => {
                             ? "(Lunas)"
                             : item.deadlinePaymentDate || "-"}
                         </span>
-                        {item.isMoreThanDeadlinePaymentDate && (
-                          <span title="Terlambat" className="text-red-500">
-                            <GoAlertFill size={24} />
-                          </span>
-                        )}
+                        {item.isMoreThanDeadlinePaymentDate &&
+                          item.paymentStatus != "Lunas" && (
+                            <span title="Terlambat" className="text-red-500">
+                              <GoAlertFill size={24} />
+                            </span>
+                          )}
                       </div>
                     </td>
                     <td className="px-4 py-3">

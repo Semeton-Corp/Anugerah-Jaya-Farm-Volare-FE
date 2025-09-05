@@ -62,7 +62,7 @@ const DetailPengadaanBarang = () => {
       sisa = Math.max(sisa - n, 0);
       return {
         id: p.id,
-        date: p.paymentDate, // backend sudah kirim string readable; kalau ISO, formatkan sesuai kebutuhan
+        date: p.date,
         paymentMethod: p.paymentMethod,
         nominalNum: n,
         remainingNum: sisa,
@@ -99,7 +99,9 @@ const DetailPengadaanBarang = () => {
   const fetchDetailData = async () => {
     try {
       const res = await getWarehouseItemProcurement(id);
-      if (res.status === 200) setData(res.data.data);
+      if (res.status === 200) {
+        setData(res.data.data);
+      }
     } catch (e) {
       console.error("Error get detail:", e);
     }
@@ -297,7 +299,10 @@ const DetailPengadaanBarang = () => {
               </Badge>
             </div>
             <div className="text-right">
-              <p className="text-sm">Sisa Bayar : {rupiah(finalRemaining)}</p>
+              <p className="text-lg font-bold">
+                Sisa Bayar :{" "}
+                <p className="text-3xl">{rupiah(finalRemaining)}</p>
+              </p>
             </div>
           </div>
         </div>

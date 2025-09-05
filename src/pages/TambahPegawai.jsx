@@ -7,7 +7,7 @@ import { signUp } from "../services/authServices";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getStores } from "../services/stores";
 import { getWarehouses } from "../services/warehouses";
-import { getCage } from "../services/cages";
+import { getCage, getChickenCage } from "../services/cages";
 import { useParams } from "react-router-dom";
 import {
   createAdditionalWorks,
@@ -57,8 +57,8 @@ const TambahPegawai = () => {
   const [selectedPic, setSelectedPic] = useState([]);
 
   const roleToApiMap = {
-    "Pekerja Telur": getCage,
-    "Pekerja Kandang": getCage,
+    "Pekerja Telur": getChickenCage,
+    "Pekerja Kandang": getChickenCage,
     "Kepala Kandang": getWarehouses,
     "Pekerja Toko": getStores,
     "Pekerja Gudang": getWarehouses,
@@ -72,7 +72,7 @@ const TambahPegawai = () => {
     try {
       const rolesResponse = await getRoles();
       if (rolesResponse.status == 200) {
-        // console.log("rolesResponse.data.data: ", rolesResponse.data.data);
+        console.log("rolesResponse.data.data: ", rolesResponse.data.data);
         setRoles(rolesResponse.data.data);
         setSelectedRole(rolesResponse.data.data[0].id);
       }
@@ -125,20 +125,16 @@ const TambahPegawai = () => {
 
       try {
         const res = await apiFn(locationId);
-        // console.log("res: ", res);
-
         if (res.status === 200) {
           const allData = res.data.data;
+          let filteredData;
 
-          // Manual filter here
-          const filtered = allData.filter(
-            (item) => item.location?.id === parseInt(locationId)
-          );
-
-          console.log("filtered: ", filtered);
-
-          setPics(filtered);
-          setSelectedPic(filtered[0]?.id ? [String(filtered[0].id)] : []);
+          if (selectedRole == 1) {
+            filteredData = allData.filter((item) => item.eggPic == "");
+          } else if (selectedRole == 2) {
+            filteredData = allData.filter((item) => item.chickenPic == "");
+          }
+          setPics(filteredData);
         }
       } catch (err) {
         console.error(err);
@@ -367,11 +363,14 @@ function ProfilPegawaiForm({
 
     if (!roleName) return;
 
-    if (roleName === "Pekerja Gudang" || roleName === "Kepala Kandang") {
+    if (roleName === "Pekerja Gudang") {
       setLabelLokasi("Lokasi Gudang");
       setPlaceHolderLokasi("Pilih lokasi gudang");
       setIsShowLocationIdField(true);
       setIsShowPicField(true);
+    } else if (roleName === "Kepala Kandang") {
+      setIsShowLocationIdField(true);
+      setIsShowPicField(false);
     } else if (roleName === "Pekerja Toko") {
       setLabelLokasi("Lokasi Toko");
       setPlaceHolderLokasi("Pilih lokasi toko");
@@ -467,7 +466,7 @@ function ProfilPegawaiForm({
                       }}
                       className="scale-150 mr-2 cursor-pointer accent-green-700"
                     />
-                    <span className="text-lg">{pic.name}</span>
+                    <span className="text-lg">{pic?.cage?.name}</span>
                   </label>
                 ))}
               </div>

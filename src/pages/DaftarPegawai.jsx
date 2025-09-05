@@ -24,6 +24,9 @@ const DaftarPegawai = () => {
   );
 
   const [page, setPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(1);
+  const [totalData, setTotalData] = useState(0);
+  const [pageSize, setPageSize] = useState(0);
 
   const detailPages = ["tambah-pegawai", "profil"];
 
@@ -39,9 +42,16 @@ const DaftarPegawai = () => {
     try {
       const fetchResponse = await getUserOverviewList(page, query, roleId);
       console.log("fetchResponse:", fetchResponse);
-      // console.log("fetchResponse: ", fetchResponse);
       if (fetchResponse.status == 200) {
-        setPegawaiAktifData(fetchResponse.data.data.users);
+        const {
+          users = [],
+          totalData = 0,
+          totalPage = 1,
+        } = fetchResponse.data.data || {};
+        setPegawaiAktifData(users);
+        setTotalData(totalData);
+        setTotalPage(totalPage);
+        setPageSize(users.length);
       }
     } catch (error) {
       console.log("error :", error);
@@ -211,16 +221,40 @@ const DaftarPegawai = () => {
             </tbody>
           </table>
 
-          {/* footer */}
-          <div className="flex justify-between mt-16 px-6">
-            <p className="text-sm text-[#CCCCCC]">Menampilkan 1-7 data</p>
-            <div className="flex gap-3">
-              <div className="rounded-[4px] py-2 px-6 bg-green-100 flex items-center justify-center text-black text-base font-medium hover:bg-green-200 cursor-pointer">
-                <p>Previous </p>
-              </div>
-              <div className="rounded-[4px] py-2 px-6 bg-green-700 flex items-center justify-center text-white text-base font-medium hover:bg-green-800 cursor-pointer">
-                <p>Next</p>
-              </div>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 px-6 gap-3">
+            <p className="text-sm text-[#777]">
+              {pageSize > 0
+                ? `Menampilkan ${(page - 1) * pageSize + 1}-${Math.min(
+                    page * pageSize,
+                    totalData
+                  )} dari ${totalData} pegawai`
+                : "Tidak ada data"}
+            </p>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page <= 1}
+                className={`rounded-[4px] py-2 px-4 ${
+                  page <= 1
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    : "bg-green-100 hover:bg-green-200 cursor-pointer"
+                }`}
+              >
+                Previous
+              </button>
+
+              <button
+                onClick={() => setPage((p) => Math.min(totalPage, p + 1))}
+                disabled={page >= totalPage}
+                className={`rounded-[4px] py-2 px-4 ${
+                  page >= totalPage
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    : "bg-green-700 hover:bg-green-800 text-white cursor-pointer"
+                }`}
+              >
+                Next
+              </button>
             </div>
           </div>
         </div>

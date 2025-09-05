@@ -14,12 +14,8 @@ import { IoLogoWhatsapp } from "react-icons/io";
 import { FaExclamationTriangle } from "react-icons/fa";
 import { getDebtOverview } from "../services/cashflow";
 
-// Helpers
 const formatRupiah = (n = 0) =>
-  "Rp " +
-  Number(n || 0)
-    .toFixed(0)
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  "Rp " + n || (0).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
 const COLORS = {
   "Sudah dibayar": "#215963",

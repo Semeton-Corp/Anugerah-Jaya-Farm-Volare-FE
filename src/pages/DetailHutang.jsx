@@ -169,13 +169,11 @@ export default function DetailHutang() {
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-  // ---- Fetch ----
   const fetchDetail = async () => {
     try {
       setLoading(true);
       setErr("");
 
-      // Support getDebt(category, id) or getDebt(id)
       let res;
       try {
         res = await getDebt(category, id);
@@ -184,6 +182,7 @@ export default function DetailHutang() {
       }
 
       if (res?.status === 200) {
+        console.log("res.data?.data: ", res.data?.data);
         setData(res.data?.data || res.data || null);
       } else {
         setErr("Gagal memuat detail hutang.");

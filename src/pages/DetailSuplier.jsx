@@ -106,7 +106,7 @@ const DetailSupplier = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
             <h2 className="text-center text-lg font-semibold mb-4">
-              Apakah anda yakin untuk pengadaan barang ini?
+              Apakah anda yakin untuk menghapus supplier ini?
             </h2>
             <div className="flex justify-center gap-4">
               <button
