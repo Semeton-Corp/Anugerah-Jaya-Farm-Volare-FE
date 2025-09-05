@@ -86,7 +86,11 @@ export default function Piutang() {
 
   useEffect(() => {
     fetchOverview();
-  }, [monthName, year, category]);
+    if (location?.state?.refetch) {
+      fetchOverview();
+      window.history.replaceState({}, document.title);
+    }
+  }, [monthName, year, category, location]);
 
   const pieData = useMemo(() => {
     if (!pie) return [];

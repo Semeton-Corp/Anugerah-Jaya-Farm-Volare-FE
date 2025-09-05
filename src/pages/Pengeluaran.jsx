@@ -134,7 +134,11 @@ export default function Pengeluaran() {
 
   useEffect(() => {
     fetchExpenseData();
-  }, [category, monthName, year]);
+    if (location?.state?.refetch) {
+      fetchExpenseData();
+      window.history.replaceState({}, document.title);
+    }
+  }, [category, monthName, year, location]);
 
   if (isDetailPage) {
     return <Outlet />;
