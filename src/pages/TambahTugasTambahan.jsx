@@ -26,8 +26,8 @@ const TambahTugasTambahan = () => {
   const [site, setSite] = useState("");
   const [location, setLocation] = useState("");
   const [specificLocation, setSpecificLocation] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
+  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [time, setTime] = useState(() => "08:00");
   const [slot, setSlot] = useState(1);
   const [salary, setSalary] = useState("");
   const [description, setDescription] = useState("");
@@ -60,14 +60,21 @@ const TambahTugasTambahan = () => {
   const handleWorkerChange = (index, field, value) => {
     const newWorkers = [...workers];
     newWorkers[index][field] = value;
-    setWorkers(newWorkers);
-
-    if (field === "role") {
-      fetchEmployeesForRole(value, index);
+    if (field === "roleId") {
+      newWorkers[index].id = "";
+      setWorkers(newWorkers);
+      fetchEmployeesForRole(value, index, site);
+      return;
     }
+    setWorkers(newWorkers);
   };
 
   const handleSubmit = async () => {
+    const userIds = workers
+      .map((w) => w.id ?? w.userId ?? w.user?.id ?? "")
+      .map((id) => (id === null || id === undefined ? "" : String(id).trim()))
+      .filter((id) => id !== "");
+
     const payload = {
       name: taskName,
       locationId: parseInt(site),
@@ -77,7 +84,7 @@ const TambahTugasTambahan = () => {
       slot: parseInt(slot),
       salary: salary,
       description: description,
-      userIds: workers.map((w) => w.name),
+      userIds: userIds,
     };
 
     try {
@@ -147,19 +154,24 @@ const TambahTugasTambahan = () => {
     }
   };
 
-  const fetchEmployeesForRole = async (roleId, index) => {
+  const fetchEmployeesForRole = async (roleId, index, siteId = site) => {
     if (!roleId) return;
 
     try {
-      const response = await getListUser(roleId, site);
-      if (response.status === 200) {
+      const response = await getListUser(roleId, siteId);
+      if (response && response.status === 200) {
+        const payload = response.data?.data;
+        const users = payload?.users ?? payload ?? [];
         setEmployeeOptionsMap((prev) => ({
           ...prev,
-          [index]: response.data.data.users,
+          [index]: users,
         }));
+      } else {
+        setEmployeeOptionsMap((prev) => ({ ...prev, [index]: [] }));
       }
     } catch (err) {
       console.error("Failed to fetch employees for role", err);
+      setEmployeeOptionsMap((prev) => ({ ...prev, [index]: [] }));
     }
   };
 
@@ -169,10 +181,12 @@ const TambahTugasTambahan = () => {
       return;
     }
     try {
-      const employeeOptionsResponse = await getListUser(selectedRole, location);
-      console.log("employeeResponse: ", employeeResponse.data.data.users);
-      if (employeeOptionsResponse.status) {
-        setEmployeeOptions(employeeOptionsResponse.data.data.users);
+      const employeeOptionsResponse = await getListUser(selectedRole, site);
+      console.log("employeeOptionsResponse: ", employeeOptionsResponse);
+      if (employeeOptionsResponse?.status === 200) {
+        const payload = employeeOptionsResponse.data?.data;
+        const users = payload?.users ?? payload ?? [];
+        setEmployeeOptions(users);
       }
     } catch (error) {
       console.log("error :", error);
@@ -270,6 +284,29 @@ const TambahTugasTambahan = () => {
 
     initFetch();
   }, []);
+
+  useEffect(() => {
+    if (!site) {
+      setEmployeeOptionsMap({});
+      setWorkers((prev) => prev.map((w) => ({ ...w, id: "" })));
+      return;
+    }
+
+    workers.forEach((worker, idx) => {
+      const roleId = worker.roleId || worker.role;
+      if (roleId) {
+        fetchEmployeesForRole(roleId, idx, site);
+      } else {
+        setEmployeeOptionsMap((prev) => ({ ...prev, [idx]: [] }));
+        setWorkers((prev) => {
+          const copy = [...prev];
+          copy[idx] = { ...copy[idx], id: "" };
+          return copy;
+        });
+      }
+    });
+  }, [site]);
+
   useEffect(() => {
     fetchEmployees();
   }, [selectedRole]);
@@ -457,19 +494,29 @@ const TambahTugasTambahan = () => {
       </div>
       <button
         onClick={() => {
-          console.log("taskName:", taskName);
-          console.log("site:", site);
-          console.log("location:", location);
-          console.log("specificLocation:", specificLocation);
-          console.log("date:", formatDateToDDMMYYYY(date));
-          console.log("time:", time);
-          console.log("slot:", slot);
-          console.log("salary:", salary);
-          console.log("description:", description);
+          // console.log("taskName:", taskName);
+          // console.log("site:", site);
+          // console.log("location:", location);
+          // console.log("specificLocation:", specificLocation);
+          // console.log("date:", formatDateToDDMMYYYY(date));
+          // console.log("time:", time);
+          // console.log("slot:", slot);
+          // console.log("salary:", salary);
+          // console.log("description:", description);
+          // console.log("workers:", workers);
+          // console.log("roles: ", roles);
+          // console.log("specificLocationOptions: ", specificLocationOptions);
+          // console.log("employeeOptionsMap: ", employeeOptionsMap);
+
+          const userIds = workers
+            .map((w) => w.id ?? w.userId ?? w.user?.id ?? "")
+            .map((id) =>
+              id === null || id === undefined ? "" : String(id).trim()
+            )
+            .filter((id) => id !== "");
+
           console.log("workers:", workers);
-          console.log("roles: ", roles);
-          console.log("specificLocationOptions: ", specificLocationOptions);
-          console.log("employeeOptionsMap: ", employeeOptionsMap);
+          console.log("userIds (strings):", userIds);
         }}
       >
         CHECK
