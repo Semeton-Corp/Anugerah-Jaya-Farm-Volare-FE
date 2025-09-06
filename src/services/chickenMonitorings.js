@@ -221,12 +221,13 @@ export const deleteChickenProcurementDraft = (id) => {
   });
 };
 
-export const getChickenProcurements = () => {
+export const getChickenProcurements = (page) => {
   return api.get(`/chickens/procurements`, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
     },
+    params: { page: page },
   });
 };
 

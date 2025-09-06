@@ -64,6 +64,7 @@ const DraftPengadaanDoc = () => {
         payload,
         selectedItem.id
       );
+      console.log("submitResponse: ", submitResponse);
       if (submitResponse.status === 201) {
         alert("✅ Berhasil mengonfirmasi pesanan");
         setShowAlokasiModal(false);
@@ -131,10 +132,10 @@ const DraftPengadaanDoc = () => {
             <thead>
               <tr className="bg-green-700 text-white text-left">
                 <th className="p-3">Tanggal Input</th>
+                <th className="p-3">Kandang</th>
                 <th className="p-3">Suplier</th>
                 <th className="p-3">Jumlah</th>
                 <th className="p-3">Harga</th>
-                {/* <th className="p-3">Status</th> */}
                 <th className="p-3">Aksi</th>
               </tr>
             </thead>
@@ -142,29 +143,24 @@ const DraftPengadaanDoc = () => {
               {draftData.map((item, index) => (
                 <tr key={index} className="border-t">
                   <td className="p-3">{item.inputDate}</td>
+                  <td className="p-3">{item.cage.name}</td>
                   <td className="p-3">{item.supplier.name}</td>
                   <td className="p-3">{`${item.quantity} Ekor`}</td>
                   <td className="p-3">
-                    {`Rp ${Number(item.totalPrice).toLocaleString(
-                      "id-ID",
-                      {}
-                    )}`}
+                    {`Rp ${Number(item.totalPrice).toLocaleString("id-ID")}`}
                   </td>
-
                   <td className="p-3 flex items-center gap-2">
                     <div className="flex gap-3 justify-center">
                       <button
                         onClick={() => {
                           const localNumber = "081246087972";
                           const waNumber = localNumber.replace(/^0/, "62");
-
                           const namaCustomer = item?.customer?.name || "";
                           const namaBarang = item?.item?.name || "";
                           const satuan = item?.item?.unit || "";
                           const jumlah = item?.quantity || "";
                           const message = `Halo ${namaCustomer}, kami dari Anugerah Jaya Farm ingin mengonfirmasi pesanan Anda:%0A%0A🧺 Nama Barang: ${namaBarang}%0A📦 Jumlah: ${jumlah} ${satuan}%0A%0AApakah jadi untuk memesan?`;
                           const waURL = `https://wa.me/${waNumber}?text=${message}`;
-
                           window.open(waURL, "_blank");
                         }}
                         className="px-3 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer"

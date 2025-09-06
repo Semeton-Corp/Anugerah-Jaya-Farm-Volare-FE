@@ -36,6 +36,7 @@ import {
 import { getCustomers } from "../services/costumer";
 import { getCurrentUserStorePlacement } from "../services/placement";
 import ReceiptModal from "../components/Receipt";
+import { GoAlertFill } from "react-icons/go";
 
 const InputDataPesanan = () => {
   const location = useLocation();
@@ -80,11 +81,14 @@ const InputDataPesanan = () => {
 
   const [isSend, setIsSend] = useState(false);
   const [sendDate, setSendDate] = useState(today);
+  const [deadlinePaymentDate, setDeadlinePayment] = useState(today);
   const [paymentDate, setPaymentDate] = useState(today);
-  const [paymentType, setPaymentType] = useState("Cicil");
+  const [paymentType, setPaymentType] = useState("Penuh");
   const [paymentStatus, setPaymentStatus] = useState("Belum Lunas");
   const [paymentMethod, setPaymentMethod] = useState("Tunai");
   const [paymentProof, setPaymentProof] = useState("https://example.com");
+  const [isMoreThanDeadlinePaymentDate, setIsMoreThanDeadlinePaymentDate] =
+    useState(false);
 
   const [telurOkKg, setTelurOkKg] = useState(0);
   const [telurOkIkat, setTelurOkIkat] = useState(0);
@@ -200,8 +204,7 @@ const InputDataPesanan = () => {
   const fetchEditSaleStoreData = async (id) => {
     try {
       const response = await getStoreSaleById(id);
-      // console.log("response get sale by id: ", response);
-      // console.log("customer name: ", response.data.data.customer);
+      console.log("response fetch detail: ", response);
 
       if (response.status == 200) {
         console.log("test: ");
@@ -212,12 +215,13 @@ const InputDataPesanan = () => {
         setQuantity(response.data.data.quantity);
         setUnit(response.data.data.saleUnit);
         setPrice(response.data.data.price);
-        setSendDate(convertToInputDateFormat(response.data.data.sentDate));
+        setSendDate(response.data.data.sentDate);
         setTotal(response.data.data.totalPrice);
         setPaymentHistory(response.data.data.payments);
         setRemaining(response.data.data.remainingPayment);
         setPaymentStatus(response.data.data.paymentStatus);
         setIsSend(response.data.data.isSend);
+        setDeadlinePayment(response.data.data.deadlinePayment);
       }
     } catch (error) {}
   };
@@ -324,15 +328,15 @@ const InputDataPesanan = () => {
     if (!selectedItem) return;
 
     const name = selectedItem.name;
-    const unit = selectedItem.unit;
-    const available = getAvailableStock(name, unit);
+    const selectedUnit = unit;
+    const available = getAvailableStock(name, selectedUnit);
 
     if (quantity > available) {
       setIsOutOfStock(true);
     } else {
       setIsOutOfStock(false);
     }
-  }, [quantity, selectedItem]);
+  }, [quantity, selectedItem, unit]);
 
   useEffect(() => {
     if (!id) {
@@ -363,6 +367,10 @@ const InputDataPesanan = () => {
       discount,
       sendDate: formatDateToDDMMYYYY(sendDate),
       paymentType,
+      deadlinePaymentDate:
+        paymentType == "Penuh"
+          ? null
+          : convertToInputDateFormat(deadlinePaymentDate),
       payments,
       customerType,
       ...(customerType === "Pelanggan Baru"
@@ -394,6 +402,8 @@ const InputDataPesanan = () => {
         alert("❌Masukkan format nomor telepon dengan 08XXXXXX");
       } else if (error.response.data.message == "customer already exist") {
         alert("❌Pelanggan sudah terdaftar, gunakan nomor telepon lain");
+      } else if (error.response.data.message == "customer id is required") {
+        alert("❌Silahkan pastikan anda memilih pembeli dengan benar!");
       } else {
         alert(
           "❌Gagal menyimpan data pesanan, periksa kembali data input anda"
@@ -704,7 +714,7 @@ const InputDataPesanan = () => {
               >
                 {items.map((item) => (
                   <option value={item.id} key={item.id}>
-                    {`${item.name} - ${item.unit}`}
+                    {`${item.name}`}
                   </option>
                 ))}
               </select>
@@ -731,9 +741,28 @@ const InputDataPesanan = () => {
           </div>
           <div className="flex-1">
             <label className="block font-medium mt-4">Satuan</label>
-            <p className="text-lg font-bold items-center">
-              {selectedItem.unit}
-            </p>
+            {isEditable ? (
+              <>
+                {selectedItem?.name !== "Telur Bonyok" ? (
+                  <select
+                    className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
+                    value={unit}
+                    onChange={(e) => setUnit(e.target.value)}
+                  >
+                    <option value="Ikat">Ikat</option>
+                    <option value="Kg">Kg</option>
+                  </select>
+                ) : (
+                  <p className="text-lg font-bold items-center mt-2">
+                    {selectedItem?.unit}
+                  </p>
+                )}
+              </>
+            ) : (
+              <>
+                <p className="text-lg font-bold items-center mt-2">{unit}</p>
+              </>
+            )}
           </div>
         </div>
 
@@ -748,7 +777,7 @@ const InputDataPesanan = () => {
           <div className="w-full">
             <label
               className={`block font-medium mt-4 ${
-                isOutOfStock ? " text-gray-400/40" : "text-black"
+                isOutOfStock && !id ? " text-gray-400/40" : "text-black"
               }`}
             >
               Tanggal Kirim
@@ -772,9 +801,7 @@ const InputDataPesanan = () => {
                 onChange={(e) => setSendDate(e.target.value)}
               />
             ) : (
-              <p className="text-lg font-bold">
-                {formatTanggalIndonesia(sendDate)}
-              </p>
+              <p className="text-lg font-bold">{sendDate}</p>
             )}
           </div>
         </div>
@@ -903,9 +930,20 @@ const InputDataPesanan = () => {
 
         {!id && (
           <>
-            <label className="block mb-2 font-medium ">Tipe Pembayaran</label>
+            <label
+              className={`block font-medium mt-4 ${
+                isOutOfStock && !id ? " text-gray-400/40" : "text-black"
+              }`}
+            >
+              Tipe Pembayaran
+            </label>
             <select
-              className="border p-2 rounded w-full "
+              disabled={isOutOfStock}
+              className={`w-full border bg-black-4  rounded p-2 mb-4 ${
+                isOutOfStock
+                  ? "bg-gray-400/10 cursor-not-allowed text-gray-400/20"
+                  : "cursor-pointer"
+              }`}
               value={paymentType}
               onChange={(e) => setPaymentType(e.target.value)}
               title="Tipe Pembayaran"
@@ -913,6 +951,59 @@ const InputDataPesanan = () => {
               <option value="Penuh">Penuh</option>
               <option value="Cicil">Cicil</option>
             </select>
+          </>
+        )}
+
+        {paymentType == "Cicil" && (
+          <>
+            <label
+              className={`block font-medium  ${
+                isOutOfStock && !id ? " text-gray-400/40" : "text-black"
+              }`}
+            >
+              Tenggat Pembayaran
+            </label>
+            {isEditable ? (
+              <input
+                disabled={isOutOfStock}
+                ref={dateInputRef}
+                className={`w-full border bg-black-4 rounded p-2 mb-4 ${
+                  isOutOfStock
+                    ? "bg-gray-400/10 cursor-not-allowed text-gray-400/20"
+                    : "cursor-pointer"
+                }`}
+                type="date"
+                value={sendDate}
+                onClick={() => {
+                  if (!isOutOfStock && dateInputRef.current?.showPicker) {
+                    dateInputRef.current.showPicker();
+                  }
+                }}
+                onChange={(e) => setSendDate(e.target.value)}
+              />
+            ) : (
+              <div className="flex gap-2 items-center">
+                <span
+                  className={`text-xl font-semibold ${
+                    paymentStatus == "Lunas"
+                      ? "text-gray-200"
+                      : isMoreThanDeadlinePaymentDate
+                      ? "text-red-600"
+                      : ""
+                  }`}
+                >
+                  {paymentStatus == "Lunas"
+                    ? "(Lunas)"
+                    : deadlinePaymentDate || "-"}
+                </span>
+
+                {isMoreThanDeadlinePaymentDate && (
+                  <span title="Terlambat" className="text-red-500">
+                    <GoAlertFill size={24} />
+                  </span>
+                )}
+              </div>
+            )}
           </>
         )}
 
@@ -1099,32 +1190,33 @@ const InputDataPesanan = () => {
       <div className="flex justify-end mb-8">
         <div
           onClick={() => {
-            const payments = {
-              paymentDate: formatDateToDDMMYYYY(paymentDate),
-              nominal: nominal.toString(),
-              paymentProof: paymentProof,
-              paymentMethod: paymentMethod,
-            };
-            const payload = {
-              itemId: selectedItem.id,
-              saleUnit: unit,
-              storeId: parseInt(selectedStore),
-              quantity: quantity,
-              price: itemTotalPrice.toString(),
-              discount: discount,
-              sendDate: formatDateToDDMMYYYY(sendDate),
-              paymentType: paymentType,
-              payments: payments,
-              customerType: customerType,
-            };
-            console.log("===== Form Data =====");
-            console.log("payload: ", payload);
-            console.log("customers: ", customers);
-            console.log("itemPrices: ", itemPrices);
-            console.log("itemPriceDiscounts: ", itemPriceDiscounts);
-            console.log("id: ", id);
-            console.log("paymentHistory: ", paymentHistory);
-            console.log("=====================");
+            // const payments = {
+            //   paymentDate: formatDateToDDMMYYYY(paymentDate),
+            //   nominal: nominal.toString(),
+            //   paymentProof: paymentProof,
+            //   paymentMethod: paymentMethod,
+            // };
+            // const payload = {
+            //   itemId: selectedItem.id,
+            //   saleUnit: unit,
+            //   storeId: parseInt(selectedStore),
+            //   quantity: quantity,
+            //   price: itemTotalPrice.toString(),
+            //   discount: discount,
+            //   sendDate: formatDateToDDMMYYYY(sendDate),
+            //   paymentType: paymentType,
+            //   payments: payments,
+            //   customerType: customerType,
+            // };
+            // console.log("===== Form Data =====");
+            // console.log("payload: ", payload);
+            // console.log("customers: ", customers);
+            // console.log("itemPrices: ", itemPrices);
+            // console.log("itemPriceDiscounts: ", itemPriceDiscounts);
+            // console.log("id: ", id);
+            // console.log("paymentHistory: ", paymentHistory);
+            // console.log("=====================");
+            console.log("selectedStore: ", selectedStore);
           }}
           className="px-5 py-3 bg-green-700 rounded-[4px] hover:bg-green-900 cursor-pointer text-white"
         >

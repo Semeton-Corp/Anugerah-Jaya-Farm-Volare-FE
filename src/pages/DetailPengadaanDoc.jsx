@@ -5,6 +5,7 @@ import { MdDelete } from "react-icons/md";
 import { useParams } from "react-router-dom";
 import {
   createChickenProcurementPayment,
+  deleteChickenProcurementPayment,
   getChickenProcurement,
   updateChickenProcurementPayment,
 } from "../services/chickenMonitorings";
@@ -166,7 +167,7 @@ export default function DetailPengadaanDoc() {
   const submitDeletePayment = async () => {
     if (!selectedPayment?.id) return;
     try {
-      const res = await deleteWarehouseItemCornProcurementPayment(
+      const res = await deleteChickenProcurementPayment(
         id,
         selectedPayment.id
       );

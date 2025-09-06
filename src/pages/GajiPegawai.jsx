@@ -6,6 +6,8 @@ import { getUserSalarySummary, getUserSalaries } from "../services/cashflow";
 import { getRoles } from "../services/roles";
 import { IoSearch } from "react-icons/io5";
 import SalaryPayModal from "../components/SalaryPayModal";
+import { getLocations } from "../services/location";
+import { MdStore } from "react-icons/md";
 // ^ adjust import paths if these live elsewhere
 
 const MONTHS_ID = [
@@ -52,6 +54,8 @@ export default function GajiPegawai() {
 
   const [keyword, setKeyword] = useState("");
   const [roleId, setRoleId] = useState("");
+
+  const [siteOptions, setSiteOptions] = useState([]);
   const [locationId, setLocationId] = useState("");
 
   const [page, setPage] = useState(1);
@@ -76,6 +80,17 @@ export default function GajiPegawai() {
 
   const handleDetail = (salaryId) => {
     navigate(`${location.pathname}/detail-gaji/${salaryId}`);
+  };
+
+  const fetchSites = async () => {
+    try {
+      const res = await getLocations();
+      if (res.status === 200) {
+        setSiteOptions(res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch sites", err);
+    }
   };
 
   const fetchSummary = async () => {
@@ -149,6 +164,7 @@ export default function GajiPegawai() {
 
   useEffect(() => {
     fetchRoles();
+    fetchSites();
   }, []);
 
   useEffect(() => {
@@ -161,7 +177,7 @@ export default function GajiPegawai() {
 
   useEffect(() => {
     fetchRows();
-  }, [monthName, year, page, roleId, keyword]);
+  }, [monthName, year, page, roleId, keyword, locationId]);
 
   const onSearch = (e) => {
     e.preventDefault();
@@ -213,14 +229,21 @@ export default function GajiPegawai() {
 
       {/* Filters row */}
       <div className="flex flex-wrap gap-2 items-center justify-end">
-        {/* (optional) site filter visual only */}
-        <button
-          type="button"
-          className="rounded bg-orange-300 hover:bg-orange-500 text-black px-4 py-2 cursor-pointer"
-          onClick={() => alert("Filter site coming soon")}
-        >
-          Semua site
-        </button>
+        <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+          <MdStore size={18} />
+          <select
+            value={locationId}
+            onChange={(e) => setLocationId(e.target.value)}
+            className="ml-2 bg-transparent text-base font-medium outline-none"
+          >
+            <option value="">Semua Site</option>
+            {siteOptions.map((site) => (
+              <option key={site.id} value={site.id}>
+                {site.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <MonthYearSelector
           month={month}

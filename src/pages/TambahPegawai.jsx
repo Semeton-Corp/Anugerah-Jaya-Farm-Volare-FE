@@ -22,9 +22,10 @@ import { updateAdditionalWorkById } from "../services/dailyWorks";
 import { formatRupiah } from "../utils/moneyFormat";
 import { getRoles } from "../services/roles";
 import { getLocations } from "../services/location";
+import { getUserById, updateUser } from "../services/user";
 
 const TambahPegawai = () => {
-  const { id } = useParams();
+  const { userId } = useParams();
   const navigate = useNavigate();
 
   const [tab, setTab] = useState("profil");
@@ -50,6 +51,7 @@ const TambahPegawai = () => {
   const [address, setAddress] = useState("");
   const [salary, setSalary] = useState(0);
   const [username, setUsername] = useState("");
+  const [photoProfile, setPhotoProfile] = useState("");
 
   const [showPopup, setShowPopup] = useState(false);
   const [password, setPassword] = useState("");
@@ -106,9 +108,38 @@ const TambahPegawai = () => {
     }
   };
 
+  const fetchUserDetail = async () => {
+    try {
+      const userDetailResponse = await getUserById(userId);
+      console.log("userDetailResponse: ", userDetailResponse);
+      if (userDetailResponse.status === 200) {
+        const userData = userDetailResponse.data.data;
+        setName(userData.name || "");
+        setEmail(userData.email || "");
+        setPhone(userData.phoneNumber || "");
+        setAddress(userData.address || "");
+        setUsername(userData.username || "");
+        setSelectedRole(userData.role.id || "");
+        setLocationId(userData.location.id || "");
+        setSalary(userData.salary || 0);
+        setSelectedSalaryInterval(userData.salaryInterval || "Harian");
+        const placementIds = userData.placements.map((placement) =>
+          placement.placeId.toString()
+        );
+        console.log("placementIds: ", placementIds);
+        setSelectedPic(placementIds || []);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
   useEffect(() => {
     fetchRoles();
     fetchLocationOptions();
+    if (userId) {
+      fetchUserDetail();
+    }
   }, []);
 
   useEffect(() => {
@@ -135,7 +166,11 @@ const TambahPegawai = () => {
           } else if (selectedRole == 2) {
             filteredData = allData.filter((item) => item.chickenPic == "");
           }
-          setPics(filteredData);
+          if (userId) {
+            setPics(allData);
+          } else {
+            setPics(filteredData);
+          }
         }
       } catch (err) {
         console.error(err);
@@ -163,26 +198,46 @@ const TambahPegawai = () => {
       salary: salary,
       salaryInterval: selectedSalaryInterval,
     };
-    try {
-      const signUpResponse = await signUp(payload);
-      // console.log("signUpResponse: ", signUpResponse);
-      if (signUpResponse.status == 201) {
-        setShowPopup(true);
+    console.log("payload: ", payload);
+    if (userId) {
+      try {
+        const updateResponse = await updateUser(payload, userId);
+        if (updateResponse.status == 200) {
+          const basePath =
+            location.pathname.split("/tambah-pegawai")[0] + "/tambah-pegawai";
+          navigate(basePath.replace("/tambah-pegawai", ""), {
+            state: { refetch: true },
+          });
+        }
+      } catch (error) {
+        var customMessage =
+          "❌Terjadi kesalahan dalam memperbaharui data pengguna!";
+        alert(customMessage);
+        console.log("error :", error);
       }
-    } catch (error) {
-      var customMessage = "❌Terjadi kesalahan dalam membuat akun!";
-      if (error.response.data.message == "email already exists") {
-        customMessage =
-          "Email sudah terdaftar, coba gunakan alamat email lain!";
+    } else {
+      try {
+        const signUpResponse = await signUp(payload);
+        if (signUpResponse.status == 201) {
+          setShowPopup(true);
+        }
+      } catch (error) {
+        var customMessage = "❌Terjadi kesalahan dalam membuat akun!";
+        if (error.response.data.message == "email already exists") {
+          customMessage =
+            "Email sudah terdaftar, coba gunakan alamat email lain!";
+        }
+        console.log("error: ", error);
+        alert(customMessage);
       }
-      console.log("error: ", error);
-      alert(customMessage);
     }
   };
   return (
     <div className="flex flex-col px-4 py-3 gap-4 ">
       <div className="flex justify-between mb-2 flex-wrap gap-4">
-        <h1 className="text-3xl font-bold">Tambah Pegawai</h1>
+        <h1 className="text-3xl font-bold">
+          {userId ? "Edit Pegawai" : "Tambah Pegawai"}
+        </h1>
       </div>
 
       {/* Tab Header */}
@@ -261,6 +316,8 @@ const TambahPegawai = () => {
             salaryInterval: selectedSalaryInterval,
           };
           console.log("payload: ", payload);
+          console.log("pics: ", pics);
+          console.log("selectedPic: ", selectedPic);
         }}
         className="bg-green-700"
       >
@@ -441,7 +498,6 @@ function ProfilPegawaiForm({
         {isShowPicField && (
           <>
             <label className="mb-1">PIC</label>
-
             {selectedRole != 0 || selectedRole == 2 ? (
               <div className="flex flex-col gap-2 mb-3">
                 {pics?.length === 0 && (
@@ -454,8 +510,8 @@ function ProfilPegawaiForm({
                   >
                     <input
                       type="checkbox"
-                      value={pic.id}
-                      checked={selectedPic?.includes(String(pic.id))}
+                      value={pic.cage.id}
+                      checked={selectedPic?.includes(String(pic.cage.id))}
                       onChange={(e) => {
                         if (e.target.checked) {
                           setSelectedPic((prev) => [...prev, e.target.value]);
@@ -486,7 +542,7 @@ function ProfilPegawaiForm({
                   <option disabled>No PICs available</option>
                 )}
                 {pics?.map((pic) => (
-                  <option key={pic.id} value={pic.id}>
+                  <option key={pic.cage.id} value={pic.cage.id}>
                     {pic.name}
                   </option>
                 ))}

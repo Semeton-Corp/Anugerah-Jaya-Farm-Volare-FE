@@ -43,6 +43,8 @@ const PengadaanDoc = () => {
   const [orderData, setOrderData] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
 
+  const [page, setPage] = useState(1);
+
   const options = [
     "Semua Status Pembayaran",
     "Belum Dibayar",
@@ -59,7 +61,7 @@ const PengadaanDoc = () => {
 
   const fetchOrderData = async () => {
     try {
-      const ordersResponse = await getChickenProcurements();
+      const ordersResponse = await getChickenProcurements(page);
       console.log("ordersResponse: ", ordersResponse);
       if (ordersResponse.status === 200) {
         setOrderData(ordersResponse.data.data.chickenProcurements);
@@ -147,6 +149,7 @@ const PengadaanDoc = () => {
             <thead>
               <tr className="bg-green-700 text-white text-left">
                 <th className="p-3">Tanggal Pemesanan</th>
+                <th className="p-3">Kandang</th>
                 <th className="p-3">Jumlah</th>
                 <th className="p-3">Supplier</th>
                 <th className="p-3">Estimasi Tiba</th>
@@ -160,6 +163,7 @@ const PengadaanDoc = () => {
               {orderData.map((order, index) => (
                 <tr key={index} className="border-t">
                   <td className="p-3">{order.orderDate}</td>
+                  <td className="p-3">{order.cage?.name}</td>
                   <td className="p-3">{order.quantity}</td>
                   <td className="p-3">{order.supplier.name}</td>
                   <td className="p-3">{order.estimationArrivalDate}</td>
@@ -251,7 +255,7 @@ const PengadaanDoc = () => {
         <KonfirmasiPengadaanDocModal
           data={{
             kandang: selectedItem?.cage?.name || "-",
-            namaBarang: selectedItem?.supplier?.type || "-",
+            namaBarang: "Ayam DOC",
             supplier: selectedItem?.supplier?.name || "-",
             jumlah: selectedItem?.quantity || 0,
           }}

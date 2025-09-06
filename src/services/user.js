@@ -56,3 +56,11 @@ export const getUserPerformanceOverview = (params) => {
     params: params,
   });
 };
+
+export const updateUser = (payload, id) => {
+  return api.put(`/users/${id}`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

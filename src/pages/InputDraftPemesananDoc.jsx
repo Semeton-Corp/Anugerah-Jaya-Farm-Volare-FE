@@ -28,7 +28,6 @@ const InputDraftPemesananDoc = () => {
       const chickenCageResponse = await getCage(selectedSite);
       if (chickenCageResponse.status === 200) {
         const allCages = chickenCageResponse.data.data;
-        console.log("allCages: ", allCages);
         const filteredCages = allCages.filter(
           (cage) => !cage.isUsed && cage.chickenCategory == "DOC"
         );
@@ -36,6 +35,8 @@ const InputDraftPemesananDoc = () => {
         if (filteredCages.length > 0) {
           setSelectedCage(filteredCages[0]);
         }
+        console.log("allCages: ", allCages);
+        console.log("filteredCages: ", filteredCages);
       }
     } catch (error) {
       console.error("Gagal memuat data kandang:", error);

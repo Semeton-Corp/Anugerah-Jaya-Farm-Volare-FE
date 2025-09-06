@@ -609,7 +609,10 @@ const AppRouter = createBrowserRouter([
                 element: <DaftarPegawai />,
                 children: [
                   { path: "tambah-pegawai", element: <TambahPegawai /> },
-                  { path: "tambah-pegawai/:id", element: <TambahPegawai /> },
+                  {
+                    path: "tambah-pegawai/:userId",
+                    element: <TambahPegawai />,
+                  },
 
                   {
                     path: "profil/:id",
