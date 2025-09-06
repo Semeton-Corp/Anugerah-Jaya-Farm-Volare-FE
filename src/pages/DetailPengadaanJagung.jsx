@@ -490,9 +490,7 @@ export default function DetailPengadaanJagung() {
                   <th className="text-left px-3 py-2">Nominal Pembayaran</th>
                   <th className="text-left px-3 py-2">Sisa Bayar</th>
                   <th className="text-left px-3 py-2">Bukti Pembayaran</th>
-                  {finalRemaining !== 0 && (
-                    <th className="text-left px-3 py-2">Aksi</th>
-                  )}
+                  <th className="text-left px-3 py-2">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -513,34 +511,30 @@ export default function DetailPengadaanJagung() {
                       <td className="px-3 py-2">{rupiah(p.nominalNum)}</td>
                       <td className="px-3 py-2">{rupiah(p.remainingNum)}</td>
                       <td className="px-3 py-2 underline">{p.proof || "-"}</td>
-                      {finalRemaining !== 0 && (
-                        <td className="w-full px-4 py-2 flex gap-3">
-                          <BiSolidEditAlt
-                            onClick={() => {
-                        
-
-                              setSelectedPayment({
-                                id: p.id,
-                                paymentMethod: p.paymentMethod,
-                                nominal: p.nominalNum,
-                                paymentDate: p.paymentDate,
-                                paymentProof: p.proof,
-                              });
-                              setShowEditModal(true);
-                            }}
-                            size={24}
-                            className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                          />
-                          <MdDelete
-                            onClick={() => {
-                              setSelectedPayment({ id: p.id });
-                              setShowDeleteModal(true);
-                            }}
-                            size={24}
-                            className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                          />
-                        </td>
-                      )}
+                      <td className="w-full px-4 py-2 flex gap-3">
+                        <BiSolidEditAlt
+                          onClick={() => {
+                            setSelectedPayment({
+                              id: p.id,
+                              paymentMethod: p.paymentMethod,
+                              nominal: p.nominalNum,
+                              paymentDate: p.paymentDate,
+                              paymentProof: p.proof,
+                            });
+                            setShowEditModal(true);
+                          }}
+                          size={24}
+                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                        />
+                        <MdDelete
+                          onClick={() => {
+                            setSelectedPayment({ id: p.id });
+                            setShowDeleteModal(true);
+                          }}
+                          size={24}
+                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                        />
+                      </td>
                     </tr>
                   ))
                 )}

@@ -24,6 +24,7 @@ import { getRoles } from "../services/roles";
 import { getLocations } from "../services/location";
 
 const TambahPegawai = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [tab, setTab] = useState("profil");

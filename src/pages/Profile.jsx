@@ -73,7 +73,7 @@ const Profile = ({ mode }) => {
   const [monthName, setMonthName] = useState(
     new Intl.DateTimeFormat("id-ID", { month: "long" }).format(new Date())
   );
-  const detailPages = ["detail-absensi", "detail-penyelesaian-pekerjaan"];
+  const detailPages = ["tambah-pegawai"];
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
@@ -122,6 +122,11 @@ const Profile = ({ mode }) => {
     } catch (error) {
       console.log("error :", error);
     }
+  };
+
+  const handleEditPegawai = () => {
+    const newPath = location?.pathname.replace("profil", "tambah-pegawai");
+    navigate(newPath);
   };
 
   useEffect(() => {
@@ -258,10 +263,13 @@ const Profile = ({ mode }) => {
             <div className="flex mt-2 w-full gap-3">
               {mode === "StaffDetail" && (
                 <>
-                  <button className="w-full rounded-[4px] cursor-pointer h-[40px] bg-orange-200 hover:bg-orange-500 flex items-center justify-center">
+                  <button
+                    onClick={handleEditPegawai}
+                    className="w-full rounded-[4px] cursor-pointer h-[40px] bg-orange-200 hover:bg-orange-500 flex items-center justify-center"
+                  >
                     <div className="flex gap-4">
                       <RiEdit2Fill size={24} />
-                      <p className="text-lg font-medium">Edit Profil</p>
+                      <p className="text-lg font-medium">Edit Pegawai</p>
                     </div>
                   </button>
 

@@ -25,7 +25,7 @@ const today = (() => {
 const Badge = ({ tone = "neutral", children }) => {
   const tones = {
     neutral: "bg-gray-200 text-gray-800",
-    warning: "bg-yellow-200 text-yellow-900",
+    warning: "bg-orange-200 text-yellow-900",
     success: "bg-[#87FF8B] text-[#066000]",
   };
   return (
@@ -324,7 +324,7 @@ export default function DetailPenjualanAyam() {
                     <th className="text-left px-3 py-2 text-sm">
                       Bukti Pembayaran
                     </th>
-                    <th className="px-3 py-2"></th>
+                    <th className="px-3 py-2">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -360,7 +360,10 @@ export default function DetailPenjualanAyam() {
                               title="Edit"
                               onClick={() => openEdit(p)}
                             >
-                              <BiSolidEditAlt size={18} />
+                              <BiSolidEditAlt
+                                size={24}
+                                className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                              />
                             </button>
                             <button
                               className="p-1 rounded hover:bg-gray-100"
@@ -370,7 +373,10 @@ export default function DetailPenjualanAyam() {
                                 setSelectedDeletePayment(p);
                               }}
                             >
-                              <MdDelete size={18} />
+                              <MdDelete
+                                size={24}
+                                className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                              />
                             </button>
                           </div>
                         </td>

@@ -13,6 +13,7 @@ import {
   formatDateToDDMMYYYY,
 } from "../utils/dateFormat";
 import { EditPembayaranModal } from "../components/EditPembayaranModal";
+import { deleteWarehouseItemCornProcurementPayment } from "../services/warehouses";
 
 const rupiah = (n) => `Rp ${Number(n || 0).toLocaleString("id-ID")}`;
 
@@ -169,11 +170,12 @@ export default function DetailPengadaanDoc() {
         id,
         selectedPayment.id
       );
+      console.log("res: ", res);
       if (res?.status === 200 || res?.status === 204) {
         alert("✅ Pembayaran berhasil dihapus");
         setShowDeleteModal(false);
         setSelectedPayment(null);
-        fetchDetail();
+        fetchDetailData();
       } else {
         alert("Gagal menghapus pembayaran.");
       }
@@ -276,9 +278,7 @@ export default function DetailPengadaanDoc() {
                   <th className="text-left px-3 py-2">Nominal Pembayaran</th>
                   <th className="text-left px-3 py-2">Sisa Bayar</th>
                   <th className="text-left px-3 py-2">Bukti Pembayaran</th>
-                  {finalRemaining !== 0 && (
-                    <th className="text-left px-3 py-2">Aksi</th>
-                  )}
+                  <th className="text-left px-3 py-2">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -301,33 +301,31 @@ export default function DetailPengadaanDoc() {
                       <td className="px-3 py-2 underline cursor-pointer">
                         {p.proof}
                       </td>
-                      {finalRemaining !== 0 && (
-                        <td className="w-full px-4 py-2 flex gap-3">
-                          <BiSolidEditAlt
-                            onClick={() => {
-                              console.log("p.paymentDate: ", p.date);
-                              setSelectedPayment({
-                                id: p.id,
-                                paymentMethod: p.paymentMethod,
-                                nominal: p.nominalNum,
-                                paymentDate: p.date,
-                                paymentProof: p.proof,
-                              });
-                              setShowEditModal(true);
-                            }}
-                            size={24}
-                            className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                          />
-                          <MdDelete
-                            onClick={() => {
-                              setSelectedPayment({ id: p.id });
-                              setShowDeleteModal(true);
-                            }}
-                            size={24}
-                            className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                          />
-                        </td>
-                      )}
+                      <td className="w-full px-4 py-2 flex gap-3">
+                        <BiSolidEditAlt
+                          onClick={() => {
+                            console.log("p.paymentDate: ", p.date);
+                            setSelectedPayment({
+                              id: p.id,
+                              paymentMethod: p.paymentMethod,
+                              nominal: p.nominalNum,
+                              paymentDate: p.date,
+                              paymentProof: p.proof,
+                            });
+                            setShowEditModal(true);
+                          }}
+                          size={24}
+                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                        />
+                        <MdDelete
+                          onClick={() => {
+                            setSelectedPayment({ id: p.id });
+                            setShowDeleteModal(true);
+                          }}
+                          size={24}
+                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                        />
+                      </td>
                     </tr>
                   ))
                 )}
@@ -433,6 +431,33 @@ export default function DetailPengadaanDoc() {
           }
         }
       />
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white w-full max-w-sm p-6 rounded shadow-xl">
+            <h3 className="text-lg font-bold mb-4 text-center">
+              Hapus pembayaran ini?
+            </h3>
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setSelectedPayment(null);
+                }}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                onClick={submitDeletePayment}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded cursor-pointer"
+              >
+                Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

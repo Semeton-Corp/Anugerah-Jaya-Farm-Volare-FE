@@ -3,11 +3,14 @@ import { BiSolidEditAlt } from "react-icons/bi";
 import { MdDelete } from "react-icons/md";
 import { useParams } from "react-router-dom";
 
-import { convertToInputDateFormat } from "../utils/dateFormat";
+import { convertToInputDateFormat, toDDMMYYYY } from "../utils/dateFormat";
 import {
   createWarehouseItemProcurementPayment,
+  deleteWarehouseItemProcurementPayment,
   getWarehouseItemProcurement,
+  updateWarehouseItemProcurementPayment,
 } from "../services/warehouses";
+import { EditPembayaranModal } from "../components/EditPembayaranModal";
 
 const rupiah = (n) => `Rp ${Number(n || 0).toLocaleString("id-ID")}`;
 const toISO = (d) => (d ? d : new Date().toISOString().slice(0, 10));
@@ -47,7 +50,12 @@ const DetailPengadaanBarang = () => {
   });
 
   const todayISO = new Date().toISOString().slice(0, 10);
+
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState(null);
+
   const [paymentMethod, setPaymentMethod] = useState("Tunai");
   const [paymentDate, setPaymentDate] = useState(todayISO);
   const [nominal, setNominal] = useState("");
@@ -107,10 +115,6 @@ const DetailPengadaanBarang = () => {
     }
   };
 
-  useEffect(() => {
-    fetchDetailData();
-  }, [id]);
-
   const addPayment = async () => {
     try {
       const payload = {
@@ -134,12 +138,72 @@ const DetailPengadaanBarang = () => {
     }
   };
 
-  const deletePaymentLocal = (paymentId) => {
-    setData((prev) => ({
-      ...prev,
-      payments: (prev.payments || []).filter((p) => p.id !== paymentId),
-    }));
+  const submitEditPayment = async ({
+    paymentMethod,
+    nominal,
+    paymentDate,
+    paymentProof,
+  }) => {
+    if (!selectedPayment?.id) return;
+
+    const payload = {
+      paymentDate: toDDMMYYYY(paymentDate),
+      nominal: String(nominal),
+      paymentMethod,
+      paymentProof,
+    };
+
+    try {
+      console.log("id: ", id);
+      console.log("var: ", selectedPayment.id);
+      const res = await updateWarehouseItemProcurementPayment(
+        payload,
+        id,
+        selectedPayment.id
+      );
+      if (res?.status === 200) {
+        alert("✅ Pembayaran berhasil diperbarui");
+        setShowEditModal(false);
+        setSelectedPayment(null);
+        fetchDetailData();
+      } else {
+        alert("❌Gagal memperbarui pembayaran.");
+      }
+    } catch (e) {
+      console.error(e);
+      if (e?.response?.data?.message == "nominal is to high") {
+        alert("❌Nominal pembayaran melebihi sisa pembayaran.");
+      } else {
+        alert("❌Gagal memperbarui pembayaran.");
+      }
+    }
   };
+
+  // DELETE
+  const submitDeletePayment = async () => {
+    if (!selectedPayment?.id) return;
+    try {
+      const res = await deleteWarehouseItemProcurementPayment(
+        id,
+        selectedPayment.id
+      );
+      if (res?.status === 200 || res?.status === 204) {
+        alert("✅ Pembayaran berhasil dihapus");
+        setShowDeleteModal(false);
+        setSelectedPayment(null);
+        fetchDetailData();
+      } else {
+        alert("Gagal menghapus pembayaran.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Gagal menghapus pembayaran.");
+    }
+  };
+
+  useEffect(() => {
+    fetchDetailData();
+  }, [id]);
 
   return (
     <div className="border rounded p-4">
@@ -267,22 +331,29 @@ const DetailPengadaanBarang = () => {
                       <td className="px-3 py-2 underline cursor-pointer">
                         {p.proof}
                       </td>
-                      <td className="px-3 py-2">
-                        <div className="flex items-center gap-3">
-                          <button
-                            className="p-1 rounded hover:bg-gray-100"
-                            title="Edit (coming soon)"
-                          >
-                            <BiSolidEditAlt size={18} />
-                          </button>
-                          <button
-                            onClick={() => deletePaymentLocal(p.id)}
-                            className="p-1 rounded hover:bg-gray-100"
-                            title="Hapus lokal"
-                          >
-                            <MdDelete size={18} />
-                          </button>
-                        </div>
+                      <td className="w-full px-4 py-2 flex gap-3">
+                        <BiSolidEditAlt
+                          onClick={() => {
+                            setSelectedPayment({
+                              id: p.id,
+                              paymentMethod: p.paymentMethod,
+                              nominal: p.nominalNum,
+                              paymentDate: p.paymentDate,
+                              paymentProof: p.proof,
+                            });
+                            setShowEditModal(true);
+                          }}
+                          size={24}
+                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                        />
+                        <MdDelete
+                          onClick={() => {
+                            setSelectedPayment({ id: p.id });
+                            setShowDeleteModal(true);
+                          }}
+                          size={24}
+                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                        />
                       </td>
                     </tr>
                   ))
@@ -308,7 +379,6 @@ const DetailPengadaanBarang = () => {
         </div>
       </div>
 
-      {/* Modal Tambah Pembayaran */}
       {showPaymentModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white w-full max-w-lg p-6 rounded shadow-xl">
@@ -372,6 +442,51 @@ const DetailPengadaanBarang = () => {
                 className="px-4 py-2 bg-green-700 hover:bg-green-900 text-white rounded cursor-pointer"
               >
                 Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* EDIT modal */}
+      <EditPembayaranModal
+        open={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedPayment(null);
+        }}
+        onSave={submitEditPayment}
+        title="Edit Pembayaran"
+        initialValues={
+          selectedPayment && {
+            paymentMethod: selectedPayment.paymentMethod,
+            nominal: selectedPayment.nominal,
+            paymentDate: selectedPayment.paymentDate,
+            paymentProof: selectedPayment.paymentProof,
+          }
+        }
+      />
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white w-full max-w-sm p-6 rounded shadow-xl">
+            <h3 className="text-lg font-bold mb-4 text-center">
+              Hapus pembayaran ini?
+            </h3>
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setSelectedPayment(null);
+                }}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                onClick={submitDeletePayment}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded cursor-pointer"
+              >
+                Hapus
               </button>
             </div>
           </div>
