@@ -241,6 +241,36 @@ export const createWarehouseItemProcurementPayment = (payload, id) => {
   });
 };
 
+export const updateWarehouseItemProcurementPayment = (
+  payload,
+  warehouseItemProcurementId,
+  id
+) => {
+  return api.put(
+    `/warehouses/items/procurements/${warehouseItemProcurementId}/payments/${id}`,
+    payload,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};
+
+export const deleteWarehouseItemProcurementPayment = (
+  warehouseItemProcurementId,
+  id
+) => {
+  return api.delete(
+    `/warehouses/items/procurements/${warehouseItemProcurementId}/payments/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};
+
 export const arrivalConfirmationWarehouseItemProcurement = (payload, id) => {
   return api.put(`/warehouses/items/procurements/${id}/arrivals`, payload, {
     headers: {

@@ -148,13 +148,6 @@ const KonfirmasiPemesananDocModal = ({
           <div className="mb-4">
             <div className="flex items-center gap-2">
               <p className="text-sm text-gray-600">Kandang</p>
-              <button
-                className="p-1 rounded border hover:bg-gray-100"
-                onClick={() => setEditKandang((v) => !v)}
-                title="Edit Kandang"
-              >
-                <BiSolidEditAlt size={16} />
-              </button>
             </div>
             {editKandang ? (
               <select

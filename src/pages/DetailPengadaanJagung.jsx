@@ -1,4 +1,3 @@
-// src/pages/DetailPengadaanJagung.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
@@ -11,7 +10,6 @@ import { EditPembayaranModal } from "../components/EditPembayaranModal";
 import { MdDelete } from "react-icons/md";
 import { BiSolidEditAlt } from "react-icons/bi";
 
-// ===== Utils =====
 const rupiah = (n) => `Rp ${Number(n || 0).toLocaleString("id-ID")}`;
 const toDDMMYYYY = (d) => {
   if (!d) return "";
@@ -118,7 +116,7 @@ const TambahPembayaranModal = ({
               onSave({
                 paymentMethod,
                 nominal,
-                paymentDate, // YYYY-MM-DD, akan diubah ke DD-MM-YYYY di parent
+                paymentDate,
                 paymentProof,
               })
             }
@@ -519,6 +517,8 @@ export default function DetailPengadaanJagung() {
                         <td className="w-full px-4 py-2 flex gap-3">
                           <BiSolidEditAlt
                             onClick={() => {
+                        
+
                               setSelectedPayment({
                                 id: p.id,
                                 paymentMethod: p.paymentMethod,

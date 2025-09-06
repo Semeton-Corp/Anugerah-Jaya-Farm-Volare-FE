@@ -19,7 +19,6 @@ export const EditPembayaranModal = ({
 
   useEffect(() => {
     if (!open) return;
-
     if (initialValues) {
       setPaymentMethod(initialValues.paymentMethod || defaultMethod);
       setNominal(

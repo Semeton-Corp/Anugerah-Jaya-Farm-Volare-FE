@@ -258,7 +258,6 @@ const PengadaanDoc = () => {
           onClose={() => setShowBarangSampaiModal(false)}
           onConfirm={(result) => {
             handleSubmitArrivalConfiramation(result);
-            // console.log("Hasil konfirmasi:", result);
           }}
         />
       )}

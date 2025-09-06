@@ -26,9 +26,9 @@ const InputDraftPemesananDoc = () => {
   const fetchCages = async () => {
     try {
       const chickenCageResponse = await getCage(selectedSite);
-      // console.log("chickenCageResponse: ", chickenCageResponse);
       if (chickenCageResponse.status === 200) {
         const allCages = chickenCageResponse.data.data;
+        console.log("allCages: ", allCages);
         const filteredCages = allCages.filter(
           (cage) => !cage.isUsed && cage.chickenCategory == "DOC"
         );

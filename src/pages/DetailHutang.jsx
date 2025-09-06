@@ -5,10 +5,20 @@ import { getDebt } from "../services/cashflow";
 import {
   createWarehouseItemProcurementPayment,
   createWarehouseItemCornProcurementPayment,
+  updateWarehouseItemCornProcurementPayment,
+  deleteWarehouseItemCornProcurementPayment,
+  updateWarehouseItemProcurementPayment,
+  deleteWarehouseItemProcurementPayment,
 } from "../services/warehouses";
-import { createChickenProcurementPayment } from "../services/chickenMonitorings";
+import {
+  createChickenProcurementPayment,
+  deleteChickenProcurementPayment,
+  updateChickenProcurementPayment,
+} from "../services/chickenMonitorings";
+import { BiSolidEditAlt } from "react-icons/bi";
+import { MdDelete } from "react-icons/md";
+import { EditPembayaranModal } from "../components/EditPembayaranModal";
 
-// ===== Utils =====
 const rupiah = (n) => `Rp ${Number(n || 0).toLocaleString("id-ID")}`;
 
 const formatTanggalID = (iso) => {
@@ -45,7 +55,6 @@ const Badge = ({ children, tone = "warning" }) => {
   );
 };
 
-// ===== Modal Tambah Pembayaran =====
 const TambahPembayaranModal = ({
   open,
   onClose,
@@ -132,31 +141,78 @@ const TambahPembayaranModal = ({
   );
 };
 
-// ===== pilih endpoint berdasarkan kategori =====
 const callAddPaymentByCategory = (category, id, payload) => {
   const cat = (category || "").toLowerCase();
-
+  console.log("cat: ", cat);
   if (cat.includes("ayam doc") || cat.includes("pengadaan ayam")) {
-    // Pengadaan Ayam DOC
     return createChickenProcurementPayment(payload, id);
   }
 
   if (cat.includes("pengadaan jagung") || cat.includes("jagung")) {
-    // Pengadaan Jagung
     return createWarehouseItemCornProcurementPayment(payload, id);
   }
 
   if (
     cat.includes("pengadaan gudang") ||
     cat.includes("pengadaan barang") ||
-    cat.includes("gudang")
+    cat.includes("gudang") ||
+    cat.includes("semua") //error the category
   ) {
-    // Pengadaan Gudang / Barang umum
     return createWarehouseItemProcurementPayment(payload, id);
   }
 
   return Promise.reject(
     new Error("Kategori hutang tidak dikenali untuk tambah pembayaran.")
+  );
+};
+
+const callUpdatePaymentByCategory = (category, id, paymentId, payload) => {
+  const cat = (category || "").toLowerCase();
+
+  if (cat.includes("ayam doc") || cat.includes("pengadaan ayam")) {
+    return updateChickenProcurementPayment(payload, id, paymentId);
+  }
+
+  if (cat.includes("pengadaan jagung") || cat.includes("jagung")) {
+    return updateWarehouseItemCornProcurementPayment(payload, id, paymentId);
+  }
+
+  if (
+    cat.includes("pengadaan gudang") ||
+    cat.includes("pengadaan barang") ||
+    cat.includes("gudang") ||
+    cat.includes("semua") //error the category
+  ) {
+    return updateWarehouseItemProcurementPayment(payload, id, paymentId);
+  }
+
+  return Promise.reject(
+    new Error("Kategori hutang tidak dikenali untuk update pembayaran.")
+  );
+};
+
+const callDeletePaymentByCategory = (category, id, paymentId) => {
+  const cat = (category || "").toLowerCase();
+
+  if (cat.includes("ayam doc") || cat.includes("pengadaan ayam")) {
+    return deleteChickenProcurementPayment(id, paymentId);
+  }
+
+  if (cat.includes("pengadaan jagung") || cat.includes("jagung")) {
+    return deleteWarehouseItemCornProcurementPayment(id, paymentId);
+  }
+
+  if (
+    cat.includes("pengadaan gudang") ||
+    cat.includes("pengadaan barang") ||
+    cat.includes("gudang") ||
+    cat.includes("semua") //error the category
+  ) {
+    return deleteWarehouseItemProcurementPayment(id, paymentId);
+  }
+
+  return Promise.reject(
+    new Error("Kategori hutang tidak dikenali untuk hapus pembayaran.")
   );
 };
 
@@ -168,6 +224,76 @@ export default function DetailHutang() {
   const [data, setData] = useState(null);
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState(null);
+
+  const submitEditPayment = async ({
+    paymentMethod,
+    nominal,
+    paymentDate,
+    paymentProof,
+  }) => {
+    if (!selectedPayment?.id) return;
+
+    const payload = {
+      paymentDate: toDDMMYYYY(paymentDate),
+      nominal: String(nominal),
+      paymentMethod,
+      paymentProof,
+    };
+
+    try {
+      const categoryKey = data?.category || category;
+      const res = await callUpdatePaymentByCategory(
+        categoryKey,
+        id,
+        selectedPayment.id,
+        payload
+      );
+
+      if (res?.status === 200 || res?.status === 201) {
+        alert("✅ Pembayaran berhasil diperbarui");
+        setShowEditModal(false);
+        setSelectedPayment(null);
+        fetchDetail();
+      } else {
+        alert("❌Gagal memperbarui pembayaran.");
+      }
+    } catch (e) {
+      console.error(e);
+      if (e?.response?.data?.message === "nominal is to high") {
+        alert("❌Nominal pembayaran melebihi sisa pembayaran.");
+      } else {
+        alert("❌Gagal memperbarui pembayaran.");
+      }
+    }
+  };
+
+  const submitDeletePayment = async () => {
+    if (!selectedPayment?.id) return;
+
+    try {
+      const categoryKey = data?.category || category;
+      const res = await callDeletePaymentByCategory(
+        categoryKey,
+        id,
+        selectedPayment.id
+      );
+
+      if (res?.status === 200 || res?.status === 204) {
+        alert("✅ Pembayaran berhasil dihapus");
+        setShowDeleteModal(false);
+        setSelectedPayment(null);
+        fetchDetail();
+      } else {
+        alert("❌ Gagal menghapus pembayaran.");
+      }
+    } catch (e) {
+      console.error("delete payment error:", e);
+      alert(e?.response?.data?.message || "Gagal menghapus pembayaran.");
+    }
+  };
 
   const fetchDetail = async () => {
     try {
@@ -197,10 +323,8 @@ export default function DetailHutang() {
 
   useEffect(() => {
     fetchDetail();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, category]);
 
-  // ---- Safe mapping ----
   const payments = useMemo(
     () =>
       data?.payments || data?.paymentHistories || data?.paymentHistory || [],
@@ -243,7 +367,6 @@ export default function DetailHutang() {
     });
   }, [payments, totalNominal]);
 
-  // ---- Tambah Pembayaran ----
   const submitPayment = async ({
     paymentMethod,
     nominal,
@@ -285,7 +408,6 @@ export default function DetailHutang() {
     <div className="p-4 space-y-4">
       <h1 className="text-2xl font-bold">Detail Hutang</h1>
 
-      {/* Header */}
       <div className="rounded border p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-10">
           <div>
@@ -350,7 +472,6 @@ export default function DetailHutang() {
         </div>
       </div>
 
-      {/* Pembayaran */}
       <div className="rounded border">
         <div className="flex items-center justify-between p-4">
           <p className="text-lg font-semibold">Pembayaran</p>
@@ -419,21 +540,29 @@ export default function DetailHutang() {
                           "-"
                         )}
                       </td>
-                      <td className="px-3 py-2">
-                        <button
-                          className="mr-3 text-gray-700 hover:text-black"
-                          onClick={() => alert("Edit pembayaran")}
-                          title="Edit"
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          className="text-gray-700 hover:text-black"
-                          onClick={() => alert("Hapus pembayaran")}
-                          title="Hapus"
-                        >
-                          🗑️
-                        </button>
+                      <td className="w-full px-4 py-2 flex gap-3">
+                        <BiSolidEditAlt
+                          onClick={() => {
+                            setSelectedPayment({
+                              id: p.id,
+                              paymentMethod: p.method,
+                              nominal: p.nominal,
+                              paymentDate: p.date,
+                              paymentProof: p.proof,
+                            });
+                            setShowEditModal(true);
+                          }}
+                          size={24}
+                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                        />
+                        <MdDelete
+                          onClick={() => {
+                            setSelectedPayment({ id: p.id });
+                            setShowDeleteModal(true);
+                          }}
+                          size={24}
+                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                        />
                       </td>
                     </tr>
                   ))
@@ -470,6 +599,51 @@ export default function DetailHutang() {
         onClose={() => setShowPaymentModal(false)}
         onSave={submitPayment}
       />
+
+      <EditPembayaranModal
+        open={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedPayment(null);
+        }}
+        onSave={submitEditPayment}
+        title="Edit Pembayaran"
+        initialValues={
+          selectedPayment && {
+            paymentMethod: selectedPayment.paymentMethod,
+            nominal: selectedPayment.nominal,
+            paymentDate: selectedPayment.paymentDate,
+            paymentProof: selectedPayment.paymentProof,
+          }
+        }
+      />
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white w-full max-w-sm p-6 rounded shadow-xl">
+            <h3 className="text-lg font-bold mb-4 text-center">
+              Hapus pembayaran ini?
+            </h3>
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setSelectedPayment(null);
+                }}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                onClick={submitDeletePayment}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded cursor-pointer"
+              >
+                Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,3 @@
-// src/pages/GeneralCashflow.jsx
 import React, { useMemo, useState } from "react";
 import {
   LineChart,
@@ -10,7 +9,6 @@ import {
   Legend,
   CartesianGrid,
 } from "recharts";
-import { PiCalendarBlank } from "react-icons/pi";
 import YearSelector from "../components/YearSelector";
 import { getCashflowOverview } from "../services/cashflow";
 import { useEffect } from "react";
@@ -83,121 +81,12 @@ const ChartCard = ({ title, children }) => (
 );
 
 export default function GeneralCashflow() {
-  const [ds] = useState(() => ({
-    2024: {
-      summary: {
-        profit: 4_500_000,
-        revenue: 4_500_000,
-        expense: 4_500_000,
-        cash: 4_500_000,
-        receivable: 4_500_000,
-        debt: 4_500_000,
-      },
-      pendapatan: [
-        1620000, 1800000, 2070000, 2340000, 2520000, 2700000, 2880000, 3150000,
-        3420000, 3690000, 4050000, 4500000,
-      ],
-      pengeluaran: [
-        810000, 990000, 1170000, 1080000, 990000, 900000, 990000, 1080000,
-        1260000, 1350000, 1080000, 900000,
-      ],
-      keuntungan: [
-        810000, 810000, 900000, 1260000, 1530000, 1800000, 1890000, 2070000,
-        2160000, 2340000, 2970000, 3600000,
-      ],
-      gudang: [
-        2250000, 2070000, 1890000, 1800000, 1980000, 2160000, 2340000, 2520000,
-        2700000, 2880000, 3060000, 3240000,
-      ],
-      toko: [
-        1980000, 1800000, 1620000, 1350000, 1260000, 1350000, 1530000, 1800000,
-        2070000, 2340000, 2700000, 3150000,
-      ],
-      kas: [
-        1350000, 1530000, 1710000, 1890000, 2070000, 2250000, 2520000, 2880000,
-        3240000, 3600000, 4050000, 4500000,
-      ],
-    },
-    2025: {
-      summary: {
-        profit: 5_000_000,
-        revenue: 5_000_000,
-        expense: 5_000_000,
-        cash: 5_000_000,
-        receivable: 5_000_000,
-        debt: 5_000_000,
-      },
-      pendapatan: [
-        1800000, 2000000, 2300000, 2600000, 2800000, 3000000, 3200000, 3500000,
-        3800000, 4100000, 4500000, 5000000,
-      ],
-      pengeluaran: [
-        900000, 1100000, 1300000, 1200000, 1100000, 1000000, 1100000, 1200000,
-        1400000, 1500000, 1200000, 1000000,
-      ],
-      keuntungan: [
-        900000, 900000, 1000000, 1400000, 1700000, 2000000, 2100000, 2300000,
-        2400000, 2600000, 3300000, 4000000,
-      ],
-      gudang: [
-        2500000, 2300000, 2100000, 2000000, 2200000, 2400000, 2600000, 2800000,
-        3000000, 3200000, 3400000, 3600000,
-      ],
-      toko: [
-        2200000, 2000000, 1800000, 1500000, 1400000, 1500000, 1700000, 2000000,
-        2300000, 2600000, 3000000, 3500000,
-      ],
-      kas: [
-        1500000, 1700000, 1900000, 2100000, 2300000, 2500000, 2800000, 3200000,
-        3600000, 4000000, 4500000, 5000000,
-      ],
-    },
-  }));
-
   const [year, setYear] = useState(2025);
-
   const [cashflowSummary, setCashflowSummary] = useState([]);
   const [cashflowGraphs, setCashflowGraphs] = useState([]);
   const [eggSaleCashflowGraphs, setEggSaleCashflowGraphs] = useState([]);
 
   const currency = (v) => formatRupiah(Number(v));
-
-  const dataYear = ds[year];
-  const prevYear = ds[year - 1];
-
-  const yoy = (cur, prev) =>
-    prev ? Math.round(((cur - prev) / prev) * 100) : null;
-
-  const pendapatanVs = useMemo(
-    () =>
-      MONTHS.map((bulan, i) => ({
-        bulan,
-        pendapatan: dataYear.pendapatan[i],
-        pengeluaran: dataYear.pengeluaran[i],
-        keuntungan: dataYear.keuntungan[i],
-      })),
-    [dataYear]
-  );
-
-  const penjualanTelur = useMemo(
-    () =>
-      MONTHS.map((bulan, i) => ({
-        bulan,
-        gudang: dataYear.gudang[i],
-        toko: dataYear.toko[i],
-      })),
-    [dataYear]
-  );
-
-  const kasProfit = useMemo(
-    () =>
-      MONTHS.map((bulan, i) => ({
-        bulan,
-        kas: dataYear.kas[i],
-        keuntungan: dataYear.keuntungan[i],
-      })),
-    [dataYear]
-  );
 
   const CustomTooltip = ({ active, label, payload }) => {
     if (!active || !payload?.length) return null;
@@ -286,11 +175,11 @@ export default function GeneralCashflow() {
       <ChartCard title="Grafik Pendapatan - Pengeluaran">
         <ResponsiveContainer width="100%" height={300}>
           <LineChart
-            data={pendapatanVs}
+            data={cashflowGraphs}
             margin={{ top: 12, right: 24, bottom: 8, left: 8 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis dataKey="bulan" tickMargin={8} />
+            <XAxis dataKey="Key" tickMargin={8} />
             <YAxis width={100} tickFormatter={currency} />
             <Tooltip content={<CustomTooltip />} />
             <Legend verticalAlign="top" height={28} iconType="circle" />
@@ -298,7 +187,7 @@ export default function GeneralCashflow() {
             <Line
               type="monotone"
               name="pendapatan"
-              dataKey="pendapatan"
+              dataKey="income"
               stroke="#3b82f6"
               strokeWidth={2.5}
               strokeLinecap="round"
@@ -310,7 +199,7 @@ export default function GeneralCashflow() {
             <Line
               type="monotone"
               name="keuntungan"
-              dataKey="keuntungan"
+              dataKey="profit"
               stroke="#22c55e"
               strokeWidth={2.5}
               strokeLinecap="round"
@@ -322,7 +211,7 @@ export default function GeneralCashflow() {
             <Line
               type="monotone"
               name="pengeluaran"
-              dataKey="pengeluaran"
+              dataKey="expense"
               stroke="#ef4444"
               strokeWidth={2.5}
               strokeLinecap="round"
@@ -338,19 +227,19 @@ export default function GeneralCashflow() {
       <ChartCard title="Grafik Penjualan Telur">
         <ResponsiveContainer width="100%" height={300}>
           <LineChart
-            data={penjualanTelur}
+            data={eggSaleCashflowGraphs}
             margin={{ top: 16, right: 24, bottom: 8, left: 8 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis dataKey="bulan" tickMargin={8} />
+            <XAxis dataKey="key" tickMargin={8} />
             <YAxis width={80} tickFormatter={currency} />
             <Tooltip content={<CustomTooltip />} />
             <Legend verticalAlign="top" height={28} iconType="circle" />
 
             <Line
               type="monotone"
-              name="Gudang"
-              dataKey="gudang"
+              name="Penjualan Gudang"
+              dataKey="warehouseEggSale"
               stroke="#3b82f6"
               strokeWidth={2.5}
               strokeLinecap="round"
@@ -362,7 +251,7 @@ export default function GeneralCashflow() {
             <Line
               type="monotone"
               name="Toko"
-              dataKey="toko"
+              dataKey="storeEggSale"
               stroke="#22c55e"
               strokeWidth={2.5}
               strokeLinecap="round"
@@ -378,11 +267,11 @@ export default function GeneralCashflow() {
       <ChartCard title="Kas - Net Profit">
         <ResponsiveContainer width="100%" height={300}>
           <LineChart
-            data={kasProfit}
+            data={cashflowGraphs}
             margin={{ top: 16, right: 24, bottom: 8, left: 8 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis dataKey="bulan" tickMargin={8} />
+            <XAxis dataKey="Key" tickMargin={8} />
             <YAxis width={80} tickFormatter={currency} />
             <Tooltip content={<CustomTooltip />} />
             <Legend verticalAlign="top" height={28} iconType="circle" />
@@ -390,7 +279,7 @@ export default function GeneralCashflow() {
             <Line
               type="monotone"
               name="Kas"
-              dataKey="kas"
+              dataKey="cash"
               stroke="#3b82f6"
               strokeWidth={2.5}
               strokeLinecap="round"
@@ -402,7 +291,7 @@ export default function GeneralCashflow() {
             <Line
               type="monotone"
               name="Keuntungan"
-              dataKey="keuntungan"
+              dataKey="profit"
               stroke="#22c55e"
               strokeWidth={2.5}
               strokeLinecap="round"
