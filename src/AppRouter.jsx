@@ -535,6 +535,39 @@ const AppRouter = createBrowserRouter([
             ],
           },
           {
+            path: "kasir",
+            children: [
+              {
+                path: "antrian-pesanan",
+                element: <AntrianPesanan />,
+                children: [
+                  {
+                    path: "input-data-pesanan",
+                    element: <InputDataPesanan />,
+                  },
+                  {
+                    path: "input-data-pesanan/:id",
+                    element: <InputDataPesanan />,
+                  },
+                ],
+              },
+              {
+                path: "daftar-pesanan",
+                element: <DaftarPesanan />,
+                children: [
+                  {
+                    path: "input-data-pesanan",
+                    element: <InputDataPesanan />,
+                  },
+                  {
+                    path: "input-data-pesanan/:id",
+                    element: <InputDataPesanan />,
+                  },
+                ],
+              },
+            ],
+          },
+          {
             path: "fasilitas",
             children: [
               {

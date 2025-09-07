@@ -169,7 +169,7 @@ const InputDataPesanan = () => {
     }
   };
 
-  const fetchItemsData = async (storeId) => {
+  const fetchItemsData = async () => {
     try {
       const response = await getItems("Telur", {
         // storeId
@@ -264,43 +264,39 @@ const InputDataPesanan = () => {
 
   const getItemSummary = async () => {
     try {
-      const placementResponse = await getCurrentUserStorePlacement();
-      if (placementResponse.status == 200) {
-        const storeId = placementResponse.data.data[0].store.id;
-        const summaryResponse = await getEggStoreItemSummary(storeId);
-        if (summaryResponse.status == 200) {
-          const eggSummaries = summaryResponse.data.data;
-          const okKg =
-            eggSummaries.find(
-              (item) => item.name === "Telur OK" && item.unit === "Kg"
-            )?.quantity ?? 0;
+      const summaryResponse = await getEggStoreItemSummary(selectedStore);
+      if (summaryResponse.status == 200) {
+        const eggSummaries = summaryResponse.data.data;
+        const okKg =
+          eggSummaries.find(
+            (item) => item.name === "Telur OK" && item.unit === "Kg"
+          )?.quantity ?? 0;
 
-          const okIkat =
-            eggSummaries.find(
-              (item) => item.name === "Telur OK" && item.unit === "Ikat"
-            )?.quantity ?? 0;
+        const okIkat =
+          eggSummaries.find(
+            (item) => item.name === "Telur OK" && item.unit === "Ikat"
+          )?.quantity ?? 0;
 
-          const retakKg =
-            eggSummaries.find(
-              (item) => item.name === "Telur Retak" && item.unit === "Kg"
-            )?.quantity ?? 0;
+        const retakKg =
+          eggSummaries.find(
+            (item) => item.name === "Telur Retak" && item.unit === "Kg"
+          )?.quantity ?? 0;
 
-          const retakIkat =
-            eggSummaries.find(
-              (item) => item.name === "Telur Retak" && item.unit === "Ikat"
-            )?.quantity ?? 0;
+        const retakIkat =
+          eggSummaries.find(
+            (item) => item.name === "Telur Retak" && item.unit === "Ikat"
+          )?.quantity ?? 0;
 
-          const bonyokPlastik =
-            eggSummaries.find(
-              (item) => item.name === "Telur Bonyok" && item.unit === "Plastik"
-            )?.quantity ?? 0;
+        const bonyokPlastik =
+          eggSummaries.find(
+            (item) => item.name === "Telur Bonyok" && item.unit === "Plastik"
+          )?.quantity ?? 0;
 
-          setTelurOkKg(okKg);
-          setTelurOkIkat(okIkat);
-          setTelurRetakKg(retakKg);
-          setTelurRetakIkat(retakIkat);
-          setTelurBonyokPlastik(bonyokPlastik);
-        }
+        setTelurOkKg(okKg);
+        setTelurOkIkat(okIkat);
+        setTelurRetakKg(retakKg);
+        setTelurRetakIkat(retakIkat);
+        setTelurBonyokPlastik(bonyokPlastik);
       }
     } catch (error) {
       console.log("error :", error);
@@ -309,7 +305,6 @@ const InputDataPesanan = () => {
 
   //START useEffect
   useEffect(() => {
-    getItemSummary();
     if (userRole == "Owner") {
       fetchStoresData();
     } else {
@@ -321,7 +316,10 @@ const InputDataPesanan = () => {
   }, []);
 
   useEffect(() => {
-    fetchItemsData(selectedStore);
+    if (selectedStore) {
+      fetchItemsData(selectedStore);
+      getItemSummary();
+    }
   }, [selectedStore]);
 
   useEffect(() => {
@@ -449,6 +447,7 @@ const InputDataPesanan = () => {
         //////
       }
     } catch (error) {
+      alert("❌Terjadi kesalahan dalam menambahkan data antrian!")
       console.log("error :", error);
     }
   };
@@ -695,6 +694,31 @@ const InputDataPesanan = () => {
           setTransactionCount={setTransactionCount}
           setSelectedCustomerId={setSelectedCustomerId}
         />
+
+        <div className="flex justify-between gap-4">
+          {userRole != "Pekerja Toko" && (
+            <div className="w-full">
+              <label className="block font-medium  mt-4">Pilih Toko</label>
+              {isEditable && !id && userRole != "Pekerja Toko" ? (
+                <select
+                  className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
+                  value={selectedStore}
+                  onChange={(e) => {
+                    setSelectedStore(e.target.value);
+                  }}
+                >
+                  {stores.map((item) => (
+                    <option value={item.id} key={item.id}>
+                      {`${item.name}`}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <p className="text-lg font-bold">{selectedItem.name}</p>
+              )}
+            </div>
+          )}
+        </div>
 
         <div className="flex justify-between gap-4">
           <div className="w-full">
@@ -996,7 +1020,6 @@ const InputDataPesanan = () => {
                     ? "(Lunas)"
                     : deadlinePaymentDate || "-"}
                 </span>
-
                 {isMoreThanDeadlinePaymentDate && (
                   <span title="Terlambat" className="text-red-500">
                     <GoAlertFill size={24} />
@@ -1005,6 +1028,29 @@ const InputDataPesanan = () => {
               </div>
             )}
           </>
+        )}
+        {id && (
+          <div className="flex gap-2 items-center">
+            <span
+              className={`text-xl font-semibold ${
+                paymentStatus == "Lunas"
+                  ? "text-gray-200"
+                  : isMoreThanDeadlinePaymentDate
+                  ? "text-red-600"
+                  : ""
+              }`}
+            >
+              {paymentStatus == "Lunas"
+                ? "(Lunas)"
+                : deadlinePaymentDate || "-"}
+            </span>
+
+            {isMoreThanDeadlinePaymentDate && (
+              <span title="Terlambat" className="text-red-500">
+                <GoAlertFill size={24} />
+              </span>
+            )}
+          </div>
         )}
 
         {/* table */}

@@ -93,6 +93,15 @@ export const sidebarMenus = {
       ],
     },
     {
+      icon: <img src={toko} alt="Overview Icon" className="h-4 w-4" />,
+      tabName: "Kasir",
+      element: <OverviewOwner />,
+      subTabs: [
+        { tabName: "Daftar Pesanan", path: "daftar-pesanan" },
+        { tabName: "Antrian Pesanan", path: "antrian-pesanan" },
+      ],
+    },
+    {
       icon: <GiTempleDoor className="h-4 w-4" />,
       tabName: "Fasilitas",
       subTabs: [

@@ -1,14 +1,19 @@
-import React from "react";
+import React, { useRef } from "react";
 import { PiCalendarBlank } from "react-icons/pi";
 import { MdEgg, MdShoppingCart } from "react-icons/md";
 import { MdStore } from "react-icons/md";
 import { TbEggCrackedFilled } from "react-icons/tb";
 import { FiMaximize2 } from "react-icons/fi";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
-import { getTodayDateInBahasa } from "../utils/dateFormat";
+import {
+  convertToInputDateFormat,
+  formatDate,
+  getTodayDateInBahasa,
+} from "../utils/dateFormat";
 import { useState } from "react";
 import { getListStoreSale, sendStoreSale } from "../services/stores";
 import { useEffect } from "react";
+import { FaMoneyBillWave } from "react-icons/fa6";
 
 const DaftarPesanan = () => {
   const location = useLocation();
@@ -16,6 +21,17 @@ const DaftarPesanan = () => {
   const [dataAntrianPesanan, setDataAntrianPesanan] = useState([]);
   const [showSendModal, setShowSendModal] = useState(false);
   const [selectedSendId, setSelectedSendId] = useState("");
+
+  const [page, setPage] = useState(1);
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
+
+  const dateInputRef = useRef(null);
+  const openDatePicker = () => {
+    if (dateInputRef.current) {
+      dateInputRef.current.showPicker?.() || dateInputRef.current.click();
+    }
+  };
 
   const detailPages = ["input-data-pesanan"];
   const isDetailPage = detailPages.some((segment) =>
@@ -45,8 +61,9 @@ const DaftarPesanan = () => {
 
   const fetchDataAntrianPesanan = async () => {
     try {
-      const response = await getListStoreSale();
-      // console.log("response: ", response);
+      const date = convertToInputDateFormat(selectedDate);
+      const response = await getListStoreSale(date, paymentMethod, page);
+      console.log("ListResponse: ", response);
       if (response.status == 200) {
         setDataAntrianPesanan(response.data.data.storeSales);
       }
@@ -62,6 +79,11 @@ const DaftarPesanan = () => {
     navigate(inputPath);
   };
 
+  const handleDateChange = (e) => {
+    const date = e.target.value;
+    setSelectedDate(date);
+  };
+
   useEffect(() => {
     fetchDataAntrianPesanan();
     if (location?.state?.refetch) {
@@ -69,6 +91,10 @@ const DaftarPesanan = () => {
       window.history.replaceState({}, document.title);
     }
   }, [location]);
+
+  useEffect(() => {
+    fetchDataAntrianPesanan();
+  }, [selectedDate, page, paymentMethod]);
 
   return (
     <>
@@ -80,7 +106,30 @@ const DaftarPesanan = () => {
           <div className="flex justify-between mb-2 flex-wrap gap-4">
             <h1 className="text-3xl font-bold">Daftar Pesanan</h1>
             <div className="text-base flex gap-2">
-              <p>{`Hari ini (${getTodayDateInBahasa()})`}</p>
+              <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+                <FaMoneyBillWave size={18} />
+                <select
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="ml-2 bg-transparent text-base font-medium outline-none"
+                >
+                  <option value="">Semua Status Pembayaran</option>
+                  <option value="Penuh">Penuh</option>
+                  <option value="Cicil">Cicil</option>
+                </select>
+              </div>
+              <div
+                className="flex items-center rounded-lg bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+                onClick={openDatePicker}
+              >
+                <input
+                  ref={dateInputRef}
+                  type="date"
+                  value={selectedDate}
+                  onChange={handleDateChange}
+                  className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+                />
+              </div>
             </div>
           </div>
 
