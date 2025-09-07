@@ -210,7 +210,16 @@ const KonfirmasiPemesananDocModal = ({
                   type="number"
                   className="border rounded px-3 py-2 w-full"
                   value={qty}
-                  onChange={(e) => setQty(e.target.value)}
+                  min={0}
+                  max={kandang?.capacity}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value > kandang.capacity) {
+                      setQty(kandang.capacity);
+                    } else {
+                      setQty(value);
+                    }
+                  }}
                 />
                 <span className="font-semibold">Ekor</span>
               </div>

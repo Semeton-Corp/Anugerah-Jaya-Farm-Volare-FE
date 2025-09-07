@@ -141,7 +141,7 @@ const KonfirmasiPenjualanAyamModal = ({
       })),
       paymentType: paymentType ?? "",
       deadlinePaymentDate:
-        paymentType == "Penuh" ? null : toInputDate(deadlinePaymentDate),
+        paymentType == "Penuh" ? undefined : deadlinePaymentDate,
     };
 
     onConfirm?.(payload);
@@ -189,7 +189,14 @@ const KonfirmasiPenjualanAyamModal = ({
                   type="number"
                   className="border rounded px-3 py-2 w-full"
                   value={totalSellChicken}
-                  onChange={(e) => setTotalSellChicken(e.target.value)}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value > chickenCage?.totalChicken) {
+                      setTotalSellChicken(chickenCage?.totalChicken);
+                    } else {
+                      setTotalSellChicken(value);
+                    }
+                  }}
                 />
                 <span className="font-semibold">Ekor</span>
               </div>

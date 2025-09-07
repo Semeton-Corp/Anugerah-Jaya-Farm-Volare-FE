@@ -57,7 +57,8 @@ const RiwayatGudang = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [selectedDate, setSelectedDate] = useState();
+  const today = new Date().toISOString().split("T")[0];
+  const [selectedDate, setSelectedDate] = useState(today);
 
   const [page, setPage] = useState(1);
   const [historyData, setHistoryData] = useState([]);
@@ -118,7 +119,6 @@ const RiwayatGudang = () => {
 
   return (
     <div className="flex flex-col px-4 py-3 gap-4 ">
-      {/* header */}
       <div className="flex justify-between mb-2 flex-wrap gap-4">
         <h1 className="text-3xl font-bold">Riwayat Gudang</h1>
 
@@ -149,16 +149,13 @@ const RiwayatGudang = () => {
         </div>
       </div>
 
-      {/* entire box */}
       <div className=" rounded-[4px] border border-black-6">
-        {/* pegawai table */}
         <div className="px-6 py-6">
           <table className="w-full ">
             <thead className="px-8 rounded-[4px] bg-green-700 text-white text-center">
               <tr className="">
                 <th className="py-2 px-4">Waktu</th>
                 <th className="py-2 px-4">Nama Barang</th>
-                <th className="py-2 px-4">Satuan</th>
                 <th className="py-2 px-4">Kuantitas</th>
                 <th className="py-2 px-4">Asal Barang</th>
                 <th className="py-2 px-4">Tujuan</th>
@@ -170,8 +167,7 @@ const RiwayatGudang = () => {
               {historyData.map((data, index) => (
                 <tr key={index} className="border-b border-black-6">
                   <td className="py-2 px-4 ">{data.time}</td>
-                  <td className="py-2 px-4">{data.item.name}</td>
-                  <td className="py-2 px-4">{data.item.unit}</td>
+                  <td className="py-2 px-4">{data.itemName ?? "-"}</td>
                   <td className="py-2 px-4">{data.quantity}</td>
                   <td className="py-2 px-4">{data.source}</td>
                   <td className="py-2 px-4">{data.destination}</td>
@@ -182,7 +178,7 @@ const RiwayatGudang = () => {
                           ? "bg-aman-box-surface-color text-aman-text-color"
                           : data.status === "Pending"
                           ? "bg-green-200 text-green-900"
-                          : data.status === "Stok diperbaharui"
+                          : data.status === "Stok Diperbarui"
                           ? "bg-orange-200 text-orange-900"
                           : "bg-kritis-box-surface-color text-kritis-text-color"
                       }`}
@@ -205,7 +201,6 @@ const RiwayatGudang = () => {
             </tbody>
           </table>
 
-          {/* footer */}
           <div className="flex justify-between mt-16 px-6">
             {historyData?.length > 0 ? (
               <p className="text-sm text-[#CCCCCC]">{`Menampilkan halaman ${page} dari ${totalPages} halaman. Total ${totalData} data riwayat`}</p>
@@ -216,21 +211,23 @@ const RiwayatGudang = () => {
             <div className="flex gap-3">
               <div
                 className={`rounded-[4px] py-2 px-6 ${
-                  page === 1
+                  page <= 1 || totalPages <= 0
                     ? "bg-gray-200 cursor-not-allowed"
                     : "bg-green-100 hover:bg-green-200 cursor-pointer"
                 } flex items-center justify-center text-black text-base font-medium `}
-                onClick={() => page > 1 && setPage(page - 1)}
+                onClick={() => page > 1 && totalPages > 0 && setPage(page - 1)}
               >
                 <p>Previous</p>
               </div>
               <div
                 className={`rounded-[4px] py-2 px-6 ${
-                  page === totalPages
+                  page >= totalPages || totalPages <= 0
                     ? "bg-gray-200 cursor-not-allowed"
                     : "bg-green-700 hover:bg-green-800 cursor-pointer"
                 } flex items-center justify-center text-white text-base font-medium `}
-                onClick={() => page < totalPages && setPage(page + 1)}
+                onClick={() =>
+                  page < totalPages && totalPages > 0 && setPage(page + 1)
+                }
               >
                 <p>Next</p>
               </div>

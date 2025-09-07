@@ -50,6 +50,9 @@ const DraftPenjualanAyam = () => {
         fetchDraftData();
       }
     } catch (error) {
+      if(error?.response?.data?.message == "total sell chicken must be less than total chicken"){
+        alert("❌Jumlah penjualan melebihi jumlah ayam di kandang")
+      }
       console.log("error :", error);
     }
   };

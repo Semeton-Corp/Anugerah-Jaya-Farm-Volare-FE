@@ -9,7 +9,7 @@ const getStatusColor = (status) => {
   switch (status) {
     case "Belum Lunas":
       return "bg-orange-200 text-orange-900";
-    case "Belum Dibayar":
+    case "Belum Lunas":
       return "bg-[#FF5E5E] text-[#640404]";
     case "Lunas":
       return "bg-[#87FF8B] text-[#066000]";
@@ -23,13 +23,13 @@ const JualAyamAfkir = () => {
   const location = useLocation();
 
   const [salesData, setSalesData] = useState([]);
-  const [status, setStatus] = useState("Semua Status Pembayaran");
-  const options = [
-    "Semua Status Pembayaran",
-    "Belum Dibayar",
-    "Dibayar Setengah",
-    "Lunas",
-  ];
+  const [paymentStatus, setPaymentStatus] = useState("");
+  const paymentStatusOptions = ["Belum Dibayar", "Belum Lunas", "Lunas"];
+
+  const [page, setPage] = useState(1);
+
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalData, setTotalData] = useState(0);
 
   const detailPages = [
     "draft-penjualan-ayam",
@@ -51,10 +51,13 @@ const JualAyamAfkir = () => {
 
   const fetchSalesData = async () => {
     try {
-      const saleResponse = await getAfkirChickenSales();
+      const saleResponse = await getAfkirChickenSales(page, paymentStatus);
       console.log("saleResponse: ", saleResponse);
+
       if (saleResponse.status == 200) {
         setSalesData(saleResponse.data.data.afkirChickenSales);
+        setTotalData(saleResponse.data.data.totalData);
+        setTotalPages(saleResponse.data.data.totalPage);
       }
     } catch (error) {
       console.log("error :", error);
@@ -69,6 +72,10 @@ const JualAyamAfkir = () => {
     }
   }, [location]);
 
+  useEffect(() => {
+    fetchSalesData();
+  }, [page, paymentStatus]);
+
   if (isDetailPage) {
     return <Outlet />;
   }
@@ -80,11 +87,12 @@ const JualAyamAfkir = () => {
         <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
           <FaMoneyBillWave size={18} />
           <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
+            value={paymentStatus}
+            onChange={(e) => setPaymentStatus(e.target.value)}
             className="ml-2 bg-transparent text-base font-medium outline-none"
           >
-            {options.map((opt) => (
+            <option value="">Semua Status Pembayaran</option>
+            {paymentStatusOptions.map((opt) => (
               <option key={opt} value={opt} className="text-black">
                 {opt}
               </option>
@@ -152,16 +160,36 @@ const JualAyamAfkir = () => {
           </table>
         </div>
 
-        {/* Pagination */}
-        <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
-          <p>Menampilkan 1–10 dari 1000 riwayat</p>
-          <div className="flex gap-2">
-            <button className="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded">
-              Previous
-            </button>
-            <button className="bg-green-800 hover:bg-green-900 text-white px-3 py-1 rounded">
-              Next
-            </button>
+        {/* footer */}
+        <div className="flex justify-between mt-16 px-6">
+          {salesData?.length > 0 ? (
+            <p className="text-sm text-[#CCCCCC]">{`Menampilkan halaman ${page} dari ${totalPages} halaman. Total ${totalData} data riwayat`}</p>
+          ) : (
+            <p></p>
+          )}
+          <div className="flex gap-3">
+            <div
+              className={`rounded-[4px] py-2 px-6 ${
+                page <= 1 || totalPages <= 0
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "bg-green-100 hover:bg-green-200 cursor-pointer"
+              } flex items-center justify-center text-black text-base font-medium `}
+              onClick={() => page > 1 && totalPages > 0 && setPage(page - 1)}
+            >
+              <p>Previous</p>
+            </div>
+            <div
+              className={`rounded-[4px] py-2 px-6 ${
+                page >= totalPages || totalPages <= 0
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "bg-green-700 hover:bg-green-800 cursor-pointer"
+              } flex items-center justify-center text-white text-base font-medium `}
+              onClick={() =>
+                page < totalPages && totalPages > 0 && setPage(page + 1)
+              }
+            >
+              <p>Next</p>
+            </div>
           </div>
         </div>
       </div>

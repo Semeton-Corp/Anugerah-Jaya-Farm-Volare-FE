@@ -12,45 +12,6 @@ import {
 import { getStoreItemsHistories } from "../services/stores";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
-const riwayatAktivitasTokoData = [
-  {
-    waktu: "10:30",
-    namaBarang: "Telur OK",
-    satuan: "Ikat",
-    kuantitas: 4000,
-    toko: "Toko A",
-    tempatPemesanan: "-",
-    keterangan: "Barang keluar",
-  },
-  {
-    waktu: "09:00",
-    namaBarang: "Telur Retak",
-    satuan: "Butir",
-    kuantitas: 1200,
-    toko: "Toko B",
-    tempatPemesanan: "-",
-    keterangan: "Barang keluar",
-  },
-  {
-    waktu: "08:00",
-    namaBarang: "Telur Pecah",
-    satuan: "Butir",
-    kuantitas: 1200,
-    toko: "Toko A",
-    tempatPemesanan: "Gudang A1",
-    keterangan: "Barang masuk",
-  },
-  {
-    waktu: "07:20",
-    namaBarang: "Telur Retak",
-    satuan: "Butir",
-    kuantitas: 1200,
-    toko: "Toko B",
-    tempatPemesanan: "Gudang A1",
-    keterangan: "Barang masuk",
-  },
-];
-
 const RiwayatStok = () => {
   const [query, setQuery] = useState("");
   const location = useLocation();
@@ -60,6 +21,7 @@ const RiwayatStok = () => {
 
   const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
   const [page, setPage] = useState(1);
+
   const [totalPages, setTotalPages] = useState(1);
   const [totalData, setTotalData] = useState(0);
 
@@ -102,15 +64,12 @@ const RiwayatStok = () => {
       const historyResponse = await getStoreItemsHistories(date, page);
 
       console.log("historyResponse: ", historyResponse);
-      // console.log("page: ", page);
 
       if (historyResponse.status == 200) {
         setStoreItemHistories(historyResponse.data.data.storeItemHistories);
+        setTotalData(historyResponse.data.data.totalData);
+        setTotalPages(historyResponse.data.data.totalPage);
       }
-
-      // setTotaldata(historyResponse.data.data.totalData);
-      // setHistoryData(historyResponse.data.data.warehouseItemHistories);
-      // setTotalPages(historyResponse.data.data.totalPage);
     } catch (error) {
       console.error("Error fetching warehouse history:", error);
     }
@@ -123,7 +82,7 @@ const RiwayatStok = () => {
   if (isDetailPage) {
     return <Outlet />;
   }
-  
+
   return (
     <div className="flex flex-col px-4 py-3 gap-4 ">
       {/* header */}
@@ -153,9 +112,8 @@ const RiwayatStok = () => {
               <tr className="">
                 <th className="py-2 px-4">Waktu</th>
                 <th className="py-2 px-4">Nama barang</th>
-                <th className="py-2 px-4">Satuan</th>
                 <th className="py-2 px-4">Kuantitas</th>
-                <th className="py-2 px-4">Toko</th>
+                <th className="py-2 px-4">Pembeli</th>
                 <th className="py-2 px-4">Tempat pemesanan</th>
                 <th className="py-2 px-4">Keterangan</th>
                 <th className="py-2 px-4"></th>
@@ -165,8 +123,7 @@ const RiwayatStok = () => {
               {storeItemHistories.map((item, index) => (
                 <tr key={index} className="border-b border-black-6">
                   <td className="py-2 px-4 ">{item.time}</td>
-                  <td className="py-2 px-4">{item.item.name}</td>
-                  <td className="py-2 px-4">{item.item.unit}</td>
+                  <td className="py-2 px-4">{item.itemName}</td>
                   <td className="py-2 px-4">{item.quantity}</td>
                   <td className="py-2 px-4">{item.destination}</td>
                   <td className="py-2 px-4">{item.source ?? "-"}</td>
@@ -207,12 +164,32 @@ const RiwayatStok = () => {
 
           {/* footer */}
           <div className="flex justify-between mt-16 px-6">
-            <p className="text-sm text-[#CCCCCC]">Menampilkan 1-7 data</p>
+            {storeItemHistories?.length > 0 ? (
+              <p className="text-sm text-[#CCCCCC]">{`Menampilkan halaman ${page} dari ${totalPages} halaman. Total ${totalData} data riwayat`}</p>
+            ) : (
+              <p></p>
+            )}
             <div className="flex gap-3">
-              <div className="rounded-[4px] py-2 px-6 bg-green-100 flex items-center justify-center text-black text-base font-medium hover:bg-green-200 cursor-pointer">
-                <p>Previous </p>
+              <div
+                className={`rounded-[4px] py-2 px-6 ${
+                  page <= 1 || totalPages <= 0
+                    ? "bg-gray-200 cursor-not-allowed"
+                    : "bg-green-100 hover:bg-green-200 cursor-pointer"
+                } flex items-center justify-center text-black text-base font-medium `}
+                onClick={() => page > 1 && totalPages > 0 && setPage(page - 1)}
+              >
+                <p>Previous</p>
               </div>
-              <div className="rounded-[4px] py-2 px-6 bg-green-700 flex items-center justify-center text-white text-base font-medium hover:bg-green-800 cursor-pointer">
+              <div
+                className={`rounded-[4px] py-2 px-6 ${
+                  page >= totalPages || totalPages <= 0
+                    ? "bg-gray-200 cursor-not-allowed"
+                    : "bg-green-700 hover:bg-green-800 cursor-pointer"
+                } flex items-center justify-center text-white text-base font-medium `}
+                onClick={() =>
+                  page < totalPages && totalPages > 0 && setPage(page + 1)
+                }
+              >
                 <p>Next</p>
               </div>
             </div>

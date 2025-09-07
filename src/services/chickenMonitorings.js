@@ -359,12 +359,23 @@ export const confirmationAfkirChickenSaleDraft = (payload, id) => {
   });
 };
 
-export const getAfkirChickenSales = () => {
+export const getAfkirChickenSales = (page, paymentStatus) => {
+  const params = { page };
+
+  if (
+    paymentStatus !== undefined &&
+    paymentStatus !== null &&
+    paymentStatus !== ""
+  ) {
+    params.paymentStatus = paymentStatus;
+  }
+
   return api.get(`/chickens/afkir/sales`, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
     },
+    params,
   });
 };
 
