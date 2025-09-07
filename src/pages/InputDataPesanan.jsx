@@ -17,6 +17,7 @@ import {
   getTodayDateInBahasa,
   formatDateToDDMMYYYY,
   formatTanggalIndonesia,
+  toISODate,
 } from "../utils/dateFormat";
 import { useState, useRef } from "react";
 import { useEffect } from "react";
@@ -229,9 +230,7 @@ const InputDataPesanan = () => {
 
   const getPrice = () => {
     const priceItem = itemPrices.find(
-      (price) =>
-        price.item.name == selectedItem.name &&
-        price.item.unit == unit
+      (price) => price.item.name == selectedItem.name && price.saleUnit == unit
     );
 
     const applicableDiscounts = itemPriceDiscounts.filter(
@@ -347,7 +346,7 @@ const InputDataPesanan = () => {
     if (quantity) {
       getPrice();
     }
-  }, [selectedItem, transactionCount, quantity]);
+  }, [selectedItem, transactionCount, quantity, unit]);
 
   const submitHandle = async () => {
     const storeSalePayment = {
@@ -1098,9 +1097,10 @@ const InputDataPesanan = () => {
                         <td className="px-4 py-2 flex gap-3 justify-center">
                           <BiSolidEditAlt
                             onClick={() => {
+                              console.log("payment: ", payment);
                               setPaymentMethod(payment.paymentMethod);
                               setNominal(payment.nominal);
-                              setPaymentDate(convertToInputDateFormat(date));
+                              setPaymentDate(toISODate(payment.date));
 
                               if (id) {
                                 setPaymentId(payment.id);

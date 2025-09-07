@@ -13,7 +13,9 @@ const TambahHargaTelur = () => {
 
   const [kategori, setKategori] = useState("");
   const [barang, setBarang] = useState("");
+  const [barangName, setBarangName] = useState("");
   const [harga, setHarga] = useState("");
+  const [saleUnit, setSaleUnit] = useState("Kg");
 
   const [items, setItems] = useState([]);
 
@@ -24,6 +26,7 @@ const TambahHargaTelur = () => {
       itemId: parseInt(barang),
       category: kategori,
       price: harga,
+      saleUnit: saleUnit,
     };
 
     if (id) {
@@ -39,7 +42,6 @@ const TambahHargaTelur = () => {
     } else {
       try {
         const tambahResponse = await createItemPrice(payload);
-        // console.log("tambahResponse: ", tambahResponse);
         if (tambahResponse.status == 201) {
           navigate(-1, { state: { refetch: true } });
         }
@@ -56,10 +58,13 @@ const TambahHargaTelur = () => {
         // storeId
       });
       console.log("response fetch item data", response);
-
       if (response.status == 200) {
-        setItems(response.data.data);
-        setSelectedItem(response.data.data[0].id);
+        const itemData = response.data.data;
+        const filterItem = itemData.filter(
+          (item) => item?.name != "Telur Reject"
+        );
+        setItems(filterItem);
+        setSelectedItem(filterItem[0].id);
       }
     } catch (error) {}
   };
@@ -86,6 +91,14 @@ const TambahHargaTelur = () => {
     fetchItemsData();
   }, []);
 
+  useEffect(() => {
+    if (barangName == "Telur Retak" || barangName == "Telur Bonyok") {
+      setSaleUnit("Plastik");
+    } else {
+      setSaleUnit("Kg");
+    }
+  }, [barangName]);
+
   return (
     <div className="flex flex-col px-4 py-3 gap-4">
       <h1 className="text-2xl font-bold">Tambah Harga Telur</h1>
@@ -107,14 +120,42 @@ const TambahHargaTelur = () => {
           <select
             className="w-full border rounded px-3 py-2 bg-gray-100"
             value={barang}
-            onChange={(e) => setBarang(e.target.value)}
+            onChange={(e) => {
+              const selectedItem = items.find(
+                (item) => item?.id == e.target.value
+              );
+              // console.log("selectedItem: ", selectedItem);
+              setBarang(e.target.value);
+              setBarangName(selectedItem?.name);
+            }}
           >
-            <option value="">Pilih barang</option>
+            <option value="">Pilih Barang</option>
             {items.map((item) => (
               <option value={item.id} key={item.id}>
-                {`${item.name} (${item.unit})`}
+                {`${item.name}`}
               </option>
             ))}
+          </select>
+        </div>
+
+        <div className="mb-4">
+          <label className="block font-medium mb-1">Pilih Satuan</label>
+          <select
+            className="w-full border rounded px-3 py-2 bg-gray-100"
+            value={saleUnit}
+            onChange={(e) => setSaleUnit(e.target.value)}
+          >
+            <option value="">Pilih Satuan</option>
+            {barangName === "Telur Retak" || barangName === "Telur Bonyok" ? (
+              <>
+                <option value="Plastik">Plastik</option>
+              </>
+            ) : (
+              <>
+                <option value="Kg">Kg</option>
+                <option value="Ikat">Ikat</option>
+              </>
+            )}
           </select>
         </div>
 
@@ -152,6 +193,7 @@ const TambahHargaTelur = () => {
               console.log("barang: ", barang);
               console.log("harga: ", harga);
               console.log("items: ", items);
+              console.log({ barangName });
             }}
             className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-900 cursor-pointer"
           >

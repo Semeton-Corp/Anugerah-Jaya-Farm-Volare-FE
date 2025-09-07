@@ -147,6 +147,7 @@ const AntrianPesanan = () => {
   const getItemSummary = async () => {
     try {
       const placementResponse = await getCurrentUserStorePlacement();
+      console.log("placementResponse: ", placementResponse);
       if (placementResponse.status == 200) {
         const storeId = placementResponse.data.data[0].store.id;
         const summaryResponse = await getEggStoreItemSummary(storeId);
@@ -187,8 +188,9 @@ const AntrianPesanan = () => {
   const getPrice = () => {
     const priceItem = itemPrices.find(
       (price) =>
-        price.item.name == selectedItem.item.name && price.item.unit == unit
+        price.item.name == selectedItem.item.name && price.saleUnit == unit
     );
+    console.log("itemPrices: ", itemPrices);
     console.log("selectedItem: ", selectedItem);
     console.log("priceItem: ", priceItem);
 
@@ -235,57 +237,94 @@ const AntrianPesanan = () => {
   };
 
   const submitHandle = async () => {
-    const storeSalePayment = {
-      paymentDate: formatDateToDDMMYYYY(paymentDate),
-      nominal: nominal.toString(),
-      paymentProof: paymentProof,
-      paymentMethod: paymentMethod,
-    };
+    const totalInvoice =
+      Number(itemTotalPrice || 0) - Number(itemPriceDiscount || 0);
+
+    if (!selectedItem || !selectedItem.id) {
+      alert("❌ Pilih item yang akan dialokasikan terlebih dahulu.");
+      return;
+    }
+
+    const cleanedPayments = (paymentHistory || []).map((p) => {
+      const paymentDate = p.paymentDate || p.date || "";
+
+      const nominalNum = (() => {
+        if (p.nominal == null) return 0;
+        const cleaned = String(p.nominal).replace(/[^\d.-]/g, "");
+        const n = Number(cleaned);
+        return Number.isFinite(n) ? n : 0;
+      })();
+
+      return {
+        paymentDate: paymentDate,
+        nominal: String(nominalNum),
+        paymentProof: p.paymentProof || p.proof || "",
+        paymentMethod: p.paymentMethod || p.method || "Tunai",
+      };
+    });
+
+    const sumPayments = cleanedPayments.reduce(
+      (acc, cur) => acc + Number(cur.nominal || 0),
+      0
+    );
+
+    if (paymentType === "Penuh") {
+      if (sumPayments === 0) {
+        alert(
+          "❌ Untuk pembayaran penuh, harus ada pembayaran yang melunasi tagihan."
+        );
+        return;
+      }
+      if (Number(sumPayments) !== Number(totalInvoice)) {
+        alert(
+          "❌ Untuk pembayaran penuh, total nominal pembayaran harus sama dengan total tagihan."
+        );
+        return;
+      }
+    }
 
     const payload = {
-      itemId: selectedItem?.item?.id,
+      itemId:
+        selectedItem?.item?.id ?? selectedItem?.itemId ?? selectedItem?.id,
       saleUnit: unit,
       storeId: parseInt(selectedStore),
-      quantity: quantity,
-      price: itemPrice.toString(),
+      quantity: parseInt(quantity),
+      price: String(itemPrice), // atau itemPrice.toString()
       discount: discount,
       sendDate: formatDateToDDMMYYYY(sendDate),
       paymentType: paymentType,
-      storeSalePayment: storeSalePayment,
+      payments: cleanedPayments.length ? cleanedPayments : undefined,
       customerType: customerType,
       ...(customerType === "Pelanggan Baru"
         ? {
             customerName: customerName,
-            customerPhoneNumber: phone.toString(),
+            customerPhoneNumber: phone?.toString() ?? "",
           }
         : {
-            customerId: selectedItem.customer.id,
+            customerId: selectedItem?.customer?.id ?? selectedCustomerId,
           }),
     };
-    // console.log("selectedItem.customer.id: ", selectedItem.customer.id);
-    // console.log("create payload is ready: ", payload);
 
     try {
       const response = await allocateStoreSaleQueue(payload, selectedItem.id);
       console.log("response: ", response);
-      if (response.status == 200) {
+      if (response.status === 200 || response.status === 201) {
+        // navigasi atau refresh
         navigate("/pekerja-toko/kasir/daftar-pesanan");
+      } else {
+        alert("⚠️ Gagal mengalokasikan antrian. Coba lagi.");
       }
     } catch (error) {
-      console.log("response: ", error);
-
-      if (
-        error.response.data.message == "nominal is not equal to total price"
-      ) {
+      console.log("response error: ", error);
+      // ditangani pesan error spesifik backend
+      const msg = error?.response?.data?.message ?? "";
+      if (msg === "nominal is not equal to total price") {
         alert(
           "❌Jumlah pembayaran penuh harus memiliki nominal yang sama dengan tagihan total"
         );
-      } else if (
-        error.response.data.message ==
-        "customer phone number must be in valid format 08"
-      ) {
+      } else if (msg === "customer phone number must be in valid format 08") {
         alert("❌Masukkan format nomor telepon dengan 08XXXXXX");
-      } else if (error.response.data.message == "customer already exist") {
+      } else if (msg === "customer already exist") {
         alert("❌Pelanggan sudah terdaftar, gunakan nomor telepon lain");
       } else {
         alert(

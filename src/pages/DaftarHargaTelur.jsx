@@ -48,7 +48,7 @@ const DaftarHargaTelur = () => {
   const fetchHargaTelur = async () => {
     try {
       const hargaResponse = await getItemPrices();
-      //   console.log("hargaResponse: ", hargaResponse);
+      console.log("hargaResponse: ", hargaResponse);
 
       if (hargaResponse.status == 200) {
         setHargaList(hargaResponse.data.data);
@@ -117,7 +117,7 @@ const DaftarHargaTelur = () => {
               <tr key={idx} className="border-b">
                 <td className="px-3 py-2">{row.category}</td>
                 <td className="px-3 py-2">{row.item.name}</td>
-                <td className="px-3 py-2">{row.item.unit}</td>
+                <td className="px-3 py-2">{row.saleUnit}</td>
                 <td className="px-3 py-2">{`Rp ${row.price}`}</td>
                 <td className="px-3 py-2">
                   <button

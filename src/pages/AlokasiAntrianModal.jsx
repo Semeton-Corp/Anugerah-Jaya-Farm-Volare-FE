@@ -1,7 +1,19 @@
-import React, { useRef, useState } from "react";
-import { formatDateToDDMMYYYY } from "../utils/dateFormat";
+import React, { useRef, useState, useMemo, useEffect } from "react";
 import { BiSolidEditAlt } from "react-icons/bi";
 import { MdDelete } from "react-icons/md";
+import {
+  formatDateToDDMMYYYY,
+  convertToInputDateFormat,
+} from "../utils/dateFormat";
+
+// Helpers
+const parseNumber = (raw) => {
+  if (raw == null || raw === "") return 0;
+  const cleaned = String(raw).replace(/[^\d.-]/g, "");
+  const n = Number(cleaned);
+  return Number.isFinite(n) ? n : 0;
+};
+const formatIDR = (n) => `Rp ${Number(n || 0).toLocaleString("id-ID")}`;
 
 const AlokasiAntrianModal = ({
   customerName,
@@ -12,41 +24,202 @@ const AlokasiAntrianModal = ({
   unit,
   setUnit,
   setShowAlokasiModal,
-  paymentHistory,
-  setPaymentHistory,
-  paymentDate,
+  paymentHistory, // parent can pass initial array or empty []
+  setPaymentHistory, // parent setter (optional) — if passed, we keep it in sync
+  paymentDate, // single-field legacy; we will not rely on this for array usage
   setPaymentDate,
   paymentStatus,
-  paymentMethod,
+  paymentMethod, // legacy single; we will use modal-local fields too
   setPaymentMethod,
-  nominal,
+  nominal, // legacy single; we will support but main usage is payments array
   setNominal,
-  remaining,
+  remaining, // optional parent-provided; we compute localRemaining anyway
   itemTotalPrice,
   itemPriceDiscount,
   paymentType,
   setPaymentType,
   paymentProof,
-  submitHandle,
+  submitHandle, // when saving, we'll call this with payload that includes payments array
   sendDate,
   setSendDate,
 }) => {
+  // Local payments state (array). Use paymentHistory prop as initial if provided.
+  const [payments, setPayments] = useState(() =>
+    Array.isArray(paymentHistory) ? paymentHistory.slice() : []
+  );
+
+  // Sync out to parent when payments change
+  useEffect(() => {
+    if (typeof setPaymentHistory === "function") {
+      setPaymentHistory(payments);
+    }
+  }, [payments, setPaymentHistory]);
+
+  // Payment modal state for add / edit
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [editingIndex, setEditingIndex] = useState(-1); // -1 => new
+  const [pmMethod, setPmMethod] = useState("Tunai");
+  const [pmNominal, setPmNominal] = useState(""); // string for user input
+  const [pmDate, setPmDate] = useState(new Date().toISOString().slice(0, 10)); // ISO for input
+  const [pmProof, setPmProof] = useState("");
+
   const dateInputRef = useRef(null);
 
-  const addPaymentHistory = () => {
-    const storeSalePayment = {
-      paymentDate: formatDateToDDMMYYYY(paymentDate),
-      nominal: nominal.toString(),
-      paymentProof: paymentProof,
-      paymentMethod: paymentMethod,
-    };
-    setPaymentHistory((prevHistory) => [...prevHistory, storeSalePayment]);
+  // Derived numbers
+  const baseTotal = useMemo(
+    () => parseNumber(itemTotalPrice) - parseNumber(itemPriceDiscount),
+    [itemTotalPrice, itemPriceDiscount]
+  );
+
+  const totalPaid = useMemo(
+    () => (payments || []).reduce((acc, p) => acc + parseNumber(p.nominal), 0),
+    [payments]
+  );
+
+  const finalRemaining = Math.max(baseTotal - totalPaid, 0);
+
+  // Remaining after each payment (cumulative)
+  const remainingAfterIndex = (idx) => {
+    let sisa = baseTotal;
+    for (let i = 0; i <= idx; i++) {
+      sisa = Math.max(sisa - parseNumber(payments[i]?.nominal), 0);
+    }
+    return sisa;
   };
 
+  // Open Add modal
+  const openAddPaymentModal = () => {
+    setEditingIndex(-1);
+    setPmMethod("Tunai");
+    setPmNominal("");
+    setPmDate(new Date().toISOString().slice(0, 10));
+    setPmProof("");
+    setShowPaymentModal(true);
+  };
+
+  // Open Edit modal for a payment index
+  const openEditPaymentModal = (index) => {
+    const p = payments[index];
+    if (!p) return;
+    setEditingIndex(index);
+    setPmMethod(p.paymentMethod || "Tunai");
+    // convert stored DD-MM-YYYY back to ISO YYYY-MM-DD for <input type="date">
+    const iso =
+      p.paymentDate && p.paymentDate.includes("-")
+        ? (() => {
+            const parts = p.paymentDate.split("-");
+            if (parts.length === 3 && parts[2].length === 4) {
+              return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+            return p.paymentDate;
+          })()
+        : new Date().toISOString().slice(0, 10);
+    setPmDate(
+      convertToInputDateFormat(iso)
+        ? (() => {
+            // convertToInputDateFormat returns DD-MM-YYYY; we want ISO for input; reuse logic:
+            const parts = p.paymentDate.split("-");
+            return `${parts[2]}-${parts[1]}-${parts[0]}`;
+          })()
+        : iso
+    );
+    setPmNominal(String(p.nominal || ""));
+    setPmProof(p.paymentProof || "");
+    setShowPaymentModal(true);
+  };
+
+  // Save (create or update)
+  const savePayment = () => {
+    // validations
+    const nominalNum = parseNumber(pmNominal);
+    if (!nominalNum || nominalNum <= 0) {
+      alert("Nominal pembayaran harus lebih dari 0.");
+      return;
+    }
+    if (!pmDate) {
+      alert("Tanggal pembayaran wajib diisi.");
+      return;
+    }
+
+    // convert ISO to DD-MM-YYYY for storage to match Konfirmasi shape
+    const iso = pmDate; // expecting YYYY-MM-DD
+    const [yyyy, mm, dd] = iso.split("-");
+    const ddmmyyyy = `${dd}-${mm}-${yyyy}`;
+
+    const entry = {
+      paymentDate: ddmmyyyy, // "DD-MM-YYYY"
+      paymentMethod: pmMethod || "Tunai",
+      nominal: String(nominalNum),
+      paymentProof: "https://example.com",
+    };
+
+    setPayments((prev) => {
+      if (editingIndex >= 0) {
+        const copy = prev.slice();
+        copy[editingIndex] = entry;
+        return copy;
+      } else {
+        return [...prev, entry];
+      }
+    });
+
+    setShowPaymentModal(false);
+    setEditingIndex(-1);
+  };
+
+  const deletePayment = (index) => {
+    if (!confirm("Hapus pembayaran ini?")) return;
+    setPayments((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // When user clicks "Buat Pesanan" call submitHandle with payments array included
+  const handleCreateOrder = () => {
+    // payload example - include payments array as required by backend (nominal as string)
+    const payload = {
+      // ... any other payload fields your parent expects
+      payments: payments.map((p) => ({
+        paymentDate: p.paymentDate,
+        paymentMethod: p.paymentMethod,
+        nominal: String(p.nominal),
+        paymentProof: p.paymentProof,
+      })),
+      paymentType,
+      // optionally include quantity, unit, sendDate, etc:
+      quantity,
+      unit,
+      sendDate,
+    };
+
+    // you can do validation for Penuh here
+    if (paymentType === "Penuh") {
+      if (finalRemaining !== 0) {
+        alert(
+          "Untuk pembayaran penuh, pastikan total pembayaran melunasi tagihan."
+        );
+        return;
+      }
+    }
+
+    // call parent handler
+    submitHandle(payload);
+  };
+
+  // keep local paymentHistory initial value in sync when prop changes (only first load)
+  useEffect(
+    () => {
+      if (Array.isArray(paymentHistory) && paymentHistory.length > 0) {
+        setPayments(paymentHistory.slice());
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [
+      /* intentionally empty: run only once if you want; or remove to always sync */
+    ]
+  );
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/25 bg-opacity-50 z-50">
-      <div className="bg-white w-full max-w-3xl p-6 rounded-lg shadow-lg">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+      <div className="bg-white w-[95%] max-w-3xl p-6 rounded shadow-lg">
         <h2 className="text-2xl font-semibold mb-4">
           Alokasi Telur Antrian Pesanan
         </h2>
@@ -69,9 +242,7 @@ const AlokasiAntrianModal = ({
               type="number"
               value={quantity}
               className="w-full border rounded px-3 py-2"
-              onChange={(e) => {
-                setQuantity(e.target.value);
-              }}
+              onChange={(e) => setQuantity(e.target.value)}
             />
           </div>
           <div className="w-1/2">
@@ -79,13 +250,11 @@ const AlokasiAntrianModal = ({
             <select
               className="w-full border rounded px-3 py-2"
               value={unit}
-              onChange={(e) => {
-                setUnit(e.target.value);
-              }}
+              onChange={(e) => setUnit(e.target.value)}
             >
-              {units?.map((unit, index) => (
-                <option key={index} value={unit}>
-                  {unit}
+              {units?.map((u, idx) => (
+                <option key={idx} value={u}>
+                  {u}
                 </option>
               ))}
             </select>
@@ -98,14 +267,9 @@ const AlokasiAntrianModal = ({
           </label>
           <input
             ref={dateInputRef}
-            className={`w-full border rounded p-2 mb-4cursor-pointer`}
+            className="w-full border rounded p-2 mb-4 cursor-pointer"
             type="date"
             value={sendDate}
-            onClick={() => {
-              if (dateInputRef.current?.showPicker) {
-                dateInputRef.current.showPicker();
-              }
-            }}
             onChange={(e) => setSendDate(e.target.value)}
           />
         </div>
@@ -113,279 +277,223 @@ const AlokasiAntrianModal = ({
         <div className="mb-2">
           <p>
             Harga Barang :{" "}
-            <span className="font-semibold">{`Rp ${itemTotalPrice.toLocaleString(
-              "id-ID"
-            )}`}</span>
+            <span className="font-semibold">{formatIDR(itemTotalPrice)}</span>
           </p>
           <p>
             Potongan Harga :{" "}
-            <span className="font-semibold">{`Rp - ${itemPriceDiscount.toLocaleString(
-              "id-ID"
-            )}`}</span>
+            <span className="font-semibold">
+              -{formatIDR(itemPriceDiscount)}
+            </span>
           </p>
         </div>
 
         <hr className="my-4" />
 
         <div className="mb-4">
-          <p className="text-xl font-bold">{`Total : Rp ${(
-            itemTotalPrice - itemPriceDiscount
-          ).toLocaleString("id-ID")}`}</p>
+          <p className="text-lg font-bold">
+            Total : <span className="ml-2">{formatIDR(baseTotal)}</span>
+          </p>
         </div>
 
-        {/* Status Pembayaran */}
-        <div className="p-4 border border-black-6 rounded-[4px]">
-          <div className="flex justify-between">
-            <h1
-              className={`text-lg font-bold "text-black"
-              `}
+        {/* paymentType above the table */}
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Tipe Pembayaran
+            </label>
+            <select
+              className="border rounded p-2"
+              value={paymentType}
+              onChange={(e) => setPaymentType(e.target.value)}
             >
-              Pembayaran
-            </h1>
-
-            <div
-              className={`px-5 py-3  rounded-[4px] bg-orange-400 hover:bg-orange-600 cursor-pointer`}
-              onClick={() => {
-                if (paymentStatus == "Lunas") {
-                  alert("Pesanan ini sudah Lunas!");
-                } else {
-                  setShowPaymentModal(true);
-                }
-              }}
-            >
-              Pilih Pembayaran
-            </div>
+              <option value="">-- Pilih Tipe Pembayaran --</option>
+              <option value="Penuh">Penuh</option>
+              <option value="Cicil">Cicil</option>
+            </select>
           </div>
 
-          {/* table */}
+          <div>
+            <button
+              onClick={() => {
+                if (paymentStatus === "Lunas") {
+                  alert("Pesanan ini sudah Lunas!");
+                } else {
+                  openAddPaymentModal();
+                }
+              }}
+              className="px-4 py-2 bg-orange-400 hover:bg-orange-600 rounded text-black"
+            >
+              Pilih Pembayaran
+            </button>
+          </div>
+        </div>
+
+        {/* payments table */}
+        <div className="p-4 border border-black-6 rounded-[4px]">
           <div className="mt-4">
             <table className="w-full">
-              <thead className={`w-full bg-green-700 text-white`}>
+              <thead className="bg-green-700 text-white">
                 <tr>
                   <th className="px-4 py-2">Tanggal</th>
                   <th className="px-4 py-2">Metode Pembayaran</th>
                   <th className="px-4 py-2">Nominal Pembayaran</th>
                   <th className="px-4 py-2">Sisa Cicilan</th>
                   <th className="px-4 py-2">Bukti</th>
-                  <th className="px-4 py-2"></th>
+                  <th className="px-4 py-2">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="border-b text-center">
-                {paymentHistory && paymentHistory.length > 0 ? (
-                  paymentHistory.map((payment, index) => (
-                    <tr key={index}>
-                      <td className="px-4 py-2">{payment.paymentDate}</td>
-                      <td className="px-4 py-2">{payment.paymentMethod}</td>
-                      <td className="px-4 py-2">
-                        Rp {Intl.NumberFormat("id-ID").format(payment.nominal)}
+              <tbody className="text-center">
+                {payments.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-6 text-gray-500 italic">
+                      Belum ada data pembayaran.
+                    </td>
+                  </tr>
+                ) : (
+                  payments.map((p, i) => (
+                    <tr key={i} className="border-b">
+                      <td className="px-4 py-3">{p.paymentDate}</td>
+                      <td className="px-4 py-3">{p.paymentMethod}</td>
+                      <td className="px-4 py-3">
+                        {formatIDR(parseNumber(p.nominal))}
                       </td>
-                      <td className="px-4 py-2">
-                        Rp{" "}
-                        {Intl.NumberFormat("id-ID").format(
-                          itemTotalPrice - itemPriceDiscount - payment.nominal
+                      <td className="px-4 py-3">
+                        {formatIDR(remainingAfterIndex(i))}
+                      </td>
+                      <td className="px-4 py-3">
+                        {p.paymentProof ? (
+                          <a
+                            href={p.paymentProof}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="underline"
+                          >
+                            Lihat Bukti
+                          </a>
+                        ) : (
+                          "-"
                         )}
                       </td>
-                      <td className="px-4 py-2 underline cursor-pointer">
-                        Lihat Bukti
-                      </td>
-                      <td className="px-4 py-2 flex gap-3 justify-center">
+                      <td className="px-4 py-3 flex gap-3 justify-center">
                         <BiSolidEditAlt
-                          onClick={() => {
-                            setPaymentMethod(payment?.paymentMethod);
-                            setNominal(payment?.nominal);
-                            setPaymentDate(
-                              convertToInputDateFormat(payment?.date)
-                            );
-                            setPaymentId(payment?.id);
-                            setShowEditModal(true);
-                          }}
-                          size={24}
-                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                          size={20}
+                          onClick={() => openEditPaymentModal(i)}
+                          className="cursor-pointer"
                         />
                         <MdDelete
-                          onClick={() => {}}
-                          size={24}
-                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                          size={20}
+                          onClick={() => deletePayment(i)}
+                          className="cursor-pointer"
                         />
                       </td>
                     </tr>
                   ))
-                ) : paymentDate &&
-                  paymentMethod &&
-                  nominal &&
-                  remaining &&
-                  paymentProof ? (
-                  <tr>
-                    <td className="px-4 py-2">
-                      {formatDateToDDMMYYYY(paymentDate)}
-                    </td>
-                    <td className="px-4 py-2">{paymentMethod}</td>
-                    <td className="px-4 py-2">
-                      Rp {Intl.NumberFormat("id-ID").format(nominal)}
-                    </td>
-                    <td className="px-4 py-2">
-                      Rp {Intl.NumberFormat("id-ID").format(remaining)}
-                    </td>
-                    <td className="px-4 py-2 underline cursor-pointer">
-                      Lihat Bukti
-                    </td>
-                  </tr>
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className={`text-center py-4 italic  text-gray-500`}
-                    >
-                      Belum ada data pembayaran.
-                    </td>
-                  </tr>
                 )}
               </tbody>
             </table>
           </div>
 
-          {/* status pembayaran */}
+          {/* status & final remaining */}
           <div className="flex mt-4 items-center justify-between">
             <div className="flex items-center gap-4">
-              <h1 className={`text-lg font-bold text-black`}>
-                Status Pembayaran:{" "}
-              </h1>
+              <h1 className=" font-bold">Status Pembayaran: </h1>
               <div
-                className={`px-5 py-3 text-xl rounded-[4px] ${
-                  paymentStatus === "Belum Lunas"
-                    ? "bg-orange-200 text-kritis-text-color"
-                    : "bg-aman-box-surface-color text-aman-text-color"
-                }
-                     
-                      `}
+                className={`px-3 py-2  rounded-[4px] ${
+                  finalRemaining === 0
+                    ? "bg-green-100 text-black"
+                    : "bg-orange-200 text-black"
+                }`}
               >
-                {paymentStatus}
+                {finalRemaining === 0 ? "Lunas" : "Belum Lunas"}
               </div>
             </div>
 
             <div>
-              <div className={`text-xl font-semibold text-black`}>
-                Sisa cicilan
-              </div>
-              <div className={`font-semibold text-3xl flex text-black`}>
-                <p className="me-2">RP</p>
-                <p className="">
-                  {Intl.NumberFormat("id-ID").format(remaining)}
-                </p>
+              <div className="text-sm">Sisa cicilan</div>
+              <div className="text-lg font-extrabold">
+                {formatIDR(finalRemaining)}
               </div>
             </div>
           </div>
         </div>
+
+        {/* footer */}
         <div className="flex justify-end gap-4 mt-4">
           <button
             onClick={() => {
               setShowAlokasiModal(false);
-              setPaymentHistory([]);
             }}
-            className="ptext-green-700 px-6 rounded border border-green-700 hover:bg-green-200 cursor-pointer"
+            className="p-2 text-green-700 px-6 rounded border border-green-700 hover:bg-green-200"
           >
             Batal
           </button>
           <button
-            onClick={() => {
-              submitHandle();
-            }}
-            className="bg-green-700 text-white px-6 py-2 rounded hover:bg-green-900 cursor-pointer "
+            onClick={handleCreateOrder}
+            className="bg-green-700 text-white px-6 py-2 rounded hover:bg-green-900"
           >
             Buat Pesanan
           </button>
         </div>
       </div>
+
+      {/* Add/Edit Payment Modal */}
       {showPaymentModal && (
         <div className="fixed w-full inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="w-full bg-white mx-40 p-6 rounded-lg shadow-xl relative">
-            <h3 className="text-xl font-bold mb-4">Pembayaran</h3>
+          <div className="w-full max-w-lg bg-white p-6 rounded-lg shadow-xl">
+            <h3 className="text-xl font-bold mb-4">
+              {editingIndex >= 0 ? "Edit Pembayaran" : "Tambah Pembayaran"}
+            </h3>
 
-            {/* Tipe Pembayaran */}
-            <>
-              <label className="block mb-2 font-medium">Tipe Pembayaran</label>
-              <select
-                className="w-full border p-2 rounded mb-4"
-                value={paymentType}
-                onChange={(e) => {
-                  setPaymentType(e.target.value);
-                }}
-              >
-                <option className="text-black-6" value="" disabled hidden>
-                  Pilih Metode Pembayaran
-                </option>
-                <option value="Penuh">Penuh</option>
-                <option value="Cicil">Cicil</option>
-              </select>{" "}
-            </>
-
-            {/* Metode Pembayaran */}
             <label className="block mb-2 font-medium">Metode Pembayaran</label>
             <select
               className="w-full border p-2 rounded mb-4"
-              value={paymentMethod}
-              onChange={(e) => {
-                setPaymentMethod(e.target.value);
-              }}
+              value={pmMethod}
+              onChange={(e) => setPmMethod(e.target.value)}
             >
-              <option className="text-black-6" value="" disabled hidden>
-                Pilih Metode Pembayaran
-              </option>
               <option value="Tunai">Tunai</option>
               <option value="Non Tunai">Non Tunai</option>
             </select>
 
-            {/* Nominal Bayar */}
-            <label className="block mb-2 font-medium">Nominal Bayar</label>
+            <label className="block mb-2 font-medium">Nominal Pembayaran</label>
             <input
               type="number"
               className="w-full border p-2 rounded mb-4"
               placeholder="Masukkan nominal pembayaran"
-              value={nominal == 0 ? "" : nominal}
-              onChange={(e) => {
-                setNominal(e.target.value);
-              }}
+              value={pmNominal}
+              onChange={(e) => setPmNominal(e.target.value)}
             />
 
-            {/* Tanggal Bayar */}
-
-            <label className="block font-medium ">Tanggal Bayar</label>
+            <label className="block font-medium mb-2">Tanggal Bayar</label>
             <input
-              ref={dateInputRef}
-              className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
               type="date"
-              value={paymentDate}
-              onClick={() => {
-                // Manually open the date picker when the input is clicked
-                if (dateInputRef.current?.showPicker) {
-                  dateInputRef.current.showPicker(); // Modern browsers
-                }
-              }}
-              onChange={(e) => setPaymentDate(e.target.value)}
+              className="w-full border rounded p-2 mb-4"
+              value={pmDate}
+              onChange={(e) => setPmDate(e.target.value)}
             />
 
-            {/* Bukti Pembayaran */}
-            <label className="block mb-2 font-medium">Bukti Pembayaran</label>
-            <input type="file" className="w-full border p-2 rounded mb-4" />
+            <label className="block mb-2 font-medium">
+              Bukti Pembayaran (URL or file name)
+            </label>
+            <input
+              type="text"
+              className="w-full border p-2 rounded mb-4"
+              placeholder="https://... or filename.jpg"
+              value={pmProof}
+              onChange={(e) => setPmProof(e.target.value)}
+            />
 
-            {/* Buttons */}
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => {
-                  setPaymentType("Cicil");
-                  setPaymentMethod("Tunai");
-                  setNominal(0);
                   setShowPaymentModal(false);
+                  setEditingIndex(-1);
                 }}
                 className="px-4 py-2 bg-gray-300 hover:bg-gray-500 rounded cursor-pointer"
               >
                 Batal
               </button>
               <button
-                onClick={() => {
-                  addPaymentHistory();
-                  setShowPaymentModal(false);
-                }}
+                onClick={savePayment}
                 className="px-4 py-2 bg-green-700 hover:bg-green-900 text-white rounded cursor-pointer"
               >
                 Simpan
