@@ -79,6 +79,30 @@ const OverviewOwner = () => {
     }
   };
 
+  const handleTotalAyamDetail = () => {
+    const newPath = location.pathname.replace(
+      "ringkasan",
+      "ayam/ringkasan-ayam"
+    );
+    navigate(newPath);
+  };
+
+  const handleStokGudangDetail = () => {
+    const newPath = location.pathname.replace(
+      "ringkasan",
+      "gudang/stok-gudang"
+    );
+    navigate(newPath);
+  };
+
+  const handleStokTokoDetail = () => {
+    const newPath = location.pathname.replace(
+      "ringkasan",
+      "toko/overview-toko"
+    );
+    navigate(newPath);
+  };
+
   useEffect(() => {
     fetchOverviewData();
   }, []);
@@ -231,7 +255,10 @@ const OverviewOwner = () => {
         <div className="bg-white flex-1 p-4 border border-black-6 rounded-lg">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-semibold">Total ayam</h2>
-            <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
+            <div
+              onClick={handleTotalAyamDetail}
+              className="p-2 rounded-full hover:bg-black-4 cursor-pointer"
+            >
               <FiMaximize2 size={24} color="" />
             </div>
           </div>
@@ -272,7 +299,10 @@ const OverviewOwner = () => {
         <div className="bg-white flex-1 p-4 border border-black-6 rounded-lg">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-semibold">Stok gudang</h2>
-            <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
+            <div
+              onClick={handleStokGudangDetail}
+              className="p-2 rounded-full hover:bg-black-4 cursor-pointer"
+            >
               <FiMaximize2 size={24} color="" />
             </div>
           </div>
@@ -311,7 +341,10 @@ const OverviewOwner = () => {
         <div className="bg-white flex-1 p-4 border border-black-6 rounded-lg">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-semibold">Stok toko</h2>
-            <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
+            <div
+              onClick={handleStokTokoDetail}
+              className="p-2 rounded-full hover:bg-black-4 cursor-pointer"
+            >
               <FiMaximize2 size={24} color="" />
             </div>
           </div>

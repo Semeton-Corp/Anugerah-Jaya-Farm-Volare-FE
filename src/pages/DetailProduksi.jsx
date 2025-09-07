@@ -185,8 +185,12 @@ const DetailProduksi = () => {
                   <td className="py-2 px-4">{item?.averageWeight}</td>
                   <td className="py-2 px-4">{item?.totalCrackedEgg}</td>
                   <td className="py-2 px-4">{item?.totalRejectEgg}</td>
-                  <td className="py-2 px-4">{item?.abnormalityRate}</td>
-
+                  <td className="py-2 px-4">
+                    {item?.abnormalityRate !== undefined &&
+                    item?.abnormalityRate !== null
+                      ? parseFloat(item.abnormalityRate).toFixed(2)
+                      : "-"}
+                  </td>
                   <td className="py-2 px-4 flex justify-center">
                     <span
                       className={`w-24 py-1 flex justify-center rounded text-sm font-semibold ${

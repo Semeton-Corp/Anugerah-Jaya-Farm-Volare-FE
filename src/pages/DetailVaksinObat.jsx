@@ -163,13 +163,17 @@ const DetailVaksinObat = () => {
                   key={index}
                   className="border-t hover:bg-black-3 transition-all"
                 >
-                  <td className="py-2 px-4">{row.tanggal}</td>
+                  <td className="py-2 px-4">
+                    {row.date == "" ? "-" : row.date}
+                  </td>
                   <td className="py-2 px-4">{row.chickenCategory}</td>
                   <td className="py-2 px-4">{row.chickenAge}</td>
                   <td className="py-2 px-4">{row.type}</td>
                   <td className="py-2 px-4">{row.healthItemName}</td>
-                  <td className="py-2 px-4">{row.dose}</td>
-                  <td className="py-2 px-4">{row.disease}</td>
+                  <td className="py-2 px-4">{`${row.dose} ${row.unit}`}</td>
+                  <td className="py-2 px-4">
+                    {row.disease == "" ? "-" : row.disease}
+                  </td>
                   <td className="py-2 px-4 flex items-center space-x-2">
                     <button>
                       <MdEdit

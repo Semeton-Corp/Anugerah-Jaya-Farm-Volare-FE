@@ -398,16 +398,16 @@ const Kinerja = () => {
             </div>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-6">
+          {/* <div className="flex flex-col lg:flex-row gap-6">
             <div className="w-full p-4 border rounded-lg">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-bold">Kinerja perusahaan</h2>
                 <div className="flex gap-2">
-                  {/* <select className="text-sm rounded bg-[#BFBFBF] px-2 py-1 text-gray-700">
+                  <select className="text-sm rounded bg-[#BFBFBF] px-2 py-1 text-gray-700">
                     <option>Rentabilitas</option>
                     <option>Produktivitas</option>
-                  </select> */}
-                  {/* <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 ">
+                  </select>
+                  <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 ">
                     <FaCalendarAlt size={18} />
                     <select
                       value={graphFilter}
@@ -420,14 +420,14 @@ const Kinerja = () => {
                         </option>
                       ))}
                     </select>
-                  </div> */}
+                  </div>
                   <span className="inline-block rounded bg-gray-300 px-4 py-1 font-semibold text-gray-800 shadow">
                     {getTodayYear()}
                   </span>
                 </div>
               </div>
 
-              {profitabilityPerformanceBarCharts.length === 0 ? (
+              {profitabilityPerformanceBarCharts?.length === 0 ? (
                 <p className="italic text-gray-300">
                   Belum ada Data kinerja perusahaan
                 </p>
@@ -447,7 +447,7 @@ const Kinerja = () => {
                 </ResponsiveContainer>
               )}
             </div>
-          </div>
+          </div> */}
         </div>
       )}
     </>
