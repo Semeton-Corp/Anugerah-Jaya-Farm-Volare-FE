@@ -23,7 +23,7 @@ const DaftarPesanan = () => {
   const [selectedSendId, setSelectedSendId] = useState("");
 
   const [page, setPage] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState("");
+  const [paymentStatus, setPaymentStatus] = useState("");
   const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
 
   const dateInputRef = useRef(null);
@@ -62,7 +62,11 @@ const DaftarPesanan = () => {
   const fetchDataAntrianPesanan = async () => {
     try {
       const date = convertToInputDateFormat(selectedDate);
-      const response = await getListStoreSale(date, paymentMethod, page);
+      const response = await getListStoreSale(
+        date,
+        paymentStatus || undefined,
+        page
+      );
       console.log("ListResponse: ", response);
       if (response.status == 200) {
         setDataAntrianPesanan(response.data.data.storeSales);
@@ -94,7 +98,7 @@ const DaftarPesanan = () => {
 
   useEffect(() => {
     fetchDataAntrianPesanan();
-  }, [selectedDate, page, paymentMethod]);
+  }, [selectedDate, page, paymentStatus]);
 
   return (
     <>
@@ -109,13 +113,13 @@ const DaftarPesanan = () => {
               <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
                 <FaMoneyBillWave size={18} />
                 <select
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  value={paymentStatus}
+                  onChange={(e) => setPaymentStatus(e.target.value)}
                   className="ml-2 bg-transparent text-base font-medium outline-none"
                 >
                   <option value="">Semua Status Pembayaran</option>
-                  <option value="Penuh">Penuh</option>
-                  <option value="Cicil">Cicil</option>
+                  <option value="Lunas">Lunas</option>
+                  <option value="Belum Lunas">Belum Lunas</option>
                 </select>
               </div>
               <div

@@ -29,6 +29,8 @@ import DeleteModal from "../components/DeleteModal";
 const AntrianPesanan = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const locationId = localStorage.getItem("locationId");
+  const userRole = localStorage.getItem("role");
   const detailPages = ["input-data-pesanan"];
 
   const [dataAntrianPesanan, setDataAntrianPesanan] = useState([]);
@@ -140,7 +142,6 @@ const AntrianPesanan = () => {
     setCustomerName(item.customer.name);
     setItemName(item.item.name);
     setQuantity(item.quantity);
-
     setUnit(item.saleUnit);
   };
 
@@ -287,7 +288,7 @@ const AntrianPesanan = () => {
       itemId:
         selectedItem?.item?.id ?? selectedItem?.itemId ?? selectedItem?.id,
       saleUnit: unit,
-      storeId: parseInt(selectedStore),
+      storeId: parseInt(selectedItem?.store?.id),
       quantity: parseInt(quantity),
       price: String(itemPrice), // atau itemPrice.toString()
       discount: discount,
@@ -357,12 +358,14 @@ const AntrianPesanan = () => {
     fetchItemPrices();
     getItemSummary();
     fetchCustomerData();
-    fetchStoresData();
+    if (userRole == "Owner") {
+      fetchStoresData();
+    } else {
+    }
   }, []);
 
   useEffect(() => {
     fetchDataAntrianPesanan();
-
     if (location.state?.refetch) {
       fetchDataAntrianPesanan();
       window.history.replaceState({}, document.title);
@@ -508,6 +511,7 @@ const AntrianPesanan = () => {
                           </button>
                           <button
                             onClick={() => {
+                              console.log("item: ", item);
                               setSelectedItemHandle(item);
                               setShowAlokasiModal(true);
                             }}

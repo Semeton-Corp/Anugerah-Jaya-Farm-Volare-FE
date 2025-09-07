@@ -82,7 +82,7 @@ const InputDataPesanan = () => {
 
   const [isSend, setIsSend] = useState(false);
   const [sendDate, setSendDate] = useState(today);
-  const [deadlinePaymentDate, setDeadlinePayment] = useState(today);
+  const [deadlinePaymentDate, setDeadlinePaymentDate] = useState(today);
   const [paymentDate, setPaymentDate] = useState(today);
   const [paymentType, setPaymentType] = useState("Penuh");
   const [paymentStatus, setPaymentStatus] = useState("Belum Lunas");
@@ -223,7 +223,10 @@ const InputDataPesanan = () => {
         setRemaining(response.data.data.remainingPayment);
         setPaymentStatus(response.data.data.paymentStatus);
         setIsSend(response.data.data.isSend);
-        setDeadlinePayment(response.data.data.deadlinePayment);
+        setDeadlinePaymentDate(response.data.data.deadlinePaymentDate);
+        setIsMoreThanDeadlinePaymentDate(
+          response.data.data.isMoreThanDeadlinePaymentDate
+        );
       }
     } catch (error) {}
   };
@@ -365,10 +368,6 @@ const InputDataPesanan = () => {
       discount,
       sendDate: formatDateToDDMMYYYY(sendDate),
       paymentType,
-      deadlinePaymentDate:
-        paymentType == "Penuh"
-          ? null
-          : convertToInputDateFormat(deadlinePaymentDate),
       payments,
       customerType,
       ...(customerType === "Pelanggan Baru"
@@ -443,8 +442,12 @@ const InputDataPesanan = () => {
 
       const queueResponse = await createStoreSaleQueue(payload);
       // console.log("queueResponse: ", queueResponse);
-      if (queueResponse.status == 201) {
-        //////
+      if (queueResponse.status === 201) {
+        const newPath = location.pathname.replace(
+          "daftar-pesanan/input-data-pesanan",
+          "antrian-pesanan"
+        );
+        navigate(newPath);
       }
     } catch (error) {
       alert("❌Terjadi kesalahan dalam menambahkan data antrian!");
@@ -730,7 +733,6 @@ const InputDataPesanan = () => {
                   const selected = items.find(
                     (item) => item.id == e.target.value
                   );
-                  // console.log("selected: ", selected);
                   setUnit(selected.unit);
                   setSelectedItem(selected);
                 }}
@@ -869,9 +871,7 @@ const InputDataPesanan = () => {
                   : itemPriceDiscount.toLocaleString("id-ID")}
               </span>
             </div>
-
             <hr className="my-2 " />
-
             <div className="grid grid-cols-2 mt-4">
               <span
                 className={`text-lg ${
@@ -977,7 +977,7 @@ const InputDataPesanan = () => {
           </>
         )}
 
-        {paymentType == "Cicil" && (
+        {/* {paymentType == "Cicil" && (
           <>
             <label
               className={`block font-medium  ${
@@ -1027,29 +1027,31 @@ const InputDataPesanan = () => {
               </div>
             )}
           </>
-        )}
+        )} */}
         {id && (
-          <div className="flex gap-2 items-center">
-            <span
-              className={`text-xl font-semibold ${
-                paymentStatus == "Lunas"
-                  ? "text-gray-200"
-                  : isMoreThanDeadlinePaymentDate
-                  ? "text-red-600"
-                  : ""
-              }`}
-            >
-              {paymentStatus == "Lunas"
-                ? "(Lunas)"
-                : deadlinePaymentDate || "-"}
-            </span>
-
-            {isMoreThanDeadlinePaymentDate && (
-              <span title="Terlambat" className="text-red-500">
-                <GoAlertFill size={24} />
+          <>
+            <div>Tenggat Pembayaran</div>
+            <div className="flex gap-2 items-center">
+              <span
+                className={`text-xl font-semibold ${
+                  paymentStatus == "Lunas"
+                    ? "text-gray-200"
+                    : isMoreThanDeadlinePaymentDate
+                    ? "text-red-600"
+                    : ""
+                }`}
+              >
+                {paymentStatus == "Lunas"
+                  ? "(Lunas)"
+                  : deadlinePaymentDate || "-"}
               </span>
-            )}
-          </div>
+              {isMoreThanDeadlinePaymentDate && (
+                <span title="Terlambat" className="text-red-500">
+                  <GoAlertFill size={24} />
+                </span>
+              )}
+            </div>
+          </>
         )}
 
         {/* table */}
@@ -1092,7 +1094,6 @@ const InputDataPesanan = () => {
                       <td className="px-4 py-2 underline cursor-pointer">
                         {payment.paymentProof ? "Lihat Bukti" : "-"}
                       </td>
-
                       {!isSend && (
                         <td className="px-4 py-2 flex gap-3 justify-center">
                           <BiSolidEditAlt
@@ -1101,7 +1102,6 @@ const InputDataPesanan = () => {
                               setPaymentMethod(payment.paymentMethod);
                               setNominal(payment.nominal);
                               setPaymentDate(toISODate(payment.date));
-
                               if (id) {
                                 setPaymentId(payment.id);
                                 setShowEditModal(true);
@@ -1227,13 +1227,13 @@ const InputDataPesanan = () => {
             }}
             className="px-5 py-3 bg-green-700 rounded-[4px] hover:bg-green-900 cursor-pointer text-white"
           >
-            {isOutOfStock ? "Masukkan ke antrian" : "Simpan"}
+            {isOutOfStock && !id ? "Masukkan ke antrian" : "Simpan"}
           </div>
         </div>
       </div>
 
       {/* simpan button */}
-      <div className="flex justify-end mb-8">
+      {/* <div className="flex justify-end mb-8">
         <div
           onClick={() => {
             // const payments = {
@@ -1268,7 +1268,7 @@ const InputDataPesanan = () => {
         >
           CHECK
         </div>
-      </div>
+      </div> */}
 
       {showPaymentModal && (
         <div className="fixed w-full inset-0 bg-black/60 flex items-center justify-center z-50">
@@ -1541,14 +1541,6 @@ const InputDataPesanan = () => {
           ref={receiptRef}
         />
       )}
-      <button
-        onClick={() => {
-          console.log("telurOkIkat: ", telurOkIkat);
-          console.log("selectedItem: ", selectedItem);
-        }}
-      >
-        CHECK
-      </button>
     </div>
   );
 };

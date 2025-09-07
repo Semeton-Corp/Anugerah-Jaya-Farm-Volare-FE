@@ -63,14 +63,14 @@ export const getStoreOverview = (
   });
 };
 
-export const getListStoreSale = (date, paymentMethod, page) => {
+export const getListStoreSale = (date, paymentStatus, page) => {
   return api.get("/stores/sales", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
     params: {
       date: date,
-      paymentMethod: paymentMethod,
+      paymentStatus: paymentStatus,
       page: page,
     },
   });
