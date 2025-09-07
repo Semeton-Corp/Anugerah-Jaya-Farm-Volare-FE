@@ -901,6 +901,7 @@ const InputDataPesanan = () => {
             <div
               onClick={() => {
                 setEditable(!isEditable);
+                setSendDate(toISODate(sendDate));
               }}
               className="px-5 py-3 bg-green-700 rounded-[4px] hover:bg-green-900 cursor-pointer text-white"
             >

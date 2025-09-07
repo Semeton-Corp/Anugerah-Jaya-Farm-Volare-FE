@@ -6,6 +6,7 @@ import {
   formatDate,
   formatDateToDDMMYYYY,
   getTodayDateInBahasa,
+  parseToDate,
 } from "../utils/dateFormat";
 import {
   arrivalConfirmationWarehouseItemCornProcurement,
@@ -164,79 +165,111 @@ const PengadaanJagung = () => {
               </tr>
             </thead>
             <tbody>
-              {daftarJagungData.map((item, idx) => (
-                <React.Fragment key={item.id || idx}>
-                  <tr className="border-b">
-                    <td className="px-4 py-3">{item.orderDate}</td>
-                    <td className="px-4 py-3">{item.item.name}</td>
-                    <td className="px-4 py-3">{`${item.quantity} ${item.item.unit}`}</td>
-                    <td className="px-4 py-3">{item.supplier.name}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={
-                            item.paymentStatus === "Lunas"
-                              ? "text-gray-200"
-                              : item.isMoreThanDeadlinePaymentDate
-                              ? "text-red-600"
-                              : ""
-                          }
-                        >
-                          {item.paymentStatus == "Lunas"
-                            ? "(Lunas)"
-                            : item.deadlinePaymentDate || "-"}
-                        </span>
-                        {item.isMoreThanDeadlinePaymentDate &&
-                          item.paymentStatus != "Lunas" && (
+              {daftarJagungData.map((item, idx) => {
+                const paidDate = parseToDate(
+                  item.paidDate ||
+                    item.paymentPaidDate ||
+                    item.paid_at ||
+                    item.paid_at_date ||
+                    ""
+                );
+                const deadlineDate = parseToDate(
+                  item.deadlinePaymentDate ||
+                    item.deadline ||
+                    item.deadline_at ||
+                    ""
+                );
+
+                const isPaidLate =
+                  paidDate && deadlineDate
+                    ? paidDate.getTime() > deadlineDate.getTime()
+                    : false;
+
+                const isLate =
+                  (item.isMoreThanDeadlinePaymentDate || isPaidLate) &&
+                  item.paymentStatus !== "Lunas";
+
+                return (
+                  <React.Fragment key={item.id ?? idx}>
+                    <tr className="border-b">
+                      <td className="px-4 py-3">{item.orderDate}</td>
+                      <td className="px-4 py-3">{item.item?.name}</td>
+                      <td className="px-4 py-3">{`${item.quantity} ${
+                        item.item?.unit || ""
+                      }`}</td>
+                      <td className="px-4 py-3">{item.supplier?.name}</td>
+
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={
+                              item.paymentStatus === "Lunas"
+                                ? "text-gray-200"
+                                : isLate
+                                ? "text-red-600"
+                                : ""
+                            }
+                          >
+                            {item.paymentStatus === "Lunas"
+                              ? "(Lunas)"
+                              : item.deadlinePaymentDate || "-"}
+                          </span>
+
+                          {isLate && (
                             <span title="Terlambat" className="text-red-500">
                               <GoAlertFill size={24} />
                             </span>
                           )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      {item.paymentStatus === "Lunas"
-                        ? badge("Lunas", "success")
-                        : item.paymentStatus === "Belum Dibayar"
-                        ? badge("Belum Dibayar", "danger")
-                        : badge("Belum Lunas", "warning")}
-                    </td>
-                    <td className="px-4 py-3">
-                      {item.procurementStatus === "Sampai - Sesuai"
-                        ? badge("Sampai - Sesuai", "success")
-                        : item.procurementStatus === "Sampai - Tidak Sesuai"
-                        ? badge("Sampai - Tidak Sesuai", "success")
-                        : item.procurementStatus == "Sedang Dikirim"
-                        ? badge("Sedang Dikirim", "warning")
-                        : item.procurementStatus
-                        ? badge(item.procurementStatus, "neutral")
-                        : "-"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-2">
-                        {!item.IsArrived && (
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-3">
+                        {item.paymentStatus === "Lunas"
+                          ? badge("Lunas", "success")
+                          : item.paymentStatus === "Belum Dibayar"
+                          ? badge("Belum Dibayar", "danger")
+                          : badge("Belum Lunas", "warning")}
+                      </td>
+
+                      <td className="px-4 py-3">
+                        {item.procurementStatus === "Sampai - Sesuai"
+                          ? badge("Sampai - Sesuai", "success")
+                          : item.procurementStatus === "Sampai - Tidak Sesuai"
+                          ? badge("Sampai - Tidak Sesuai", "success")
+                          : item.procurementStatus === "Sedang Dikirim"
+                          ? badge("Sedang Dikirim", "warning")
+                          : item.procurementStatus
+                          ? badge(item.procurementStatus, "neutral")
+                          : "-"}
+                      </td>
+
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2">
+                          {!item.IsArrived && (
+                            <button
+                              onClick={() => handleBarangSampai(item)}
+                              className="bg-orange-300 hover:bg-orange-500 text-black px-3 py-1 rounded"
+                            >
+                              Barang Sampai
+                            </button>
+                          )}
                           <button
-                            onClick={() => handleBarangSampai(item)}
-                            className="bg-orange-300 hover:bg-orange-500 text-black px-3 py-1 rounded"
+                            onClick={() => handleDetail(item.id)}
+                            className="bg-green-700 hover:bg-green-900 text-white px-3 py-1 rounded"
                           >
-                            Barang Sampai
+                            Lihat Detail
                           </button>
-                        )}
-                        <button
-                          onClick={() => handleDetail(item.id)}
-                          className="bg-green-700 hover:bg-green-900 text-white px-3 py-1 rounded"
-                        >
-                          Lihat Detail
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                </React.Fragment>
-              ))}
+                        </div>
+                      </td>
+                    </tr>
+                  </React.Fragment>
+                );
+              })}
+
               {daftarJagungData.length === 0 && (
                 <tr>
                   <td
-                    colSpan={9}
+                    colSpan={8}
                     className="px-4 py-6 text-center text-gray-500"
                   >
                     Tidak ada data.

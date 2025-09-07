@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getChickenMonitoring } from "../services/chickenMonitorings";
 import { deleteChickenData } from "../services/chickenMonitorings";
-import { getTodayDateInBahasa } from "../utils/dateFormat";
+import { getTodayDateInBahasa, parseToDate } from "../utils/dateFormat";
 import {
   arrivalConfirmationWarehouseItemProcurement,
   getWarehouseItemProcurements,
@@ -161,86 +161,111 @@ const PengadaanBarang = () => {
               </tr>
             </thead>
             <tbody>
-              {daftarBarangData.map((r, idx) => (
-                <React.Fragment key={r.id ?? idx}>
-                  <tr className="border-b">
-                    <td className="px-4 py-3">{r.orderDate}</td>
-                    <td className="px-4 py-3">{r.item.name}</td>
-                    <td className="px-4 py-3">{`${r.quantity} ${r.item.unit}`}</td>
-                    <td className="px-4 py-3">{r.supplier.name}</td>
-                    <td className="px-4 py-3">{r.estimationArrivalDate}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={
-                            r.paymentStatus === "Lunas"
-                              ? "text-gray-200"
-                              : r.isMoreThanDeadlinePaymentDate
-                              ? "text-red-600"
-                              : ""
-                          }
-                        >
-                          {r.paymentStatus == "Lunas"
-                            ? "(Lunas)"
-                            : r.deadlinePaymentDate || "-"}
-                        </span>
-                        {r.isMoreThanDeadlinePaymentDate &&
-                          r.paymentStatus != "Lunas" && (
+              {daftarBarangData.map((r, idx) => {
+                const paidDate = parseToDate(
+                  r.paidDate || r.paymentPaidDate || r.paid_at || ""
+                );
+                const deadlineDate = parseToDate(
+                  r.deadlinePaymentDate ||
+                    r.deadline ||
+                    r.deadline_at ||
+                    r.deadlinePaymentDate
+                );
+
+                const isPaidLate =
+                  paidDate && deadlineDate
+                    ? paidDate.getTime() > deadlineDate.getTime()
+                    : false;
+
+                const isLate =
+                  (r.isMoreThanDeadlinePaymentDate || isPaidLate) &&
+                  r.paymentStatus !== "Lunas";
+
+                return (
+                  <React.Fragment key={r.id ?? idx}>
+                    <tr className="border-b">
+                      <td className="px-4 py-3">{r.orderDate}</td>
+                      <td className="px-4 py-3">{r.item.name}</td>
+                      <td className="px-4 py-3">{`${r.quantity} ${r.item.unit}`}</td>
+                      <td className="px-4 py-3">{r.supplier.name}</td>
+                      <td className="px-4 py-3">{r.estimationArrivalDate}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={
+                              r.paymentStatus === "Lunas"
+                                ? "text-gray-200"
+                                : isLate
+                                ? "text-red-600"
+                                : ""
+                            }
+                          >
+                            {r.paymentStatus == "Lunas"
+                              ? "(Lunas)"
+                              : r.deadlinePaymentDate || "-"}
+                          </span>
+
+                          {isLate && (
                             <span title="Terlambat" className="text-red-500">
                               <GoAlertFill size={24} />
                             </span>
                           )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      {r.paymentStatus === "Lunas"
-                        ? badge("Lunas", "success")
-                        : r.paymentStatus === "Belum Dibayar"
-                        ? badge("Belum Dibayar", "danger")
-                        : badge("Belum Lunas", "warning")}
-                    </td>
-                    <td className="px-4 py-3">
-                      {r.procurementStatus === "Sampai - Sesuai"
-                        ? badge("Sampai - Sesuai", "success")
-                        : r.procurementStatus === "Sampai - Tidak Sesuai"
-                        ? badge("Sampai - Tidak Sesuai", "success")
-                        : r.procurementStatus == "Sedang Dikirim"
-                        ? badge("Sedang Dikirim", "warning")
-                        : r.procurementStatus
-                        ? badge(r.procurementStatus, "neutral")
-                        : "-"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-2">
-                        {!r.IsArrived && (
-                          <button
-                            onClick={() => {
-                              setIsShowConfirmModal(true);
-                              setSelectedItem(r);
-                            }}
-                            className="bg-orange-300 hover:bg-orange-500 cursor-pointer text-black px-3 py-1 rounded"
-                          >
-                            Barang Sampai
-                          </button>
-                        )}
+                        </div>
+                      </td>
 
-                        <button
-                          onClick={() => handleDetail(r.id)}
-                          className="bg-green-700 hover:bg-green-900 cursor-pointer text-white px-3 py-1 rounded"
-                        >
-                          Lihat Detail
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                  {/* Garis tipis sesuai contoh */}
-                  <tr>
-                    <td colSpan={9}>
-                      <div className="h-px bg-gray-200 w-full" />
-                    </td>
-                  </tr>
-                </React.Fragment>
-              ))}
+                      <td className="px-4 py-3">
+                        {r.paymentStatus === "Lunas"
+                          ? badge("Lunas", "success")
+                          : r.paymentStatus === "Belum Dibayar"
+                          ? badge("Belum Dibayar", "danger")
+                          : badge("Belum Lunas", "warning")}
+                      </td>
+
+                      <td className="px-4 py-3">
+                        {r.procurementStatus === "Sampai - Sesuai"
+                          ? badge("Sampai - Sesuai", "success")
+                          : r.procurementStatus === "Sampai - Tidak Sesuai"
+                          ? badge("Sampai - Tidak Sesuai", "success")
+                          : r.procurementStatus == "Sedang Dikirim"
+                          ? badge("Sedang Dikirim", "warning")
+                          : r.procurementStatus
+                          ? badge(r.procurementStatus, "neutral")
+                          : "-"}
+                      </td>
+
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2">
+                          {!r.IsArrived && (
+                            <button
+                              onClick={() => {
+                                setIsShowConfirmModal(true);
+                                setSelectedItem(r);
+                              }}
+                              className="bg-orange-300 hover:bg-orange-500 cursor-pointer text-black px-3 py-1 rounded"
+                            >
+                              Barang Sampai
+                            </button>
+                          )}
+
+                          <button
+                            onClick={() => handleDetail(r.id)}
+                            className="bg-green-700 hover:bg-green-900 cursor-pointer text-white px-3 py-1 rounded"
+                          >
+                            Lihat Detail
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+
+                    {/* thin separator */}
+                    <tr>
+                      <td colSpan={9}>
+                        <div className="h-px bg-gray-200 w-full" />
+                      </td>
+                    </tr>
+                  </React.Fragment>
+                );
+              })}
 
               {daftarBarangData.length === 0 && (
                 <tr>

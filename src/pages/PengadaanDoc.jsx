@@ -10,6 +10,7 @@ import {
 } from "../services/chickenMonitorings";
 import { useEffect } from "react";
 import { GoAlertFill } from "react-icons/go";
+import { parseToDate } from "../utils/dateFormat";
 
 const getPaymentClass = (status) => {
   switch (status) {
@@ -160,79 +161,109 @@ const PengadaanDoc = () => {
               </tr>
             </thead>
             <tbody>
-              {orderData.map((order, index) => (
-                <tr key={index} className="border-t">
-                  <td className="p-3">{order.orderDate}</td>
-                  <td className="p-3">{order.cage?.name}</td>
-                  <td className="p-3">{order.quantity}</td>
-                  <td className="p-3">{order.supplier.name}</td>
-                  <td className="p-3">{order.estimationArrivalDate}</td>
-                  <td className="p-3 flex items-center gap-2">
-                    <span
-                      className={
-                        order.paymentStatus === "Lunas"
-                          ? "text-gray-200"
-                          : order.isMoreThanDeadlinePaymentDate
-                          ? "text-red-600"
-                          : ""
-                      }
-                    >
-                      {order.paymentStatus == "Lunas"
-                        ? "(Lunas)"
-                        : order.deadlinePaymentDate || "-"}
-                    </span>
-                    {order.isMoreThanDeadlinePaymentDate && (
+              {orderData.map((order, index) => {
+                const paidDate = parseToDate(
+                  order.paidDate ||
+                    order.paid_at ||
+                    order.paymentPaidDate ||
+                    order.paid_on ||
+                    ""
+                );
+                const deadlineDate = parseToDate(
+                  order.deadlinePaymentDate ||
+                    order.deadline ||
+                    order.deadline_at ||
+                    ""
+                );
+
+                const isPaidLate =
+                  paidDate && deadlineDate
+                    ? paidDate.getTime() > deadlineDate.getTime()
+                    : false;
+
+                const isLate =
+                  (order.isMoreThanDeadlinePaymentDate || isPaidLate) &&
+                  order.paymentStatus !== "Lunas";
+
+                return (
+                  <tr key={order.id ?? index} className="border-t">
+                    <td className="p-3">{order.orderDate}</td>
+                    <td className="p-3">{order.cage?.name}</td>
+                    <td className="p-3">{order.quantity}</td>
+                    <td className="p-3">{order.supplier?.name}</td>
+                    <td className="p-3">{order.estimationArrivalDate}</td>
+
+                    <td className="p-3 flex items-center gap-2">
                       <span
-                        title="Sudah melewati deadline"
-                        className="text-red-600"
+                        className={
+                          order.paymentStatus === "Lunas"
+                            ? "text-gray-200"
+                            : isLate
+                            ? "text-red-600"
+                            : ""
+                        }
                       >
-                        <GoAlertFill size={24} />
+                        {order.paymentStatus === "Lunas"
+                          ? "(Lunas)"
+                          : order.deadlinePaymentDate || "-"}
                       </span>
-                    )}
-                  </td>
-                  <td className="p-3">
-                    <span
-                      className={`px-2 py-1 text-sm font-medium rounded ${getPaymentClass(
-                        order.paymentStatus
-                      )}`}
-                    >
-                      {order.paymentStatus}
-                    </span>
-                  </td>
-                  <td className="p-3">
-                    <span
-                      className={`px-2 py-1 text-sm font-medium rounded ${getShippingClass(
-                        order.IsArrived
-                      )}`}
-                    >
-                      {order.IsArrived ? "Selesai" : "Sedang Dikirim"}
-                    </span>
-                  </td>
-                  <td className="p-3 flex gap-2">
-                    {!order.IsArrived && (
+
+                      {isLate && (
+                        <span
+                          title="Sudah melewati deadline"
+                          className="text-red-600"
+                        >
+                          <GoAlertFill size={24} />
+                        </span>
+                      )}
+                    </td>
+
+                    <td className="p-3">
+                      <span
+                        className={`px-2 py-1 text-sm font-medium rounded ${getPaymentClass(
+                          order.paymentStatus
+                        )}`}
+                      >
+                        {order.paymentStatus}
+                      </span>
+                    </td>
+
+                    <td className="p-3">
+                      <span
+                        className={`px-2 py-1 text-sm font-medium rounded ${getShippingClass(
+                          order.IsArrived
+                        )}`}
+                      >
+                        {order.IsArrived ? "Selesai" : "Sedang Dikirim"}
+                      </span>
+                    </td>
+
+                    <td className="p-3 flex gap-2">
+                      {!order.IsArrived && (
+                        <button
+                          onClick={() => {
+                            console.log("order: ", order);
+                            setShowBarangSampaiModal(true);
+                            setSelectedItem(order);
+                            console.log("order: ", order);
+                          }}
+                          className="bg-orange-300 hover:bg-orange-500 text-sm px-3 py-1 rounded cursor-pointer"
+                        >
+                          Ayam Sampai
+                        </button>
+                      )}
                       <button
                         onClick={() => {
-                          console.log("order: ", order);
-                          setShowBarangSampaiModal(true);
-                          setSelectedItem(order);
-                          console.log("order: ", order);
+                          handleDetailProcurement(order.id);
                         }}
-                        className="bg-orange-300 hover:bg-orange-500 text-sm px-3 py-1 rounded cursor-pointer"
+                        className="bg-green-700 hover:bg-green-900 text-white text-sm px-3 py-1 rounded cursor-pointer"
                       >
-                        Ayam Sampai
+                        Detail
                       </button>
-                    )}
-                    <button
-                      onClick={() => {
-                        handleDetailProcurement(order.id);
-                      }}
-                      className="bg-green-700 hover:bg-green-900 text-white text-sm px-3 py-1 rounded cursor-pointer"
-                    >
-                      Detail
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

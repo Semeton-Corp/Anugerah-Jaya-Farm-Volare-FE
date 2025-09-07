@@ -75,7 +75,6 @@ const MONTHS = {
 export const toISODate = (input) => {
   if (!input) return new Date().toISOString().slice(0, 10);
 
-
   if (/^\d{4}-\d{2}-\d{2}$/.test(input)) return input;
 
   // DD-MM-YYYY
@@ -238,4 +237,27 @@ export function getFormattedDateTime() {
   const tahun = now.getFullYear();
 
   return `${jam}:${menit}, ${tanggal} ${bulan} ${tahun}`;
+}
+
+export function parseToDate(str) {
+  if (!str && str !== 0) return null;
+  if (str instanceof Date) return isNaN(str.getTime()) ? null : str;
+
+  const s = String(str || "").trim();
+  if (!s) return null;
+
+  if (/^\d{4}-\d{2}-\d{2}(\b|T)/.test(s)) {
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  const ddmmyyyy = /^(\d{2})-(\d{2})-(\d{4})$/.exec(s);
+  if (ddmmyyyy) {
+    const [, dd, mm, yyyy] = ddmmyyyy;
+    const d = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d;
 }
