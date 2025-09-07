@@ -99,6 +99,7 @@ export const sidebarMenus = {
       subTabs: [
         { tabName: "Daftar Pesanan", path: "daftar-pesanan" },
         { tabName: "Antrian Pesanan", path: "antrian-pesanan" },
+        { tabName: "Daftar Harga Telur", path: "daftar-harga-telur" },
       ],
     },
     {

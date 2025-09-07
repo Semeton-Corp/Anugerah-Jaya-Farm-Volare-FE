@@ -250,8 +250,16 @@ export const createStoreSaleQueue = (payload) => {
   });
 };
 
-export const getStoresaleQueues = () => {
+export const getStoreSaleQueues = () => {
   return api.get(`/stores/queues`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const deleteStoreSaleQueue = (id) => {
+  return api.delete(`/stores/queues/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

@@ -128,11 +128,12 @@ const InputDataPesanan = () => {
     try {
       const priceResponse = await getItemPrices();
       const discountResponse = await getItemPricesDiscount();
-      // console.log("priceResponse: ", priceResponse);
-      // console.log("discountResponse: ", discountResponse);
+
       if (priceResponse.status == 200 && discountResponse.status == 200) {
         setItemPrices(priceResponse.data.data);
         setItemPriceDiscounts(discountResponse.data.data);
+        console.log("priceResponse: ", priceResponse);
+        console.log("discountResponse: ", discountResponse);
         if (id) {
           fetchEditSaleStoreData(id);
           setEditable(false);
@@ -230,7 +231,7 @@ const InputDataPesanan = () => {
     const priceItem = itemPrices.find(
       (price) =>
         price.item.name == selectedItem.name &&
-        price.item.unit == selectedItem.unit
+        price.item.unit == unit
     );
 
     const applicableDiscounts = itemPriceDiscounts.filter(
@@ -447,13 +448,12 @@ const InputDataPesanan = () => {
         //////
       }
     } catch (error) {
-      alert("❌Terjadi kesalahan dalam menambahkan data antrian!")
+      alert("❌Terjadi kesalahan dalam menambahkan data antrian!");
       console.log("error :", error);
     }
   };
 
   const editSubmitHandle = async () => {
-    const storeSalePayment = paymentHistory;
     const payload = {
       quantity: quantity,
       sendDate: formatDateToDDMMYYYY(sendDate),

@@ -10,10 +10,11 @@ import { useState } from "react";
 import {
   allocateStoreSaleQueue,
   createStoreSale,
+  deleteStoreSaleQueue,
   getEggStoreItemSummary,
   getListStoreSale,
   getStores,
-  getStoresaleQueues,
+  getStoreSaleQueues,
 } from "../services/stores";
 import { useEffect } from "react";
 import { updateStoreSale } from "../services/stores";
@@ -23,6 +24,7 @@ import { getItemPrices, getItemPricesDiscount } from "../services/item";
 import AlokasiAntrianModal from "./AlokasiAntrianModal";
 import { getCurrentUserStorePlacement } from "../services/placement";
 import { getCustomers } from "../services/costumer";
+import DeleteModal from "../components/DeleteModal";
 
 const AntrianPesanan = () => {
   const location = useLocation();
@@ -75,6 +77,8 @@ const AntrianPesanan = () => {
   const [paymentProof, setPaymentProof] = useState("https://example.com");
 
   const [showAlokasiModal, setShowAlokasiModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedDeletedId, setSelectedDeletedId] = useState("");
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
@@ -94,7 +98,7 @@ const AntrianPesanan = () => {
 
   const fetchDataAntrianPesanan = async () => {
     try {
-      const response = await getStoresaleQueues();
+      const response = await getStoreSaleQueues();
       // console.log("response: ", response);
       if (response.status == 200) {
         setDataAntrianPesanan(response.data.data);
@@ -135,11 +139,6 @@ const AntrianPesanan = () => {
     setSelectedItem(item);
     setCustomerName(item.customer.name);
     setItemName(item.item.name);
-    // if (item.item.name == "Telur Bonyok") {
-    //   setUnits(["Plastik"]);
-    // } else {
-    //   setUnits(["Ikat", "Kg"]);
-    // }
     setQuantity(item.quantity);
 
     setUnit(item.saleUnit);
@@ -190,6 +189,8 @@ const AntrianPesanan = () => {
       (price) =>
         price.item.name == selectedItem.item.name && price.item.unit == unit
     );
+    console.log("selectedItem: ", selectedItem);
+    console.log("priceItem: ", priceItem);
 
     const applicableDiscounts = itemPriceDiscounts.filter(
       (discount) => transactionCount >= discount.minimumTransactionUser
@@ -293,6 +294,24 @@ const AntrianPesanan = () => {
       }
     }
   };
+
+  async function deleteDataHandle() {
+    try {
+      const response = await deleteStoreSaleQueue(selectedDeletedId);
+
+      if (response.status === 204) {
+        alert("✅ Data berhasil dihapus!");
+        fetchDataAntrianPesanan();
+      } else {
+        alert("⚠️ Gagal menghapus data. Silakan coba lagi.");
+      }
+    } catch (error) {
+      console.error("Gagal menghapus data ayam:", error);
+      alert("❌ Terjadi kesalahan saat menghapus data.");
+    } finally {
+      setShowDeleteModal(false);
+    }
+  }
 
   useState(() => {
     fetchDataAntrianPesanan();
@@ -424,7 +443,7 @@ const AntrianPesanan = () => {
                         </div>
                       </td>
                       <td className="py-2 px-4">{item?.item?.name}</td>
-                      <td className="py-2 px-4">{item?.item?.unit}</td>
+                      <td className="py-2 px-4">{item?.saleUnit}</td>
                       <td className="py-2 px-4">{item?.quantity}</td>
                       <td className="py-2 px-4">{item?.customer?.name}</td>
 
@@ -458,7 +477,10 @@ const AntrianPesanan = () => {
                             Alokasikan
                           </button>
                           <button
-                            onClick={() => {}}
+                            onClick={() => {
+                              setShowDeleteModal(true);
+                              setSelectedDeletedId(item?.id);
+                            }}
                             className="px-3 py-1 bg-kritis-box-surface-color rounded-[4px] text-white hover:bg-kritis-text-color cursor-pointer"
                           >
                             Hapus
@@ -503,6 +525,11 @@ const AntrianPesanan = () => {
           )}
         </div>
       )}
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onCancel={() => setShowDeleteModal(false)}
+        onConfirm={deleteDataHandle}
+      />
     </>
   );
 };
