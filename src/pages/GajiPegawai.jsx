@@ -67,7 +67,7 @@ export default function GajiPegawai() {
     totalBonusSalary: 0,
   });
   const [rows, setRows] = useState([]);
-  const [totalPage, setTotalPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [totalData, setTotalData] = useState(0);
   const [loading, setLoading] = useState(false);
 
@@ -98,6 +98,7 @@ export default function GajiPegawai() {
       const res = await getUserSalarySummary(monthName, year);
       if (res?.status === 200) {
         const d = res.data?.data || {};
+        console.log("d: ", d);
         setSummary({
           totalUser: Number(d.totalUser || 0),
           totalBaseSalary: Number(d.totalBaseSalary || 0),
@@ -134,6 +135,7 @@ export default function GajiPegawai() {
         keyword: keyword || undefined,
         roleId: roleId || undefined,
         locationId: locationId || undefined,
+        page: page,
       };
       const res = await getUserSalaries(params);
       console.log("res: ", res);
@@ -141,17 +143,17 @@ export default function GajiPegawai() {
         const d = res.data?.data || {};
         setRows(d.userSalaries || []);
         setTotalData(Number(d.totalData || 0));
-        setTotalPage(Number(d.totalPage || 1));
+        setTotalPages(Number(d.totalPage || 1));
       } else {
         setRows([]);
         setTotalData(0);
-        setTotalPage(1);
+        setTotalPages(1);
       }
     } catch (e) {
       console.log("rows error:", e);
       setRows([]);
       setTotalData(0);
-      setTotalPage(1);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
@@ -195,7 +197,6 @@ export default function GajiPegawai() {
     <div className="p-4 space-y-4">
       <h1 className="text-3xl font-bold">Gaji Pegawai</h1>
 
-      {/* Top summary cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <SummaryCard
           title="Total Pegawai"
@@ -227,9 +228,8 @@ export default function GajiPegawai() {
         />
       </div>
 
-      {/* Filters row */}
       <div className="flex flex-wrap gap-2 items-center justify-end">
-        <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+        <div className="flex items-center rounded px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
           <MdStore size={18} />
           <select
             value={locationId}
@@ -254,7 +254,6 @@ export default function GajiPegawai() {
         />
       </div>
 
-      {/* Search + role filter + table */}
       <div className="border rounded-md p-4">
         <form
           onSubmit={onSearch}
@@ -278,7 +277,6 @@ export default function GajiPegawai() {
             Cari
           </button>
 
-          {/* Role filter */}
           <div className="ml-auto">
             <div className="flex items-center rounded px-3 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
               <select
@@ -406,21 +404,29 @@ export default function GajiPegawai() {
               ? `Menampilkan ${startIdx}-${endIdx} dari ${totalData} riwayat`
               : `Menampilkan 0 dari ${totalData} riwayat`}
           </div>
-          <div className="flex gap-2">
-            <button
-              className="rounded bg-gray-200 hover:bg-gray-300 px-3 py-1.5 disabled:opacity-50"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
+          <div className="flex gap-3">
+            <div
+              className={`rounded-[4px] py-2 px-6 ${
+                page <= 1 || totalPages <= 0
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "bg-green-100 hover:bg-green-200 cursor-pointer"
+              } flex items-center justify-center text-black text-base font-medium `}
+              onClick={() => page > 1 && totalPages > 0 && setPage(page - 1)}
             >
-              Previous
-            </button>
-            <button
-              className="rounded bg-gray-200 hover:bg-gray-300 px-3 py-1.5 disabled:opacity-50"
-              disabled={page >= totalPage}
-              onClick={() => setPage((p) => Math.min(totalPage, p + 1))}
+              <p>Previous</p>
+            </div>
+            <div
+              className={`rounded-[4px] py-2 px-6 ${
+                page >= totalPages || totalPages <= 0
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "bg-green-700 hover:bg-green-800 cursor-pointer"
+              } flex items-center justify-center text-white text-base font-medium `}
+              onClick={() =>
+                page < totalPages && totalPages > 0 && setPage(page + 1)
+              }
             >
-              Next
-            </button>
+              <p>Next</p>
+            </div>
           </div>
         </div>
       </div>
@@ -434,6 +440,14 @@ export default function GajiPegawai() {
           fetchRows();
         }}
       />
+      <button
+        onClick={() => {
+          console.log("page: ", page);
+          console.log("totalPages: ", totalPages);
+        }}
+      >
+        CHECK
+      </button>
     </div>
   );
 }

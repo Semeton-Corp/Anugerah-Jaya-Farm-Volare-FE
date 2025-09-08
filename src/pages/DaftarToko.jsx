@@ -3,12 +3,20 @@ import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { getStores } from "../services/stores";
 import { useEffect } from "react";
+import { MdStore } from "react-icons/md";
+import { getLocations } from "../services/location";
 
 const DaftarToko = () => {
+  const userRole = localStorage.getItem("role");
   const location = useLocation();
   const navigate = useNavigate();
 
   const [stores, setStores] = useState([]);
+
+  const [siteOptions, setSiteOptions] = useState([]);
+  const [selectedSite, setSelectedSite] = useState(
+    userRole === "Owner" ? 0 : localStorage.getItem("locationId")
+  );
 
   const detailPages = ["tambah-toko", "detail-toko"];
 
@@ -26,7 +34,7 @@ const DaftarToko = () => {
 
   const fetchStores = async () => {
     try {
-      const storeResponse = await getStores();
+      const storeResponse = await getStores(selectedSite);
       // console.log("storeResponse: ", storeResponse);
       if (storeResponse.status === 200) {
         setStores(storeResponse.data.data);
@@ -36,8 +44,20 @@ const DaftarToko = () => {
     }
   };
 
+  const fetchSites = async () => {
+    try {
+      const res = await getLocations();
+      if (res.status === 200) {
+        setSiteOptions(res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch sites", err);
+    }
+  };
+
   useEffect(() => {
     fetchStores();
+    fetchSites();
 
     if (location?.state?.refetch) {
       fetchStores();
@@ -45,19 +65,43 @@ const DaftarToko = () => {
     }
   }, [location]);
 
+  useEffect(() => {
+    fetchStores();
+  }, [selectedSite]);
+
   if (isDetailPage) {
     return <Outlet />;
   }
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Toko</h1>
+      <div className="flex justify-between mb-4 ">
+        <h1 className="text-2xl font-bold">Toko</h1>
+
+        {userRole == "Owner" && (
+          <div className="flex items-center rounded px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+            <MdStore size={18} />
+            <select
+              value={selectedSite}
+              onChange={(e) => setSelectedSite(e.target.value)}
+              className="ml-2 bg-transparent text-base font-medium outline-none"
+            >
+              <option value="">Semua Site</option>
+              {siteOptions.map((site) => (
+                <option key={site.id} value={site.id}>
+                  {site.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
 
       <div className="border rounded p-4">
         <div className="flex justify-end mb-3">
           <button
             onClick={handleTambahToko}
-            className="bg-orange-500 hover:bg-orange-600 cursor-pointer  px-4 py-2 rounded font-medium"
+            className="bg-orange-300 hover:bg-orange-500 cursor-pointer  px-4 py-2 rounded font-medium"
           >
             + Tambah Toko
           </button>
@@ -91,13 +135,13 @@ const DaftarToko = () => {
           </tbody>
         </table>
       </div>
-      <button
+      {/* <button
         onClick={() => {
           console.log("stores: ", stores);
         }}
       >
         CHECK
-      </button>
+      </button> */}
     </div>
   );
 };

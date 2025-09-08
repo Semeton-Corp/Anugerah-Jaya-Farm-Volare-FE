@@ -113,17 +113,17 @@ const DaftarKandang = () => {
         )}
       </div>
 
-      <div className="bg-white rounded-lg shadow p-8">
+      <div className="bg-white rounded border border-black p-8">
         <div className="flex justify-end mb-4 space-x-2">
           <div
             onClick={pindahAyamHandle}
-            className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
+            className="flex items-center rounded px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
           >
             <div className="text-base font-medium ms-2">Pindah Ayam</div>
           </div>
           <div
             onClick={tambahKandangHandle}
-            className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
+            className="flex items-center rounded px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer"
           >
             <div className="text-base font-medium ms-2">+ Tambah Kandang</div>
           </div>

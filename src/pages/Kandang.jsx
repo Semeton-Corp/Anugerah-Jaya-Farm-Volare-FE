@@ -56,7 +56,7 @@ const Kandang = () => {
         </button> */}
       </div>
 
-      <div className="p-6 border bg-white rounded-[4px]">
+      <div className="p-6 border  bg-white rounded-[4px]">
         <div className="overflow-x-auto bg-white  rounded">
           <table className="min-w-full text-sm text-left">
             <thead>
