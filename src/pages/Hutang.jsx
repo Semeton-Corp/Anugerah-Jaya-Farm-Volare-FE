@@ -93,7 +93,6 @@ export default function Hutang() {
 
   const pieData = useMemo(() => {
     if (!pie) return [];
-    // Support either `overduePercentage` or `dueSoonPercentage` as “Jatuh tempo”
     const overdue = pie.overduePercentage ?? pie.dueSoonPercentage ?? 0;
     return [
       { name: "Sudah dibayar", value: Number(pie.paidPercentage || 0) },
@@ -267,19 +266,36 @@ export default function Hutang() {
                     </td>
                     <td className="py-3 px-4">{statusPill(r.paymentStatus)}</td>
                     <td className="py-3 px-4">
-                      <a
-                        href={toWA(r.phoneNumber)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center justify-center w-9 h-9 rounded bg-green-700 hover:bg-green-900"
-                        title="Hubungi via WhatsApp"
+                      <button
+                        onClick={() => {
+                          const localNumber = r.phoneNumber;
+                          const waNumber = localNumber.replace(/^0/, "62");
+                          const message = `Halo ${r.name},
+                          
+                          Kami dari Anugerah Jaya Farm ingin mengingatkan mengenai tagihan Anda:
+                          
+                          📅 Tenggat: ${r.deadlinePaymentDate}
+                          🏷️ Kategori: ${r.category}
+                          📍 Lokasi: ${r.placeName}
+                          💰 Total: ${formatRupiah(r.nominal)}
+                          💵 Sisa Tagihan: ${formatRupiah(r.remainingPayment)}
+                          
+                          Mohon konfirmasi terkait pembayaran ini. Terima kasih 🙏`;
+
+                          const waURL = `https://wa.me/${waNumber}?text=${encodeURIComponent(
+                            message
+                          )}`;
+                          window.open(waURL, "_blank");
+                        }}
+                        className="inline-flex items-center justify-center w-9 h-9 rounded bg-green-700 hover:bg-green-900 cursor-pointer"
+                        title="Kirim pesan WA"
                       >
-                        <IoLogoWhatsapp className="text-white" />
-                      </a>
+                        <IoLogoWhatsapp className="text-white" size={20} />
+                      </button>
                     </td>
                     <td className="py-3 px-4">
                       <button
-                        className="rounded bg-green-700 hover:bg-green-900 text-white px-3 py-1.5"
+                        className="rounded bg-green-700 hover:bg-green-900 text-white px-3 py-1.5 cursor-pointer"
                         onClick={() => handleDetail(r.category, r.id)}
                       >
                         Lihat detail
