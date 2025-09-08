@@ -27,7 +27,6 @@ const JualAyamAfkir = () => {
   const paymentStatusOptions = ["Belum Dibayar", "Belum Lunas", "Lunas"];
 
   const [page, setPage] = useState(1);
-
   const [totalPages, setTotalPages] = useState(1);
   const [totalData, setTotalData] = useState(0);
 
@@ -39,7 +38,6 @@ const JualAyamAfkir = () => {
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
-  const [showBarangsampaiModal, setShowBarangSampaiModal] = useState(false);
 
   const draftPenjualanAyamHandle = () => {
     navigate(`${location.pathname}/draft-penjualan-ayam`);
@@ -52,7 +50,6 @@ const JualAyamAfkir = () => {
   const fetchSalesData = async () => {
     try {
       const saleResponse = await getAfkirChickenSales(page, paymentStatus);
-      console.log("saleResponse: ", saleResponse);
 
       if (saleResponse.status == 200) {
         setSalesData(saleResponse.data.data.afkirChickenSales);

@@ -221,13 +221,22 @@ export const deleteChickenProcurementDraft = (id) => {
   });
 };
 
-export const getChickenProcurements = (page) => {
+export const getChickenProcurements = (page, paymentStatus) => {
+  const params = { page };
+
+  if (
+    paymentStatus !== undefined &&
+    paymentStatus !== null &&
+    paymentStatus !== ""
+  ) {
+    params.paymentStatus = paymentStatus;
+  }
   return api.get(`/chickens/procurements`, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
     },
-    params: { page: page },
+    params,
   });
 };
 
