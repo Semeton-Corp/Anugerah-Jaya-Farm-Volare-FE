@@ -22,6 +22,11 @@ const DetailProduksi = () => {
   const [selectedSite, setSelectedSite] = useState(
     userRole === "Owner" ? 0 : localStorage.getItem("locationId")
   );
+
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalData, setTotalData] = useState(0);
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -62,13 +67,9 @@ const DetailProduksi = () => {
 
       const date = formatDateToDDMMYYYY(selectedDate);
       response = await getEggMonitoring(selectedSite, date);
-      console.log("response egg:", response);
-      console.log("selectedSite:", selectedSite);
-      console.log("date:", date);
-
+      console.log("response: ", response);
       if (response?.status === 200) {
         setProduksiDetail(response.data.data);
-        // console.log("response.data.data: ", response.data.data);
       }
     } catch (error) {
       console.error(error);
@@ -89,7 +90,6 @@ const DetailProduksi = () => {
   useEffect(() => {
     fetchDataTelur();
     fetchSites();
-
     if (location.state?.refetch) {
       fetchDataTelur();
     }
@@ -99,10 +99,10 @@ const DetailProduksi = () => {
     fetchDataTelur();
   }, [selectedSite, selectedDate]);
 
-  async function editDataHandle(dataId) {
+  const editDataHandle = (dataId) => {
     const currectPath = location.pathname;
     navigate(`${currectPath}/input-telur/${dataId}`);
-  }
+  };
 
   if (isDetailPage) {
     return <Outlet />;
@@ -223,7 +223,7 @@ const DetailProduksi = () => {
             </tbody>
           </table>
 
-          {userRole === "Owner" && (
+          {/* {userRole === "Owner" && (
             <div className="border-t-3 border-t-black-6 mt-12">
               <div className="mb-10"></div>
               <div className="flex justify-between mt-4 px-6">
@@ -238,7 +238,7 @@ const DetailProduksi = () => {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>

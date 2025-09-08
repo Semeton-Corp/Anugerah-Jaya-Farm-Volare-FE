@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { getWarehouses } from "../services/warehouses";
+import { MdStore } from "react-icons/md";
+import { getLocations } from "../services/location";
 
 const DaftarGudang = () => {
   const userRole = localStorage.getItem("role");
@@ -8,6 +10,11 @@ const DaftarGudang = () => {
   const navigate = useNavigate();
 
   const [gudangList, setGudangList] = useState([]);
+
+  const [siteOptions, setSiteOptions] = useState([]);
+  const [selectedSite, setSelectedSite] = useState(
+    userRole === "Owner" ? 0 : localStorage.getItem("locationId")
+  );
 
   const detailPage = ["tambah-gudang", "detail-gudang"];
 
@@ -25,22 +32,8 @@ const DaftarGudang = () => {
 
   const fetchGudangList = async () => {
     try {
-      const gudangResponse = await getWarehouses();
-      console.log("gudangResponse: ", gudangResponse);
-
-      if (userRole != "Owner") {
-        const locationId = parseInt(localStorage.getItem("locationId"), 10);
-
-        const allGudang = gudangResponse.data.data;
-
-        const filteredGudang = allGudang.filter(
-          (gudang) => gudang.location?.id === locationId
-        );
-        // console.log("allGudang: ", allGudang);
-        // console.log("Filtered Gudang: ", filteredGudang);
-        // Do something with filteredGudang, e.g.,
-        setGudangList(filteredGudang);
-      } else {
+      const gudangResponse = await getWarehouses(selectedSite);
+      if (gudangResponse.status == 200) {
         const allGudang = gudangResponse.data.data;
         setGudangList(allGudang);
       }
@@ -49,7 +42,19 @@ const DaftarGudang = () => {
     }
   };
 
+  const fetchSites = async () => {
+    try {
+      const res = await getLocations();
+      if (res.status === 200) {
+        setSiteOptions(res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch sites", err);
+    }
+  };
+
   useEffect(() => {
+    fetchSites();
     fetchGudangList();
 
     if (location.state?.refetch) {
@@ -57,6 +62,10 @@ const DaftarGudang = () => {
       window.history.replaceState({}, document.title);
     }
   }, [location]);
+
+  useEffect(() => {
+    fetchGudangList();
+  }, [selectedSite]);
 
   if (isDetailPage) {
     return <Outlet />;
@@ -67,7 +76,24 @@ const DaftarGudang = () => {
       <h1 className="text-3xl font-bold mb-4">Gudang</h1>
 
       <div className="bg-white border rounded p-4">
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-end mb-4 gap-4">
+          {userRole == "Owner" && (
+            <div className="flex items-center rounded px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+              <MdStore size={18} />
+              <select
+                value={selectedSite}
+                onChange={(e) => setSelectedSite(e.target.value)}
+                className="ml-2 bg-transparent text-base font-medium outline-none"
+              >
+                <option value="">Semua Site</option>
+                {siteOptions.map((site) => (
+                  <option key={site.id} value={site.id}>
+                    {site.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <button
             onClick={handleTambahGudang}
             className="bg-orange-300  px-4 py-2 rounded hover:bg-orange-500 cursor-pointer"

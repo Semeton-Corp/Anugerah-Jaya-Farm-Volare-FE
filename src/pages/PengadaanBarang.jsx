@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { PiCalendarBlank } from "react-icons/pi";
 import { BiSolidEditAlt } from "react-icons/bi";
 import { MdDelete } from "react-icons/md";
@@ -6,7 +6,12 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { getChickenMonitoring } from "../services/chickenMonitorings";
 import { deleteChickenData } from "../services/chickenMonitorings";
-import { getTodayDateInBahasa, parseToDate } from "../utils/dateFormat";
+import {
+  formatDate,
+  formatDateToDDMMYYYY,
+  getTodayDateInBahasa,
+  parseToDate,
+} from "../utils/dateFormat";
 import {
   arrivalConfirmationWarehouseItemProcurement,
   getWarehouseItemProcurements,
@@ -48,12 +53,15 @@ const badge = (text, variant = "neutral") => {
 
 const PengadaanBarang = () => {
   const userRole = localStorage.getItem("role");
+
   const location = useLocation();
   const navigate = useNavigate();
 
   const [daftarBarangData, setDaftarBarangData] = useState([]);
   const [isShowConfirmModal, setIsShowConfirmModal] = useState(false);
   const [isShowBatalModal, setIsShowBatalModal] = useState(false);
+
+  const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
 
   const [selectedItem, setSelectedItem] = useState(null);
 
@@ -65,8 +73,8 @@ const PengadaanBarang = () => {
 
   const fetchBarangData = async () => {
     try {
-      const dataResponse = await getWarehouseItemProcurements();
-      console.log("dataResponse: ", dataResponse);
+      const date = formatDateToDDMMYYYY(selectedDate);
+      const dataResponse = await getWarehouseItemProcurements(date);
       if (dataResponse.status == 200) {
         setDaftarBarangData(dataResponse.data.data.warehouseItemProcurements);
       }
@@ -74,15 +82,6 @@ const PengadaanBarang = () => {
       console.log("error :", error);
     }
   };
-
-  useEffect(() => {
-    fetchBarangData();
-
-    if (location.state?.refetch) {
-      fetchBarangData();
-      window.history.replaceState({}, document.title);
-    }
-  }, [location]);
 
   const confirmBatalHandle = () => {
     console.log("test:");
@@ -114,6 +113,30 @@ const PengadaanBarang = () => {
     navigate(`${location.pathname}/detail-pengadaan-barang/${id}`);
   };
 
+  const handleDateChange = (e) => {
+    const date = e.target.value;
+    setSelectedDate(date);
+  };
+
+  const dateInputRef = useRef(null);
+  const openDatePicker = () => {
+    if (dateInputRef.current) {
+      dateInputRef.current.showPicker?.() || dateInputRef.current.click();
+    }
+  };
+
+  useEffect(() => {
+    fetchBarangData();
+
+    if (location.state?.refetch) {
+      fetchBarangData();
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
+  useEffect(() => {
+    fetchBarangData();
+  }, [selectedDate]);
+
   if (isDetailPage) {
     return <Outlet />;
   }
@@ -124,15 +147,20 @@ const PengadaanBarang = () => {
       <div className="flex justify-between items-center mb-2 flex-wrap gap-4">
         <h1 className="text-3xl font-bold">Pengadaan Barang</h1>
 
-        <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-          <PiCalendarBlank size={18} />
-          <div className="text-base font-medium ms-2">
-            Hari ini ({getTodayDateInBahasa()})
-          </div>
+        <div
+          className="flex items-center rounded-lg bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+          onClick={openDatePicker}
+        >
+          <input
+            ref={dateInputRef}
+            type="date"
+            value={selectedDate}
+            onChange={handleDateChange}
+            className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
+          />
         </div>
       </div>
 
-      {/* Table Section */}
       <div className="bg-white p-4 border rounded-lg w-full border-black-6">
         <div className="flex justify-end items-center mb-4">
           <div

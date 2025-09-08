@@ -10,13 +10,13 @@ export const inputTelur = (payload) => {
   });
 };
 
-export const getEggMonitoring = (locationId, date) => {
+export const getEggMonitoring = (locationId, date, page) => {
   return api.get("/eggs/monitorings", {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
     },
-    params: { locationId: locationId, date: date },
+    params: { locationId: locationId, date: date, page: page },
   });
 };
 

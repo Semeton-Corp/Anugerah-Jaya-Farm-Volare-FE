@@ -8,11 +8,6 @@ const DaftarToko = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const dummyToko = [
-    { id: 1, nama: "Toko A", lokasi: "Sidodadi", jumlahPekerja: 4 },
-    { id: 2, nama: "Toko B", lokasi: "Sukamaju", jumlahPekerja: 6 },
-  ];
-
   const [stores, setStores] = useState([]);
 
   const detailPages = ["tambah-toko", "detail-toko"];

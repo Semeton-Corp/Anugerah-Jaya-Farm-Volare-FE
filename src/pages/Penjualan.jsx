@@ -581,15 +581,6 @@ const Penjualan = () => {
               </ResponsiveContainer>
             </div>
           </div>
-
-          <button
-            onClick={() => {
-              console.log("eggSaleGraph: ", eggSaleGraphs);
-            }}
-          >
-            CHECK
-          </button>
-          {/* <Outlet /> */}
         </div>
       )}
     </>

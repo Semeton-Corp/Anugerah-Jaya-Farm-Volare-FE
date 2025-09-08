@@ -15,16 +15,6 @@ import { AlertTriangle } from "lucide-react";
 import { getLocations } from "../services/location";
 import { useRef } from "react";
 
-const data = [
-  { date: "29 Mar", produksi: 25, penjualan: 30 },
-  { date: "30 Mar", produksi: 14, penjualan: 40 },
-  { date: "31 Mar", produksi: 30, penjualan: 33 },
-  { date: "01 Apr", produksi: 22, penjualan: 40 },
-  { date: "02 Apr", produksi: 16, penjualan: 8 },
-  { date: "03 Apr", produksi: 25, penjualan: 20 },
-  { date: "04 Apr", produksi: 43, penjualan: 32 },
-];
-
 const DetailAyam = () => {
   const userRole = localStorage.getItem("role");
   const userName = localStorage.getItem("userName");
@@ -143,7 +133,6 @@ const DetailAyam = () => {
 
   return (
     <div className="flex flex-col px-4 py-3 gap-4">
-      {/* Header */}
       <div className="flex justify-between items-center mb-2 flex-wrap gap-6">
         <h1 className="text-3xl font-bold">
           {userRole === "Pekerja Kandang" ? "Data Ayam" : "Detail Ayam"}
@@ -151,7 +140,7 @@ const DetailAyam = () => {
 
         <div className="flex gap-4">
           {userRole == "Owner" && (
-            <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+            <div className="flex items-center roundedpx-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
               <MdStore size={18} />
               <select
                 value={selectedSite}
