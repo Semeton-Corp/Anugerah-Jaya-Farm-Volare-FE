@@ -17,6 +17,7 @@ import DeleteModal from "../components/DeleteModal";
 const InputAyam = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
   const locationId = localStorage.getItem("locationId");
   const userRole = localStorage.getItem("role");
   const userName = localStorage.getItem("userName");

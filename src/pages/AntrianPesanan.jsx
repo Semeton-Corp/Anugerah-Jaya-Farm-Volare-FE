@@ -29,9 +29,12 @@ import DeleteModal from "../components/DeleteModal";
 const AntrianPesanan = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const locationId = localStorage.getItem("locationId");
   const userRole = localStorage.getItem("role");
   const detailPages = ["input-data-pesanan"];
+
+  const [selectedSite] = useState(
+    userRole === "Owner" ? 0 : localStorage.getItem("locationId")
+  );
 
   const [dataAntrianPesanan, setDataAntrianPesanan] = useState([]);
   const [paymentHistory, setPaymentHistory] = useState([]);
@@ -100,10 +103,10 @@ const AntrianPesanan = () => {
 
   const fetchDataAntrianPesanan = async () => {
     try {
-      const response = await getStoreSaleQueues();
-      // console.log("response: ", response);
-      if (response.status == 200) {
-        setDataAntrianPesanan(response.data.data);
+      const antrianResponse = await getStoreSaleQueues(selectedStore);
+      console.log("antrianResponse: ", antrianResponse);
+      if (antrianResponse.status == 200) {
+        setDataAntrianPesanan(antrianResponse.data.data);
       }
     } catch (error) {
       alert("Gagal memuat data antrian pesanan: ", error);
@@ -137,7 +140,6 @@ const AntrianPesanan = () => {
   };
 
   const setSelectedItemHandle = (item) => {
-    console.log("item: ", item);
     setSelectedItem(item);
     setCustomerName(item.customer.name);
     setItemName(item.item.name);
@@ -145,41 +147,51 @@ const AntrianPesanan = () => {
     setUnit(item.saleUnit);
   };
 
-  const getItemSummary = async () => {
+  const fetchCurentStore = async () => {
     try {
       const placementResponse = await getCurrentUserStorePlacement();
       console.log("placementResponse: ", placementResponse);
       if (placementResponse.status == 200) {
         const storeId = placementResponse.data.data[0].store.id;
-        const summaryResponse = await getEggStoreItemSummary(storeId);
-        if (summaryResponse.status == 200) {
-          const eggSummaries = summaryResponse.data.data;
-          const okKg =
-            eggSummaries.find(
-              (item) => item.name === "Telur OK" && item.unit === "Kg"
-            )?.quantity ?? 0;
-          const okIkat =
-            eggSummaries.find(
-              (item) => item.name === "Telur OK" && item.unit === "Ikat"
-            )?.quantity ?? 0;
-          const retakKg =
-            eggSummaries.find(
-              (item) => item.name === "Telur Retak" && item.unit === "Kg"
-            )?.quantity ?? 0;
-          const retakIkat =
-            eggSummaries.find(
-              (item) => item.name === "Telur Retak" && item.unit === "Ikat"
-            )?.quantity ?? 0;
-          const bonyokPlastik =
-            eggSummaries.find(
-              (item) => item.name === "Telur Bonyok" && item.unit === "Plastik"
-            )?.quantity ?? 0;
-          setTelurOkKg(okKg);
-          setTelurOkIkat(okIkat);
-          setTelurRetakKg(retakKg);
-          setTelurRetakIkat(retakIkat);
-          setTelurBonyokPlastik(bonyokPlastik);
-        }
+        setSelectedStore(storeId);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const getItemSummary = async () => {
+    try {
+      console.log("selectedStore: ", selectedStore);
+      const summaryResponse = await getEggStoreItemSummary(selectedStore);
+      console.log("summaryResponse: ", summaryResponse);
+      if (summaryResponse.status == 200) {
+        const eggSummaries = summaryResponse.data.data;
+        const okKg =
+          eggSummaries.find(
+            (item) => item.name === "Telur OK" && item.unit === "Kg"
+          )?.quantity ?? 0;
+        const okIkat =
+          eggSummaries.find(
+            (item) => item.name === "Telur OK" && item.unit === "Ikat"
+          )?.quantity ?? 0;
+        const retakKg =
+          eggSummaries.find(
+            (item) => item.name === "Telur Retak" && item.unit === "Kg"
+          )?.quantity ?? 0;
+        const retakIkat =
+          eggSummaries.find(
+            (item) => item.name === "Telur Retak" && item.unit === "Ikat"
+          )?.quantity ?? 0;
+        const bonyokPlastik =
+          eggSummaries.find(
+            (item) => item.name === "Telur Bonyok" && item.unit === "Plastik"
+          )?.quantity ?? 0;
+        setTelurOkKg(okKg);
+        setTelurOkIkat(okIkat);
+        setTelurRetakKg(retakKg);
+        setTelurRetakIkat(retakIkat);
+        setTelurBonyokPlastik(bonyokPlastik);
       }
     } catch (error) {
       console.log("error :", error);
@@ -224,9 +236,10 @@ const AntrianPesanan = () => {
     setTotal(totalitemPrice - totalDiscount);
   };
 
-  const fetchStoresData = async () => {
+  const fetchAllStores = async () => {
     try {
-      const response = await getStores();
+      console.log("selectedSite: ", selectedSite);
+      const response = await getStores(selectedSite);
       if (response.status == 200) {
         setStores(response.data.data);
         setSelectedStore(response.data.data[0].id);
@@ -290,7 +303,7 @@ const AntrianPesanan = () => {
       saleUnit: unit,
       storeId: parseInt(selectedItem?.store?.id),
       quantity: parseInt(quantity),
-      price: String(itemPrice), // atau itemPrice.toString()
+      price: String(itemPrice),
       discount: discount,
       sendDate: formatDateToDDMMYYYY(sendDate),
       paymentType: paymentType,
@@ -310,14 +323,12 @@ const AntrianPesanan = () => {
       const response = await allocateStoreSaleQueue(payload, selectedItem.id);
       console.log("response: ", response);
       if (response.status === 200 || response.status === 201) {
-        // navigasi atau refresh
         navigate("/pekerja-toko/kasir/daftar-pesanan");
       } else {
         alert("⚠️ Gagal mengalokasikan antrian. Coba lagi.");
       }
     } catch (error) {
       console.log("response error: ", error);
-      // ditangani pesan error spesifik backend
       const msg = error?.response?.data?.message ?? "";
       if (msg === "nominal is not equal to total price") {
         alert(
@@ -338,7 +349,6 @@ const AntrianPesanan = () => {
   async function deleteDataHandle() {
     try {
       const response = await deleteStoreSaleQueue(selectedDeletedId);
-
       if (response.status === 204) {
         alert("✅ Data berhasil dihapus!");
         fetchDataAntrianPesanan();
@@ -354,15 +364,21 @@ const AntrianPesanan = () => {
   }
 
   useState(() => {
-    fetchDataAntrianPesanan();
     fetchItemPrices();
-    getItemSummary();
     fetchCustomerData();
-    if (userRole == "Owner") {
-      fetchStoresData();
+    if (userRole != "Pekerja Toko") {
+      fetchAllStores();
     } else {
+      fetchCurentStore();
     }
   }, []);
+
+  useEffect(() => {
+    if (selectedStore) {
+      getItemSummary();
+      fetchDataAntrianPesanan();
+    }
+  }, [selectedStore]);
 
   useEffect(() => {
     fetchDataAntrianPesanan();
@@ -390,8 +406,26 @@ const AntrianPesanan = () => {
         <div className="flex flex-col px-4 py-3 gap-4 ">
           <div className="flex justify-between mb-2 flex-wrap gap-4">
             <h1 className="text-3xl font-bold">Antrian Pesanan</h1>
-            <div className="text-base flex gap-2">
-              <p>{`Hari ini (${getTodayDateInBahasa()})`}</p>
+            <div className="flex gap-3 items-center">
+              {userRole != "Pekerja Toko" && (
+                <div className="flex items-center rounded px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+                  <MdStore size={18} />
+                  <select
+                    value={selectedStore}
+                    onChange={(e) => setSelectedStore(e.target.value)}
+                    className="ml-2 bg-transparent text-base font-medium outline-none"
+                  >
+                    {stores.map((site) => (
+                      <option key={site.id} value={site.id}>
+                        {site.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              <div className="text-base flex gap-2">
+                <p>{`Hari ini (${getTodayDateInBahasa()})`}</p>
+              </div>
             </div>
           </div>
 

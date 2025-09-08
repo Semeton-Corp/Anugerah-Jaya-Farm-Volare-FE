@@ -250,11 +250,12 @@ export const createStoreSaleQueue = (payload) => {
   });
 };
 
-export const getStoreSaleQueues = () => {
+export const getStoreSaleQueues = (storeId) => {
   return api.get(`/stores/queues`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
+    params: { storeId: storeId },
   });
 };
 

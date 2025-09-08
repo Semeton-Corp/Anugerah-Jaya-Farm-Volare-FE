@@ -140,7 +140,7 @@ const DetailAyam = () => {
 
         <div className="flex gap-4">
           {userRole == "Owner" && (
-            <div className="flex items-center roundedpx-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+            <div className="flex items-center rounded px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
               <MdStore size={18} />
               <select
                 value={selectedSite}

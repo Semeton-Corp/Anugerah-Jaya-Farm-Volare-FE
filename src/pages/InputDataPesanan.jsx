@@ -700,7 +700,9 @@ const InputDataPesanan = () => {
         <div className="flex justify-between gap-4">
           {userRole != "Pekerja Toko" && (
             <div className="w-full">
-              <label className="block font-medium  mt-4">Pilih Toko</label>
+              <label className="block font-medium  mt-4">
+                {id ? "Toko" : "Pilih Toko"}
+              </label>
               {isEditable && !id && userRole != "Pekerja Toko" ? (
                 <select
                   className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
