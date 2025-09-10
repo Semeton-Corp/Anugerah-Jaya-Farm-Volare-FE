@@ -20,7 +20,7 @@ import { useState } from "react";
 import MonthYearSelector from "../components/MonthYearSelector";
 import { getCurrentUserStorePlacement } from "../services/placement";
 import { getItems } from "../services/item";
-import { getStoreOverview } from "../services/stores";
+import { getStoreOverview, getStores } from "../services/stores";
 
 const salesData = [
   { date: "29 Mar", ok: 24, retak: 4, pecah: 2 },
@@ -33,6 +33,7 @@ const salesData = [
 ];
 
 const Toko = () => {
+  const userRole = localStorage.getItem("role");
   const location = useLocation();
   const detailPages = ["detail-stok-toko", "riwayat-aktivitas-toko"];
   const isDetailPage = detailPages.some((segment) =>
@@ -81,7 +82,13 @@ const Toko = () => {
   const [monthName, setMonthName] = useState(months[today.getMonth()]);
   const [year, setYear] = useState(new Date().getFullYear());
 
-  const [storeId, setStoreId] = useState(0);
+  const [selectedSite] = useState(
+    userRole === "Owner" ? 0 : localStorage.getItem("locationId")
+  );
+
+  const [stores, setStores] = useState([]);
+  const [selectedStore, setSelectedStore] = useState("");
+
   const [itemId, setItemId] = useState(0);
   const [itemName, setItemName] = useState("");
 
@@ -104,7 +111,7 @@ const Toko = () => {
       const overviewResponse = await getStoreOverview(
         monthName,
         year,
-        storeId,
+        selectedStore,
         itemId,
         graphFilter
       );
@@ -117,6 +124,8 @@ const Toko = () => {
         setCrackedEggInKg(data.crackedEggInKg);
         setGoodEggInIkat(data.goodEggInIkat);
         setGoodEggInKg(data.goodEggInKg);
+        setTotalIncome(data.totalIncome);
+        setTotalReceivables(data.totalReceivables);
       }
     } catch (error) {
       console.log("error :", error);
@@ -125,14 +134,12 @@ const Toko = () => {
 
   const getDetailData = async () => {
     try {
-      const placementResponse = await getCurrentUserStorePlacement();
-      if (placementResponse.status == 200) {
-        setStoreId(placementResponse.data.data[0].store.id);
-        const storeId = placementResponse.data.data[0].store.id;
-        const itemResponse = await getItems();
+      const itemResponse = await getItems();
+      if (itemResponse.status == 200) {
         const eggCategoryOptions = itemResponse.data.data.filter(
           (item) => item.category == "Telur" && item.name !== "Telur Reject"
         );
+        console.log("eggCategoryOptions:", eggCategoryOptions);
         setItemId(eggCategoryOptions[0].id);
         setItemName(eggCategoryOptions[0].name);
         setEggCategoryOptions(eggCategoryOptions);
@@ -142,15 +149,47 @@ const Toko = () => {
     }
   };
 
+  const fetchCurentStore = async () => {
+    try {
+      const placementResponse = await getCurrentUserStorePlacement();
+      console.log("placementResponse: ", placementResponse);
+      if (placementResponse.status == 200) {
+        const storeId = placementResponse.data.data[0].store.id;
+        setSelectedStore(storeId);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const fetchAllStores = async () => {
+    try {
+      console.log("selectedSite: ", selectedSite);
+      const response = await getStores(selectedSite);
+      if (response.status == 200) {
+        setStores(response.data.data);
+        setSelectedStore(response.data.data[0].id);
+      }
+    } catch (error) {
+      alert("Gagal memuat data toko: ", error);
+      console.log("error: ", error);
+    }
+  };
+
   useEffect(() => {
     getDetailData();
+    if (userRole != "Pekerja Toko") {
+      fetchAllStores();
+    } else {
+      fetchCurentStore();
+    }
   }, []);
 
   useEffect(() => {
-    if (storeId && itemId) {
+    if (selectedStore && itemId) {
       getOverviewData();
     }
-  }, [storeId, itemId, monthName, year, graphFilter]);
+  }, [selectedStore, itemId, monthName, year, graphFilter]);
 
   return (
     <>
@@ -161,10 +200,22 @@ const Toko = () => {
           <div className="flex justify-between mb-2 flex-wrap gap-4">
             <h1 className="text-3xl font-bold">Ringkasan</h1>
             <div className="flex gap-2">
-              {/* <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-                <MdStore size={18} />
-                <div className="text-base font-medium ms-2">Semua Toko</div>
-              </div> */}
+              {userRole != "Pekerja Toko" && (
+                <div className="flex items-center rounded px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+                  <MdStore size={18} />
+                  <select
+                    value={selectedStore}
+                    onChange={(e) => setSelectedStore(e.target.value)}
+                    className="ml-2 bg-transparent text-base font-medium outline-none"
+                  >
+                    {stores.map((site) => (
+                      <option key={site.id} value={site.id}>
+                        {site.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <MonthYearSelector
                 month={month}
                 year={year}
@@ -346,7 +397,6 @@ const Toko = () => {
               console.log("monthName: ", monthName);
               console.log("year: ", year);
               console.log("itemId: ", itemId);
-              console.log("storeId: ", storeId);
               console.log("graphFilter: ", graphFilter);
               console.log("itemName: ", itemName);
               console.log("storeGraph: ", storeGraph);
