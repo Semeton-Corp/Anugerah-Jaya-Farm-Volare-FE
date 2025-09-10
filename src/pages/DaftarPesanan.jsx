@@ -19,10 +19,7 @@ import {
   getWarehouses,
   getWarehouseSaleQueues,
 } from "../services/warehouses";
-import {
-  getCurrentUserStorePlacement,
-  getCurrentUserWarehousePlacement,
-} from "../services/placement";
+import { getCurrentUserWarehousePlacement } from "../services/placement";
 
 const DaftarPesanan = () => {
   const userRole = localStorage.getItem("role");
@@ -218,7 +215,7 @@ const DaftarPesanan = () => {
     } else if (userRole == "Pekerja Toko") {
       fetchCurentStore();
     } else {
-      fetchCurentWarehouse();
+      // fetchCurentWarehouse();
     }
   }, []);
 
@@ -252,19 +249,25 @@ const DaftarPesanan = () => {
                 <div className="flex items-center rounded px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
                   <MdStore size={18} />
                   <select
-                    value={selectedPlace.id}
+                    value={
+                      selectedPlace
+                        ? `${selectedPlace.type}-${selectedPlace.id}`
+                        : ""
+                    }
                     onChange={(e) => {
-                      const selectedPlace = placeOptions.find(
-                        (item) => item.id == e.target.value
+                      const [type, id] = e.target.value.split("-");
+                      const selected = placeOptions.find(
+                        (item) => item.type === type && String(item.id) === id
                       );
-                      setSelectedPlace(selectedPlace);
+                      console.log("selectedPlace: ", selected);
+                      setSelectedPlace(selected);
                     }}
                     className="ml-2 bg-transparent text-base font-medium outline-none"
                   >
                     {placeOptions.map((place) => (
                       <option
                         key={`${place.type}-${place.id}`}
-                        value={place.id}
+                        value={`${place.type}-${place.id}`}
                       >
                         {place.name}
                       </option>

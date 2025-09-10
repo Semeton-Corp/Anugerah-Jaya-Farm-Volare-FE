@@ -38,6 +38,10 @@ import { getCustomers } from "../services/costumer";
 import { getCurrentUserStorePlacement } from "../services/placement";
 import ReceiptModal from "../components/Receipt";
 import { GoAlertFill } from "react-icons/go";
+import {
+  getEggWarehouseItemSummary,
+  getWarehouses,
+} from "../services/warehouses";
 
 const InputDataPesanan = () => {
   const location = useLocation();
@@ -53,6 +57,9 @@ const InputDataPesanan = () => {
   const [isOutOfStock, setIsOutOfStock] = useState(false);
 
   const [editingIndex, setEditingIndex] = useState(null);
+
+  const [placeOptions, setPlaceOptions] = useState([]);
+  const [selectedPlace, setSelectedPlace] = useState([]);
 
   const [stores, setStores] = useState([]);
   const [selectedStore, setSelectedStore] = useState("");
@@ -133,8 +140,8 @@ const InputDataPesanan = () => {
       if (priceResponse.status == 200 && discountResponse.status == 200) {
         setItemPrices(priceResponse.data.data);
         setItemPriceDiscounts(discountResponse.data.data);
-        console.log("priceResponse: ", priceResponse);
-        console.log("discountResponse: ", discountResponse);
+        // console.log("priceResponse: ", priceResponse);
+        // console.log("discountResponse: ", discountResponse);
         if (id) {
           fetchEditSaleStoreData(id);
           setEditable(false);
@@ -145,16 +152,93 @@ const InputDataPesanan = () => {
     }
   };
 
-  const fetchStoresData = async () => {
+  const fetchAllPlaces = async () => {
     try {
-      const response = await getStores();
-      if (response.status == 200) {
-        setStores(response.data.data);
-        setSelectedStore(response.data.data[0].id);
+      const storesResponse = await getStores();
+      const warehousesResponse = await getWarehouses();
+
+      if (storesResponse.status == 200 && warehousesResponse.status == 200) {
+        const stores = storesResponse?.data?.data ?? [];
+        const warehouses = warehousesResponse?.data?.data ?? [];
+
+        const options = [
+          ...stores.map((store) => ({
+            id: store.id,
+            name: store.name,
+            type: "store",
+          })),
+          ...warehouses.map((wh) => ({
+            id: wh.id,
+            name: wh.name,
+            type: "warehouse",
+          })),
+        ];
+
+        setPlaceOptions(options);
+        console.log("options: ", options);
+
+        if (options.length > 0) {
+          setSelectedPlace(options[0]);
+        }
       }
     } catch (error) {
-      alert("Gagal memuat data toko: ", error);
+      console.log("error :", error);
+    }
+  };
+
+  const fetchAllWarehouses = async () => {
+    try {
+      const siteWarehousesResponse = await getWarehouses(selectedSite);
+      if (siteWarehousesResponse.status == 200) {
+        const warehouses = siteWarehousesResponse?.data?.data ?? [];
+        const options = [
+          ...warehouses.map((warehouse) => ({
+            id: warehouse.id,
+            name: warehouse.name,
+            type: "warehouse",
+          })),
+        ];
+        setPlaceOptions(options);
+        setSelectedPlace(options[0]);
+      }
+    } catch (error) {
+      alert("Gagal memuat data gudang: ", error);
       console.log("error: ", error);
+    }
+  };
+
+  const fetchCurentStore = async () => {
+    try {
+      const placementResponse = await getCurrentUserStorePlacement();
+      if (placementResponse.status == 200) {
+        const store = placementResponse.data.data[0].store;
+        const selectedStore = {
+          id: store.id,
+          name: store.name,
+          type: "store",
+        };
+        setSelectedPlace(selectedStore);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const fetchCurentWarehouse = async () => {
+    try {
+      const placementResponse = await getCurrentUserWarehousePlacement();
+      if (placementResponse.status == 200) {
+        console.log("placementResponse: ", placementResponse);
+        const warehouse = placementResponse.data.data[0].warehouse;
+        const selectedWarehouse = {
+          id: warehouse.id,
+          name: warehouse.name,
+          type: "warehouse",
+        };
+        setSelectedPlace(selectedWarehouse);
+      }
+    } catch (error) {
+      console.log("error :", error);
     }
   };
 
@@ -177,6 +261,8 @@ const InputDataPesanan = () => {
         // storeId
       });
 
+      console.log("response: ", response);
+
       if (response.status == 200) {
         const filterData = response.data.data.filter(
           (item) => item.name != "Telur Reject"
@@ -191,11 +277,8 @@ const InputDataPesanan = () => {
   const fetchCustomerData = async () => {
     try {
       const customerResponse = await getCustomers();
-      // console.log("customerResponse: ", customerResponse);
       if (customerResponse.status == 200) {
         setCustomers(customerResponse.data.data);
-        // setStores(response.data.data);
-        // setSelectedStore(response.data.data[0].id);
       }
     } catch (error) {
       alert("Gagal memuat data toko: ", error);
@@ -206,7 +289,7 @@ const InputDataPesanan = () => {
   const fetchEditSaleStoreData = async (id) => {
     try {
       const response = await getStoreSaleById(id);
-      console.log("response fetch detail: ", response);
+      // console.log("response fetch detail: ", response);
 
       if (response.status == 200) {
         setSelectedStore(response.data.data.store.id);
@@ -266,29 +349,36 @@ const InputDataPesanan = () => {
 
   const getItemSummary = async () => {
     try {
-      const summaryResponse = await getEggStoreItemSummary(selectedStore);
+      let summaryResponse;
+      if (selectedPlace.type == "store") {
+        summaryResponse = await getEggStoreItemSummary(selectedPlace.id);
+      } else if (selectedPlace.type == "warehouse") {
+        summaryResponse = await getEggWarehouseItemSummary(selectedPlace.id);
+      } else {
+        alert("❌ Terjadi kesalahan saat memuat data!");
+        return;
+      }
+
+      console.log("summaryResponse: ", summaryResponse);
+
       if (summaryResponse.status == 200) {
         const eggSummaries = summaryResponse.data.data;
         const okKg =
           eggSummaries.find(
             (item) => item.name === "Telur OK" && item.unit === "Kg"
           )?.quantity ?? 0;
-
         const okIkat =
           eggSummaries.find(
             (item) => item.name === "Telur OK" && item.unit === "Ikat"
           )?.quantity ?? 0;
-
         const retakKg =
           eggSummaries.find(
             (item) => item.name === "Telur Retak" && item.unit === "Kg"
           )?.quantity ?? 0;
-
         const retakIkat =
           eggSummaries.find(
             (item) => item.name === "Telur Retak" && item.unit === "Ikat"
           )?.quantity ?? 0;
-
         const bonyokPlastik =
           eggSummaries.find(
             (item) => item.name === "Telur Bonyok" && item.unit === "Plastik"
@@ -492,7 +582,6 @@ const InputDataPesanan = () => {
       }
     } catch (error) {
       // console.log("error:", error.response.data.message);
-
       if (
         error.response.data.message ==
         "total payment is greater than total price"
@@ -555,9 +644,13 @@ const InputDataPesanan = () => {
 
   useEffect(() => {
     if (userRole == "Owner") {
-      fetchStoresData();
+      fetchAllPlaces();
+    } else if (userRole == "Kepala Kandang") {
+      fetchAllWarehouses();
+    } else if (userRole == "Pekerja Toko") {
+      fetchCurentStore();
     } else {
-      fetchStorePlacement();
+      fetchCurentWarehouse();
     }
     fetchCustomerData();
     fetchItemPrices();
@@ -565,11 +658,11 @@ const InputDataPesanan = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedStore) {
-      fetchItemsData(selectedStore);
+    if (selectedPlace.type) {
+      fetchItemsData();
       getItemSummary();
     }
-  }, [selectedStore]);
+  }, [selectedPlace]);
 
   useEffect(() => {
     if (!selectedItem) return;
@@ -583,7 +676,15 @@ const InputDataPesanan = () => {
     } else {
       setIsOutOfStock(false);
     }
-  }, [quantity, selectedItem, unit]);
+  }, [
+    quantity,
+    selectedItem,
+    unit,
+    selectedPlace,
+    telurOkIkat,
+    telurRetakIkat,
+    telurBonyokPlastik,
+  ]);
 
   useEffect(() => {
     if (!id) {
@@ -707,14 +808,26 @@ const InputDataPesanan = () => {
               {isEditable && !id && userRole != "Pekerja Toko" ? (
                 <select
                   className="w-full border bg-black-4 cursor-pointer rounded p-2 mb-4"
-                  value={selectedStore}
+                  value={
+                    selectedPlace
+                      ? `${selectedPlace.type}-${selectedPlace.id}`
+                      : ""
+                  }
                   onChange={(e) => {
-                    setSelectedStore(e.target.value);
+                    const [type, id] = e.target.value.split("-");
+                    const selected = placeOptions.find(
+                      (item) => item.type === type && String(item.id) === id
+                    );
+                    console.log("selectedPlace: ", selected);
+                    setSelectedPlace(selected);
                   }}
                 >
-                  {stores.map((item) => (
-                    <option value={item.id} key={item.id}>
-                      {`${item.name}`}
+                  {placeOptions.map((place) => (
+                    <option
+                      key={`${place.type}-${place.id}`}
+                      value={`${place.type}-${place.id}`}
+                    >
+                      {place.name}
                     </option>
                   ))}
                 </select>

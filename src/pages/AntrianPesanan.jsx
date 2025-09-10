@@ -110,7 +110,6 @@ const AntrianPesanan = () => {
       }
       if (antrianResponse.status == 200) {
         setDataAntrianPesanan(antrianResponse.data.data);
-        console.log("antrianResponse: ", antrianResponse);
       }
     } catch (error) {
       console.log("error: ", error);
@@ -171,39 +170,6 @@ const AntrianPesanan = () => {
     }
   };
 
-  const fetchCustomerData = async () => {
-    try {
-      const customerResponse = await getCustomers();
-      if (customerResponse.status == 200) {
-        setCustomers(customerResponse.data.data);
-      }
-    } catch (error) {
-      alert("Gagal memuat data toko: ", error);
-      console.log("error: ", error);
-    }
-  };
-
-  const fetchItemPrices = async () => {
-    try {
-      const priceResponse = await getItemPrices();
-      const discountResponse = await getItemPricesDiscount();
-      if (priceResponse.status == 200 && discountResponse.status == 200) {
-        setItemPrices(priceResponse.data.data);
-        setItemPriceDiscounts(discountResponse.data.data);
-      }
-    } catch (error) {
-      console.log("error :", error);
-    }
-  };
-
-  const setSelectedItemHandle = (item) => {
-    setSelectedItem(item);
-    setCustomerName(item.customer.name);
-    setItemName(item.item.name);
-    setQuantity(item.quantity);
-    setUnit(item.saleUnit);
-  };
-
   const fetchCurentStore = async () => {
     try {
       const placementResponse = await getCurrentUserStorePlacement();
@@ -237,6 +203,39 @@ const AntrianPesanan = () => {
     } catch (error) {
       console.log("error :", error);
     }
+  };
+
+  const fetchCustomerData = async () => {
+    try {
+      const customerResponse = await getCustomers();
+      if (customerResponse.status == 200) {
+        setCustomers(customerResponse.data.data);
+      }
+    } catch (error) {
+      alert("Gagal memuat data toko: ", error);
+      console.log("error: ", error);
+    }
+  };
+
+  const fetchItemPrices = async () => {
+    try {
+      const priceResponse = await getItemPrices();
+      const discountResponse = await getItemPricesDiscount();
+      if (priceResponse.status == 200 && discountResponse.status == 200) {
+        setItemPrices(priceResponse.data.data);
+        setItemPriceDiscounts(discountResponse.data.data);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const setSelectedItemHandle = (item) => {
+    setSelectedItem(item);
+    setCustomerName(item.customer.name);
+    setItemName(item.item.name);
+    setQuantity(item.quantity);
+    setUnit(item.saleUnit);
   };
 
   const getItemSummary = async () => {
@@ -486,19 +485,25 @@ const AntrianPesanan = () => {
                 <div className="flex items-center rounded px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
                   <MdStore size={18} />
                   <select
-                    value={selectedPlace.id}
+                    value={
+                      selectedPlace
+                        ? `${selectedPlace.type}-${selectedPlace.id}`
+                        : ""
+                    }
                     onChange={(e) => {
-                      const selectedPlace = placeOptions.find(
-                        (item) => item.id == e.target.value
+                      const [type, id] = e.target.value.split("-");
+                      const selected = placeOptions.find(
+                        (item) => item.type === type && String(item.id) === id
                       );
-                      setSelectedPlace(selectedPlace);
+                      console.log("selectedPlace: ", selected);
+                      setSelectedPlace(selected);
                     }}
                     className="ml-2 bg-transparent text-base font-medium outline-none"
                   >
                     {placeOptions.map((place) => (
                       <option
                         key={`${place.type}-${place.id}`}
-                        value={place.id}
+                        value={`${place.type}-${place.id}`}
                       >
                         {place.name}
                       </option>
