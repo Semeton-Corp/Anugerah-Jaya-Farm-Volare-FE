@@ -470,3 +470,19 @@ export const getWarehouseSaleQueues = (warehouseId) => {
     params: { warehouseId: warehouseId },
   });
 };
+
+export const createWarehouseSale = (payload) => {
+  return api.post(`/warehouses/sales`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const createWarehouseSaleQueue = (payload) => {
+  return api.post(`/warehouses/queues`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

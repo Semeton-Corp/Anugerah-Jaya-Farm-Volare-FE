@@ -39,6 +39,8 @@ import { getCurrentUserStorePlacement } from "../services/placement";
 import ReceiptModal from "../components/Receipt";
 import { GoAlertFill } from "react-icons/go";
 import {
+  createWarehouseSale,
+  createWarehouseSaleQueue,
   getEggWarehouseItemSummary,
   getWarehouses,
 } from "../services/warehouses";
@@ -396,17 +398,12 @@ const InputDataPesanan = () => {
   };
 
   const submitHandle = async () => {
-    const storeSalePayment = {
-      paymentDate: formatDateToDDMMYYYY(paymentDate),
-      nominal: nominal.toString(),
-      paymentProof: paymentProof,
-      paymentMethod: paymentMethod,
-    };
-
     const payload = {
       itemId: selectedItem.id,
       saleUnit: unit,
-      storeId: parseInt(selectedStore),
+      ...(selectedPlace.type == "store"
+        ? { storeId: parseInt(selectedPlace.id) }
+        : { warehouseId: parseInt(selectedPlace.id) }),
       quantity,
       price: itemPrice.toString(),
       discount,
@@ -422,14 +419,21 @@ const InputDataPesanan = () => {
     console.log("create payload is ready: ", payload);
 
     try {
-      const response = await createStoreSale(payload);
+      let submitResponse;
+      if (selectedPlace.type == "store") {
+        submitResponse = await createStoreSale(payload);
+      } else if (selectedPlace.type == "warehouse") {
+        submitResponse = await createWarehouseSale(payload);
+      } else {
+        alert("❌ Terjadi kesalahan saat membuat data antrian!");
+        return;
+      }
 
-      if (response.status == 201) {
+      if (submitResponse.status == 201) {
         navigate(-1, { state: { refetch: true } });
       }
     } catch (error) {
-      console.log("response: ", error);
-
+      console.log("error: ", error);
       if (
         error.response.data.message == "nominal is not equal to total price"
       ) {
@@ -457,7 +461,7 @@ const InputDataPesanan = () => {
     if (
       !customerType ||
       !selectedItem.id ||
-      !selectedStore ||
+      !selectedPlace ||
       !quantity ||
       !unit ||
       !sendDate
@@ -478,13 +482,25 @@ const InputDataPesanan = () => {
               customerId: selectedCustomerId,
             }),
         itemId: selectedItem.id,
-        storeId: parseInt(selectedStore),
+        ...(selectedPlace.type == "store"
+          ? { storeId: parseInt(selectedPlace.id) }
+          : { warehouseId: parseInt(selectedPlace.id) }),
         quantity: quantity,
         saleUnit: unit,
         sendDate: formatDateToDDMMYYYY(sendDate),
       };
 
-      const queueResponse = await createStoreSaleQueue(payload);
+      let queueResponse;
+
+      if (selectedPlace.type == "store") {
+        queueResponse = await createStoreSaleQueue(payload);
+      } else if (selectedPlace.type == "warehouse") {
+        queueResponse = await createWarehouseSaleQueue(payload);
+      } else {
+        alert("❌ Terjadi kesalahan saat membuat data antrian!");
+        return;
+      }
+
       // console.log("queueResponse: ", queueResponse);
       if (queueResponse.status === 201) {
         const newPath = location.pathname.replace(
@@ -494,7 +510,11 @@ const InputDataPesanan = () => {
         navigate(newPath);
       }
     } catch (error) {
-      alert("❌Terjadi kesalahan dalam menambahkan data antrian!");
+      if (error.response.data.message == "customer id is required") {
+        alert("❌Masukkan nomor pelanggan terlebih dahulu!");
+      } else {
+        alert("❌Terjadi kesalahan dalam menambahkan data antrian!");
+      }
       console.log("error :", error);
     }
   };
@@ -632,14 +652,19 @@ const InputDataPesanan = () => {
 
   useEffect(() => {
     const subtotal = Math.max(
-      (itemTotalPrice || 0) - (itemPriceDiscount || 0),
+      Number(itemTotalPrice || 0) - Number(itemPriceDiscount || 0),
       0
     );
-    const paid = (tablePayments || []).reduce(
-      (s, p) => s + Number(p.nominal || 0),
-      0
-    );
-    setRemaining(Math.max(subtotal - paid, 0));
+
+    const paid = (tablePayments || []).reduce((sum, payment) => {
+      return sum + Number(payment.nominal || 0);
+    }, 0);
+
+    const remainingAmount = Math.max(subtotal - paid, 0);
+
+    console.log({ subtotal, paid, remainingAmount, tablePayments });
+
+    setRemaining(remainingAmount);
   }, [itemTotalPrice, itemPriceDiscount, tablePayments]);
 
   useEffect(() => {
@@ -685,12 +710,6 @@ const InputDataPesanan = () => {
     telurRetakIkat,
     telurBonyokPlastik,
   ]);
-
-  useEffect(() => {
-    if (!id) {
-      setRemaining(itemTotalPrice - itemPriceDiscount - nominal);
-    }
-  }, [nominal, itemTotalPrice, itemPriceDiscount]);
 
   useEffect(() => {
     if (quantity) {
@@ -803,7 +822,7 @@ const InputDataPesanan = () => {
           {userRole != "Pekerja Toko" && (
             <div className="w-full">
               <label className="block font-medium  mt-4">
-                {id ? "Toko" : "Pilih Toko"}
+                {id ? "Lokasi" : "Pilih Lokasi"}
               </label>
               {isEditable && !id && userRole != "Pekerja Toko" ? (
                 <select
@@ -1194,6 +1213,14 @@ const InputDataPesanan = () => {
               {tablePayments && tablePayments.length > 0 ? (
                 tablePayments.map((payment, index) => {
                   const date = payment.date || payment.paymentDate;
+
+                  const totalPaidSoFar = tablePayments
+                    .slice(0, index + 1)
+                    .reduce((sum, p) => sum + Number(p.nominal || 0), 0);
+
+                  const remaining =
+                    itemTotalPrice - itemPriceDiscount - totalPaidSoFar;
+
                   return (
                     <tr key={payment.id || index}>
                       <td className="px-4 py-2">{date}</td>
@@ -1202,11 +1229,10 @@ const InputDataPesanan = () => {
                         Rp {Intl.NumberFormat("id-ID").format(payment.nominal)}
                       </td>
                       <td className="px-4 py-2">
-                        {payment.remaining !== undefined
-                          ? `Rp ${Intl.NumberFormat("id-ID").format(
-                              payment.remaining
-                            )}`
-                          : "-"}
+                        Rp{" "}
+                        {Intl.NumberFormat("id-ID").format(
+                          remaining < 0 ? 0 : remaining
+                        )}
                       </td>
                       <td className="px-4 py-2 underline cursor-pointer">
                         {payment.paymentProof ? "Lihat Bukti" : "-"}
@@ -1298,20 +1324,18 @@ const InputDataPesanan = () => {
                 isOutOfStock && !id ? "text-gray-500/20" : "text-black"
               }`}
             >
-              Sisa cicilan
+              Sisa Cicilan
             </div>
             <div
               className={`font-semibold text-3xl flex ${
                 isOutOfStock && !id ? "text-gray-500/20" : "text-black"
               }`}
             >
-              <p className="me-2">RP</p>
-              <p className="">
-                {remaining === 0
+              <p className="me-2">Rp</p>
+              <p>
+                {isOutOfStock && !id
                   ? "0"
-                  : isOutOfStock && !id
-                  ? "0"
-                  : Intl.NumberFormat("id-ID").format(remaining)}
+                  : Intl.NumberFormat("id-ID").format(remaining || 0)}
               </p>
             </div>
           </div>
@@ -1410,7 +1434,6 @@ const InputDataPesanan = () => {
               <option value="Non Tunai">Non Tunai</option>
             </select>
 
-            {/* Nominal Bayar */}
             <label className="block mb-2 font-medium">Nominal Bayar</label>
             <input
               type="number"
@@ -1439,11 +1462,9 @@ const InputDataPesanan = () => {
               onChange={(e) => setPaymentDate(e.target.value)}
             />
 
-            {/* Bukti Pembayaran */}
             <label className="block mb-2 font-medium">Bukti Pembayaran</label>
             <input type="file" className="w-full border p-2 rounded mb-4" />
 
-            {/* Buttons */}
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => {
@@ -1467,7 +1488,7 @@ const InputDataPesanan = () => {
 
                   const newPayment = {
                     paymentDate: formatDateToDDMMYYYY(paymentDate),
-                    nominal: nominal,
+                    nominal: Number(nominal ?? nominal ?? 0),
                     paymentMethod,
                     paymentProof,
                   };

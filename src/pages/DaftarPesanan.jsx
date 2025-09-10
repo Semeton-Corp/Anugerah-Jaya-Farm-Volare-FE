@@ -187,7 +187,11 @@ const DaftarPesanan = () => {
 
       console.log("antrianResponse: ", antrianResponse);
       if (antrianResponse.status == 200) {
-        setDataAntrianPesanan(antrianResponse.data.data.storeSales);
+        if (selectedPlace.type == "store") {
+          setDataAntrianPesanan(antrianResponse.data.data.storeSales);
+        } else if (selectedPlace.type == "warehouse") {
+          setDataAntrianPesanan(antrianResponse.data.data.warehouseSales);
+        }
       }
     } catch (error) {
       console.log("error: ", error);

@@ -107,7 +107,7 @@ const InformasiPembeli = ({
             <div className="relative w-full">
               <div className="flex items-center border border-black rounded overflow-hidden w-full">
                 <input
-                  type="text"
+                  type="number"
                   placeholder="Masukkan nomor telepon"
                   className="flex-grow px-3 py-2 outline-none bg-gray-100"
                   value={phone}
