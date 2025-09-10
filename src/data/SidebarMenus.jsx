@@ -52,7 +52,7 @@ export const sidebarMenus = {
       tabName: "Kinerja",
       element: <OverviewOwner />,
       subTabs: [
-        { tabName: "Overview Kinerja", path: "overview-kinerja" },
+        { tabName: "Ringkasan Kinerja", path: "ringkasan-kinerja" },
         { tabName: "Detail Kinerja Ayam", path: "detail-kinerja-ayam" },
         { tabName: "Pengadaan DOC", path: "detail-kinerja-ayam" },
         { tabName: "Jual Ayam Afkir", path: "detail-kinerja-ayam" },
@@ -331,8 +331,8 @@ export const sidebarMenus = {
       tabName: "Kasir",
       element: <OverviewOwner />,
       subTabs: [
-        { tabName: "Antrian Pesanan", path: "antrian-pesanan" },
         { tabName: "Daftar Pesanan", path: "daftar-pesanan" },
+        { tabName: "Antrian Pesanan", path: "antrian-pesanan" },
       ],
     },
     {

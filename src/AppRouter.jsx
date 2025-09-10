@@ -255,7 +255,7 @@ const AppRouter = createBrowserRouter([
           {
             path: "kinerja",
             children: [
-              { path: "overview-kinerja", element: <Kinerja /> },
+              { path: "ringkasan-kinerja", element: <Kinerja /> },
               {
                 path: "detail-kinerja-ayam",
                 element: <DetailKinerjaAyam />,

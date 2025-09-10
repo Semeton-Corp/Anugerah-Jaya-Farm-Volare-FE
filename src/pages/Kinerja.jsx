@@ -186,6 +186,7 @@ const Kinerja = () => {
   useEffect(() => {
     fetchPerformanceOverview();
   }, [selectedChickenCage, selectedSite]);
+  
   return (
     <>
       {isDetailPage ? (

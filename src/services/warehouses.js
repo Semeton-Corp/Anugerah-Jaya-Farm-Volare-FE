@@ -442,3 +442,20 @@ export const createRawFeed = (payload) => {
     },
   });
 };
+/////////////////////////SALAH
+export const getListWarehouseSales = () => {
+  return api.post(`/`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const getWarehouseSaleQueues = (warehouseId) => {
+  return api.get(`/warehouses/queues`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    params: { warehouseId: warehouseId },
+  });
+};

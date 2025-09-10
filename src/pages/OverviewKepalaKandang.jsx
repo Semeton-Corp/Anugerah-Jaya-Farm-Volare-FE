@@ -34,6 +34,9 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { useEffect } from "react";
+import { getChickenAndWarehousePerformanceOverview } from "../services/chickenMonitorings";
+import { getWarehouses, getWarehousesByLocation } from "../services/warehouses";
 
 const ayamChartData = [
   {
@@ -180,12 +183,29 @@ const usiaAyamData = [
 
 const OverviewKepalaKandang = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const userRole = localStorage.getItem("role");
+
+  const [selectedSite] = useState(
+    userRole === "Owner" ? 0 : localStorage.getItem("locationId")
+  );
+
   const detailPages = ["detail-kinerja-ayam"];
 
   const isDetailPage = detailPages.some((segment) =>
     location.pathname.includes(segment)
   );
-  const navigate = useNavigate();
+
+  const [warehouses, setWarehouses] = useState();
+  const [selectedWarehouse, setSelectedWarehouse] = useState();
+
+  const [graphFilterOptions, setGraphFilterOptions] = useState([
+    "Minggu Ini",
+    "Bulan Ini",
+    "Tahun Ini",
+  ]);
+  const [graphFilter, setGraphFilter] = useState("Minggu Ini");
 
   const detailKinerjaAyamHandle = () => {
     const currentPath = location.pathname;
@@ -194,7 +214,39 @@ const OverviewKepalaKandang = () => {
     navigate(detailPath);
   };
 
-  const [selectedFilter, setSelectedFilter] = useState("Rentabilitas");
+  const fetchOverviewData = async () => {
+    try {
+      console.log("graphFilter: ", graphFilter);
+      const overviewData = await getChickenAndWarehousePerformanceOverview(
+        graphFilter
+      );
+      console.log("overviewData: ", overviewData);
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const fetchWarehouseData = async () => {
+    try {
+      const warehouseResponse = await getWarehouses(selectedSite);
+      console.log("warehouseResponse: ", warehouseResponse);
+      if (warehouseResponse.status == 200) {
+        setWarehouses(warehouseResponse.data.data);
+        setSelectedWarehouse(warehouseResponse.data.data[0].id);
+        setCornCapacity(warehouseResponse.data.data[0].cornCapacity);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchWarehouseData();
+  }, []);
+
+  useEffect(() => {
+    fetchOverviewData();
+  }, [selectedWarehouse]);
 
   return (
     <>
@@ -204,28 +256,9 @@ const OverviewKepalaKandang = () => {
         <div className="flex flex-col px-4 py-3 gap-4 ">
           <div className="flex justify-between mb-2 flex-wrap gap-4">
             <h1 className="text-3xl font-bold">Kinerja</h1>
-            <div className="flex gap-2">
-              <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-                <FaLocationDot size={18} />
-                <div className="text-base font-medium ms-2">Semua Site</div>
-              </div>
-              <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-                <GiBirdCage size={18} />
-                <div className="text-base font-medium ms-2">Semua kandang</div>
-              </div>
-
-              <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-                <PiCalendarBlank size={18} />
-                <div className="text-base font-medium ms-2">
-                  Hari ini (20 Mar 2025)
-                </div>
-              </div>
-            </div>
           </div>
 
-          {/* Telur  ok, retak, pecah, reject*/}
           <div className="flex md:grid-cols-2 gap-4 justify-between">
-            {/* telur OK */}
             <div className="p-4 w-full rounded-md bg-green-100">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Konsumsi pakan</h2>
@@ -236,19 +269,16 @@ const OverviewKepalaKandang = () => {
                   <LuWheat size={24} color="white" />
                 </div>
                 <div className="flex items-center">
-                  {/* popuasl */}
                   <p className="text-3xl font-semibold me-3">15</p>
                   <p className="text-xl font-semibold">Kg</p>
                 </div>
               </div>
             </div>
 
-            {/* ayam sakit */}
             <div className="p-4 w-full rounded-md bg-green-100">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">HDP rata-rata</h2>
               </div>
-
               <div className="flex flex-wrap gap-4">
                 <div className="flex flex-wrap gap-4 items-center">
                   <div className="p-2 rounded-xl bg-green-700">
@@ -261,14 +291,12 @@ const OverviewKepalaKandang = () => {
                 </div>
               </div>
             </div>
-            {/* penjualan telur */}
             <div className="p-4 w-full rounded-md bg-green-100">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Berat telur rata-rata</h2>
               </div>
 
               <div className="flex flex-wrap gap-4">
-                {/* item butir */}
                 <div className="flex flex-wrap gap-4 items-center">
                   <div className="p-2 rounded-xl bg-green-700">
                     <MdEgg size={24} color="white" />
@@ -280,20 +308,17 @@ const OverviewKepalaKandang = () => {
                 </div>
               </div>
             </div>
-            {/* penjualan telur */}
             <div className="p-4 w-full rounded-md bg-green-100">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">FCR rata-rata</h2>
               </div>
 
               <div className="flex flex-wrap gap-4">
-                {/* item butir */}
                 <div className="flex flex-wrap gap-4">
                   <div className="flex flex-wrap gap-4 items-center">
                     <div className="p-2 rounded-xl bg-green-700">
                       <GiChicken size={24} color="white" />
                     </div>
-                    {/* popuasl */}
                     <div className="flex">
                       <p className="text-3xl font-semibold pe-2">2.1</p>
                     </div>
@@ -302,7 +327,6 @@ const OverviewKepalaKandang = () => {
               </div>
             </div>
 
-            {/* telur OK */}
             <div className="p-4 w-full rounded-md bg-green-100">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Mortalitas rata-rata</h2>
@@ -313,8 +337,116 @@ const OverviewKepalaKandang = () => {
                   <GiChicken size={24} color="white" />
                 </div>
                 <div>
-                  {/* popuasl */}
                   <p className="text-3xl font-semibold">0.02</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-4">
+            <div className="bg-white flex-1 p-4 border border-black-6 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="text-lg font-semibold">Kinerja Ayam</h2>
+                <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
+                  <FiMaximize2 size={24} color="" />
+                </div>
+              </div>
+
+              <div className="flex w-full gap-4 px-4 justify-center">
+                <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
+                  <div className="flex flex-col justify-center gap-2">
+                    <div className="flex flex-col items-center">
+                      <p className="text-[40px] font-bold">20</p>
+                      <p className="text-xl">Kandang</p>
+                    </div>
+                    <div className="rounded-[4px] bg-[#87FF8B] flex items-center">
+                      <p className="w-full text-center">Produktif</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
+                  <div className="flex flex-col justify-center gap-2">
+                    <div className="flex flex-col items-center">
+                      <p className="text-[40px] font-bold">5</p>
+                      <p className="text-xl">Kandang</p>
+                    </div>
+                    <div className="rounded-[4px] bg-orange-200 flex items-center">
+                      <p className="w-full text-center">Periksa</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white flex-1 p-4 border border-black-6 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="text-lg font-semibold">Stok gudang</h2>
+                <div className="flex gap-4">
+                  <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+                    <MdStore size={18} />
+                    <select
+                      value={selectedWarehouse}
+                      onChange={(e) => {
+                        const warehouseId = e.target.value;
+                        setSelectedWarehouse(warehouseId);
+
+                        const selected = warehouses?.find(
+                          (w) => w.id == warehouseId
+                        );
+                        if (selected) {
+                          setCornCapacity(selected.cornCapacity);
+                        }
+                      }}
+                      className="ml-2 bg-transparent text-base font-medium outline-none"
+                    >
+                      {warehouses?.map((warehouse) => (
+                        <option key={warehouse.id} value={warehouse.id}>
+                          {warehouse.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
+                    <FiMaximize2 size={24} color="" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex w-full gap-4 px-4 justify-center">
+                <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
+                  <div className="flex flex-col justify-center gap-2">
+                    <div className="flex flex-col items-center">
+                      <p className="text-[40px] font-bold">20</p>
+                      <p className="text-xl">Barang</p>
+                    </div>
+                    <div className="rounded-[4px] bg-[#87FF8B] flex items-center">
+                      <p className="w-full text-center">aman</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
+                  <div className="flex flex-col justify-center gap-2">
+                    <div className="flex flex-col items-center">
+                      <p className="text-[40px] font-bold">5</p>
+                      <p className="text-xl">Barang</p>
+                    </div>
+                    <div className="rounded-[4px] bg-[#FF5E5E] flex items-center">
+                      <p className="w-full text-center">kritis</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
+                  <div className="flex flex-col justify-center gap-2">
+                    <div className="flex flex-col items-center">
+                      <p className="text-[40px] font-bold">5</p>
+                      <p className="text-xl">Kandang</p>
+                    </div>
+                    <div className="rounded-[4px] bg-orange-200 flex items-center">
+                      <p className="w-full text-center">Periksa</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -379,95 +511,6 @@ const OverviewKepalaKandang = () => {
                   />
                 </PieChart>
               </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className="flex gap-4">
-            <div className="bg-white flex-1 p-4 border border-black-6 rounded-lg">
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="text-lg font-semibold">Kinerja Ayam</h2>
-                <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
-                  <FiMaximize2 size={24} color="" />
-                </div>
-              </div>
-
-              {/* the items */}
-              <div className="flex w-full gap-4 px-4 justify-center">
-                {/* item 1 */}
-                <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
-                  <div className="flex flex-col justify-center gap-2">
-                    <div className="flex flex-col items-center">
-                      <p className="text-[40px] font-bold">20</p>
-                      <p className="text-xl">Kandang</p>
-                    </div>
-                    <div className="rounded-[4px] bg-[#87FF8B] flex items-center">
-                      <p className="w-full text-center">Produktif</p>
-                    </div>
-                  </div>
-                </div>
-                {/* item 2 */}
-                <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
-                  <div className="flex flex-col justify-center gap-2">
-                    <div className="flex flex-col items-center">
-                      <p className="text-[40px] font-bold">5</p>
-                      <p className="text-xl">Kandang</p>
-                    </div>
-                    <div className="rounded-[4px] bg-orange-200 flex items-center">
-                      <p className="w-full text-center">Periksa</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white flex-1 p-4 border border-black-6 rounded-lg">
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="text-lg font-semibold">Stok gudang</h2>
-                <div className="p-2 rounded-full hover:bg-black-4 cursor-pointer">
-                  <FiMaximize2 size={24} color="" />
-                </div>
-              </div>
-
-              {/* the items */}
-              <div className="flex w-full gap-4 px-4 justify-center">
-                {/* item 1 */}
-                <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
-                  <div className="flex flex-col justify-center gap-2">
-                    <div className="flex flex-col items-center">
-                      <p className="text-[40px] font-bold">20</p>
-                      <p className="text-xl">Barang</p>
-                    </div>
-                    <div className="rounded-[4px] bg-[#87FF8B] flex items-center">
-                      <p className="w-full text-center">aman</p>
-                    </div>
-                  </div>
-                </div>
-                {/* item 2 */}
-                <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
-                  <div className="flex flex-col justify-center gap-2">
-                    <div className="flex flex-col items-center">
-                      <p className="text-[40px] font-bold">5</p>
-                      <p className="text-xl">Barang</p>
-                    </div>
-                    <div className="rounded-[4px] bg-[#FF5E5E] flex items-center">
-                      <p className="w-full text-center">kritis</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* item 3 */}
-                <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
-                  <div className="flex flex-col justify-center gap-2">
-                    <div className="flex flex-col items-center">
-                      <p className="text-[40px] font-bold">5</p>
-                      <p className="text-xl">Kandang</p>
-                    </div>
-                    <div className="rounded-[4px] bg-orange-200 flex items-center">
-                      <p className="w-full text-center">Periksa</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>

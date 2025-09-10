@@ -22,9 +22,17 @@ import { formatDateToDDMMYYYY } from "../utils/dateFormat";
 import { IoLogoWhatsapp } from "react-icons/io";
 import { getItemPrices, getItemPricesDiscount } from "../services/item";
 import AlokasiAntrianModal from "./AlokasiAntrianModal";
-import { getCurrentUserStorePlacement } from "../services/placement";
+import {
+  getCurrentUserStorePlacement,
+  getCurrentUserWarehousePlacement,
+} from "../services/placement";
 import { getCustomers } from "../services/costumer";
 import DeleteModal from "../components/DeleteModal";
+import {
+  getEggWarehouseItemSummary,
+  getWarehouses,
+  getWarehouseSaleQueues,
+} from "../services/warehouses";
 
 const AntrianPesanan = () => {
   const location = useLocation();
@@ -48,8 +56,8 @@ const AntrianPesanan = () => {
   const [selectedItem, setSelectedItem] = useState("");
   const [itemName, setItemName] = useState("");
 
-  const [stores, setStores] = useState([]);
-  const [selectedStore, setSelectedStore] = useState("");
+  const [placeOptions, setPlaceOptions] = useState([]);
+  const [selectedPlace, setSelectedPlace] = useState([]);
 
   const [customers, setCustomers] = useState("");
   const [customerName, setCustomerName] = useState("");
@@ -89,27 +97,99 @@ const AntrianPesanan = () => {
     location.pathname.includes(segment)
   );
 
-  const inputDataPesananHandle = () => {
-    const currentPath = location.pathname;
-    const inputPath = currentPath + "/input-data-pesanan";
-    navigate(inputPath);
-  };
-
-  const editDataPesananHandle = (id) => {
-    const currentPath = location.pathname;
-    const inputPath = currentPath + "/input-data-pesanan/" + id;
-    navigate(inputPath);
-  };
-
   const fetchDataAntrianPesanan = async () => {
     try {
-      const antrianResponse = await getStoreSaleQueues(selectedStore);
-      console.log("antrianResponse: ", antrianResponse);
+      let antrianResponse;
+      if (selectedPlace.type == "store") {
+        antrianResponse = await getStoreSaleQueues(selectedPlace.id);
+      } else if (selectedPlace.type == "warehouse") {
+        antrianResponse = await getWarehouseSaleQueues(selectedPlace.id);
+      } else {
+        alert("❌ Terjadi kesalahan saat memuat data!");
+        return;
+      }
+
       if (antrianResponse.status == 200) {
         setDataAntrianPesanan(antrianResponse.data.data);
+        console.log("antrianResponse: ", antrianResponse);
       }
     } catch (error) {
+      console.log("error: ", error);
       alert("Gagal memuat data antrian pesanan: ", error);
+    }
+  };
+
+  const fetchAllPlaces = async () => {
+    try {
+      const storesResponse = await getStores();
+      const warehousesResponse = await getWarehouses();
+
+      if (storesResponse.status == 200 && warehousesResponse.status == 200) {
+        const stores = storesResponse?.data?.data ?? [];
+        const warehouses = warehousesResponse?.data?.data ?? [];
+
+        const options = [
+          ...stores.map((store) => ({
+            id: store.id,
+            name: store.name,
+            type: "store",
+          })),
+          ...warehouses.map((wh) => ({
+            id: wh.id,
+            name: wh.name,
+            type: "warehouse",
+          })),
+        ];
+
+        setPlaceOptions(options);
+        if (options.length > 0) {
+          setSelectedPlace(options[0]);
+        }
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const fetchAllStores = async () => {
+    try {
+      const siteStoresResponse = await getStores(selectedSite);
+      if (siteStoresResponse.status == 200) {
+        const stores = siteStoresResponse?.data?.data ?? [];
+        const options = [
+          ...stores.map((store) => ({
+            id: store.id,
+            name: store.name,
+            type: "store",
+          })),
+        ];
+        setPlaceOptions(options);
+        setSelectedPlace(options[0]);
+      }
+    } catch (error) {
+      alert("Gagal memuat data toko: ", error);
+      console.log("error: ", error);
+    }
+  };
+
+  const fetchAllWarehouses = async () => {
+    try {
+      const siteWarehousesResponse = await getWarehouses(selectedSite);
+      if (siteWarehousesResponse.status == 200) {
+        const warehouses = siteWarehousesResponse?.data?.data ?? [];
+        const options = [
+          ...warehouses.map((warehouse) => ({
+            id: warehouse.id,
+            name: warehouse.name,
+            type: "warehouse",
+          })),
+        ];
+        setPlaceOptions(options);
+        setSelectedPlace(options[0]);
+      }
+    } catch (error) {
+      alert("Gagal memuat data gudang: ", error);
+      console.log("error: ", error);
     }
   };
 
@@ -130,7 +210,6 @@ const AntrianPesanan = () => {
       const priceResponse = await getItemPrices();
       const discountResponse = await getItemPricesDiscount();
       if (priceResponse.status == 200 && discountResponse.status == 200) {
-        // console.log("priceResponse: ", priceResponse);
         setItemPrices(priceResponse.data.data);
         setItemPriceDiscounts(discountResponse.data.data);
       }
@@ -150,10 +229,32 @@ const AntrianPesanan = () => {
   const fetchCurentStore = async () => {
     try {
       const placementResponse = await getCurrentUserStorePlacement();
-      console.log("placementResponse: ", placementResponse);
       if (placementResponse.status == 200) {
-        const storeId = placementResponse.data.data[0].store.id;
-        setSelectedStore(storeId);
+        const store = placementResponse.data.data[0].store;
+        const selectedStore = {
+          id: store.id,
+          name: store.name,
+          type: "store",
+        };
+        setSelectedPlace(selectedStore);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const fetchCurentWarehouse = async () => {
+    try {
+      const placementResponse = await getCurrentUserWarehousePlacement();
+      if (placementResponse.status == 200) {
+        console.log("placementResponse: ", placementResponse);
+        const warehouse = placementResponse.data.data[0].warehouse;
+        const selectedWarehouse = {
+          id: warehouse.id,
+          name: warehouse.name,
+          type: "warehouse",
+        };
+        setSelectedPlace(selectedWarehouse);
       }
     } catch (error) {
       console.log("error :", error);
@@ -162,8 +263,15 @@ const AntrianPesanan = () => {
 
   const getItemSummary = async () => {
     try {
-      console.log("selectedStore: ", selectedStore);
-      const summaryResponse = await getEggStoreItemSummary(selectedStore);
+      let summaryResponse;
+      if (selectedPlace.type == "store") {
+        summaryResponse = await getEggStoreItemSummary(selectedPlace.id);
+      } else if (selectedPlace.type == "warehouse") {
+        summaryResponse = await getEggWarehouseItemSummary(selectedPlace.id);
+      } else {
+        alert("❌ Terjadi kesalahan saat memuat data!");
+        return;
+      }
       console.log("summaryResponse: ", summaryResponse);
       if (summaryResponse.status == 200) {
         const eggSummaries = summaryResponse.data.data;
@@ -234,20 +342,6 @@ const AntrianPesanan = () => {
     setItemTotalPrice(totalitemPrice);
     setItemPriceDiscount(totalDiscount);
     setTotal(totalitemPrice - totalDiscount);
-  };
-
-  const fetchAllStores = async () => {
-    try {
-      console.log("selectedSite: ", selectedSite);
-      const response = await getStores(selectedSite);
-      if (response.status == 200) {
-        setStores(response.data.data);
-        setSelectedStore(response.data.data[0].id);
-      }
-    } catch (error) {
-      alert("Gagal memuat data toko: ", error);
-      console.log("error: ", error);
-    }
   };
 
   const submitHandle = async () => {
@@ -363,25 +457,28 @@ const AntrianPesanan = () => {
     }
   }
 
-  useState(() => {
+  useEffect(() => {
     fetchItemPrices();
     fetchCustomerData();
-    if (userRole != "Pekerja Toko") {
-      fetchAllStores();
-    } else {
+    if (userRole == "Owner") {
+      fetchAllPlaces();
+    } else if (userRole == "Kepala Kandang") {
+      fetchAllWarehouses();
+    } else if (userRole == "Pekerja Toko") {
       fetchCurentStore();
+    } else {
+      fetchCurentWarehouse();
     }
   }, []);
 
   useEffect(() => {
-    if (selectedStore) {
-      getItemSummary();
+    if (selectedPlace.type) {
       fetchDataAntrianPesanan();
+      getItemSummary();
     }
-  }, [selectedStore]);
+  }, [selectedPlace]);
 
   useEffect(() => {
-    fetchDataAntrianPesanan();
     if (location.state?.refetch) {
       fetchDataAntrianPesanan();
       window.history.replaceState({}, document.title);
@@ -407,22 +504,31 @@ const AntrianPesanan = () => {
           <div className="flex justify-between mb-2 flex-wrap gap-4">
             <h1 className="text-3xl font-bold">Antrian Pesanan</h1>
             <div className="flex gap-3 items-center">
-              {userRole != "Pekerja Toko" && (
-                <div className="flex items-center rounded px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-                  <MdStore size={18} />
-                  <select
-                    value={selectedStore}
-                    onChange={(e) => setSelectedStore(e.target.value)}
-                    className="ml-2 bg-transparent text-base font-medium outline-none"
-                  >
-                    {stores.map((site) => (
-                      <option key={site.id} value={site.id}>
-                        {site.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+              {userRole == "Owner" ||
+                (userRole == "Kepala Kandang" && (
+                  <div className="flex items-center rounded px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+                    <MdStore size={18} />
+                    <select
+                      value={selectedPlace.id}
+                      onChange={(e) => {
+                        const selectedPlace = placeOptions.find(
+                          (item) => item.id == e.target.value
+                        );
+                        setSelectedPlace(selectedPlace);
+                      }}
+                      className="ml-2 bg-transparent text-base font-medium outline-none"
+                    >
+                      {placeOptions.map((place) => (
+                        <option
+                          key={`${place.type}-${place.id}`}
+                          value={place.id}
+                        >
+                          {place.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
               <div className="text-base flex gap-2">
                 <p>{`Hari ini (${getTodayDateInBahasa()})`}</p>
               </div>
@@ -501,7 +607,7 @@ const AntrianPesanan = () => {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-green-700 text-white text-center">
-                    <th className="py-2 px-4">Antiran</th>
+                    <th className="py-2 px-4">Antrian</th>
                     <th className="py-2 px-4">Nama Barang</th>
                     <th className="py-2 px-4">Satuan</th>
                     <th className="py-2 px-4">Jumlah</th>
