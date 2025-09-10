@@ -209,7 +209,6 @@ const InputDataPesanan = () => {
       console.log("response fetch detail: ", response);
 
       if (response.status == 200) {
-        console.log("test: ");
         setSelectedStore(response.data.data.store.id);
         setCustomerName(response.data.data.customer.name);
         setPhone(response.data.data.customer.phoneNumber);
@@ -305,51 +304,6 @@ const InputDataPesanan = () => {
       console.log("error :", error);
     }
   };
-
-  //START useEffect
-  useEffect(() => {
-    if (userRole == "Owner") {
-      fetchStoresData();
-    } else {
-      fetchStorePlacement();
-    }
-    fetchCustomerData();
-    fetchItemPrices();
-    fetchItemsData(selectedStore);
-  }, []);
-
-  useEffect(() => {
-    if (selectedStore) {
-      fetchItemsData(selectedStore);
-      getItemSummary();
-    }
-  }, [selectedStore]);
-
-  useEffect(() => {
-    if (!selectedItem) return;
-
-    const name = selectedItem.name;
-    const selectedUnit = unit;
-    const available = getAvailableStock(name, selectedUnit);
-
-    if (quantity > available) {
-      setIsOutOfStock(true);
-    } else {
-      setIsOutOfStock(false);
-    }
-  }, [quantity, selectedItem, unit]);
-
-  useEffect(() => {
-    if (!id) {
-      setRemaining(itemTotalPrice - itemPriceDiscount - nominal);
-    }
-  }, [nominal, itemTotalPrice, itemPriceDiscount]);
-
-  useEffect(() => {
-    if (quantity) {
-      getPrice();
-    }
-  }, [selectedItem, transactionCount, quantity, unit]);
 
   const submitHandle = async () => {
     const storeSalePayment = {
@@ -458,7 +412,10 @@ const InputDataPesanan = () => {
   const editSubmitHandle = async () => {
     const payload = {
       quantity: quantity,
-      sendDate: formatDateToDDMMYYYY(sendDate),
+      sendDate: formatDateToDDMMYYYY(toISODate(sendDate)),
+      discount: discount,
+      price: price,
+      saleUnit: unit,
     };
 
     try {
@@ -595,6 +552,50 @@ const InputDataPesanan = () => {
     );
     setRemaining(Math.max(subtotal - paid, 0));
   }, [itemTotalPrice, itemPriceDiscount, tablePayments]);
+
+  useEffect(() => {
+    if (userRole == "Owner") {
+      fetchStoresData();
+    } else {
+      fetchStorePlacement();
+    }
+    fetchCustomerData();
+    fetchItemPrices();
+    fetchItemsData(selectedStore);
+  }, []);
+
+  useEffect(() => {
+    if (selectedStore) {
+      fetchItemsData(selectedStore);
+      getItemSummary();
+    }
+  }, [selectedStore]);
+
+  useEffect(() => {
+    if (!selectedItem) return;
+
+    const name = selectedItem.name;
+    const selectedUnit = unit;
+    const available = getAvailableStock(name, selectedUnit);
+
+    if (quantity > available) {
+      setIsOutOfStock(true);
+    } else {
+      setIsOutOfStock(false);
+    }
+  }, [quantity, selectedItem, unit]);
+
+  useEffect(() => {
+    if (!id) {
+      setRemaining(itemTotalPrice - itemPriceDiscount - nominal);
+    }
+  }, [nominal, itemTotalPrice, itemPriceDiscount]);
+
+  useEffect(() => {
+    if (quantity) {
+      getPrice();
+    }
+  }, [selectedItem, transactionCount, quantity, unit]);
 
   return (
     <div className="flex flex-col px-4 py-3 gap-4 ">
@@ -1220,7 +1221,7 @@ const InputDataPesanan = () => {
 
           <div
             onClick={() => {
-              if (isOutOfStock) {
+              if (isOutOfStock && !id) {
                 queueHandle();
               } else if (id) {
                 editSubmitHandle();

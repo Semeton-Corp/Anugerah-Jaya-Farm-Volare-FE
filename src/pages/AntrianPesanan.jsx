@@ -108,7 +108,6 @@ const AntrianPesanan = () => {
         alert("❌ Terjadi kesalahan saat memuat data!");
         return;
       }
-
       if (antrianResponse.status == 200) {
         setDataAntrianPesanan(antrianResponse.data.data);
         console.log("antrianResponse: ", antrianResponse);
@@ -148,27 +147,6 @@ const AntrianPesanan = () => {
       }
     } catch (error) {
       console.log("error :", error);
-    }
-  };
-
-  const fetchAllStores = async () => {
-    try {
-      const siteStoresResponse = await getStores(selectedSite);
-      if (siteStoresResponse.status == 200) {
-        const stores = siteStoresResponse?.data?.data ?? [];
-        const options = [
-          ...stores.map((store) => ({
-            id: store.id,
-            name: store.name,
-            type: "store",
-          })),
-        ];
-        setPlaceOptions(options);
-        setSelectedPlace(options[0]);
-      }
-    } catch (error) {
-      alert("Gagal memuat data toko: ", error);
-      console.log("error: ", error);
     }
   };
 
@@ -504,31 +482,30 @@ const AntrianPesanan = () => {
           <div className="flex justify-between mb-2 flex-wrap gap-4">
             <h1 className="text-3xl font-bold">Antrian Pesanan</h1>
             <div className="flex gap-3 items-center">
-              {userRole == "Owner" ||
-                (userRole == "Kepala Kandang" && (
-                  <div className="flex items-center rounded px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
-                    <MdStore size={18} />
-                    <select
-                      value={selectedPlace.id}
-                      onChange={(e) => {
-                        const selectedPlace = placeOptions.find(
-                          (item) => item.id == e.target.value
-                        );
-                        setSelectedPlace(selectedPlace);
-                      }}
-                      className="ml-2 bg-transparent text-base font-medium outline-none"
-                    >
-                      {placeOptions.map((place) => (
-                        <option
-                          key={`${place.type}-${place.id}`}
-                          value={place.id}
-                        >
-                          {place.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                ))}
+              {(userRole == "Owner" || userRole == "Kepala Kandang") && (
+                <div className="flex items-center rounded px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+                  <MdStore size={18} />
+                  <select
+                    value={selectedPlace.id}
+                    onChange={(e) => {
+                      const selectedPlace = placeOptions.find(
+                        (item) => item.id == e.target.value
+                      );
+                      setSelectedPlace(selectedPlace);
+                    }}
+                    className="ml-2 bg-transparent text-base font-medium outline-none"
+                  >
+                    {placeOptions.map((place) => (
+                      <option
+                        key={`${place.type}-${place.id}`}
+                        value={place.id}
+                      >
+                        {place.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="text-base flex gap-2">
                 <p>{`Hari ini (${getTodayDateInBahasa()})`}</p>
               </div>

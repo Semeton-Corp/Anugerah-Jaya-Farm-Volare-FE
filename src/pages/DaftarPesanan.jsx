@@ -11,13 +11,28 @@ import {
   getTodayDateInBahasa,
 } from "../utils/dateFormat";
 import { useState } from "react";
-import { getListStoreSale, sendStoreSale } from "../services/stores";
+import { getListStoreSale, getStores, sendStoreSale } from "../services/stores";
 import { useEffect } from "react";
 import { FaMoneyBillWave } from "react-icons/fa6";
+import {
+  getListWarehouseSales,
+  getWarehouses,
+  getWarehouseSaleQueues,
+} from "../services/warehouses";
+import {
+  getCurrentUserStorePlacement,
+  getCurrentUserWarehousePlacement,
+} from "../services/placement";
 
 const DaftarPesanan = () => {
+  const userRole = localStorage.getItem("role");
   const location = useLocation();
   const navigate = useNavigate();
+
+  const [selectedSite] = useState(
+    userRole === "Owner" ? 0 : localStorage.getItem("locationId")
+  );
+
   const [dataAntrianPesanan, setDataAntrianPesanan] = useState([]);
   const [showSendModal, setShowSendModal] = useState(false);
   const [selectedSendId, setSelectedSendId] = useState("");
@@ -25,6 +40,9 @@ const DaftarPesanan = () => {
   const [page, setPage] = useState(1);
   const [paymentStatus, setPaymentStatus] = useState("");
   const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
+
+  const [placeOptions, setPlaceOptions] = useState([]);
+  const [selectedPlace, setSelectedPlace] = useState([]);
 
   const dateInputRef = useRef(null);
   const openDatePicker = () => {
@@ -59,19 +77,123 @@ const DaftarPesanan = () => {
     }
   };
 
+  const fetchAllPlaces = async () => {
+    try {
+      const storesResponse = await getStores();
+      const warehousesResponse = await getWarehouses();
+
+      if (storesResponse.status == 200 && warehousesResponse.status == 200) {
+        const stores = storesResponse?.data?.data ?? [];
+        const warehouses = warehousesResponse?.data?.data ?? [];
+
+        const options = [
+          ...stores.map((store) => ({
+            id: store.id,
+            name: store.name,
+            type: "store",
+          })),
+          ...warehouses.map((wh) => ({
+            id: wh.id,
+            name: wh.name,
+            type: "warehouse",
+          })),
+        ];
+
+        setPlaceOptions(options);
+        if (options.length > 0) {
+          setSelectedPlace(options[0]);
+        }
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const fetchAllWarehouses = async () => {
+    try {
+      const siteWarehousesResponse = await getWarehouses(selectedSite);
+      if (siteWarehousesResponse.status == 200) {
+        const warehouses = siteWarehousesResponse?.data?.data ?? [];
+        const options = [
+          ...warehouses.map((warehouse) => ({
+            id: warehouse.id,
+            name: warehouse.name,
+            type: "warehouse",
+          })),
+        ];
+        setPlaceOptions(options);
+        setSelectedPlace(options[0]);
+      }
+    } catch (error) {
+      alert("Gagal memuat data gudang: ", error);
+      console.log("error: ", error);
+    }
+  };
+
+  const fetchCurentStore = async () => {
+    try {
+      const placementResponse = await getCurrentUserStorePlacement();
+      if (placementResponse.status == 200) {
+        const store = placementResponse.data.data[0].store;
+        const selectedStore = {
+          id: store.id,
+          name: store.name,
+          type: "store",
+        };
+        setSelectedPlace(selectedStore);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
+  const fetchCurentWarehouse = async () => {
+    try {
+      const placementResponse = await getCurrentUserWarehousePlacement();
+      if (placementResponse.status == 200) {
+        console.log("placementResponse: ", placementResponse);
+        const warehouse = placementResponse.data.data[0].warehouse;
+        const selectedWarehouse = {
+          id: warehouse.id,
+          name: warehouse.name,
+          type: "warehouse",
+        };
+        setSelectedPlace(selectedWarehouse);
+      }
+    } catch (error) {
+      console.log("error :", error);
+    }
+  };
+
   const fetchDataAntrianPesanan = async () => {
     try {
       const date = convertToInputDateFormat(selectedDate);
-      const response = await getListStoreSale(
-        date,
-        paymentStatus || undefined,
-        page
-      );
-      console.log("ListResponse: ", response);
-      if (response.status == 200) {
-        setDataAntrianPesanan(response.data.data.storeSales);
+      let antrianResponse;
+      if (selectedPlace.type == "store") {
+        antrianResponse = await getListStoreSale(
+          date,
+          paymentStatus || undefined,
+          page,
+          selectedPlace.id
+        );
+      } else if (selectedPlace.type == "warehouse") {
+        antrianResponse = await getListWarehouseSales(
+          date,
+          paymentStatus || undefined,
+          page,
+          selectedPlace.id
+        );
+      } else {
+        alert("❌ Terjadi kesalahan saat memuat data!");
+        return;
+      }
+
+      console.log("antrianResponse: ", antrianResponse);
+      if (antrianResponse.status == 200) {
+        setDataAntrianPesanan(antrianResponse.data.data.storeSales);
       }
     } catch (error) {
+      console.log("error: ", error);
       alert("Gagal memuat data antrian pesanan: ", error);
     }
   };
@@ -89,16 +211,32 @@ const DaftarPesanan = () => {
   };
 
   useEffect(() => {
-    fetchDataAntrianPesanan();
-    if (location?.state?.refetch) {
-      fetchDataAntrianPesanan();
-      window.history.replaceState({}, document.title);
+    if (userRole == "Owner") {
+      fetchAllPlaces();
+    } else if (userRole == "Kepala Kandang") {
+      fetchAllWarehouses();
+    } else if (userRole == "Pekerja Toko") {
+      fetchCurentStore();
+    } else {
+      fetchCurentWarehouse();
     }
-  }, [location]);
+  }, []);
 
   useEffect(() => {
-    fetchDataAntrianPesanan();
-  }, [selectedDate, page, paymentStatus]);
+    if (selectedPlace.type) {
+      fetchDataAntrianPesanan();
+      if (location?.state?.refetch) {
+        fetchDataAntrianPesanan();
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [selectedPlace, location]);
+
+  useEffect(() => {
+    if (selectedPlace.type) {
+      fetchDataAntrianPesanan();
+    }
+  }, [selectedDate, page, paymentStatus, selectedPlace]);
 
   return (
     <>
@@ -110,6 +248,30 @@ const DaftarPesanan = () => {
           <div className="flex justify-between mb-2 flex-wrap gap-4">
             <h1 className="text-3xl font-bold">Daftar Pesanan</h1>
             <div className="text-base flex gap-2">
+              {(userRole == "Owner" || userRole == "Kepala Kandang") && (
+                <div className="flex items-center rounded px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+                  <MdStore size={18} />
+                  <select
+                    value={selectedPlace.id}
+                    onChange={(e) => {
+                      const selectedPlace = placeOptions.find(
+                        (item) => item.id == e.target.value
+                      );
+                      setSelectedPlace(selectedPlace);
+                    }}
+                    className="ml-2 bg-transparent text-base font-medium outline-none"
+                  >
+                    {placeOptions.map((place) => (
+                      <option
+                        key={`${place.type}-${place.id}`}
+                        value={place.id}
+                      >
+                        {place.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
                 <FaMoneyBillWave size={18} />
                 <select

@@ -443,10 +443,21 @@ export const createRawFeed = (payload) => {
   });
 };
 /////////////////////////SALAH
-export const getListWarehouseSales = () => {
-  return api.post(`/`, payload, {
+export const getListWarehouseSales = (
+  date,
+  paymentStatus,
+  page,
+  warehouseId
+) => {
+  return api.get(`/warehouses/sales`, {
     headers: {
       Authorization: `Bearer ${token}`,
+    },
+    params: {
+      date: date,
+      paymentStatus: paymentStatus,
+      page: page,
+      warehouseId,
     },
   });
 };

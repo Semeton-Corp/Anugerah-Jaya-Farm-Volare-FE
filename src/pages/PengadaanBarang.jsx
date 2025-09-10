@@ -146,7 +146,7 @@ const PengadaanBarang = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-2 flex-wrap gap-4">
         <h1 className="text-3xl font-bold">Pengadaan Barang</h1>
-
+        TIDAK ADA DATE adanya PAGINATION
         <div
           className="flex items-center rounded-lg bg-orange-300 hover:bg-orange-500 cursor-pointer gap-2"
           onClick={openDatePicker}
