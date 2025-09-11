@@ -192,7 +192,6 @@ const OverviewStok = () => {
   const fetchStores = async () => {
     try {
       const storeResponse = await getStores();
-      // console.log("storeResponse: ", storeResponse);
       if (storeResponse.status === 200) {
         setStores(storeResponse.data.data);
         setSelectedStore(storeResponse.data.data[0].id);
@@ -241,20 +240,26 @@ const OverviewStok = () => {
           <div className="flex justify-between mb-2 flex-wrap gap-4">
             <h1 className="text-3xl font-bold">Stok Toko</h1>
             <div className="flex gap-2">
-              {userRole == "Owner" && (
-                <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+              {userRole != "Pekerja Toko" && (
+                <div className="flex items-center rounded px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
                   <MdStore size={18} />
-                  <div className="text-base font-medium ms-2">Semua Toko</div>
+                  <select
+                    value={selectedStore}
+                    onChange={(e) => setSelectedStore(e.target.value)}
+                    className="ml-2 bg-transparent text-base font-medium outline-none"
+                  >
+                    {stores?.map((site) => (
+                      <option key={site.id} value={site.id}>
+                        {site.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Telur  ok, retak, pecah, reject*/}
-
-          {/* telur OK */}
           <div className="flex md:grid-cols-2 gap-4 justify-between">
-            {/* telur OK */}
             <div className="p-4 w-full rounded-md border-2 border-black-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Telur OK Ikat</h2>
@@ -284,7 +289,6 @@ const OverviewStok = () => {
               </div>
             </div>
 
-            {/* telur OK */}
             <div className="p-4 w-full rounded-md border-2 border-black-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Telur Retak</h2>
@@ -373,11 +377,8 @@ const OverviewStok = () => {
                       <th className="py-2 px-4">Nama Barang</th>
                       <th className="py-2 px-4">Satuan</th>
                       <th className="py-2 px-4">Jumlah</th>
-                      {/* <th className="py-2 px-4">Nama Toko</th> */}
                       <th className="py-2 px-4">Keterangan</th>
-                      {userRole !== "Owner" && (
-                        <th className="py-2 px-4">Aksi</th>
-                      )}
+                      <th className="py-2 px-4">Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -398,18 +399,16 @@ const OverviewStok = () => {
                             {item.description}
                           </span>
                         </td>
-                        {userRole !== "Owner" && (
-                          <td className="py-2 px-4 flex justify-center">
-                            <button
-                              onClick={() =>
-                                editStokHandle(item.store.id, item.item.id)
-                              }
-                              className="px-3 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer font-medium mb-3"
-                            >
-                              Edit Stok
-                            </button>
-                          </td>
-                        )}
+                        <td className="py-2 px-4 flex justify-center">
+                          <button
+                            onClick={() =>
+                              editStokHandle(item.store.id, item.item.id)
+                            }
+                            className="px-3 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer font-medium mb-3"
+                          >
+                            Edit Stok
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>

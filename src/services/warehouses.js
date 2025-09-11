@@ -479,6 +479,14 @@ export const createWarehouseSale = (payload) => {
   });
 };
 
+export const sendWarehouseSale = (id) => {
+  return api.patch(`/warehouses/sales/${id}/send`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export const createWarehouseSaleQueue = (payload) => {
   return api.post(`/warehouses/queues`, payload, {
     headers: {

@@ -517,6 +517,12 @@ const AppRouter = createBrowserRouter([
               {
                 path: "stok-toko",
                 element: <OverviewStok />,
+                children: [
+                  {
+                    path: "edit-stok/:storeId/:itemId",
+                    element: <EditStok />,
+                  },
+                ],
               },
               {
                 path: "request-ke-gudang",

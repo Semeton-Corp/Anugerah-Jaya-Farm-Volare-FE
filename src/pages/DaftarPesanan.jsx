@@ -18,6 +18,7 @@ import {
   getListWarehouseSales,
   getWarehouses,
   getWarehouseSaleQueues,
+  sendWarehouseSale,
 } from "../services/warehouses";
 import {
   getCurrentUserStorePlacement,
@@ -65,8 +66,13 @@ const DaftarPesanan = () => {
 
   const sendSaleHandle = async () => {
     try {
-      const sendResponse = await sendStoreSale(selectedSendId);
-      // console.log("sendResponse: ", sendResponse);
+      let sendResponse;
+      if (selectedPlace.type == "store") {
+        sendResponse = await sendStoreSale(selectedSendId);
+      } else if (selectedPlace.type == "warehouse") {
+        sendResponse = await sendWarehouseSale(selectedSendId);
+      }
+
       if (sendResponse.status == 200) {
         alert("✅ Pesanan berhasil dikirim!");
         setShowSendModal(false);
