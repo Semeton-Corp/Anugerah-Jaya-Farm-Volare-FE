@@ -19,7 +19,7 @@ import {
 } from "../utils/dateFormat";
 import { deleteAdditionalWorkById } from "../services/dailyWorks";
 import { updateAdditionalWorkById } from "../services/dailyWorks";
-import { formatRupiah } from "../utils/moneyFormat";
+import { formatRupiah, formatThousand } from "../utils/moneyFormat";
 import { getRoles } from "../services/roles";
 import { getLocations } from "../services/location";
 import { getUserById, updateUser } from "../services/user";
@@ -157,14 +157,17 @@ const TambahPegawai = () => {
 
       try {
         const res = await apiFn(locationId);
+        console.log("pic res: ", res);
         if (res.status === 200) {
           const allData = res.data.data;
           let filteredData;
-
+          console.log("selectedRole: ", selectedRole);
           if (selectedRole == 1) {
             filteredData = allData.filter((item) => item.eggPic == "");
           } else if (selectedRole == 2) {
             filteredData = allData.filter((item) => item.chickenPic == "");
+          } else {
+            filteredData = allData;
           }
           if (userId) {
             setPics(allData);
@@ -498,7 +501,7 @@ function ProfilPegawaiForm({
         {isShowPicField && (
           <>
             <label className="mb-1">PIC</label>
-            {selectedRole != 0 || selectedRole == 2 ? (
+            {selectedRole == 1 || selectedRole == 2 ? (
               <div className="flex flex-col gap-2 mb-3">
                 {pics?.length === 0 && (
                   <span className="text-gray-400">No PICs available</span>
@@ -542,7 +545,7 @@ function ProfilPegawaiForm({
                   <option disabled>No PICs available</option>
                 )}
                 {pics?.map((pic) => (
-                  <option key={pic.cage.id} value={pic.cage.id}>
+                  <option key={pic.id} value={pic.id}>
                     {pic.name}
                   </option>
                 ))}
@@ -640,10 +643,11 @@ function GajiPokokForm({
           Rp
         </span>
         <input
-          type="number"
+          type="text"
+          inputMode="numeric"
           placeholder="Masukkan gaji pokok"
           className="border rounded p-4 mb-3 pl-12 w-full"
-          value={getDisplay(salary)}
+          value={formatThousand(salary)}
           onChange={(e) => setSalary(e.target.value)}
         />
       </div>

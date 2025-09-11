@@ -44,6 +44,7 @@ import {
   getEggWarehouseItemSummary,
   getWarehouses,
 } from "../services/warehouses";
+import { formatThousand, onlyDigits } from "../utils/moneyFormat";
 
 const InputDataPesanan = () => {
   const location = useLocation();
@@ -65,6 +66,9 @@ const InputDataPesanan = () => {
 
   const [stores, setStores] = useState([]);
   const [selectedStore, setSelectedStore] = useState("");
+  const [selectedSite] = useState(
+    userRole === "Owner" ? 0 : localStorage.getItem("locationId")
+  );
 
   const [items, setItems] = useState([]);
   const [selectedItem, setSelectedItem] = useState("");
@@ -409,7 +413,10 @@ const InputDataPesanan = () => {
       discount,
       sendDate: formatDateToDDMMYYYY(sendDate),
       paymentType,
-      payments,
+      payments: payments.map((p) => ({
+        ...p,
+        nominal: p.nominal.toString(),
+      })),
       customerType,
       ...(customerType === "Pelanggan Baru"
         ? { customerName, customerPhoneNumber: phone.toString() }
@@ -438,7 +445,7 @@ const InputDataPesanan = () => {
         error.response.data.message == "nominal is not equal to total price"
       ) {
         alert(
-          "❌Jumlah pembayaran penuh harus memiliki nominal yang sama dengan tagihan total"
+          "❌Jumlah pembayaran penuh harus memiliki nominal yang sama dengan tagihan total dikarenakan pembayaran PENUH"
         );
       } else if (
         error.response.data.message ==
@@ -448,7 +455,7 @@ const InputDataPesanan = () => {
       } else if (error.response.data.message == "customer already exist") {
         alert("❌Pelanggan sudah terdaftar, gunakan nomor telepon lain");
       } else if (error.response.data.message == "customer id is required") {
-        alert("❌Silahkan pastikan anda memilih pembeli dengan benar!");
+        alert("❌Silahkan pastikan anda memilih NOMOR PEMBELI dengan benar!");
       } else {
         alert(
           "❌Gagal menyimpan data pesanan, periksa kembali data input anda"
@@ -1246,11 +1253,10 @@ const InputDataPesanan = () => {
                               setNominal(payment.nominal);
                               setPaymentDate(toISODate(payment.date));
                               if (id) {
-                                setPaymentId(payment.id);
                                 setShowEditModal(true);
                               } else {
                                 setEditingIndex(index);
-                                setShowPaymentModal(true);
+                                setShowEditModal(true);
                               }
                             }}
                             size={24}
@@ -1418,7 +1424,6 @@ const InputDataPesanan = () => {
               {id ? "Tambah Pembayaran" : "Pembayaran"}
             </h3>
 
-            {/* Metode Pembayaran */}
             <label className="block mb-2 font-medium">Metode Pembayaran</label>
             <select
               className="w-full border p-2 rounded mb-4"
@@ -1436,16 +1441,16 @@ const InputDataPesanan = () => {
 
             <label className="block mb-2 font-medium">Nominal Bayar</label>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
               className="w-full border p-2 rounded mb-4"
               placeholder="Masukkan nominal pembayaran"
-              value={nominal == 0 ? "" : nominal}
+              value={nominal == 0 ? "" : formatThousand(nominal)}
               onChange={(e) => {
-                setNominal(e.target.value);
+                const raw = onlyDigits(e.target.value);
+                setNominal(raw);
               }}
             />
-
-            {/* Tanggal Bayar */}
 
             <label className="block font-medium ">Tanggal Bayar</label>
             <input
@@ -1454,9 +1459,8 @@ const InputDataPesanan = () => {
               type="date"
               value={paymentDate}
               onClick={() => {
-                // Manually open the date picker when the input is clicked
                 if (dateInputRef.current?.showPicker) {
-                  dateInputRef.current.showPicker(); // Modern browsers
+                  dateInputRef.current.showPicker();
                 }
               }}
               onChange={(e) => setPaymentDate(e.target.value)}
@@ -1518,7 +1522,6 @@ const InputDataPesanan = () => {
         </div>
       )}
 
-      {/* EDIT MODAL */}
       {showEditModal && (
         <div className="fixed w-full inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="w-full bg-white mx-40 p-6 rounded-lg shadow-xl relative">
@@ -1544,16 +1547,16 @@ const InputDataPesanan = () => {
             {/* Nominal Bayar */}
             <label className="block mb-2 font-medium">Nominal Bayar</label>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
               className="w-full border p-2 rounded mb-4"
               placeholder="Masukkan nominal pembayaran"
-              value={nominal == 0 ? "" : nominal}
+              value={nominal == 0 ? "" : formatThousand(nominal)}
               onChange={(e) => {
-                setNominal(e.target.value);
+                const raw = onlyDigits(e.target.value);
+                setNominal(raw);
               }}
             />
-
-            {/* Tanggal Bayar */}
 
             <label className="block font-medium ">Tanggal Bayar</label>
             <input
@@ -1562,9 +1565,8 @@ const InputDataPesanan = () => {
               type="date"
               value={paymentDate}
               onClick={() => {
-                // Manually open the date picker when the input is clicked
                 if (dateInputRef.current?.showPicker) {
-                  dateInputRef.current.showPicker(); // Modern browsers
+                  dateInputRef.current.showPicker();
                 }
               }}
               onChange={(e) => setPaymentDate(e.target.value)}
@@ -1602,7 +1604,28 @@ const InputDataPesanan = () => {
                   if (id) {
                     updateStoreSalePaymentHandle();
                   } else {
-                    setShowPaymentModal(false);
+                    const newPayment = {
+                      paymentDate: formatDateToDDMMYYYY(paymentDate),
+                      nominal: Number(nominal ?? nominal ?? 0),
+                      paymentMethod,
+                      paymentProof,
+                    };
+
+                    setPayments((prev) => {
+                      if (editingIndex === null) {
+                        return [...prev, newPayment];
+                      } else {
+                        const copy = [...prev];
+                        copy[editingIndex] = newPayment;
+                        return copy;
+                      }
+                    });
+
+                    setEditingIndex(null);
+                    setPaymentMethod("Tunai");
+                    setNominal(0);
+                    setPaymentDate(today);
+                    setShowEditModal(false);
                   }
                 }}
                 className="px-4 py-2 bg-green-700 hover:bg-green-900 text-white rounded cursor-pointer"

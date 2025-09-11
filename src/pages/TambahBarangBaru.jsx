@@ -23,7 +23,6 @@ const TambahBarangBaru = () => {
 
   const [name, setName] = useState("");
   const [category, setCategory] = useState([
-    "Telur",
     "Barang",
     "Bahan Baku Adukan",
     "Bahan Baku Adukan - Jagung",

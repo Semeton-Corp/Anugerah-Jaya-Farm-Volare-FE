@@ -87,8 +87,7 @@ const DetailGudang = () => {
         // console.log("rolesResponse.data.data: ", rolesResponse.data.data);
         const allRoles = rolesResponse.data.data;
         const filterRoles = allRoles.filter(
-          (role) =>
-            role.name === "Pekerja Gudang" || role.name === "Kepala Kandang"
+          (role) => role.name === "Pekerja Gudang"
         );
         setRoles(filterRoles);
       }
@@ -116,9 +115,9 @@ const DetailGudang = () => {
     // alert("pegawai added");
     const payload = {
       userId: selectedEmployee,
-      WarehouseId: parseInt(id),
+      warehouseId: parseInt(id),
     };
-    // console.log("payload: ", payload);
+    console.log("payload: ", payload);
 
     try {
       const addPegawairesponse = await createWarehousePlacement(payload);
