@@ -848,7 +848,6 @@ const InputDataPesanan = () => {
                     const selected = placeOptions.find(
                       (item) => item.type === type && String(item.id) === id
                     );
-                    console.log("selectedPlace: ", selected);
                     setSelectedPlace(selected);
                   }}
                 >

@@ -373,7 +373,9 @@ const AntrianPesanan = () => {
       itemId:
         selectedItem?.item?.id ?? selectedItem?.itemId ?? selectedItem?.id,
       saleUnit: unit,
-      storeId: parseInt(selectedItem?.store?.id),
+      ...(selectedPlace.type == "store"
+        ? { storeId: parseInt(selectedPlace.id) }
+        : { warehouseId: parseInt(selectedPlace.id) }),
       quantity: parseInt(quantity),
       price: String(itemPrice),
       discount: discount,
@@ -393,7 +395,6 @@ const AntrianPesanan = () => {
 
     try {
       let allocateResponse;
-      console.log("selectedPlace: ", selectedPlace);
       if (selectedPlace.type == "store") {
         allocateResponse = await allocateStoreSaleQueue(
           payload,
@@ -405,14 +406,13 @@ const AntrianPesanan = () => {
           selectedItem.id
         );
       }
-      if (allocateResponse.status === 200 || allocateResponse.status === 201) {
+
+      if (allocateResponse.status == 200 || allocateResponse.status == 201) {
         const newPath = location.pathname.replace(
-          "daftar-pesanan",
-          "antrian-pesanan"
+          "antrian-pesanan",
+          "daftar-pesanan"
         );
         navigate(newPath);
-      } else {
-        alert("⚠️ Gagal mengalokasikan antrian. Coba lagi.");
       }
     } catch (error) {
       console.log("response error: ", error);
@@ -425,6 +425,8 @@ const AntrianPesanan = () => {
         alert("❌Masukkan format nomor telepon dengan 08XXXXXX");
       } else if (msg === "customer already exist") {
         alert("❌Pelanggan sudah terdaftar, gunakan nomor telepon lain");
+      } else if (msg === "stock item is insuficcient") {
+        alert("❌Stok gudang tidak mencukupi untuk pesanan ini");
       } else {
         alert(
           "❌Gagal menyimpan data pesanan, periksa kembali data input anda"
