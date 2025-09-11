@@ -486,3 +486,11 @@ export const createWarehouseSaleQueue = (payload) => {
     },
   });
 };
+
+export const allocateWarehouseSaleQueue = (payload, id) => {
+  return api.post(`/warehouses/queues/${id}/allocates`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

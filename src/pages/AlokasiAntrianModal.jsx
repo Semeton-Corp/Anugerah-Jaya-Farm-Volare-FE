@@ -5,6 +5,7 @@ import {
   formatDateToDDMMYYYY,
   convertToInputDateFormat,
 } from "../utils/dateFormat";
+import { formatThousand, onlyDigits } from "../utils/moneyFormat";
 
 // Helpers
 const parseNumber = (raw) => {
@@ -24,48 +25,44 @@ const AlokasiAntrianModal = ({
   unit,
   setUnit,
   setShowAlokasiModal,
-  paymentHistory, // parent can pass initial array or empty []
-  setPaymentHistory, // parent setter (optional) — if passed, we keep it in sync
-  paymentDate, // single-field legacy; we will not rely on this for array usage
+  paymentHistory,
+  setPaymentHistory,
+  paymentDate,
   setPaymentDate,
   paymentStatus,
-  paymentMethod, // legacy single; we will use modal-local fields too
+  paymentMethod,
   setPaymentMethod,
-  nominal, // legacy single; we will support but main usage is payments array
+  nominal,
   setNominal,
-  remaining, // optional parent-provided; we compute localRemaining anyway
+  remaining,
   itemTotalPrice,
   itemPriceDiscount,
   paymentType,
   setPaymentType,
   paymentProof,
-  submitHandle, // when saving, we'll call this with payload that includes payments array
+  submitHandle,
   sendDate,
   setSendDate,
 }) => {
-  // Local payments state (array). Use paymentHistory prop as initial if provided.
   const [payments, setPayments] = useState(() =>
     Array.isArray(paymentHistory) ? paymentHistory.slice() : []
   );
 
-  // Sync out to parent when payments change
   useEffect(() => {
     if (typeof setPaymentHistory === "function") {
       setPaymentHistory(payments);
     }
   }, [payments, setPaymentHistory]);
 
-  // Payment modal state for add / edit
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [editingIndex, setEditingIndex] = useState(-1); // -1 => new
+  const [editingIndex, setEditingIndex] = useState(-1);
   const [pmMethod, setPmMethod] = useState("Tunai");
-  const [pmNominal, setPmNominal] = useState(""); // string for user input
-  const [pmDate, setPmDate] = useState(new Date().toISOString().slice(0, 10)); // ISO for input
+  const [pmNominal, setPmNominal] = useState("");
+  const [pmDate, setPmDate] = useState(new Date().toISOString().slice(0, 10));
   const [pmProof, setPmProof] = useState("");
 
   const dateInputRef = useRef(null);
 
-  // Derived numbers
   const baseTotal = useMemo(
     () => parseNumber(itemTotalPrice) - parseNumber(itemPriceDiscount),
     [itemTotalPrice, itemPriceDiscount]
@@ -78,7 +75,6 @@ const AlokasiAntrianModal = ({
 
   const finalRemaining = Math.max(baseTotal - totalPaid, 0);
 
-  // Remaining after each payment (cumulative)
   const remainingAfterIndex = (idx) => {
     let sisa = baseTotal;
     for (let i = 0; i <= idx; i++) {
@@ -87,7 +83,6 @@ const AlokasiAntrianModal = ({
     return sisa;
   };
 
-  // Open Add modal
   const openAddPaymentModal = () => {
     setEditingIndex(-1);
     setPmMethod("Tunai");
@@ -97,13 +92,11 @@ const AlokasiAntrianModal = ({
     setShowPaymentModal(true);
   };
 
-  // Open Edit modal for a payment index
   const openEditPaymentModal = (index) => {
     const p = payments[index];
     if (!p) return;
     setEditingIndex(index);
     setPmMethod(p.paymentMethod || "Tunai");
-    // convert stored DD-MM-YYYY back to ISO YYYY-MM-DD for <input type="date">
     const iso =
       p.paymentDate && p.paymentDate.includes("-")
         ? (() => {
@@ -117,7 +110,6 @@ const AlokasiAntrianModal = ({
     setPmDate(
       convertToInputDateFormat(iso)
         ? (() => {
-            // convertToInputDateFormat returns DD-MM-YYYY; we want ISO for input; reuse logic:
             const parts = p.paymentDate.split("-");
             return `${parts[2]}-${parts[1]}-${parts[0]}`;
           })()
@@ -128,9 +120,7 @@ const AlokasiAntrianModal = ({
     setShowPaymentModal(true);
   };
 
-  // Save (create or update)
   const savePayment = () => {
-    // validations
     const nominalNum = parseNumber(pmNominal);
     if (!nominalNum || nominalNum <= 0) {
       alert("Nominal pembayaran harus lebih dari 0.");
@@ -141,13 +131,12 @@ const AlokasiAntrianModal = ({
       return;
     }
 
-    // convert ISO to DD-MM-YYYY for storage to match Konfirmasi shape
-    const iso = pmDate; // expecting YYYY-MM-DD
+    const iso = pmDate;
     const [yyyy, mm, dd] = iso.split("-");
     const ddmmyyyy = `${dd}-${mm}-${yyyy}`;
 
     const entry = {
-      paymentDate: ddmmyyyy, // "DD-MM-YYYY"
+      paymentDate: ddmmyyyy,
       paymentMethod: pmMethod || "Tunai",
       nominal: String(nominalNum),
       paymentProof: "https://example.com",
@@ -172,11 +161,8 @@ const AlokasiAntrianModal = ({
     setPayments((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // When user clicks "Buat Pesanan" call submitHandle with payments array included
   const handleCreateOrder = () => {
-    // payload example - include payments array as required by backend (nominal as string)
     const payload = {
-      // ... any other payload fields your parent expects
       payments: payments.map((p) => ({
         paymentDate: p.paymentDate,
         paymentMethod: p.paymentMethod,
@@ -184,13 +170,11 @@ const AlokasiAntrianModal = ({
         paymentProof: p.paymentProof,
       })),
       paymentType,
-      // optionally include quantity, unit, sendDate, etc:
       quantity,
       unit,
       sendDate,
     };
 
-    // you can do validation for Penuh here
     if (paymentType === "Penuh") {
       if (finalRemaining !== 0) {
         alert(
@@ -199,23 +183,14 @@ const AlokasiAntrianModal = ({
         return;
       }
     }
-
-    // call parent handler
     submitHandle(payload);
   };
 
-  // keep local paymentHistory initial value in sync when prop changes (only first load)
-  useEffect(
-    () => {
-      if (Array.isArray(paymentHistory) && paymentHistory.length > 0) {
-        setPayments(paymentHistory.slice());
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    },
-    [
-      /* intentionally empty: run only once if you want; or remove to always sync */
-    ]
-  );
+  useEffect(() => {
+    if (Array.isArray(paymentHistory) && paymentHistory.length > 0) {
+      setPayments(paymentHistory.slice());
+    }
+  }, []);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
@@ -456,11 +431,15 @@ const AlokasiAntrianModal = ({
 
             <label className="block mb-2 font-medium">Nominal Pembayaran</label>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
               className="w-full border p-2 rounded mb-4"
               placeholder="Masukkan nominal pembayaran"
-              value={pmNominal}
-              onChange={(e) => setPmNominal(e.target.value)}
+              value={formatThousand(pmNominal)}
+              onChange={(e) => {
+                const raw = onlyDigits(e.target.value);
+                setPmNominal(raw);
+              }}
             />
 
             <label className="block font-medium mb-2">Tanggal Bayar</label>

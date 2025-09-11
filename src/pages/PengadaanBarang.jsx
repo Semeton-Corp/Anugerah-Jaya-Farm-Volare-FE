@@ -89,10 +89,15 @@ const PengadaanBarang = () => {
   };
 
   const confirmBarangSampaiHandle = async (payload) => {
-    console.log("test:", payload);
+    const normalizedPayload = {
+      ...payload,
+      quantity: Number(payload.quantity) || 0,
+    };
+
+    console.log("test:", normalizedPayload);
     try {
       const arriveResponse = await arrivalConfirmationWarehouseItemProcurement(
-        payload,
+        normalizedPayload,
         selectedItem.id
       );
       console.log("arriveResponse: ", arriveResponse);

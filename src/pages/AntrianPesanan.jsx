@@ -29,6 +29,7 @@ import {
 import { getCustomers } from "../services/costumer";
 import DeleteModal from "../components/DeleteModal";
 import {
+  allocateWarehouseSaleQueue,
   getEggWarehouseItemSummary,
   getWarehouses,
   getWarehouseSaleQueues,
@@ -391,10 +392,25 @@ const AntrianPesanan = () => {
     };
 
     try {
-      const response = await allocateStoreSaleQueue(payload, selectedItem.id);
-      console.log("response: ", response);
-      if (response.status === 200 || response.status === 201) {
-        navigate("/pekerja-toko/kasir/daftar-pesanan");
+      let allocateResponse;
+      console.log("selectedPlace: ", selectedPlace);
+      if (selectedPlace.type == "store") {
+        allocateResponse = await allocateStoreSaleQueue(
+          payload,
+          selectedItem.id
+        );
+      } else if (selectedPlace.type == "warehouse") {
+        allocateResponse = await allocateWarehouseSaleQueue(
+          payload,
+          selectedItem.id
+        );
+      }
+      if (allocateResponse.status === 200 || allocateResponse.status === 201) {
+        const newPath = location.pathname.replace(
+          "daftar-pesanan",
+          "antrian-pesanan"
+        );
+        navigate(newPath);
       } else {
         alert("⚠️ Gagal mengalokasikan antrian. Coba lagi.");
       }
