@@ -35,7 +35,10 @@ import {
   getItems,
 } from "../services/item";
 import { getCustomers } from "../services/costumer";
-import { getCurrentUserStorePlacement } from "../services/placement";
+import {
+  getCurrentUserStorePlacement,
+  getCurrentUserWarehousePlacement,
+} from "../services/placement";
 import ReceiptModal from "../components/Receipt";
 import { GoAlertFill } from "react-icons/go";
 import {
@@ -223,6 +226,7 @@ const InputDataPesanan = () => {
           name: store.name,
           type: "store",
         };
+        console.log("selectedStore: ", selectedStore);
         setSelectedPlace(selectedStore);
       }
     } catch (error) {
@@ -826,7 +830,7 @@ const InputDataPesanan = () => {
         />
 
         <div className="flex justify-between gap-4">
-          {userRole != "Pekerja Toko" && (
+          {userRole != "Pekerja Toko" && userRole != "Pekerja Gudang" && (
             <div className="w-full">
               <label className="block font-medium  mt-4">
                 {id ? "Lokasi" : "Pilih Lokasi"}
@@ -1037,7 +1041,7 @@ const InputDataPesanan = () => {
             </div>
           </div>
         </div>
-        {/* edit button */}
+
         {!isSend && id && (
           <div className="flex gap-6 justify-end mt-4">
             <div
@@ -1572,11 +1576,9 @@ const InputDataPesanan = () => {
               onChange={(e) => setPaymentDate(e.target.value)}
             />
 
-            {/* Bukti Pembayaran */}
             <label className="block mb-2 font-medium">Bukti Pembayaran</label>
             <input type="file" className="w-full border p-2 rounded mb-4" />
 
-            {/* Buttons */}
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => {

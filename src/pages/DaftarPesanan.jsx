@@ -19,7 +19,10 @@ import {
   getWarehouses,
   getWarehouseSaleQueues,
 } from "../services/warehouses";
-import { getCurrentUserWarehousePlacement } from "../services/placement";
+import {
+  getCurrentUserStorePlacement,
+  getCurrentUserWarehousePlacement,
+} from "../services/placement";
 
 const DaftarPesanan = () => {
   const userRole = localStorage.getItem("role");
@@ -148,7 +151,6 @@ const DaftarPesanan = () => {
     try {
       const placementResponse = await getCurrentUserWarehousePlacement();
       if (placementResponse.status == 200) {
-        console.log("placementResponse: ", placementResponse);
         const warehouse = placementResponse.data.data[0].warehouse;
         const selectedWarehouse = {
           id: warehouse.id,
@@ -219,7 +221,7 @@ const DaftarPesanan = () => {
     } else if (userRole == "Pekerja Toko") {
       fetchCurentStore();
     } else {
-      // fetchCurentWarehouse();
+      fetchCurentWarehouse();
     }
   }, []);
 

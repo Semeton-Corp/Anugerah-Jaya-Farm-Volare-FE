@@ -1568,6 +1568,10 @@ const AppRouter = createBrowserRouter([
                 element: <DaftarPesanan />,
                 children: [
                   {
+                    path: "input-data-pesanan",
+                    element: <InputDataPesanan />,
+                  },
+                  {
                     path: "input-data-pesanan/:id",
                     element: <InputDataPesanan />,
                   },

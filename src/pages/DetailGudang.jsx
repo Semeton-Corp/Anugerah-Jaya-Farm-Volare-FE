@@ -36,17 +36,12 @@ const DetailGudang = () => {
   const handleDeleteGudang = async () => {
     try {
       const deleteResponse = await deleteWarehouse(id);
-      // console.log("deleteResponse: ", deleteResponse);
       if (deleteResponse.status === 204) {
         navigate(-1, { state: { refetch: true } });
       }
     } catch (error) {
       console.log("error :", error);
     }
-  };
-
-  const handleAddEmployee = () => {
-    alert("Add employee clicked");
   };
 
   const handleViewProfile = (id) => {
