@@ -94,13 +94,11 @@ const PengadaanBarang = () => {
       quantity: Number(payload.quantity) || 0,
     };
 
-    console.log("test:", normalizedPayload);
     try {
       const arriveResponse = await arrivalConfirmationWarehouseItemProcurement(
         normalizedPayload,
         selectedItem.id
       );
-      console.log("arriveResponse: ", arriveResponse);
       if (arriveResponse.status == 200) {
         fetchBarangData();
       }

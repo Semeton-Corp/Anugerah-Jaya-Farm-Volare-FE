@@ -68,6 +68,7 @@ const KonfirmasiBarangSampaiGudangModal = ({
               onChange={(e) => setJumlah(e.target.value)}
               placeholder="Masukkan jumlah barang yang datang"
               className="w-full border rounded px-2 py-1"
+              disabled={mode == "Sesuai"}
             />
             <span className="font-bold">{data?.satuan}</span>
           </div>
