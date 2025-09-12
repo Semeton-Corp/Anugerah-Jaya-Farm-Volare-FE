@@ -7,11 +7,11 @@ import { sidebarMenus } from "../data/SidebarMenus";
 import { useLocation, useNavigate } from "react-router-dom";
 import { IoIosArrowDown, IoIosArrowForward } from "react-icons/io";
 
-const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
+const SideNavbar = ({ role, isExpanded, setIsExpanded, setIsMobileOpen }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const toggleSidebar = () => setIsExpanded(!isExpanded);
+  const toggleSidebar = () => setIsExpanded && setIsExpanded(!isExpanded);
   const menuItems = sidebarMenus[role] || [];
 
   const currentPath = location.pathname;
@@ -19,6 +19,14 @@ const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
 
   const toggleSubmenu = (tabName) => {
     setExpandedMenu(expandedMenu === tabName ? null : tabName);
+  };
+
+  // helper: navigate and close mobile drawer if setter available
+  const goTo = (path) => {
+    navigate(path);
+    if (typeof setIsMobileOpen === "function") {
+      setIsMobileOpen(false); // <-- close mobile drawer after navigation
+    }
   };
 
   return (
@@ -78,7 +86,7 @@ const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
                         toggleSidebar();
                       }
                     } else {
-                      navigate(fullPath);
+                      goTo(fullPath); // <-- use helper that also closes mobile
                     }
                   }}
                   showArrow={hasSubTabs}
@@ -104,7 +112,7 @@ const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
                       return (
                         <div
                           key={sIdx}
-                          onClick={() => navigate(fullSubPath)}
+                          onClick={() => goTo(fullSubPath)} // <-- close mobile drawer too
                           className={`text-sm rounded-md py-3 px-3 cursor-pointer font-medium ${
                             isSubSelected
                               ? "bg-orange-500"
@@ -129,7 +137,14 @@ const SideNavbar = ({ role, isExpanded, setIsExpanded }) => {
             if (expandedMenu) {
               toggleSubmenu();
             }
-            toggleSidebar();
+            // toggleSidebar might be undefined if setIsExpanded not passed (mobile)
+            if (typeof setIsExpanded === "function") {
+              toggleSidebar();
+            }
+            // also close mobile drawer if present (when user taps collapse on mobile)
+            if (typeof setIsMobileOpen === "function") {
+              setIsMobileOpen(false); // <-- close mobile
+            }
           }}
           className={`${isExpanded ? "ml-auto" : ""}`}
         >

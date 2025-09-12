@@ -365,13 +365,6 @@ const InputDataPesanan = () => {
 
     const totalitemPrice = price * quantity;
     const totalDiscount = totalitemPrice * discountPercent;
-    console.log("price: ", price);
-    console.log("discountPercent: ", discountPercent);
-    console.log(
-      "selectedDiscount.totalDiscount: ",
-      selectedDiscount.totalDiscount
-    );
-    console.log("transactionCount: ", transactionCount);
 
     setDiscount(selectedDiscount.totalDiscount);
     setItemPrice(price);
@@ -638,6 +631,11 @@ const InputDataPesanan = () => {
   };
 
   const createSalePaymentHandle = async (id) => {
+    if (!nominal) {
+      alert("❌Pastikan nominal pembayaran tidak kosong!");
+      return;
+    }
+
     const payload = {
       paymentDate: formatDateToDDMMYYYY(paymentDate),
       nominal: nominal.toString(),

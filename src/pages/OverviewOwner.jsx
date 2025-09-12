@@ -381,22 +381,6 @@ const OverviewOwner = () => {
           </div>
         </div>
       </div>
-      {/* <button
-        onClick={() => {
-          console.log("chickenSummary:", chickenSummary);
-          console.log("eggSummary:", eggSummary);
-          console.log(
-            "productionAndSaleEggGraphs:",
-            productionAndSaleEggGraphs
-          );
-          console.log("saleSummary:", saleSummary);
-          console.log("storeItemSummary:", storeItemSummary);
-          console.log("warehouseItemSummary:", warehouseItemSummary);
-        }}
-        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-      >
-        Log All States
-      </button> */}
     </div>
   );
 };

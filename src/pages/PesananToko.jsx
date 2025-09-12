@@ -103,7 +103,7 @@ const PesananToko = () => {
 
   const handleDateChange = (e) => {
     const date = e.target.value;
-  
+
     setSelectedDate(date);
   };
 
@@ -148,7 +148,7 @@ const PesananToko = () => {
   const confirmTelurOkHandle = async (payload) => {
     try {
       console.log("payload: ", payload);
-      console.log("selectedItem.id: ", selectedItem.id);
+      console.log("selectedItem.item.id: ", selectedItem.item.id);
       const confirmResponse = await warehouseConfirmationStoreRequestItem(
         payload,
         selectedItem.id
