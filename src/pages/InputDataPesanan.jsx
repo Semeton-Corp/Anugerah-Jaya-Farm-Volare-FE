@@ -43,9 +43,14 @@ import ReceiptModal from "../components/Receipt";
 import { GoAlertFill } from "react-icons/go";
 import {
   createWarehouseSale,
+  createWarehouseSalePayment,
   createWarehouseSaleQueue,
+  deleteWarehouseSale,
+  deleteWarehouseSalePayment,
   getEggWarehouseItemSummary,
   getWarehouses,
+  getWarehouseSaleById,
+  updateWarehouseSalePayment,
 } from "../services/warehouses";
 import { formatThousand, onlyDigits } from "../utils/moneyFormat";
 
@@ -59,6 +64,8 @@ const InputDataPesanan = () => {
   const receiptRef = useRef();
 
   const { id } = useParams();
+  const { state } = useLocation();
+
   const [isEditable, setEditable] = useState(true);
   const [isOutOfStock, setIsOutOfStock] = useState(false);
 
@@ -149,8 +156,6 @@ const InputDataPesanan = () => {
       if (priceResponse.status == 200 && discountResponse.status == 200) {
         setItemPrices(priceResponse.data.data);
         setItemPriceDiscounts(discountResponse.data.data);
-        // console.log("priceResponse: ", priceResponse);
-        // console.log("discountResponse: ", discountResponse);
         if (id) {
           fetchEditSaleStoreData(id);
           setEditable(false);
@@ -255,7 +260,6 @@ const InputDataPesanan = () => {
   const fetchStorePlacement = async () => {
     try {
       const response = await getCurrentUserStorePlacement();
-      // console.log("response: ", response);
       if (response.status == 200) {
         setSelectedStore(response.data.data[0].store.id);
       }
@@ -298,26 +302,33 @@ const InputDataPesanan = () => {
 
   const fetchEditSaleStoreData = async (id) => {
     try {
-      const response = await getStoreSaleById(id);
-      // console.log("response fetch detail: ", response);
+      let detailResponse;
+      if (state?.selectedPlace?.type === "store") {
+        detailResponse = await getStoreSaleById(id);
+      } else if (state?.selectedPlace?.type === "warehouse") {
+        detailResponse = await getWarehouseSaleById(id);
+      } else {
+        console.log("state kosong atau tipe tidak dikenal");
+      }
+      console.log("detailResponse: ", detailResponse);
 
-      if (response.status == 200) {
-        setSelectedStore(response.data.data.store.id);
-        setCustomerName(response.data.data.customer.name);
-        setPhone(response.data.data.customer.phoneNumber);
-        setSelectedItem(response.data.data.item);
-        setQuantity(response.data.data.quantity);
-        setUnit(response.data.data.saleUnit);
-        setPrice(response.data.data.price);
-        setSendDate(response.data.data.sentDate);
-        setTotal(response.data.data.totalPrice);
-        setPaymentHistory(response.data.data.payments);
-        setRemaining(response.data.data.remainingPayment);
-        setPaymentStatus(response.data.data.paymentStatus);
-        setIsSend(response.data.data.isSend);
-        setDeadlinePaymentDate(response.data.data.deadlinePaymentDate);
+      if (detailResponse.status == 200) {
+        // setSelectedStore(detailResponse.data.data.store.id);
+        setCustomerName(detailResponse.data.data.customer.name);
+        setPhone(detailResponse.data.data.customer.phoneNumber);
+        setSelectedItem(detailResponse.data.data.item);
+        setQuantity(detailResponse.data.data.quantity);
+        setUnit(detailResponse.data.data.saleUnit);
+        setPrice(detailResponse.data.data.price);
+        setSendDate(detailResponse.data.data.sentDate);
+        setTotal(detailResponse.data.data.totalPrice);
+        setPaymentHistory(detailResponse.data.data.payments);
+        setRemaining(detailResponse.data.data.remainingPayment);
+        setPaymentStatus(detailResponse.data.data.paymentStatus);
+        setIsSend(detailResponse.data.data.isSend);
+        setDeadlinePaymentDate(detailResponse.data.data.deadlinePaymentDate);
         setIsMoreThanDeadlinePaymentDate(
-          response.data.data.isMoreThanDeadlinePaymentDate
+          detailResponse.data.data.isMoreThanDeadlinePaymentDate
         );
       }
     } catch (error) {}
@@ -560,8 +571,20 @@ const InputDataPesanan = () => {
 
   const handleDelete = async () => {
     try {
-      const deleteResponse = await deleteStoreSale(id);
-      // console.log("deleteResponse: ", deleteResponse);
+      let deleteResponse;
+      if (state?.selectedPlace.type == "store") {
+        console.log("MASUK A:");
+        deleteResponse = await deleteStoreSale(id);
+      } else if (state?.selectedPlace.type == "warehouse") {
+        console.log("MASUK B:");
+        deleteResponse = await deleteWarehouseSale(id);
+      } else {
+        alert("❌ Terjadi kesalahan saat membuat data antrian!");
+        return;
+      }
+
+      console.log("deleteResponse: ", deleteResponse);
+
       if (deleteResponse.status === 204) {
         setShowDeleteModal(false);
         navigate(-1, { state: { refetch: true } });
@@ -574,11 +597,24 @@ const InputDataPesanan = () => {
 
   const handleDeletePayment = async () => {
     try {
-      const deleteResponse = await deleteStoreSalePayment(
-        id,
-        selectedDeletePaymentId
-      );
-      // console.log("deleteResponse: ", deleteResponse);
+      let deleteResponse;
+      console.log("state?.selectedPlace?.type: ", state?.selectedPlace?.type);
+      if (state?.selectedPlace?.type == "store") {
+        deleteResponse = await deleteStoreSalePayment(
+          id,
+          selectedDeletePaymentId
+        );
+      } else if (state?.selectedPlace?.type == "warehouse") {
+        deleteResponse = await deleteWarehouseSalePayment(
+          id,
+          selectedDeletePaymentId
+        );
+      } else {
+        alert("❌ Terjadi kesalahan saat membuat data antrian!");
+        return;
+      }
+      console.log("deleteResponse: ", deleteResponse);
+
       if (deleteResponse.status === 204) {
         setShowDeletePaymentModal(false);
         fetchEditSaleStoreData(id);
@@ -589,7 +625,7 @@ const InputDataPesanan = () => {
     setShowDeleteModal(false);
   };
 
-  const createStoreSalePaymentHandle = async (id) => {
+  const createSalePaymentHandle = async (id) => {
     const payload = {
       paymentDate: formatDateToDDMMYYYY(paymentDate),
       nominal: nominal.toString(),
@@ -597,12 +633,20 @@ const InputDataPesanan = () => {
       paymentMethod: paymentMethod,
     };
 
-    // console.log("payload: ", payload);
-
     try {
-      const response = await createStoreSalePayment(id, payload);
-      // console.log("response: ", response);
-      if (response.status == 201) {
+      let paymentResponse;
+      if (state?.selectedPlace.type == "store") {
+        paymentResponse = await createStoreSalePayment(payload, id);
+      } else if (state?.selectedPlace.type == "warehouse") {
+        paymentResponse = await createWarehouseSalePayment(payload, id);
+      } else {
+        alert("❌ Terjadi kesalahan saat membuat data antrian!");
+        return;
+      }
+
+      console.log("paymentResponse: ", paymentResponse);
+
+      if (paymentResponse.status == 201) {
         fetchEditSaleStoreData(id);
         setShowPaymentModal(false);
         setPaymentType("Cicil");
@@ -614,8 +658,14 @@ const InputDataPesanan = () => {
     } catch (error) {
       // console.log("error:", error.response.data.message);
       if (
-        error.response.data.message ==
+        error?.response?.data?.message ==
         "total payment is greater than total price"
+      ) {
+        alert(
+          "Pembayaran yang dilakukan melebihi total tagihan, periksa kembali nominal bayar! "
+        );
+      } else if (
+        error?.response?.data?.message == "store sale is already sent"
       ) {
         alert(
           "Pembayaran yang dilakukan melebihi total tagihan, periksa kembali nominal bayar! "
@@ -623,6 +673,7 @@ const InputDataPesanan = () => {
       } else {
         alert("Gagal menambahkan pembayaran ");
       }
+      console.log("error: ", error);
     }
   };
 
@@ -635,9 +686,23 @@ const InputDataPesanan = () => {
     };
 
     try {
-      const response = await updateStoreSalePayment(id, paymentId, payload);
-      // console.log("response: ", response);
-      if (response.status == 200) {
+      let updateResponse;
+      if (state?.selectedPlace.type == "store") {
+        updateResponse = await updateStoreSalePayment(id, paymentId, payload);
+      } else if (state?.selectedPlace.type == "warehouse") {
+        updateResponse = await updateWarehouseSalePayment(
+          id,
+          paymentId,
+          payload
+        );
+      } else {
+        alert("❌ Terjadi kesalahan saat membuat data antrian!");
+        return;
+      }
+
+      console.log("updateResponse: ", updateResponse);
+
+      if (updateResponse.status == 200) {
         fetchEditSaleStoreData(id);
         setPaymentType("Cicil");
         setPaymentMethod("Tunai");
@@ -1247,40 +1312,40 @@ const InputDataPesanan = () => {
                       <td className="px-4 py-2 underline cursor-pointer">
                         {payment.paymentProof ? "Lihat Bukti" : "-"}
                       </td>
-                      {!isSend && (
-                        <td className="px-4 py-2 flex gap-3 justify-center">
-                          <BiSolidEditAlt
-                            onClick={() => {
-                              console.log("payment: ", payment);
-                              setPaymentMethod(payment.paymentMethod);
-                              setNominal(payment.nominal);
-                              setPaymentDate(toISODate(payment.date));
-                              if (id) {
-                                setShowEditModal(true);
-                              } else {
-                                setEditingIndex(index);
-                                setShowEditModal(true);
-                              }
-                            }}
-                            size={24}
-                            className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                          />
-                          <MdDelete
-                            onClick={() => {
-                              if (id) {
-                                setShowDeletePaymentModal(true);
-                                setSelectedDeletePaymentId(payment.id);
-                              } else {
-                                setPayments((prev) =>
-                                  prev.filter((_, i) => i !== index)
-                                );
-                              }
-                            }}
-                            size={24}
-                            className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
-                          />
-                        </td>
-                      )}
+
+                      <td className="px-4 py-2 flex gap-3 justify-center">
+                        <BiSolidEditAlt
+                          onClick={() => {
+                            console.log("payment: ", payment);
+                            setPaymentMethod(payment.paymentMethod);
+                            setNominal(payment.nominal);
+                            setPaymentDate(toISODate(payment.date));
+                            setPaymentId(payment.id);
+                            if (id) {
+                              setShowEditModal(true);
+                            } else {
+                              setEditingIndex(index);
+                              setShowEditModal(true);
+                            }
+                          }}
+                          size={24}
+                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                        />
+                        <MdDelete
+                          onClick={() => {
+                            if (id) {
+                              setShowDeletePaymentModal(true);
+                              setSelectedDeletePaymentId(payment.id);
+                            } else {
+                              setPayments((prev) =>
+                                prev.filter((_, i) => i !== index)
+                              );
+                            }
+                          }}
+                          size={24}
+                          className="cursor-pointer text-black hover:text-gray-300 transition-colors duration-200"
+                        />
+                      </td>
                     </tr>
                   );
                 })
@@ -1489,7 +1554,7 @@ const InputDataPesanan = () => {
               <button
                 onClick={() => {
                   if (id) {
-                    createStoreSalePaymentHandle(id);
+                    createSalePaymentHandle(id);
                     return;
                   }
 

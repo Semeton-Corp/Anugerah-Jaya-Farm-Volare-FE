@@ -57,13 +57,14 @@ const DaftarPesanan = () => {
     location.pathname.includes(segment)
   );
 
-  const editDataPesananHandle = (id) => {
+  const editDataPesananHandle = (item) => {
     const currentPath = location.pathname;
-    const inputPath = currentPath + "/input-data-pesanan/" + id;
+    const inputPath = `${currentPath}/input-data-pesanan/${item.id}`;
 
-    navigate(inputPath);
+    navigate(inputPath, {
+      state: { selectedPlace },
+    });
   };
-
   const sendSaleHandle = async () => {
     try {
       let sendResponse;
@@ -390,7 +391,7 @@ const DaftarPesanan = () => {
 
                           <button
                             onClick={() => {
-                              editDataPesananHandle(item.id);
+                              editDataPesananHandle(item);
                             }}
                             className="px-3 py-1 bg-green-700 rounded-[4px] text-white hover:bg-green-900 cursor-pointer"
                           >

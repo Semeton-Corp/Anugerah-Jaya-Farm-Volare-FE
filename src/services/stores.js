@@ -93,8 +93,8 @@ export const deleteStoreSale = (id) => {
   });
 };
 
-export const deleteStoreSalePayment = (storeId, paymentId) => {
-  return api.delete(`/stores/sales/${storeId}/payments/${paymentId}`, {
+export const deleteStoreSalePayment = (storeSaleId, paymentId) => {
+  return api.delete(`/stores/sales/${storeSaleId}/payments/${paymentId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -167,7 +167,7 @@ export const updateStoreSale = (storeSaleId, payload) => {
   });
 };
 
-export const createStoreSalePayment = (id, payload) => {
+export const createStoreSalePayment = (payload, id) => {
   return api.post(`/stores/sales/${id}/payments`, payload, {
     headers: {
       Authorization: `Bearer ${token}`,

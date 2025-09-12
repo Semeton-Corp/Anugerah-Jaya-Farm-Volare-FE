@@ -462,12 +462,11 @@ export const getListWarehouseSales = (
   });
 };
 
-export const getWarehouseSaleQueues = (warehouseId) => {
-  return api.get(`/warehouses/queues`, {
+export const getWarehouseSaleById = (id) => {
+  return api.get(`/warehouses/sales/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-    params: { warehouseId: warehouseId },
   });
 };
 
@@ -479,12 +478,60 @@ export const createWarehouseSale = (payload) => {
   });
 };
 
+export const getWarehouseSaleQueues = (warehouseId) => {
+  return api.get(`/warehouses/queues`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    params: { warehouseId: warehouseId },
+  });
+};
+
 export const sendWarehouseSale = (id) => {
   return api.patch(`/warehouses/sales/${id}/send`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
+};
+
+export const deleteWarehouseSale = (id) => {
+  return api.delete(`/warehouses/sales/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const createWarehouseSalePayment = (payload, id) => {
+  return api.post(`/warehouses/sales/${id}/payments`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const deleteWarehouseSalePayment = (warehouseSaleId, paymentId) => {
+  return api.delete(
+    `/warehouses/sales/${warehouseSaleId}/payments/${paymentId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};
+
+export const updateWarehouseSalePayment = (warehouseSaleId, id, payload) => {
+  return api.delete(
+    `/warehouses/sales/${warehouseSaleId}/payments/${id}`,
+    payload,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
 };
 
 export const createWarehouseSaleQueue = (payload) => {
