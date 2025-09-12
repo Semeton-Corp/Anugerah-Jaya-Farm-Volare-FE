@@ -330,6 +330,11 @@ const InputDataPesanan = () => {
         setIsMoreThanDeadlinePaymentDate(
           detailResponse.data.data.isMoreThanDeadlinePaymentDate
         );
+        const phoneNumber = detailResponse.data.data.customer.phoneNumber;
+        const selectedCustomer = customers.find(
+          (item) => item.phoneNumber == phoneNumber
+        );
+        setTransactionCount(selectedCustomer?.totalTransaction);
       }
     } catch (error) {}
   };
@@ -354,12 +359,19 @@ const InputDataPesanan = () => {
     const price = priceItem?.price;
     const discountPercent = selectedDiscount.totalDiscount / 100;
 
-    if (!price) {
+    if (!price && !id) {
       alert("❌ Harga barang yang dipilih belum ditentukan oleh pusat!");
     }
 
     const totalitemPrice = price * quantity;
     const totalDiscount = totalitemPrice * discountPercent;
+    console.log("price: ", price);
+    console.log("discountPercent: ", discountPercent);
+    console.log(
+      "selectedDiscount.totalDiscount: ",
+      selectedDiscount.totalDiscount
+    );
+    console.log("transactionCount: ", transactionCount);
 
     setDiscount(selectedDiscount.totalDiscount);
     setItemPrice(price);
@@ -764,6 +776,12 @@ const InputDataPesanan = () => {
       getItemSummary();
     }
   }, [selectedPlace]);
+
+  useEffect(() => {
+    if (id) {
+      fetchEditSaleStoreData(id);
+    }
+  }, [customers]);
 
   useEffect(() => {
     if (!selectedItem) return;

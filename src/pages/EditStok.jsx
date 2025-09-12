@@ -12,6 +12,7 @@ const EditStok = () => {
   const [storeName, setStoreName] = useState("");
 
   const [jumlah, setJumlah] = useState(50);
+  const [unit, setUnit] = useState("-");
   const [showConfirm, setShowConfirm] = useState(false);
 
   const handleSubmit = async () => {
@@ -32,11 +33,11 @@ const EditStok = () => {
   const fetchDetail = async () => {
     try {
       const detailResponse = await getStoreItem(storeId, itemId);
-      // console.log("detailResponse: ", detailResponse);
       if (detailResponse.status == 200) {
         setItemName(detailResponse.data.data.item.name);
         setStoreName(detailResponse.data.data.store.name);
         setJumlah(detailResponse.data.data.quantity);
+        setUnit(detailResponse.data.data.item.unit);
       }
     } catch (error) {
       console.log("error :", error);
@@ -70,7 +71,7 @@ const EditStok = () => {
               value={jumlah}
               onChange={(e) => setJumlah(e.target.value)}
             />
-            <span className="font-semibold">Ikat</span>
+            <span className="font-semibold">{unit}</span>
           </div>
         </div>
 
