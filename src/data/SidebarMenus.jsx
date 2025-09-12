@@ -224,9 +224,15 @@ export const sidebarMenus = {
   ],
   "Kepala Kandang": [
     {
-      icon: <img src={overview} alt="Overview Icon" className="h-4 w-4" />,
-      tabName: "Overview",
+      icon: <img src={kinerja} alt="Overview Icon" className="h-4 w-4" />,
+      tabName: "Kinerja",
       element: <OverviewOwner />,
+      subTabs: [
+        { tabName: "Ringkasan Kinerja", path: "ringkasan-kinerja" },
+        { tabName: "Detail Kinerja Ayam", path: "detail-kinerja-ayam" },
+        { tabName: "Pengadaan DOC", path: "detail-kinerja-ayam" },
+        { tabName: "Jual Ayam Afkir", path: "detail-kinerja-ayam" },
+      ],
     },
     {
       icon: <img src={produksiTelur} alt="Overview Icon" className="h-4 w-4" />,

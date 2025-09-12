@@ -187,6 +187,15 @@ const OverviewKepalaKandang = () => {
 
   const userRole = localStorage.getItem("role");
 
+  const [chickenPerformanceSummary, setChickenPerformanceSummary] = useState(
+    []
+  );
+  const [chickenCagePerformanceSummary, setChickenCagePerformanceSummary] =
+    useState([]);
+  const [warehouseItemSummary, setWarehouseItemSummary] = useState([]);
+  const [chickenGraphs, setChickenGraphs] = useState([]);
+  const [chickenBarChart, setChickenBarChart] = useState([]);
+
   const [selectedSite] = useState(
     userRole === "Owner" ? 0 : localStorage.getItem("locationId")
   );
@@ -216,11 +225,21 @@ const OverviewKepalaKandang = () => {
 
   const fetchOverviewData = async () => {
     try {
-      console.log("graphFilter: ", graphFilter);
-      const overviewData = await getChickenAndWarehousePerformanceOverview(
-        graphFilter
+      const overviewResponse = await getChickenAndWarehousePerformanceOverview(
+        graphFilter,
+        selectedWarehouse
       );
-      console.log("overviewData: ", overviewData);
+      console.log("overviewData: ", overviewResponse);
+      if (overviewResponse.status == 200) {
+        const overviewData = overviewResponse.data.data;
+        setChickenPerformanceSummary(overviewData.chickenPerformanceSummary);
+        setChickenCagePerformanceSummary(
+          overviewData.chickenCagePerformanceSummary
+        );
+        setWarehouseItemSummary(overviewData.warehouseItemSummary);
+        setChickenGraphs(overviewData.chickenGraphs);
+        setChickenBarChart(overviewData.chickenBarChart);
+      }
     } catch (error) {
       console.log("error :", error);
     }
@@ -229,11 +248,9 @@ const OverviewKepalaKandang = () => {
   const fetchWarehouseData = async () => {
     try {
       const warehouseResponse = await getWarehouses(selectedSite);
-      console.log("warehouseResponse: ", warehouseResponse);
       if (warehouseResponse.status == 200) {
         setWarehouses(warehouseResponse.data.data);
         setSelectedWarehouse(warehouseResponse.data.data[0].id);
-        setCornCapacity(warehouseResponse.data.data[0].cornCapacity);
       }
     } catch (error) {
       console.log("error :", error);
@@ -269,7 +286,9 @@ const OverviewKepalaKandang = () => {
                   <LuWheat size={24} color="white" />
                 </div>
                 <div className="flex items-center">
-                  <p className="text-3xl font-semibold me-3">15</p>
+                  <p className="text-3xl font-semibold me-3">
+                    {chickenPerformanceSummary.foodConsumption}
+                  </p>
                   <p className="text-xl font-semibold">Kg</p>
                 </div>
               </div>
@@ -285,7 +304,9 @@ const OverviewKepalaKandang = () => {
                     <MdEgg size={24} color="white" />
                   </div>
                   <div className="flex items-center">
-                    <p className="text-3xl font-semibold pe-2">80</p>
+                    <p className="text-3xl font-semibold pe-2">
+                      {Number(chickenPerformanceSummary.averageHDP).toFixed(2)}
+                    </p>
                     <p className="text-xl font-semibold">%</p>
                   </div>
                 </div>
@@ -302,7 +323,11 @@ const OverviewKepalaKandang = () => {
                     <MdEgg size={24} color="white" />
                   </div>
                   <div className="flex items-center">
-                    <p className="text-3xl font-semibold pe-2">14</p>
+                    <p className="text-3xl font-semibold pe-2">
+                      {Number(
+                        chickenPerformanceSummary.averageEggWeight
+                      ).toFixed(2)}
+                    </p>
                     <p className="text-xl font-semibold">gr</p>
                   </div>
                 </div>
@@ -320,7 +345,11 @@ const OverviewKepalaKandang = () => {
                       <GiChicken size={24} color="white" />
                     </div>
                     <div className="flex">
-                      <p className="text-3xl font-semibold pe-2">2.1</p>
+                      <p className="text-3xl font-semibold pe-2">
+                        {Number(chickenPerformanceSummary.averageFCR).toFixed(
+                          2
+                        )}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -337,7 +366,11 @@ const OverviewKepalaKandang = () => {
                   <GiChicken size={24} color="white" />
                 </div>
                 <div>
-                  <p className="text-3xl font-semibold">0.02</p>
+                  <p className="text-3xl font-semibold">
+                    {Number(
+                      chickenPerformanceSummary.averageMortalityRate
+                    ).toFixed(2)}
+                  </p>
                 </div>
               </div>
             </div>
@@ -356,7 +389,9 @@ const OverviewKepalaKandang = () => {
                 <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
                   <div className="flex flex-col justify-center gap-2">
                     <div className="flex flex-col items-center">
-                      <p className="text-[40px] font-bold">20</p>
+                      <p className="text-[40px] font-bold">
+                        {chickenCagePerformanceSummary.totalProductiveCage}
+                      </p>
                       <p className="text-xl">Kandang</p>
                     </div>
                     <div className="rounded-[4px] bg-[#87FF8B] flex items-center">
@@ -367,11 +402,13 @@ const OverviewKepalaKandang = () => {
                 <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
                   <div className="flex flex-col justify-center gap-2">
                     <div className="flex flex-col items-center">
-                      <p className="text-[40px] font-bold">5</p>
+                      <p className="text-[40px] font-bold">
+                        {chickenCagePerformanceSummary.totalProductiveCage}
+                      </p>
                       <p className="text-xl">Kandang</p>
                     </div>
-                    <div className="rounded-[4px] bg-orange-200 flex items-center">
-                      <p className="w-full text-center">Periksa</p>
+                    <div className="rounded-[4px] bg-[#FF5E5E] flex items-center">
+                      <p className="w-full text-center">Afkir</p>
                     </div>
                   </div>
                 </div>
@@ -389,13 +426,6 @@ const OverviewKepalaKandang = () => {
                       onChange={(e) => {
                         const warehouseId = e.target.value;
                         setSelectedWarehouse(warehouseId);
-
-                        const selected = warehouses?.find(
-                          (w) => w.id == warehouseId
-                        );
-                        if (selected) {
-                          setCornCapacity(selected.cornCapacity);
-                        }
                       }}
                       className="ml-2 bg-transparent text-base font-medium outline-none"
                     >
@@ -416,7 +446,9 @@ const OverviewKepalaKandang = () => {
                 <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
                   <div className="flex flex-col justify-center gap-2">
                     <div className="flex flex-col items-center">
-                      <p className="text-[40px] font-bold">20</p>
+                      <p className="text-[40px] font-bold">
+                        {warehouseItemSummary.totalSafeItem}
+                      </p>
                       <p className="text-xl">Barang</p>
                     </div>
                     <div className="rounded-[4px] bg-[#87FF8B] flex items-center">
@@ -428,23 +460,13 @@ const OverviewKepalaKandang = () => {
                 <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
                   <div className="flex flex-col justify-center gap-2">
                     <div className="flex flex-col items-center">
-                      <p className="text-[40px] font-bold">5</p>
+                      <p className="text-[40px] font-bold">
+                        {warehouseItemSummary.totalNotSafeItem}
+                      </p>
                       <p className="text-xl">Barang</p>
                     </div>
                     <div className="rounded-[4px] bg-[#FF5E5E] flex items-center">
                       <p className="w-full text-center">kritis</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border border-black-6 rounded-[4px] bg-white shadow-lg px-[32px] py-[18px]">
-                  <div className="flex flex-col justify-center gap-2">
-                    <div className="flex flex-col items-center">
-                      <p className="text-[40px] font-bold">5</p>
-                      <p className="text-xl">Kandang</p>
-                    </div>
-                    <div className="rounded-[4px] bg-orange-200 flex items-center">
-                      <p className="w-full text-center">Periksa</p>
                     </div>
                   </div>
                 </div>

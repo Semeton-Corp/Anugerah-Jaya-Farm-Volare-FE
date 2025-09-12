@@ -463,7 +463,8 @@ export const getChickenAndCompanyPerformanceOverview = (
 };
 
 export const getChickenAndWarehousePerformanceOverview = (
-  overviewGraphTime
+  overviewGraphTime,
+  warehouseId
 ) => {
   return api.get(`/chickens/performances/chicken-warehouse`, {
     headers: {
@@ -472,6 +473,7 @@ export const getChickenAndWarehousePerformanceOverview = (
     },
     params: {
       overviewGraphTime: overviewGraphTime,
+      warehouseId: warehouseId,
     },
   });
 };

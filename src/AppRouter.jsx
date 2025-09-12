@@ -1041,7 +1041,10 @@ const AppRouter = createBrowserRouter([
         path: "",
         element: <MainLayout role="Kepala Kandang" />,
         children: [
-          { path: "", element: <Navigate to="overview" replace /> },
+          {
+            path: "",
+            element: <Navigate to="kinerja/ringkasan-kinerja" replace />,
+          },
           {
             path: "profile",
             element: <Profile mode="MyProfile" />,
@@ -1053,7 +1056,99 @@ const AppRouter = createBrowserRouter([
               },
             ],
           },
-          { path: "overview", element: <OverviewKepalaKandang /> },
+          {
+            path: "kinerja",
+            children: [
+              { path: "ringkasan-kinerja", element: <OverviewKepalaKandang /> },
+              {
+                path: "detail-kinerja-ayam",
+                element: <DetailKinerjaAyam />,
+                children: [{ path: "pindah-ayam", element: <PindahAyam /> }],
+              },
+              {
+                path: "pengadaan-doc",
+                element: <PengadaanDoc />,
+                children: [
+                  {
+                    path: "draft-pesan-doc",
+                    element: <DraftPengadaanDoc />,
+                    children: [
+                      {
+                        path: "input-draft-pesan-doc",
+                        element: <InputDraftPemesananDoc />,
+                      },
+                    ],
+                  },
+                  {
+                    path: "detail-pengadaan-doc/:id",
+                    element: <DetailPengadaanDoc />,
+                  },
+                ],
+              },
+              {
+                path: "jual-ayam-afkir",
+                element: <JualAyamAfkir />,
+                children: [
+                  {
+                    path: "detail-penjualan-ayam/:id",
+                    element: <DetailPenjualanAyam />,
+                  },
+                  {
+                    path: "daftar-pelanggan-ayam",
+                    element: <PilihPembeliAyam mode={"detail"} />,
+                    children: [
+                      {
+                        path: "tambah-pelanggan-ayam",
+                        element: <TambahPelangganAyam />,
+                      },
+                      {
+                        path: "detail-pelanggan-afkir/:id",
+                        element: <DetailPelangganAfkir />,
+                        children: [
+                          {
+                            path: "edit-pelanggan-ayam",
+                            element: <TambahPelangganAyam />,
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    path: "draft-penjualan-ayam",
+                    element: <DraftPenjualanAyam />,
+                    children: [
+                      {
+                        path: "input-draft-penjualan-ayam",
+                        element: <InputDraftPenjualanAyam />,
+                        children: [
+                          {
+                            path: "pilih-pembeli-ayam",
+                            element: <PilihPembeliAyam mode={"pilih"} />,
+                            children: [
+                              {
+                                path: "tambah-pelanggan-ayam",
+                                element: <TambahPelangganAyam />,
+                              },
+                              {
+                                path: "detail-pelanggan-afkir/:id",
+                                element: <DetailPelangganAfkir />,
+                                children: [
+                                  {
+                                    path: "edit-pelanggan-ayam",
+                                    element: <TambahPelangganAyam />,
+                                  },
+                                ],
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
           {
             path: "produksi-telur",
             children: [
