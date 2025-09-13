@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { PiCalendarBlank } from "react-icons/pi";
 import { MdEgg, MdShoppingCart } from "react-icons/md";
 import { PiMoneyWavyFill } from "react-icons/pi";
@@ -15,7 +15,7 @@ import {
   GiChicken,
   GiDeathSkull,
 } from "react-icons/gi";
-import { FaPercentage } from "react-icons/fa";
+import { FaCalendarAlt, FaPercentage } from "react-icons/fa";
 
 const COLORS = ["#06b6d4", "#facc15", "#f97316", "#10b981", "#ef4444"];
 
@@ -257,13 +257,31 @@ const OverviewKepalaKandang = () => {
     }
   };
 
+  const ageDistributionData = useMemo(() => {
+    const src = chickenBarChart || {};
+    const pick = (k) => Number(src?.[k] ?? 0);
+
+    const preLayerVal =
+      src?.chickenPreLayer != null
+        ? pick("chickenPreLayer")
+        : pick("chickentPreLayer");
+
+    return [
+      { stage: "DOC", value: pick("chickenDOC") },
+      { stage: "Pre Layer", value: preLayerVal },
+      { stage: "Grower", value: pick("chickenGrower") },
+      { stage: "Layer", value: pick("chickenLayer") },
+      { stage: "Afkir", value: pick("chickenAfkir") },
+    ];
+  }, [chickenBarChart]);
+
   useEffect(() => {
     fetchWarehouseData();
   }, []);
 
   useEffect(() => {
     fetchOverviewData();
-  }, [selectedWarehouse]);
+  }, [selectedWarehouse, graphFilter]);
 
   return (
     <>
@@ -474,64 +492,62 @@ const OverviewKepalaKandang = () => {
             </div>
           </div>
 
-          {/* chart, incomes, and history section */}
-          <div className="flex flex-col lg:flex-row h-80 gap-6">
-            <div className="w-3/5 bg-white rounded-lg p-4 border border-black-6">
-              <h2 className="text-xl font-semibold mb-4">
-                Ayam Mati & Ayam Sakit
-              </h2>
+          <div className="flex flex-col lg:flex-row h-90 gap-6">
+            <div className="w-full bg-white rounded-lg p-4 border border-black-6">
+              <div className="flex justify-between">
+                <h2 className="text-lg font-semibold mb-4">
+                  Ayam Mati & Ayam Sakit
+                </h2>
+                <div className="flex items-center rounded-lg px-4 py-2 bg-orange-300 hover:bg-orange-500 cursor-pointer">
+                  <FaCalendarAlt size={18} />
+                  <select
+                    value={graphFilter}
+                    onChange={(e) => setGraphFilter(e.target.value)}
+                    className="ml-2 bg-transparent text-base font-medium outline-none"
+                  >
+                    {graphFilterOptions.map((choice, index) => (
+                      <option key={index} value={choice}>
+                        {choice}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
               <ResponsiveContainer width="100%" height="90%">
-                <LineChart data={ayamChartData}>
+                <LineChart data={chickenGraphs}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
+                  <XAxis dataKey="key" />
                   <YAxis domain={[0, 50]} />
                   <Tooltip />
                   <Legend verticalAlign="top" align="right" />
                   <Line
                     type="monotone"
-                    dataKey="ayamMati"
+                    dataKey="deathChicken"
                     stroke="#ef4444"
                     name="Ayam Mati"
                   />
                   <Line
                     type="monotone"
-                    dataKey="ayamSakit"
+                    dataKey="sickChicken"
                     stroke="#facc15"
                     name="Ayam Sakit"
                   />
                 </LineChart>
               </ResponsiveContainer>
             </div>
-
-            {/* stok gudang */}
-
-            <div className="w-2/5 bg-white rounded-lg p-4 border border-gray-300">
-              <h2 className="text-lg font-semibold ">Distribusi Usia Ayam</h2>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={usiaAyamData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={95}
-                    label
-                  >
-                    {usiaAyamData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend
-                    verticalAlign="middle"
-                    align="right"
-                    layout="vertical"
-                  />
-                </PieChart>
+          </div>
+          <div className="lg:col-span-2">
+            <div className="p-4 border border-black-6 rounded-lg">
+              <h2 className="text-lg font-bold mb-4">Distribusi Usia Ayam</h2>
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart data={ageDistributionData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="stage" />
+                  <YAxis tickFormatter={(v) => v.toLocaleString("id-ID")} />
+                  <Tooltip formatter={(v) => v.toLocaleString("id-ID")} />
+                  <Bar dataKey="value" fill="#5A9EA7" barSize={40} />
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
